@@ -18,7 +18,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 */
 
 // 🔹 Halaman utama dan gallery (umum)
-Route::get('/', [DashboardController::class, 'index'])->name('home');
+Route::get('/', [DashboardController::class, 'index'])->name('landing');
 Route::get('/gallery-hewan', [DashboardController::class, 'hewan'])->name('gallery.hewan');
 
 // 🔹 Route hanya untuk tamu (belum login)
