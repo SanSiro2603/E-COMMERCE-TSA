@@ -163,15 +163,20 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-3">
-                        <button class="hidden sm:flex items-center gap-2 px-6 h-11 rounded-2xl bg-gradient-to-r from-secondary to-yellow-400 text-primary font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <a href="{{ route('login') }}" 
+                        class="hidden sm:flex items-center gap-2 px-6 h-11 rounded-2xl bg-gradient-to-r from-secondary to-yellow-400 text-primary font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                             <span class="material-symbols-outlined">person</span>
                             <span>Login</span>
-                        </button>
+                        </a>
+
                         {{-- <button class="relative flex items-center justify-center w-11 h-11 rounded-2xl glass-strong shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                             <span class="material-symbols-outlined text-primary dark:text-white">shopping_cart</span>
                             <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">3</span>
                         </button> --}}
-                        <button onclick="document.documentElement.classList.toggle('dark')" class="flex items-center justify-center w-11 h-11 rounded-2xl glass-strong shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        
+                        <button 
+                            onclick="document.documentElement.classList.toggle('dark')" 
+                            class="flex items-center justify-center w-11 h-11 rounded-2xl glass-strong shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                             <span class="material-symbols-outlined text-primary dark:text-white">dark_mode</span>
                         </button>
                     </div>
