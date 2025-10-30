@@ -144,7 +144,7 @@
                             <span class="material-symbols-outlined text-3xl text-white">eco</span>
                         </div>
                         <div>
-                            <a href="{{route("home")}}" class="text-2xl font-bold gradient-text">Lembah Hijau</a>
+                            <a href="{{route("landing")}}" class="text-2xl font-bold gradient-text">Lembah Hijau</a>
                             <p class="text-xs text-gray-600 dark:text-gray-400">Premium Livestock</p>
                         </div>
                     </div>
