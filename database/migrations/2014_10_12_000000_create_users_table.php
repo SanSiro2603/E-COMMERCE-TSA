@@ -15,16 +15,19 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('role', ['super_admin', 'admin', 'pembeli'])->default('pembeli');
+            $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+            $table->string('profile_photo')->nullable();
+            $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
             $table->timestamps();
+
+            $table->index('role');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('users');
