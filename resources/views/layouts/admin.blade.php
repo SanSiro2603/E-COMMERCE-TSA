@@ -204,20 +204,6 @@
                 <span class="material-symbols-outlined text-xl">bar_chart</span>
                 <span>Analitik</span>
             </a>
-
-            <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
-                <p class="px-3 mb-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Pengaturan</p>
-                
-                <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <span class="material-symbols-outlined text-xl">settings</span>
-                    <span>Pengaturan</span>
-                </a>
-
-                <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <span class="material-symbols-outlined text-xl">help</span>
-                    <span>Bantuan</span>
-                </a>
-            </div>
         </nav>
 
         <!-- User Profile in Sidebar -->
