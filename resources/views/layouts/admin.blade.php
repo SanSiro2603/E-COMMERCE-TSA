@@ -7,7 +7,7 @@
     <title>@yield('title', 'Admin - Lembah Hijau')</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
     <script>
@@ -16,246 +16,305 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#72e236",
-                        "soft-green": "#7BB661",
-                        "warm-yellow": "#FFD54F",
-                        "charcoal": "#333333",
-                        "background-light": "#FDFBF5",
-                        "background-dark": "#172111",
+                        "primary": {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
                     },
                     fontFamily: {
-                        "display": ["Poppins", "sans-serif"],
-                        "be-vietnam": ["Be Vietnam Pro", "sans-serif"]
+                        "sans": ["Inter", "sans-serif"]
                     }
                 }
             }
         }
     </script>
     <style>
-        /* Animated Gradient Background */
         body {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 25%, #bbf7d0 50%, #86efac 75%, #4ade80 100%);
-            background-size: 400% 400%;
-            animation: gradientShift 15s ease infinite;
+            font-family: 'Inter', sans-serif;
         }
 
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* Sidebar Transitions */
+        .sidebar {
+            transition: transform 0.3s ease-in-out;
         }
 
-        /* Glassmorphism Effect */
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        @media (max-width: 1024px) {
+            .sidebar:not(.open) {
+                transform: translateX(-100%);
+            }
         }
 
-        .glass-strong {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border: 1px solid rgba(255, 255, 255, 0.6);
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+        /* Active Link Indicator */
+        .nav-link {
+            position: relative;
+            transition: all 0.2s ease;
         }
 
-        .glass-dark {
-            background: rgba(23, 33, 17, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        /* Gradient Button */
-        .gradient-button {
-            background: linear-gradient(135deg, #86efac 0%, #4ade80 50%, #22c55e 100%);
-            background-size: 200% 200%;
-            transition: all 0.3s ease;
-        }
-        
-        .gradient-button:hover {
-            background-position: 100% 0;
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
-        }
-
-        /* Sidebar Active Effect */
-        .sidebar-active {
-            background: linear-gradient(135deg, rgba(134, 239, 172, 0.2) 0%, rgba(74, 222, 128, 0.2) 100%);
-            border-left: 4px solid #22c55e;
+        .nav-link.active {
+            background-color: rgb(240 253 244);
+            color: rgb(22 163 74);
             font-weight: 600;
         }
 
-        /* Hover Effects */
-        .hover-lift {
-            transition: all 0.3s ease;
+        .dark .nav-link.active {
+            background-color: rgb(20 83 45 / 0.3);
+            color: rgb(134 239 172);
         }
 
-        .hover-lift:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(31, 38, 135, 0.2);
+        .nav-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 60%;
+            width: 3px;
+            background: linear-gradient(to bottom, #22c55e, #16a34a);
+            border-radius: 0 4px 4px 0;
         }
 
-        /* Smooth Transitions */
-        * {
-            transition: background-color 0.3s ease, border-color 0.3s ease;
+        /* Dropdown Animation */
+        .dropdown-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .dropdown-content.open {
+            max-height: 500px;
         }
 
         /* Custom Scrollbar */
         ::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
+            height: 6px;
         }
 
         ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
+            background: transparent;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: rgba(34, 197, 94, 0.5);
+            background: rgb(229 231 235);
             border-radius: 10px;
         }
 
+        .dark ::-webkit-scrollbar-thumb {
+            background: rgb(55 65 81);
+        }
+
         ::-webkit-scrollbar-thumb:hover {
-            background: rgba(34, 197, 94, 0.7);
+            background: rgb(209 213 219);
         }
 
-        /* Dark Mode Adjustments */
-        .dark body {
-            background: linear-gradient(135deg, #0f1810 0%, #172111 25%, #1a2e14 50%, #1d3a17 75%, #20461a 100%);
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: rgb(75 85 99);
         }
 
-        .dark .glass {
-            background: rgba(23, 33, 17, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+        /* Notification Badge Pulse */
+        .notification-badge {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
 
-        .dark .glass-strong {
-            background: rgba(23, 33, 17, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-
-        /* Logo Animation */
-        .logo-shine {
-            background: linear-gradient(90deg, #22c55e 0%, #86efac 50%, #22c55e 100%);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: shine 3s linear infinite;
-        }
-
-        @keyframes shine {
-            to {
-                background-position: 200% center;
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
             }
+            50% {
+                opacity: .5;
+            }
+        }
+
+        /* Dark Mode Smooth Transition */
+        * {
+            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+        }
+
+        /* Focus Styles */
+        button:focus-visible, a:focus-visible {
+            outline: 2px solid rgb(34 197 94);
+            outline-offset: 2px;
         }
     </style>
 </head>
-<body class="font-display min-h-screen">
+<body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
 
-    <!-- Navbar with Glassmorphism -->
-    <nav class="glass-strong sticky top-0 z-50">
-        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-            <a href="{{ route('admin.dashboard') }}" class="text-2xl font-bold font-be-vietnam flex items-center gap-2">
-                <span class="logo-shine">Lembah Hijau</span>
-                <span class="text-xs px-2 py-1 bg-gradient-to-r from-green-400 to-emerald-500 text-white rounded-full">Admin</span>
+    <!-- Sidebar -->
+    <aside class="sidebar fixed top-0 left-0 z-40 w-64 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
+        <!-- Logo -->
+        <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-800">
+            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-xl">eco</span>
+                </div>
+                <span class="text-lg font-bold text-gray-900 dark:text-white">Lembah Hijau</span>
             </a>
-            <div class="flex items-center gap-6">
-                <!-- Notifications -->
-                <button class="relative p-2 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition">
-                    <span class="material-symbols-outlined text-gray-700 dark:text-gray-300">notifications</span>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
-                
-                <!-- User Menu -->
-                <div class="flex items-center gap-3">
-                    <div class="text-right">
-                        <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ Auth::user()->name }}</p>
-                        <p class="text-xs text-gray-600 dark:text-gray-400">Administrator</p>
+            <button class="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" onclick="toggleSidebar()">
+                <span class="material-symbols-outlined text-gray-500">close</span>
+            </button>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 overflow-y-auto p-4 space-y-1">
+            <!-- Dashboard -->
+            <a href="{{ route('admin.dashboard') }}" class="nav-link active flex items-center gap-3 px-3 py-2 rounded-lg text-sm">
+                <span class="material-symbols-outlined text-xl">dashboard</span>
+                <span>Dashboard</span>
+            </a>
+
+            <!-- Products Dropdown -->
+            <div>
+                <button onclick="toggleDropdown('products')" class="nav-link flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-xl">inventory_2</span>
+                        <span>Produk</span>
                     </div>
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center text-white font-bold">
-                        {{ substr(Auth::user()->name, 0, 1) }}
+                    <span class="material-symbols-outlined text-lg transition-transform" id="products-icon">expand_more</span>
+                </button>
+                <div class="dropdown-content ml-11 mt-1 space-y-1" id="products-dropdown">
+                    <a href="#" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">Daftar Produk</a>
+                    <a href="#" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">Kategori</a>
+                    <a href="#" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">Stok</a>
+                </div>
+            </div>
+
+            <!-- Orders -->
+            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
+                <span class="material-symbols-outlined text-xl">shopping_cart</span>
+                <span>Pesanan</span>
+                <span class="ml-auto px-2 py-0.5 text-xs font-semibold bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 rounded-full">12</span>
+            </a>
+
+            <!-- Customers -->
+            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
+                <span class="material-symbols-outlined text-xl">people</span>
+                <span>Pelanggan</span>
+            </a>
+
+            <!-- Analytics -->
+            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
+                <span class="material-symbols-outlined text-xl">bar_chart</span>
+                <span>Analitik</span>
+            </a>
+
+            <div class="pt-4 mt-4 border-t border-gray-200 dark:border-gray-800">
+                <p class="px-3 mb-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Pengaturan</p>
+                
+                <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <span class="material-symbols-outlined text-xl">settings</span>
+                    <span>Pengaturan</span>
+                </a>
+
+                <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <span class="material-symbols-outlined text-xl">help</span>
+                    <span>Bantuan</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- User Profile in Sidebar -->
+        <div class="p-4 border-t border-gray-200 dark:border-gray-800">
+            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
+                    {{ substr(Auth::user()->name, 0, 1) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">Administrator</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="lg:pl-64">
+        <!-- Top Navigation Bar -->
+        <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
+            <div class="flex items-center justify-between h-16 px-4 lg:px-6">
+                <!-- Mobile Menu Button -->
+                <button class="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" onclick="toggleSidebar()">
+                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">menu</span>
+                </button>
+
+                <!-- Search Bar -->
+                <div class="hidden md:flex flex-1 max-w-md">
+                    <div class="relative w-full">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
+                        <input type="text" placeholder="Search..." class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 dark:text-white placeholder-gray-500">
                     </div>
                 </div>
 
-                <!-- Logout -->
-                <a href="{{ route('logout') }}"
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                   class="flex items-center gap-2 px-4 py-2 text-sm bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition">
-                    <span class="material-symbols-outlined text-sm">logout</span>
-                    Logout
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
-            </div>
-        </div>
-    </nav>
+                <!-- Right Section -->
+                <div class="flex items-center gap-2">
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleDarkMode()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">
+                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-400 dark:hidden">dark_mode</span>
+                        <span class="material-symbols-outlined text-gray-400 hidden dark:inline">light_mode</span>
+                    </button>
 
-    <!-- Sidebar + Content -->
-    <div class="flex min-h-screen">
-        <!-- Sidebar with Glassmorphism -->
-        <aside class="w-72 p-6 glass m-4 rounded-2xl h-fit sticky top-24">
-            <div class="mb-8">
-                <h3 class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-4">Menu Utama</h3>
-                <ul class="space-y-2">
-                    <li>
-                        <a href="{{ route('admin.dashboard') }}" class="sidebar-active flex items-center gap-3 p-3 rounded-xl text-green-700 dark:text-green-400">
-                            <span class="material-symbols-outlined">dashboard</span>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-700 dark:text-gray-300 transition">
-                            <span class="material-symbols-outlined">inventory_2</span>
-                            <span>Produk</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-700 dark:text-gray-300 transition">
-                            <span class="material-symbols-outlined">shopping_cart</span>
-                            <span>Pesanan</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-700 dark:text-gray-300 transition">
-                            <span class="material-symbols-outlined">people</span>
-                            <span>Pelanggan</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-700 dark:text-gray-300 transition">
-                            <span class="material-symbols-outlined">bar_chart</span>
-                            <span>Laporan</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+                    <!-- Notifications -->
+                    <button class="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">
+                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">notifications</span>
+                        <span class="notification-badge absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
 
-            <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
-                <h3 class="text-xs uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold mb-4">Pengaturan</h3>
-                <ul class="space-y-2">
-                    <li>
-                        <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-700 dark:text-gray-300 transition">
-                            <span class="material-symbols-outlined">settings</span>
-                            <span>Pengaturan</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="flex items-center gap-3 p-3 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 text-gray-700 dark:text-gray-300 transition">
-                            <span class="material-symbols-outlined">help</span>
-                            <span>Bantuan</span>
-                        </a>
-                    </li>
-                </ul>
+                    <!-- Logout -->
+                    <a href="{{ route('logout') }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                       class="flex items-center gap-2 px-3 py-2 text-sm bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg transition">
+                        <span class="material-symbols-outlined text-lg">logout</span>
+                        <span class="hidden sm:inline">Logout</span>
+                    </a>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
+                </div>
             </div>
-        </aside>
+        </header>
 
-        <!-- Main Content -->
-        <main class="flex-1 p-6">
+        <!-- Page Content -->
+        <main class="p-4 lg:p-6">
             @yield('content')
         </main>
     </div>
+
+    <!-- Overlay for mobile -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-gray-900/50 z-30 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
+    <script>
+        // Toggle Sidebar on Mobile
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        }
+
+        // Toggle Dropdown
+        function toggleDropdown(id) {
+            const dropdown = document.getElementById(id + '-dropdown');
+            const icon = document.getElementById(id + '-icon');
+            dropdown.classList.toggle('open');
+            icon.style.transform = dropdown.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0)';
+        }
+
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
+        }
+
+        // Initialize Dark Mode from localStorage
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
