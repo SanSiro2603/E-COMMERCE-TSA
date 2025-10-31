@@ -5,15 +5,14 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Auth\Events\Registered;
 
 class RegisterController extends Controller
 {
     /**
-     * Tampilkan form registrasi
+     * Display registration form
      */
     public function showRegistrationForm()
     {
@@ -21,66 +20,83 @@ class RegisterController extends Controller
     }
 
     /**
-     * Handle registrasi user baru
+     * Handle registration request
      */
     public function register(Request $request)
     {
         // Validasi input
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::min(8)
-                ->mixedCase()
-                ->numbers()
-                ->symbols()
-            ],
+            'password' => ['required', 'confirmed', Password::min(8)],
             'phone' => ['nullable', 'string', 'max:20'],
-            'address' => ['nullable', 'string', 'max:500'],
-            'role' => ['nullable', 'in:pembeli,admin'], // Default pembeli jika tidak dipilih
-        ], [
-            'name.required' => 'Nama wajib diisi.',
-            'email.required' => 'Email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar.',
-            'password.required' => 'Password wajib diisi.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
-            'password.min' => 'Password minimal 8 karakter.',
+            'address' => ['nullable', 'string'],
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()
+                ->withErrors($validator)
+                ->withInput();
+        }
 
         // Buat user baru
         $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'phone' => $validated['phone'] ?? null,
-            'address' => $validated['address'] ?? null,
-            'role' => $validated['role'] ?? 'pembeli', // Default role pembeli
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'pembeli', // default role
+            'phone' => $request->phone,
+            'address' => $request->address,
         ]);
 
-        // Trigger event registered (untuk email verification jika diperlukan)
-        event(new Registered($user));
+        // Login otomatis setelah registrasi
+        auth()->login($user);
 
-        // Auto login setelah registrasi
-        Auth::login($user);
-
-        // Regenerasi session untuk keamanan
-        $request->session()->regenerate();
-
-        // Redirect berdasarkan role
-        return redirect()->intended($this->redirectTo($user->role))
-            ->with('success', 'Registrasi berhasil! Selamat datang di Lembah Hijau.');
+        // Redirect ke dashboard atau home
+        return redirect()->route('dashboard')->with('success', 'Registrasi berhasil! Selamat datang.');
     }
 
     /**
-     * Redirect berdasarkan role setelah registrasi
+     * Handle API registration (optional - untuk API)
      */
-    protected function redirectTo($role)
+    public function registerApi(Request $request)
     {
-        return match ($role) {
-            'super_admin' => route('superadmin.dashboard'),
-            'admin'       => route('admin.dashboard'),
-            'pembeli'     => route('pembeli.dashboard'),
-            default       => route('pembeli.dashboard'),
-        };
+        $validator = Validator::make($request->all(), [
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', Password::min(8)],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'address' => ['nullable', 'string'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Buat user baru
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'role' => 'pembeli',
+            'phone' => $request->phone,
+            'address' => $request->address,
+        ]);
+
+        // Generate token untuk API (jika menggunakan Sanctum)
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Registrasi berhasil',
+            'data' => [
+                'user' => $user,
+                'token' => $token
+            ]
+        ], 201);
     }
 }

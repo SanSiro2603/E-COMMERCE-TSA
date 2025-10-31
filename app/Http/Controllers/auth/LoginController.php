@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
@@ -15,26 +16,38 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        // Validasi input login
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required|string|min:6',
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
         ]);
 
         $credentials = $request->only('email', 'password');
 
+        // Coba login
         if (Auth::attempt($credentials, $request->filled('remember'))) {
+            $request->session()->regenerate(); // penting agar session baru terbentuk
             $user = Auth::user();
 
-            // Regenerasi session untuk keamanan
-            $request->session()->regenerate();
-
-            // Redirect berdasarkan role
-            return redirect()->intended($this->redirectTo($user->role));
+            // redirect sesuai role
+            return $this->authenticated($request, $user);
         }
 
+        // Jika gagal login
         throw ValidationException::withMessages([
-            'email' => [trans('auth.failed')],
+            'email' => ['Email atau password salah.'],
         ]);
+    }
+
+    protected function authenticated($request, $user)
+    {
+        // Redirect sesuai role
+        return match ($user->role) {
+            'super_admin' => redirect()->route('superadmin.dashboard'),
+            'admin' => redirect()->route('admin.dashboard'),
+            'pembeli' => redirect()->route('pembeli.dashboard'),
+            default => redirect()->route('landing'),
+        };
     }
 
     public function logout(Request $request)
@@ -43,16 +56,6 @@ class LoginController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('login');
-    }
-
-    protected function redirectTo($role)
-    {
-        return match ($role) {
-            'super_admin' => route('superadmin.dashboard'),
-            'admin'       => route('admin.dashboard'),
-            'pembeli'     => route('pembeli.dashboard'),
-            default       => route('pembeli.dashboard'),
-        };
+        return redirect()->route('login');
     }
 }
