@@ -57,23 +57,18 @@
 
 <body class="font-display gradient-mesh flex items-center justify-center min-h-screen overflow-auto relative p-4">
 
-  <!-- Efek glassmorphism di background -->
+  <!-- Efek glass -->
   <div class="absolute inset-0 glass -z-10"></div>
 
-  <!-- Efek dekoratif -->
+  <!-- Background dekoratif -->
   <div class="fixed top-0 right-0 w-80 h-80 bg-primary/30 rounded-full blur-3xl animate-float -z-10"></div>
   <div class="fixed bottom-0 left-0 w-80 h-80 bg-secondary/30 rounded-full blur-3xl animate-float -z-10" style="animation-delay: 3s;"></div>
 
-  <!-- Wrapper utama -->
   <div class="flex flex-col md:flex-row w-full max-w-5xl rounded-3xl overflow-hidden glass shadow-2xl border border-white/20 bg-white/70 dark:bg-gray-900/60 my-8">
     
-    <!-- Bagian kiri -->
+    <!-- Kiri -->
     <div class="hidden md:block w-2/5 relative min-h-[700px]">
-      <img 
-        src="{{ asset('images/login.png') }}" 
-        alt="Farm Livestock" 
-        class="h-full w-full object-cover brightness-90"
-      />
+      <img src="{{ asset('images/login.png') }}" alt="Farm Livestock" class="h-full w-full object-cover brightness-90"/>
       <div class="absolute inset-0 bg-gradient-to-tr from-green-900/50 to-transparent"></div>
       <div class="absolute bottom-8 left-8 text-white">
         <h2 class="text-2xl font-bold drop-shadow-md">Lembah Hijau</h2>
@@ -81,7 +76,7 @@
       </div>
     </div>
 
-    <!-- Bagian kanan -->
+    <!-- Kanan -->
     <div class="flex flex-col justify-center w-full md:w-3/5 p-8 md:p-10">
       <div class="flex items-center gap-3 mb-6">
         <div class="size-12 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
@@ -96,6 +91,7 @@
       <h2 class="text-2xl font-black text-gray-900 dark:text-white mb-2">Sign Up</h2>
       <p class="text-gray-600 dark:text-gray-400 mb-6 text-sm">Create an account to get started</p>
 
+      {{-- ✅ Tampilkan error global --}}
       @if ($errors->any())
         <div class="mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
           <ul class="text-sm text-red-600 dark:text-red-400 space-y-1">
@@ -109,7 +105,7 @@
       <form method="POST" action="{{ route('register') }}" class="space-y-4">
         @csrf
         
-        <!-- Nama Lengkap -->
+        <!-- Nama -->
         <div>
           <label for="name" class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
             Full Name <span class="text-red-500">*</span>
@@ -122,10 +118,13 @@
               name="name" 
               value="{{ old('name') }}"
               required
-              class="w-full h-12 pl-12 pr-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
+              class="w-full h-12 pl-12 pr-4 rounded-xl bg-white dark:bg-gray-800 border @error('name') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
               placeholder="John Doe"
             />
           </div>
+          @error('name')
+            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+          @enderror
         </div>
 
         <!-- Email -->
@@ -141,45 +140,13 @@
               name="email" 
               value="{{ old('email') }}"
               required
-              class="w-full h-12 pl-12 pr-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
+              class="w-full h-12 pl-12 pr-4 rounded-xl bg-white dark:bg-gray-800 border @error('email') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
               placeholder="your.email@example.com"
             />
           </div>
-        </div>
-
-        <!-- Nomor HP -->
-        <div>
-          <label for="phone" class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-            Phone Number
-          </label>
-          <div class="relative">
-            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">phone</span>
-            <input 
-              type="tel" 
-              id="phone" 
-              name="phone" 
-              value="{{ old('phone') }}"
-              class="w-full h-12 pl-12 pr-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
-              placeholder="08123456789"
-            />
-          </div>
-        </div>
-
-        <!-- Alamat -->
-        <div>
-          <label for="address" class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
-            Address
-          </label>
-          <div class="relative">
-            <span class="material-symbols-outlined absolute left-4 top-4 text-gray-500">home</span>
-            <textarea 
-              id="address" 
-              name="address" 
-              rows="3"
-              class="w-full pl-12 pr-4 py-3 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400 resize-none"
-              placeholder="Enter your complete address"
-            >{{ old('address') }}</textarea>
-          </div>
+          @error('email')
+            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+          @enderror
         </div>
 
         <!-- Password -->
@@ -194,7 +161,7 @@
               id="password" 
               name="password" 
               required
-              class="w-full h-12 pl-12 pr-12 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
+              class="w-full h-12 pl-12 pr-12 rounded-xl bg-white dark:bg-gray-800 border @error('password') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
               placeholder="Create a strong password"
             />
             <button 
@@ -205,9 +172,12 @@
               <span class="material-symbols-outlined">visibility</span>
             </button>
           </div>
+          @error('password')
+            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+          @enderror
         </div>
 
-        <!-- Confirm Password -->
+        <!-- Konfirmasi -->
         <div>
           <label for="password_confirmation" class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">
             Confirm Password <span class="text-red-500">*</span>
@@ -219,7 +189,7 @@
               id="password_confirmation" 
               name="password_confirmation" 
               required
-              class="w-full h-12 pl-12 pr-12 rounded-xl bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
+              class="w-full h-12 pl-12 pr-12 rounded-xl bg-white dark:bg-gray-800 border @error('password_confirmation') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
               placeholder="Confirm your password"
             />
             <button 
@@ -230,26 +200,18 @@
               <span class="material-symbols-outlined">visibility</span>
             </button>
           </div>
+          @error('password_confirmation')
+            <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+          @enderror
         </div>
 
-        <!-- Terms & Conditions -->
-        <div class="flex items-start gap-2 text-sm pt-2">
-          <input type="checkbox" name="terms" required class="size-4 mt-0.5 rounded border-gray-300 text-primary focus:ring-primary" />
-          <label class="text-gray-600 dark:text-gray-300">
-            I agree to the <a href="#" class="text-primary hover:underline font-semibold">Terms of Service</a> and <a href="#" class="text-primary hover:underline font-semibold">Privacy Policy</a>
-          </label>
-        </div>
-
-        <!-- Submit Button -->
-        <button 
-          type="submit"
-          class="w-full h-12 rounded-xl bg-gradient-to-r from-green-700 to-green-500 text-white font-bold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
-        >
+        <!-- Submit -->
+        <button type="submit"
+          class="w-full h-12 rounded-xl bg-gradient-to-r from-green-700 to-green-500 text-white font-bold shadow-md hover:shadow-lg hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2">
           <span>Sign Up</span>
           <span class="material-symbols-outlined">arrow_forward</span>
         </button>
 
-        <!-- Link to Login -->
         <div class="text-center mt-4 text-sm">
           <p class="text-gray-700 dark:text-gray-300">
             Already have an account? 
@@ -276,5 +238,4 @@
     }
   </script>
 </body>
-
 </html>

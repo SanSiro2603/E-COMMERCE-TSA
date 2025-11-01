@@ -96,6 +96,12 @@
       <h2 class="text-xl font-black text-gray-900 dark:text-white mb-1">Sign In</h2>
       <p class="text-gray-600 dark:text-gray-400 mb-5 text-xs">Welcome back! Please enter your details</p>
 
+          @if ($errors->any())
+      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-3 text-xs">
+          {{ $errors->first() }}
+      </div>
+        @endif
+
       <form method="POST" action="{{ route('login') }}" class="space-y-4">
         @csrf
         <div>
@@ -110,7 +116,7 @@
               name="email" 
               required
               class="w-full h-10 pl-10 pr-3 rounded-xl bg-white/70 dark:bg-gray-800/60 border border-gray-300 focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400 text-sm"
-              placeholder="your.email@example.com"
+              placeholder="Enter Your Email"
             />
           </div>
         </div>
@@ -127,7 +133,7 @@
               name="password" 
               required
               class="w-full h-10 pl-10 pr-10 rounded-xl bg-white/70 dark:bg-gray-800/60 border border-gray-300 focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400 text-sm"
-              placeholder="Enter your password"
+              placeholder="Enter Your Password"
             />
             <button 
               type="button" 
@@ -140,10 +146,6 @@
         </div>
 
         <div class="flex items-center justify-between text-xs">
-          <label class="flex items-center gap-2">
-            <input type="checkbox" name="remember" class="size-3 rounded border-gray-300 text-primary focus:ring-primary" />
-            <span class="text-gray-600 dark:text-gray-300">Remember me</span>
-          </label>
           <a href="#" class="text-primary hover:underline font-semibold">
             Forgot Password?
           </a>
