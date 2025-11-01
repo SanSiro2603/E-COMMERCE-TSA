@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Pembeli\PembeliDashboardController;
+use App\Http\Controllers\Pembeli\ProdukController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\ProductController;
@@ -44,9 +46,30 @@ Route::post('logout', [LoginController::class, 'logout'])
 // 🔹 Route untuk dashboard ADMIN
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
 
-    // Dashboard Admin
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('dashboard');
+// 🔹 Route untuk dashboard ADMIN & PEMBELI
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
+        ->name('admin.dashboard');
+        
+});
+
+// routes/web.php
+
+ 
+    Route::middleware(['auth', 'role:pembeli'])->prefix('pembeli')->name('pembeli.')->group(function () {
+    Route::get('/dashboard', [PembeliDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
+    Route::get('/produk/{slug}', [ProdukController::class, 'show'])->name('produk.show');
+
+    // // Placeholder routes (akan dibuat nanti)
+    // Route::get('/produk', fn() => inertia('Pembeli/Produk'))->name('produk.index');
+    // Route::get('/produk/{slug}', fn() => inertia('Pembeli/ProdukShow'))->name('produk.show');
+    Route::get('/keranjang', fn() => inertia('Pembeli/Keranjang'))->name('keranjang');
+    Route::get('/pesanan', fn() => inertia('Pembeli/Pesanan'))->name('pesanan');
+    Route::get('/pesanan/{order}', fn() => inertia('Pembeli/PesananShow'))->name('pesanan.show');
+    Route::get('/profil', fn() => inertia('Pembeli/Profil'))->name('profil.edit');
+});
 
     // Manajemen Produk
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
