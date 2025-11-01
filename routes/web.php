@@ -53,24 +53,6 @@ Route::middleware(['auth'])->group(function () {
         
 });
 
-// routes/web.php
-
- 
-    Route::middleware(['auth', 'role:pembeli'])->prefix('pembeli')->name('pembeli.')->group(function () {
-    Route::get('/dashboard', [PembeliDashboardController::class, 'index'])->name('dashboard');
-
-    Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
-    Route::get('/produk/{slug}', [ProdukController::class, 'show'])->name('produk.show');
-
-    // // Placeholder routes (akan dibuat nanti)
-    // Route::get('/produk', fn() => inertia('Pembeli/Produk'))->name('produk.index');
-    // Route::get('/produk/{slug}', fn() => inertia('Pembeli/ProdukShow'))->name('produk.show');
-    Route::get('/keranjang', fn() => inertia('Pembeli/Keranjang'))->name('keranjang');
-    Route::get('/pesanan', fn() => inertia('Pembeli/Pesanan'))->name('pesanan');
-    Route::get('/pesanan/{order}', fn() => inertia('Pembeli/PesananShow'))->name('pesanan.show');
-    Route::get('/profil', fn() => inertia('Pembeli/Profil'))->name('profil.edit');
-});
-
     // Manajemen Produk
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
     Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
@@ -98,13 +80,18 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.exportExcel');
 });
 
-// 🔹 (Opsional) Route untuk dashboard SUPERADMIN & PEMBELI
-Route::middleware(['auth'])->group(function () {
-    Route::get('/superadmin/dashboard', function () {
-        return view('superadmin.dashboard');
-    })->name('superadmin.dashboard');
 
-    Route::get('/pembeli/dashboard', function () {
-        return view('pembeli.dashboard');
-    })->name('pembeli.dashboard');
+    Route::middleware(['auth', 'role:pembeli'])->prefix('pembeli')->name('pembeli.')->group(function () {
+    Route::get('/dashboard', [PembeliDashboardController::class, 'index'])->name('dashboard');
+
+    Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
+    Route::get('/produk/{slug}', [ProdukController::class, 'show'])->name('produk.show');
+
+    // // Placeholder routes (akan dibuat nanti)
+    // Route::get('/produk', fn() => inertia('Pembeli/Produk'))->name('produk.index');
+    // Route::get('/produk/{slug}', fn() => inertia('Pembeli/ProdukShow'))->name('produk.show');
+    Route::get('/keranjang', fn() => inertia('Pembeli/Keranjang'))->name('keranjang');
+    Route::get('/pesanan', fn() => inertia('Pembeli/Pesanan'))->name('pesanan');
+    Route::get('/pesanan/{order}', fn() => inertia('Pembeli/PesananShow'))->name('pesanan.show');
+    Route::get('/profil', fn() => inertia('Pembeli/Profil'))->name('profil.edit');
 });
