@@ -52,6 +52,17 @@
     .animate-float {
       animation: float 6s ease-in-out infinite;
     }
+    .google-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border: 1px solid #ccc;
+      border-radius: 9999px;
+      width: 40px;
+      height: 40px;
+      transition: background 0.3s;
+      background: #fff;
+    }
   </style>
 </head>
 
@@ -220,12 +231,12 @@
         </div>
 
         <!-- Tombol Registrasi via Google -->
-        <a href="{{ route('google.redirect') }}"
-          class="w-full h-10 flex items-center justify-center gap-2 border border-gray-300 rounded-xl hover:bg-gray-100 transition-all duration-300 text-sm font-semibold text-gray-700">
-          <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-4 h-4" alt="Google Logo">
-          Sign up with Google
-        </a>
-
+          <div class="flex justify-center">
+          <a href="{{ route('google.redirect') }}" onclick="openGoogleLogin(event)" class="google-btn">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5" />
+          </a>
+        </div>
+        
         <!-- Bagian link ke login -->
         <div class="text-center mt-4 text-sm">
           <p class="text-gray-700 dark:text-gray-300">
@@ -248,6 +259,23 @@
         input.type = 'password';
         icon.textContent = 'visibility';
       }
+    }
+    function openGoogleLogin(event) {
+      event.preventDefault();
+      const width = 500, height = 600;
+      const left = (window.innerWidth - width) / 2;
+      const top = (window.innerHeight - height) / 2;
+      const popup = window.open(
+        "{{ route('google.redirect') }}",
+        "GoogleLogin",
+        `width=${width},height=${height},top=${top},left=${left},resizable=no,scrollbars=yes,status=no`
+      );
+      const timer = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(timer);
+          window.location.reload();
+        }
+      }, 1000);
     }
   </script>
 </body>
