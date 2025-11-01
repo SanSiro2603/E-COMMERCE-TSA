@@ -26,6 +26,11 @@
   </script>
 
   <style>
+     body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%);
+    }
+
     .material-symbols-outlined {
       font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
     }
@@ -130,7 +135,7 @@
               value="{{ old('name') }}"
               required
               class="w-full h-12 pl-12 pr-4 rounded-xl bg-white dark:bg-gray-800 border @error('name') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
-              placeholder="John Doe"
+              placeholder="Your Name"
             />
           </div>
           @error('name')
@@ -152,7 +157,7 @@
               value="{{ old('email') }}"
               required
               class="w-full h-12 pl-12 pr-4 rounded-xl bg-white dark:bg-gray-800 border @error('email') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
-              placeholder="your.email@example.com"
+              placeholder="Your Email"
             />
           </div>
           @error('email')
@@ -173,7 +178,7 @@
               name="password" 
               required
               class="w-full h-12 pl-12 pr-12 rounded-xl bg-white dark:bg-gray-800 border @error('password') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
-              placeholder="Create a strong password"
+              placeholder="Password"
             />
             <button 
               type="button" 
@@ -201,7 +206,7 @@
               name="password_confirmation" 
               required
               class="w-full h-12 pl-12 pr-12 rounded-xl bg-white dark:bg-gray-800 border @error('password_confirmation') border-red-500 @else border-gray-300 dark:border-gray-600 @enderror focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder-gray-400"
-              placeholder="Confirm your password"
+              placeholder="Confirm Your Password"
             />
             <button 
               type="button" 
