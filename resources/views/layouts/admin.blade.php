@@ -220,49 +220,37 @@
         </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <div class="lg:pl-64">
-        <!-- Top Navigation Bar -->
-        <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-            <div class="flex items-center justify-between h-16 px-4 lg:px-6">
-                <!-- Mobile Menu Button -->
-                <button class="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" onclick="toggleSidebar()">
-                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">menu</span>
-                </button>
-
-                <!-- Search Bar -->
-                <div class="hidden md:flex flex-1 max-w-md">
-                    <div class="relative w-full">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
-                        <input type="text" placeholder="Search..." class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 dark:text-white placeholder-gray-500">
-                    </div>
-                </div>
-
-                <!-- Right Section -->
-                <div class="flex items-center gap-2">
-                    <!-- Dark Mode Toggle -->
-                    <button onclick="toggleDarkMode()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">
-                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-400 dark:hidden">dark_mode</span>
-                        <span class="material-symbols-outlined text-gray-400 hidden dark:inline">light_mode</span>
-                    </button>
-
-                    <!-- Notifications -->
-                    <button class="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">
-                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">notifications</span>
-                        <span class="notification-badge absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </button>
-
-                    <!-- Logout -->
-                    <a href="{{ route('logout') }}"
-                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                       class="flex items-center gap-2 px-3 py-2 text-sm bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg transition">
-                        <span class="material-symbols-outlined text-lg">logout</span>
-                        <span class="hidden sm:inline">Logout</span>
+    <!-- Sidebar + Content -->
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-zinc-900 h-screen shadow-r-lg p-6 space-y-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg bg-soft-green/10 text-soft-green font-medium">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        Dashboard
                     </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
-                </div>
-            </div>
-        </header>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                        <span class="material-symbols-outlined">inventory_2</span>
+                        Produk
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                        Pesanan
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                        <span class="material-symbols-outlined">bar_chart</span>
+                        Laporan
+                    </a>
+                </li>
+            </ul>
+        </aside>
 
         <!-- Page Content -->
         <main class="p-4 lg:p-6">

@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Pembeli\PembeliDashboardController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 
 /*
@@ -38,14 +41,21 @@ Route::post('logout', [LoginController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
 
-
-// 🔹 Route untuk dashboard ADMIN & PEMBELI
+// 🔹 Route untuk dashboard ADMIN
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
         ->name('admin.dashboard');
-        
-    Route::get('/pembeli/dashboard', [PembeliDashboardController::class, 'index'])
-        ->name('pembeli.dashboard');
+});
+
+// 🔹 (Opsional) Route untuk dashboard SUPERADMIN & PEMBELI
+Route::middleware(['auth'])->group(function () {
+    Route::get('/superadmin/dashboard', function () {
+        return view('superadmin.dashboard');
+    })->name('superadmin.dashboard');
+
+    Route::get('/pembeli/dashboard', function () {
+        return view('pembeli.dashboard');
+    })->name('pembeli.dashboard');
 });
 
 
