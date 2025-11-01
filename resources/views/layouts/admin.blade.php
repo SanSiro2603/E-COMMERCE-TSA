@@ -72,13 +72,19 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
-                        <span class="material-symbols-outlined">inventory_2</span>
+                    <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                        <span class="material-symbols-outlined">pets</span>
+                        Kategori
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.products.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                        <span class="material-symbols-outlined">cruelty_free</span>
                         Produk
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                    <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
                         <span class="material-symbols-outlined">shopping_cart</span>
                         Pesanan
                     </a>
