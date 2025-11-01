@@ -90,7 +90,7 @@
                     </a>
                 </li>
                 <li>
-                    <a href="#" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                    <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
                         <span class="material-symbols-outlined">bar_chart</span>
                         Laporan
                     </a>
