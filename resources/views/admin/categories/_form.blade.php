@@ -3,6 +3,21 @@
     @if(isset($category)) @method('PUT') @endif
 
     <div class="space-y-6">
+        <!-- Alert Messages -->
+        @if(session('success'))
+            <div class="p-4 mb-4 text-sm text-green-700 bg-green-100 dark:bg-green-800 dark:text-green-200 rounded-lg flex items-center gap-2 animate-fade">
+                <span class="material-symbols-outlined">check_circle</span>
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="p-4 mb-4 text-sm text-red-700 bg-red-100 dark:bg-red-800 dark:text-red-200 rounded-lg flex items-center gap-2 animate-fade">
+                <span class="material-symbols-outlined">error</span>
+                {{ session('error') }}
+            </div>
+        @endif
+
         <!-- Nama Kategori -->
         <div>
             <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
@@ -29,7 +44,7 @@
             </label>
             <textarea name="description" 
                       rows="4"
-                      placeholder="Masukkan deskripsi kategori..."
+                      placeholder="Masukkan deskripsi kategori"
                       class="block w-full px-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green dark:focus:ring-soft-green dark:focus:border-soft-green transition-colors resize-none">{{ old('description', $category->description ?? '') }}</textarea>
             @error('description')
                 <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
@@ -70,9 +85,19 @@
 </form>
 
 <style>
-    /* Custom checkbox styling for better visibility */
+    /* Custom checkbox styling */
     input[type="checkbox"]:checked {
         background-color: #7BB661;
         border-color: #7BB661;
+    }
+
+    /* Simple fade in animation for alerts */
+    .animate-fade {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
     }
 </style>

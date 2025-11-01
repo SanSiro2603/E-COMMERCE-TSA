@@ -4,6 +4,65 @@
 @section('title', 'Kelola Kategori')
 
 @section('content')
+
+<style>
+    /* Custom Pagination Styling */
+    .pagination {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    
+    .pagination .page-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border-radius: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(to right, #7BB661, #72e236);
+        color: white;
+        border: none;
+    }
+    
+    .pagination .page-link:hover:not(.active) {
+        background-color: rgba(123, 182, 97, 0.1);
+        color: #7BB661;
+    }
+    
+    .dark .pagination .page-link {
+        color: #e4e4e7;
+        background-color: #27272a;
+        border-color: #3f3f46;
+    }
+    
+    .dark .pagination .page-link:hover:not(.active) {
+        background-color: rgba(123, 182, 97, 0.15);
+        border-color: #7BB661;
+    }
+
+    /* Simple fade in animation for alerts */
+    .animate-fade {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+     /* Simple fade in animation for alerts */
+    .animate-fade {
+        animation: fadeIn 0.3s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
 <div class="space-y-6">
 
     <!-- Page Header -->
@@ -18,6 +77,21 @@
             Tambah Kategori
         </a>
     </div>
+
+    <!-- Alert Messages -->
+    @if(session('success'))
+        <div id="alert-success" class="p-4 mb-4 text-sm text-green-700 bg-green-100 dark:bg-green-800 dark:text-green-200 rounded-lg flex items-center gap-2 animate-fade">
+            <span class="material-symbols-outlined">check_circle</span>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div id="alert-error" class="p-4 mb-4 text-sm text-red-700 bg-red-100 dark:bg-red-800 dark:text-red-200 rounded-lg flex items-center gap-2 animate-fade">
+            <span class="material-symbols-outlined">error</span>
+            {{ session('error') }}
+        </div>
+    @endif
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -210,43 +284,21 @@
 
 </div>
 
-<style>
-    /* Custom Pagination Styling */
-    .pagination {
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-    }
-    
-    .pagination .page-link {
-        padding: 0.5rem 0.75rem;
-        font-size: 0.875rem;
-        font-weight: 500;
-        border-radius: 0.5rem;
-        transition: all 0.2s;
-    }
-    
-    .pagination .page-item.active .page-link {
-        background: linear-gradient(to right, #7BB661, #72e236);
-        color: white;
-        border: none;
-    }
-    
-    .pagination .page-link:hover:not(.active) {
-        background-color: rgba(123, 182, 97, 0.1);
-        color: #7BB661;
-    }
-    
-    .dark .pagination .page-link {
-        color: #e4e4e7;
-        background-color: #27272a;
-        border-color: #3f3f46;
-    }
-    
-    .dark .pagination .page-link:hover:not(.active) {
-        background-color: rgba(123, 182, 97, 0.15);
-        border-color: #7BB661;
-    }
-</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const successAlert = document.getElementById('alert-success');
+        const errorAlert = document.getElementById('alert-error');
 
+        [successAlert, errorAlert].forEach(alert => {
+            if(alert) {
+                setTimeout(() => {
+                    alert.style.transition = "opacity 0.5s ease-out, transform 0.5s ease-out";
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-10px)';
+                    setTimeout(() => alert.remove(), 500); // hapus elemen setelah animasi
+                }, 2000); // tunggu 2 detik sebelum fade out
+            }
+        });
+    });
+</script>
 @endsection
