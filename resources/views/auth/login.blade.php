@@ -166,6 +166,13 @@
               Sign Up
             </a>
           </p>
+          <div class="mt-6">
+          <a href="{{ route('google.redirect') }}"
+            class="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-xl py-3 hover:bg-gray-50 transition">
+            <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" class="w-5 h-5"/>
+            <span class="text-sm font-semibold text-gray-700">Login with Google</span>
+          </a>
+        </div>
         </div>
       </form>
     </div>

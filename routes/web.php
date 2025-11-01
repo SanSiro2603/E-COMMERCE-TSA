@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\ProductController;
@@ -27,6 +28,15 @@ use App\Http\Controllers\Pembeli\ProdukController;
 Route::get('/', [DashboardController::class, 'index'])->name('landing');
 Route::get('/gallery-hewan', [DashboardController::class, 'hewan'])->name('gallery.hewan');
 
+
+// ===============================================================
+// 🔹 AUTH GOOGLE LOGIN
+// ===============================================================
+
+Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
+Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+
 // 🔹 Route hanya untuk tamu (belum login)
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -34,8 +44,6 @@ Route::middleware('guest')->group(function () {
     
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register']);
-    
-    
 });
 
 // 🔹 Logout hanya untuk user login
@@ -43,7 +51,10 @@ Route::post('logout', [LoginController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
 
-// 🔹 Route untuk dashboard ADMIN
+
+// ===============================================================
+// 🔹 ADMIN ROUTES
+// ===============================================================
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
 
     // Dashboard Admin
@@ -78,18 +89,20 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 
+// ===============================================================
+// 🔹 PEMBELI ROUTES
+// ===============================================================
 Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function () {
 
-    // Dashboard Admin
+    // Dashboard Pembeli
     Route::get('/dashboard', [PembeliDashboardController::class, 'index'])
         ->name('dashboard');
 
+    // Produk
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
     Route::get('/produk/{slug}', [ProdukController::class, 'show'])->name('produk.show');
 
-    // // Placeholder routes (akan dibuat nanti)
-    // Route::get('/produk', fn() => inertia('Pembeli/Produk'))->name('produk.index');
-    // Route::get('/produk/{slug}', fn() => inertia('Pembeli/ProdukShow'))->name('produk.show');
+    // Halaman lainnya
     Route::get('/keranjang', fn() => inertia('Pembeli/Keranjang'))->name('keranjang');
     Route::get('/pesanan', fn() => inertia('Pembeli/Pesanan'))->name('pesanan');
     Route::get('/pesanan/{order}', fn() => inertia('Pembeli/PesananShow'))->name('pesanan.show');
