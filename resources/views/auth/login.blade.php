@@ -151,32 +151,38 @@
           </a>
         </div>
 
-        <button 
-          type="submit"
-          class="w-full h-10 rounded-xl bg-gradient-to-r from-green-700 to-green-500 text-white font-bold shadow-md hover:shadow-lg hover:scale-[1.03] transition-all duration-300 flex items-center justify-center gap-1 text-xs"
-        >
-          <span>Sign In</span>
-          <span class="material-symbols-outlined text-xs">arrow_forward</span>
-        </button>
+                <button 
+            type="submit"
+            class="w-full h-10 rounded-xl bg-gradient-to-r from-green-700 to-green-500 text-white font-bold shadow-md hover:shadow-lg hover:scale-[1.03] transition-all duration-300 flex items-center justify-center gap-1 text-xs"
+          >
+            <span>Sign In</span>
+            <span class="material-symbols-outlined text-xs">arrow_forward</span>
+          </button>
 
-        <div class="text-center mt-3 text-xs">
-          <p class="text-gray-700 dark:text-gray-300">
-            Don’t have an account? 
-            <a href="{{ route('register') }}" class="text-green-700 font-bold hover:underline">
-              Sign Up
-            </a>
-          </p>
-          <div class="mt-6">
+          <!-- Garis pemisah -->
+          <div class="relative flex items-center my-5">
+            <div class="flex-grow border-t border-gray-300"></div>
+            <span class="mx-2 text-xs text-gray-500">OR</span>
+            <div class="flex-grow border-t border-gray-300"></div>
+          </div>
+
+          <!-- Tombol Login via Google -->
           <a href="{{ route('google.redirect') }}"
             class="w-full flex items-center justify-center gap-2 border border-gray-300 rounded-xl py-3 hover:bg-gray-50 transition">
             <img src="https://www.svgrepo.com/show/355037/google.svg" alt="Google" class="w-5 h-5"/>
             <span class="text-sm font-semibold text-gray-700">Login with Google</span>
           </a>
-        </div>
-        </div>
-      </form>
-    </div>
-  </div>
+
+          <!-- Link ke halaman register -->
+          <div class="text-center mt-6 text-xs">
+            <p class="text-gray-700 dark:text-gray-300">
+              Don’t have an account? 
+              <a href="{{ route('register') }}" class="text-green-700 font-bold hover:underline">
+                Sign Up
+              </a>
+            </p>
+          </div>
+
 
   <script>
     function togglePassword(event) {
