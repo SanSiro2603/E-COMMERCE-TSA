@@ -3,8 +3,6 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Pembeli\PembeliDashboardController;
-use App\Http\Controllers\Pembeli\ProdukController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Admin\ProductController;
@@ -12,6 +10,8 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Pembeli\PembeliDashboardController;
+use App\Http\Controllers\Pembeli\ProdukController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,12 +46,9 @@ Route::post('logout', [LoginController::class, 'logout'])
 // 🔹 Route untuk dashboard ADMIN
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
 
-// 🔹 Route untuk dashboard ADMIN & PEMBELI
-Route::middleware(['auth'])->group(function () {
-    Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('admin.dashboard');
-        
-});
+    // Dashboard Admin
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+        ->name('dashboard');
 
     // Manajemen Produk
     Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -81,7 +78,7 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-    Route::middleware(['auth', 'role:pembeli'])->prefix('pembeli')->name('pembeli.')->group(function () {
+ Route::middleware(['auth', 'role:pembeli'])->prefix('pembeli')->name('pembeli.')->group(function () {
     Route::get('/dashboard', [PembeliDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
