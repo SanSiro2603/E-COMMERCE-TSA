@@ -78,8 +78,11 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 });
 
 
- Route::middleware(['auth', 'role:pembeli'])->prefix('pembeli')->name('pembeli.')->group(function () {
-    Route::get('/dashboard', [PembeliDashboardController::class, 'index'])->name('dashboard');
+Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function () {
+
+    // Dashboard Admin
+    Route::get('/dashboard', [PembeliDashboardController::class, 'index'])
+        ->name('dashboard');
 
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
     Route::get('/produk/{slug}', [ProdukController::class, 'show'])->name('produk.show');
