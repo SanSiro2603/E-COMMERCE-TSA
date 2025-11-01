@@ -212,6 +212,21 @@
           <span class="material-symbols-outlined">arrow_forward</span>
         </button>
 
+        <!-- Garis pemisah -->
+        <div class="relative flex items-center my-4">
+          <div class="flex-grow border-t border-gray-300"></div>
+          <span class="mx-2 text-xs text-gray-500">OR</span>
+          <div class="flex-grow border-t border-gray-300"></div>
+        </div>
+
+        <!-- Tombol Registrasi via Google -->
+        <a href="{{ route('google.redirect') }}"
+          class="w-full h-10 flex items-center justify-center gap-2 border border-gray-300 rounded-xl hover:bg-gray-100 transition-all duration-300 text-sm font-semibold text-gray-700">
+          <img src="https://www.svgrepo.com/show/355037/google.svg" class="w-4 h-4" alt="Google Logo">
+          Sign up with Google
+        </a>
+
+        <!-- Bagian link ke login -->
         <div class="text-center mt-4 text-sm">
           <p class="text-gray-700 dark:text-gray-300">
             Already have an account? 
@@ -220,9 +235,7 @@
             </a>
           </p>
         </div>
-      </form>
-    </div>
-  </div>
+
 
   <script>
     function togglePassword(event, inputId) {
