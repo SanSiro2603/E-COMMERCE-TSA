@@ -7,7 +7,7 @@
     <title>@yield('title', 'Admin - Lembah Hijau')</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
 
     <script>
@@ -16,291 +16,93 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": {
-                            50: '#f0fdf4',
-                            100: '#dcfce7',
-                            200: '#bbf7d0',
-                            300: '#86efac',
-                            400: '#4ade80',
-                            500: '#22c55e',
-                            600: '#16a34a',
-                            700: '#15803d',
-                            800: '#166534',
-                            900: '#14532d',
-                        }
+                        "primary": "#72e236",
+                        "soft-green": "#7BB661",
+                        "warm-yellow": "#FFD54F",
+                        "charcoal": "#333333",
+                        "background-light": "#FDFBF5",
+                        "background-dark": "#172111",
                     },
                     fontFamily: {
-                        "sans": ["Inter", "sans-serif"]
+                        "display": ["Poppins", "sans-serif"],
+                        "be-vietnam": ["Be Vietnam Pro", "sans-serif"]
                     }
                 }
             }
         }
     </script>
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
+        .gradient-button {
+            background-image: linear-gradient(to right, #8fcf72, #7BB661);
         }
-
-        /* Sidebar Transitions */
-        .sidebar {
-            transition: transform 0.3s ease-in-out;
-        }
-
-        @media (max-width: 1024px) {
-            .sidebar:not(.open) {
-                transform: translateX(-100%);
-            }
-        }
-
-        /* Active Link Indicator */
-        .nav-link {
-            position: relative;
-            transition: all 0.2s ease;
-        }
-
-        .nav-link.active {
-            background-color: rgb(240 253 244);
-            color: rgb(22 163 74);
-            font-weight: 600;
-        }
-
-        .dark .nav-link.active {
-            background-color: rgb(20 83 45 / 0.3);
-            color: rgb(134 239 172);
-        }
-
-        .nav-link.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            height: 60%;
-            width: 3px;
-            background: linear-gradient(to bottom, #22c55e, #16a34a);
-            border-radius: 0 4px 4px 0;
-        }
-
-        /* Dropdown Animation */
-        .dropdown-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-        }
-
-        .dropdown-content.open {
-            max-height: 500px;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgb(229 231 235);
-            border-radius: 10px;
-        }
-
-        .dark ::-webkit-scrollbar-thumb {
-            background: rgb(55 65 81);
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgb(209 213 219);
-        }
-
-        .dark ::-webkit-scrollbar-thumb:hover {
-            background: rgb(75 85 99);
-        }
-
-        /* Notification Badge Pulse */
-        .notification-badge {
-            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: .5;
-            }
-        }
-
-        /* Dark Mode Smooth Transition */
-        * {
-            transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-        }
-
-        /* Focus Styles */
-        button:focus-visible, a:focus-visible {
-            outline: 2px solid rgb(34 197 94);
-            outline-offset: 2px;
+        .gradient-button:hover {
+            background-image: linear-gradient(to right, #9bd980, #8fcf72);
         }
     </style>
 </head>
-<body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen">
 
-    <!-- Sidebar -->
-    <aside class="sidebar fixed top-0 left-0 z-40 w-64 h-screen bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800">
-        <!-- Logo -->
-        <div class="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-800">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
-                    <span class="material-symbols-outlined text-white text-xl">eco</span>
-                </div>
-                <span class="text-lg font-bold text-gray-900 dark:text-white">Lembah Hijau</span>
+    <!-- Navbar -->
+    <nav class="bg-white dark:bg-zinc-900 shadow-lg border-b border-gray-200 dark:border-zinc-700">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="{{ route('admin.dashboard') }}" class="text-2xl font-bold text-charcoal dark:text-white font-be-vietnam">
+                Lembah Hijau <span class="text-xs text-soft-green">Admin</span>
             </a>
-            <button class="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" onclick="toggleSidebar()">
-                <span class="material-symbols-outlined text-gray-500">close</span>
-            </button>
-        </div>
-
-        <!-- Navigation -->
-        <nav class="flex-1 overflow-y-auto p-4 space-y-1">
-            <!-- Dashboard -->
-            <a href="{{ route('admin.dashboard') }}" class="nav-link active flex items-center gap-3 px-3 py-2 rounded-lg text-sm">
-                <span class="material-symbols-outlined text-xl">dashboard</span>
-                <span>Dashboard</span>
-            </a>
-
-            <!-- Products Dropdown -->
-            <div>
-                <button onclick="toggleDropdown('products')" class="nav-link flex items-center justify-between w-full px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
-                    <div class="flex items-center gap-3">
-                        <span class="material-symbols-outlined text-xl">inventory_2</span>
-                        <span>Produk</span>
-                    </div>
-                    <span class="material-symbols-outlined text-lg transition-transform" id="products-icon">expand_more</span>
-                </button>
-                <div class="dropdown-content ml-11 mt-1 space-y-1" id="products-dropdown">
-                    <a href="#" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">Daftar Produk</a>
-                    <a href="#" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">Kategori</a>
-                    <a href="#" class="block px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50">Stok</a>
-                </div>
-            </div>
-
-            <!-- Orders -->
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
-                <span class="material-symbols-outlined text-xl">shopping_cart</span>
-                <span>Pesanan</span>
-                <span class="ml-auto px-2 py-0.5 text-xs font-semibold bg-primary-100 text-primary-700 dark:bg-primary-900/30 dark:text-primary-400 rounded-full">12</span>
-            </a>
-
-            <!-- Customers -->
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
-                <span class="material-symbols-outlined text-xl">people</span>
-                <span>Pelanggan</span>
-            </a>
-
-            <!-- Analytics -->
-            <a href="#" class="nav-link flex items-center gap-3 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 dark:hover:bg-gray-800">
-                <span class="material-symbols-outlined text-xl">bar_chart</span>
-                <span>Analitik</span>
-            </a>
-        </nav>
-
-        <!-- User Profile in Sidebar -->
-        <div class="p-4 border-t border-gray-200 dark:border-gray-800">
-            <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 cursor-pointer">
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-semibold text-sm">
-                    {{ substr(Auth::user()->name, 0, 1) }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-gray-500 dark:text-gray-400 truncate">Administrator</p>
-                </div>
+            <div class="flex items-center gap-4">
+                <span class="text-sm text-charcoal dark:text-zinc-300">Halo, {{ Auth::user()->name }}</span>
+                <a href="{{ route('logout') }}"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                   class="text-soft-green hover:text-warm-yellow text-sm underline">
+                    Logout
+                </a>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
             </div>
         </div>
-    </aside>
+    </nav>
 
-    <!-- Main Content Area -->
-    <div class="lg:pl-64">
-        <!-- Top Navigation Bar -->
-        <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-            <div class="flex items-center justify-between h-16 px-4 lg:px-6">
-                <!-- Mobile Menu Button -->
-                <button class="lg:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg" onclick="toggleSidebar()">
-                    <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">menu</span>
-                </button>
-
-                <!-- Search Bar -->
-                <div class="hidden md:flex flex-1 max-w-md">
-                    <div class="relative w-full">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
-                        <input type="text" placeholder="Search..." class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border-0 rounded-lg text-sm focus:ring-2 focus:ring-primary-500 dark:text-white placeholder-gray-500">
-                    </div>
-                </div>
-
-                <!-- Right Section -->
-                <div class="flex items-center gap-2">
-                    <!-- Dark Mode Toggle -->
-                    <button onclick="toggleDarkMode()" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">
-                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-400 dark:hidden">dark_mode</span>
-                        <span class="material-symbols-outlined text-gray-400 hidden dark:inline">light_mode</span>
-                    </button>
-
-                    <!-- Notifications -->
-                    <button class="relative p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition">
-                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-400">notifications</span>
-                        <span class="notification-badge absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-                    </button>
-
-                    <!-- Logout -->
-                    <a href="{{ route('logout') }}"
-                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                       class="flex items-center gap-2 px-3 py-2 text-sm bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg transition">
-                        <span class="material-symbols-outlined text-lg">logout</span>
-                        <span class="hidden sm:inline">Logout</span>
+    <!-- Sidebar + Content -->
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white dark:bg-zinc-900 h-screen shadow-r-lg p-6 space-y-4">
+            <ul class="space-y-2">
+                <li>
+                    <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 p-3 rounded-lg bg-soft-green/10 text-soft-green font-medium">
+                        <span class="material-symbols-outlined">dashboard</span>
+                        Dashboard
                     </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
-                </div>
-            </div>
-        </header>
+                </li>
+                <li>
+                    <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                        <span class="material-symbols-outlined">pets</span>
+                        Kategori
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.products.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                        <span class="material-symbols-outlined">cruelty_free</span>
+                        Produk
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.orders.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                        <span class="material-symbols-outlined">shopping_cart</span>
+                        Pesanan
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('admin.reports.index') }}" class="flex items-center gap-3 p-3 rounded-lg hover:bg-soft-green/10 text-charcoal dark:text-zinc-300">
+                        <span class="material-symbols-outlined">bar_chart</span>
+                        Laporan
+                    </a>
+                </li>
+            </ul>
+        </aside>
 
-        <!-- Page Content -->
-        <main class="p-4 lg:p-6">
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
             @yield('content')
         </main>
     </div>
-
-    <!-- Overlay for mobile -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-gray-900/50 z-30 lg:hidden hidden" onclick="toggleSidebar()"></div>
-
-    <script>
-        // Toggle Sidebar on Mobile
-        function toggleSidebar() {
-            const sidebar = document.querySelector('.sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('hidden');
-        }
-
-        // Toggle Dropdown
-        function toggleDropdown(id) {
-            const dropdown = document.getElementById(id + '-dropdown');
-            const icon = document.getElementById(id + '-icon');
-            dropdown.classList.toggle('open');
-            icon.style.transform = dropdown.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0)';
-        }
-
-        // Dark Mode Toggle
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark'));
-        }
-
-        // Initialize Dark Mode from localStorage
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.documentElement.classList.add('dark');
-        }
-    </script>
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
