@@ -6,6 +6,44 @@
 @section('content')
 <div class="space-y-6">
 
+    <!-- Success Alert -->
+    @if(session('success'))
+        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4 animate-fade-in">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-green-900 dark:text-green-300">Berhasil!</h3>
+                    <p class="text-sm text-green-800 dark:text-green-400 mt-1">{{ session('success') }}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        class="flex-shrink-0 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
+    <!-- Error Alert -->
+    @if(session('error'))
+        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-fade-in">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                    <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">error</span>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-red-900 dark:text-red-300">Gagal!</h3>
+                    <p class="text-sm text-red-800 dark:text-red-400 mt-1">{{ session('error') }}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        class="flex-shrink-0 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
+    @endif
+
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-zinc-400">
         <a href="{{ route('admin.dashboard') }}" class="hover:text-soft-green transition-colors">Dashboard</a>
@@ -227,3 +265,35 @@
 
 </div>
 @endsection
+
+<style>
+    @keyframes fade-in {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .animate-fade-in {
+        animation: fade-in 0.3s ease-out;
+    }
+</style>
+
+<script>
+    // Auto dismiss alerts after 5 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const alerts = document.querySelectorAll('.animate-fade-in');
+        alerts.forEach(alert => {
+            setTimeout(() => {
+                alert.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
+                alert.style.opacity = '0';
+                alert.style.transform = 'translateY(-10px)';
+                setTimeout(() => alert.remove(), 300);
+            }, 5000);
+        });
+    });
+</script>

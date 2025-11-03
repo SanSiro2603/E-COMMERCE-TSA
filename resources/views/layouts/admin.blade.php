@@ -267,7 +267,10 @@
                         <!-- Notifications -->
                         {{-- <button class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
                             <span class="material-symbols-outlined text-gray-600 dark:text-zinc-300">notifications</span>
-                            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                            <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500
+                            
+                            "y89o 0.h1nbb
+                             rounded-full"></span>
                         </button> --}}
 
                         <!-- Theme Toggle -->

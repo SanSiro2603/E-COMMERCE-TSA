@@ -237,7 +237,7 @@
 
         <!-- Tombol Registrasi via Google -->
           <div class="flex justify-center">
-          <a href="{{ route('google.redirect') }}" onclick="openGoogleLogin(event)" class="google-btn">
+          <a href="{{ route('google.redirect') }}"  class="google-btn">
             <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5" />
           </a>
         </div>
@@ -265,23 +265,7 @@
         icon.textContent = 'visibility';
       }
     }
-    function openGoogleLogin(event) {
-      event.preventDefault();
-      const width = 500, height = 600;
-      const left = (window.innerWidth - width) / 2;
-      const top = (window.innerHeight - height) / 2;
-      const popup = window.open(
-        "{{ route('google.redirect') }}",
-        "GoogleLogin",
-        `width=${width},height=${height},top=${top},left=${left},resizable=no,scrollbars=yes,status=no`
-      );
-      const timer = setInterval(() => {
-        if (popup.closed) {
-          clearInterval(timer);
-          window.location.reload();
-        }
-      }, 1000);
-    }
+   
   </script>
 </body>
 </html>
