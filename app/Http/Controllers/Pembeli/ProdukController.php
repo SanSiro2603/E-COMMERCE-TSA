@@ -90,57 +90,68 @@ class ProdukController extends Controller
             ';
         }
 
-        $html = '';
-        foreach ($products as $product) {
-            $stockBadge = '';
-            $imageOverlay = '';
-            
-            if ($product->stock <= 5 && $product->stock > 0) {
-                $stockBadge = '<div class="absolute top-2 right-2 px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">Stok ' . $product->stock . '</div>';
-            } elseif ($product->stock == 0) {
-                $imageOverlay = '<div class="absolute inset-0 bg-black/50 flex items-center justify-center"><span class="px-3 py-1.5 bg-red-500 text-white text-sm font-bold rounded-full">Habis</span></div>';
-            }
+       $html = '';
+foreach ($products as $product) {
+    $stockBadge = '';
+    $imageOverlay = '';
 
-            $actionButtons = '';
-            if ($product->stock > 0) {
-                $actionButtons = '
-                    <button onclick="addToCart(' . $product->id . ')"
-                            class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gradient-to-r from-soft-green to-primary text-white rounded-lg text-xs font-medium hover:shadow-md transition-all">
-                        <span class="material-symbols-outlined text-base">shopping_cart</span>
-                        <span class="hidden sm:inline">Keranjang</span>
-                    </button>
-                    <a href="' . route('pembeli.produk.show', $product->slug) . '"
-                       class="px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
-                        <span class="material-symbols-outlined text-base">visibility</span>
-                    </a>
-                ';
-            } else {
-                $actionButtons = '
-                    <button disabled
-                            class="flex-1 px-3 py-2 bg-gray-200 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 rounded-lg text-xs font-medium cursor-not-allowed">
-                        Stok Habis
-                    </button>
-                ';
-            }
+    if ($product->stock <= 5 && $product->stock > 0) {
+        $stockBadge = '
+            <div class="absolute top-2 right-2 px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
+                Stok ' . $product->stock . '
+            </div>';
+    } elseif ($product->stock == 0) {
+        $imageOverlay = '
+            <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <span class="px-3 py-1.5 bg-red-500 text-white text-sm font-bold rounded-full">
+                    Habis
+                </span>
+            </div>';
+    }
 
-            $image = $product->image 
-                ? '<img src="' . asset('storage/' . $product->image) . '" alt="' . e($product->name) . '" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">'
-                : '<div class="w-full h-full flex items-center justify-center"><span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl">image</span></div>';
+    // Tombol aksi (keranjang + lihat produk)
+    if ($product->stock > 0) {
+        $actionButtons = '
+            <div class="flex items-center gap-2">
+                <button onclick="addToCart(' . $product->id . ')"
+                        class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gradient-to-r from-soft-green to-primary text-white rounded-lg text-xs font-medium hover:shadow-md transition-all">
+                    <span class="material-symbols-outlined text-base">shopping_cart</span>
+                    <span class="hidden sm:inline">Keranjang</span>
+                </button>
+                <a href="' . route('pembeli.produk.show', $product->slug) . '"
+                   class="px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-base">visibility</span>
+                </a>
+            </div>';
+    } else {
+        $actionButtons = '
+            <button disabled
+                    class="flex-1 px-3 py-2 bg-gray-200 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 rounded-lg text-xs font-medium cursor-not-allowed">
+                Stok Habis
+            </button>';
+    }
 
-            $description = $product->description 
-                ? '<p class="text-xs text-gray-600 dark:text-zinc-400 line-clamp-2 mb-3">' . e($product->description) . '</p>'
-                : '';
+    // Deskripsi pendek
+    $description = $product->description
+        ? '<p class="text-xs text-gray-600 dark:text-zinc-400 line-clamp-2 mb-3 text-justify">'
+            . e($product->description) . '</p>'
+        : '';
 
-            $html .= '
+    // HTML produk
+    $html .= '
     <div class="group bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-lg transition-all overflow-hidden">
         <a href="' . route('pembeli.produk.show', $product->slug) . '" 
-           class="block relative overflow-hidden bg-gray-100 dark:bg-zinc-800 rounded-t-lg">
-            ' . ($product->image 
-                ? '<img src="' . asset('storage/' . $product->image) . '" alt="' . e($product->name) . '" class="block w-[110%] max-w-none -ml-[5%] object-cover transition-transform duration-300 hover:scale-110 rounded-t-lg product-image">'
-                : '<div class="w-[110%] max-w-none -ml-[5%] flex items-center justify-center product-image"><span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl">image</span></div>') . '
-            ' . $stockBadge . '
-            ' . $imageOverlay . '
+           class="block relative overflow-hidden bg-gray-100 dark:bg-zinc-800 rounded-t-lg aspect-[4/3]">
+            ' . ($product->image
+                ? '<img src="' . asset('storage/' . $product->image) . '" 
+                      alt="' . e($product->name) . '"
+                      class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">'
+                : '<div class="w-full h-full flex items-center justify-center">
+                      <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl">image</span>
+                   </div>') . '
+            ' . $stockBadge . $imageOverlay . '
         </a>
+
         <div class="p-4">
             <div class="mb-2">
                 <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
@@ -148,25 +159,26 @@ class ProdukController extends Controller
                     ' . e($product->category->name ?? 'Uncategorized') . '
                 </span>
             </div>
+
             <a href="' . route('pembeli.produk.show', $product->slug) . '" class="block">
                 <h3 class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-soft-green transition-colors mb-2">
                     ' . e($product->name) . '
                 </h3>
             </a>
+
             ' . $description . '
+
             <div class="mb-3">
                 <p class="text-lg font-bold text-soft-green dark:text-soft-green">
                     Rp ' . number_format($product->price, 0, ',', '.') . '
                 </p>
             </div>
-            <div class="flex gap-2">
-                ' . $actionButtons . '
-            </div>
-        </div>
-    </div>
-';
 
-        }
+            ' . $actionButtons . '
+        </div>
+    </div>';
+}
+
 
         return $html;
     }
