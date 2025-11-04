@@ -61,6 +61,11 @@
             background: #72e236;
         }
 
+        
+    
+
+
+
         /* Mobile menu animation */
         .mobile-menu {
             transform: translateX(-100%);
@@ -93,7 +98,7 @@
                     </a>
                 </div>
 
-                <!-- Center Search (Desktop) -->
+                {{-- <!-- Center Search (Desktop) -->
                 <div class="hidden md:flex flex-1 max-w-2xl mx-8">
                     <div class="relative w-full">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">search</span>
@@ -101,7 +106,7 @@
                                placeholder="Cari produk..." 
                                class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-zinc-800 border-0 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-400 focus:ring-2 focus:ring-soft-green focus:bg-white dark:focus:bg-zinc-700 transition-all">
                     </div>
-                </div>
+                </div> --}}
 
                 <!-- Right Side Actions -->
                 <div class="flex items-center gap-2 sm:gap-4">
