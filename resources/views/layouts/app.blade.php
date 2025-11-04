@@ -183,58 +183,44 @@
 
     <div class="flex relative">
         <!-- Desktop Sidebar -->
-        <aside class="hidden lg:block w-64 bg-white dark:bg-zinc-900 min-h-[calc(100vh-4rem)] border-r border-gray-200 dark:border-zinc-800 sticky top-16">
-            <div class="p-4">
-                <nav class="space-y-1">
-                    <a href="{{ route('pembeli.dashboard') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('pembeli.dashboard') ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }} transition-colors">
-                        <span class="material-symbols-outlined">home</span>
-                        <span>Beranda</span>
-                    </a>
-                    <a href="{{ route('pembeli.produk.index') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('pembeli.produk.*') ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }} transition-colors">
-                        <span class="material-symbols-outlined">inventory_2</span>
-                        <span>Produk</span>
-                    </a>
-                    <a href="{{ route('pembeli.keranjang') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('pembeli.keranjang') ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }} transition-colors">
-                        <span class="material-symbols-outlined">shopping_cart</span>
-                        <span>Keranjang</span>
-                        @if(session('cart') && count(session('cart')) > 0)
-                            <span class="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
-                                {{ count(session('cart')) }}
-                            </span>
-                        @endif
-                    </a>
-                    <a href="{{ route('pembeli.pesanan') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('pembeli.pesanan') ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }} transition-colors">
-                        <span class="material-symbols-outlined">receipt_long</span>
-                        <span>Pesanan Saya</span>
-                    </a>
-                    <a href="{{ route('pembeli.profil.edit') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('pembeli.profil.*') ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }} transition-colors">
-                        <span class="material-symbols-outlined">person</span>
-                        <span>Profil</span>
-                    </a>
-                </nav>
+       <!-- Desktop Sidebar -->
+<aside class="hidden lg:flex flex-col w-56 bg-white dark:bg-zinc-900 min-h-[calc(100vh-4rem)] border-r border-gray-200 dark:border-zinc-800 sticky top-16">
+    <nav class="flex-1 py-4 space-y-1">
+        @php
+            $menu = [
+                ['icon' => 'home', 'label' => 'Beranda', 'route' => 'pembeli.dashboard'],
+                ['icon' => 'inventory_2', 'label' => 'Produk', 'route' => 'pembeli.produk.index'],
+                ['icon' => 'shopping_cart', 'label' => 'Keranjang', 'route' => 'pembeli.keranjang'],
+                ['icon' => 'receipt_long', 'label' => 'Pesanan', 'route' => 'pembeli.pesanan'],
+                ['icon' => 'person', 'label' => 'Profil', 'route' => 'pembeli.profil.edit'],
+            ];
+        @endphp
 
-                <!-- Help Section -->
-                <div class="mt-8 p-4 bg-gradient-to-br from-soft-green/10 to-primary/10 rounded-lg border border-soft-green/20">
-                    <div class="flex items-start gap-3">
-                        <span class="material-symbols-outlined text-soft-green text-2xl">help</span>
-                        <div>
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Butuh Bantuan?</h3>
-                            <p class="text-xs text-gray-600 dark:text-zinc-400 mt-1">Hubungi customer service kami</p>
-                            <a href="#" class="inline-flex items-center gap-1 mt-2 text-xs font-medium text-soft-green hover:text-primary">
-                                <span>Hubungi Kami</span>
-                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </aside>
+        @foreach($menu as $item)
+            @php $active = request()->routeIs($item['route'].'*'); @endphp
+            <a href="{{ route($item['route']) }}"
+               class="group relative flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg 
+               {{ $active 
+                    ? 'text-soft-green bg-soft-green/10 font-semibold' 
+                    : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }}
+               transition-all duration-200">
 
+                <!-- Indikator hijau aktif -->
+                @if($active)
+                    <span class="absolute left-0 w-1 h-8 bg-soft-green rounded-r-full"></span>
+                @endif
+
+                <span class="material-symbols-outlined text-[20px] 
+                    {{ $active ? 'text-soft-green' : 'text-gray-500 dark:text-zinc-400 group-hover:text-soft-green' }}">
+                    {{ $item['icon'] }}
+                </span>
+                <span class="truncate">{{ $item['label'] }}</span>
+            </a>
+        @endforeach
+    </nav>
+</aside>
+
+               
         <!-- Mobile Sidebar Overlay -->
         <div class="lg:hidden mobile-menu fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-900 shadow-xl z-40 overflow-y-auto">
             <div class="p-4">
