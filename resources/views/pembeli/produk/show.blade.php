@@ -4,309 +4,154 @@
 @section('title', $product->name . ' - Lembah Hijau')
 
 @section('content')
-<div class="space-y-6">
+<div class="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+    <div class="flex flex-col lg:flex-row gap-8">
 
-    <!-- Breadcrumb -->
-    <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-zinc-400">
-        <a href="{{ route('pembeli.dashboard') }}" class="hover:text-soft-green transition-colors">Beranda</a>
-        <span class="material-symbols-outlined text-lg">chevron_right</span>
-        <a href="{{ route('pembeli.produk.index') }}" class="hover:text-soft-green transition-colors">Produk</a>
-        <span class="material-symbols-outlined text-lg">chevron_right</span>
-        <a href="{{ route('pembeli.produk.index', ['category' => $product->category_id]) }}" class="hover:text-soft-green transition-colors">
-            {{ $product->category->name ?? 'Uncategorized' }}
-        </a>
-        <span class="material-symbols-outlined text-lg">chevron_right</span>
-        <span class="text-gray-900 dark:text-white font-medium">{{ Str::limit($product->name, 30) }}</span>
-    </nav>
-
-    <!-- Product Detail Card -->
-    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 lg:p-8">
-            
-            <!-- Left: Product Images -->
-            <div class="space-y-4">
-                <!-- Main Image -->
-                <div class="relative aspect-square rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700">
-                    @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" 
-                             alt="{{ $product->name }}"
-                             class="w-full h-full object-cover"
-                             id="mainImage">
-                    @else
-                        <div class="w-full h-full flex items-center justify-center">
-                            <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-9xl">image</span>
-                        </div>
-                    @endif
-
-                    <!-- Stock Badge Overlay -->
-                    @if($product->stock > 0 && $product->stock <= 5)
-                        <div class="absolute top-4 right-4 px-3 py-1.5 bg-yellow-500 text-white text-sm font-bold rounded-full shadow-lg">
-                            <span class="material-symbols-outlined text-sm align-middle">warning</span>
-                            Stok {{ $product->stock }}
-                        </div>
-                    @elseif($product->stock == 0)
-                        <div class="absolute inset-0 bg-black/60 flex items-center justify-center">
-                            <div class="text-center">
-                                <span class="material-symbols-outlined text-white text-6xl mb-2">block</span>
-                                <p class="text-white text-xl font-bold">Stok Habis</p>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Certificate Download -->
-                @if($product->health_certificate)
-                    <div class="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-500/10 dark:to-cyan-500/10 border border-blue-200 dark:border-blue-500/20 rounded-xl">
-                        <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-                                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl">verified</span>
-                            </div>
-                            <div class="flex-1">
-                                <h4 class="text-sm font-semibold text-gray-900 dark:text-white">Sertifikat Kesehatan</h4>
-                                <p class="text-xs text-gray-600 dark:text-zinc-400">Produk bersertifikat resmi</p>
-                            </div>
-                            <a href="{{ asset('storage/' . $product->health_certificate) }}" 
-                               target="_blank"
-                               class="flex items-center gap-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                                <span class="material-symbols-outlined text-base">download</span>
-                                Download
-                            </a>
-                        </div>
-                    </div>
-                @endif
+        <!-- LEFT: PRODUCT IMAGE -->
+<div class="lg:w-1/2 w-full flex flex-col items-center space-y-4">
+    <!-- Gambar Produk -->
+    <div class="relative w-full max-w-md aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700">
+        @if($product->image)
+            <img src="{{ asset('storage/' . $product->image) }}" 
+                 alt="{{ $product->name }}"
+                 class="w-full h-full object-cover">
+        @else
+            <div class="w-full h-full flex items-center justify-center">
+                <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-8xl">image</span>
             </div>
+        @endif
 
-            <!-- Right: Product Info -->
-            <div class="space-y-6">
-                <!-- Category Badge -->
-                <div>
-                    <a href="{{ route('pembeli.produk.index', ['category' => $product->category_id]) }}"
-                       class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 hover:bg-purple-200 dark:hover:bg-purple-500/30 rounded-full text-sm font-medium transition-colors">
-                        <span class="material-symbols-outlined text-sm">category</span>
-                        {{ $product->category->name ?? 'Uncategorized' }}
-                    </a>
-                </div>
-
-                <!-- Product Name & Price -->
-                <div>
-                    <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 dark:text-white font-be-vietnam mb-3">
-                        {{ $product->name }}
-                    </h1>
-                    <div class="flex items-end gap-3">
-                        <p class="text-4xl font-bold text-soft-green dark:text-soft-green">
-                            Rp {{ number_format($product->price, 0, ',', '.') }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Stock Info -->
-                <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
-                    <div class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-gray-600 dark:text-zinc-400">inventory</span>
-                        <span class="text-sm text-gray-600 dark:text-zinc-400">Stok:</span>
-                        <span class="text-sm font-bold {{ $product->stock > 5 ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400' }}">
-                            {{ $product->stock }} tersedia
-                        </span>
-                    </div>
-                    @if($product->available_from)
-                        <div class="flex items-center gap-2 pl-4 border-l border-gray-200 dark:border-zinc-700">
-                            <span class="material-symbols-outlined text-gray-600 dark:text-zinc-400">schedule</span>
-                            <span class="text-sm text-gray-600 dark:text-zinc-400">
-                                Tersedia: {{ \Carbon\Carbon::parse($product->available_from)->format('d M Y') }}
-                            </span>
-                        </div>
-                    @endif
-                </div>
-
-                <!-- Description -->
-                <div class="space-y-3">
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                        <span class="material-symbols-outlined text-soft-green">description</span>
-                        Deskripsi Produk
-                    </h3>
-                    <div class="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
-                        <p class="text-gray-700 dark:text-zinc-300 leading-relaxed whitespace-pre-line">
-                            {{ $product->description ?? 'Tidak ada deskripsi untuk produk ini.' }}
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Quantity Selector (if in stock) -->
-                @if($product->stock > 0)
-                    <div class="space-y-3">
-                        <h3 class="text-sm font-semibold text-gray-900 dark:text-white">Jumlah</h3>
-                        <div class="flex items-center gap-3">
-                            <button onclick="decreaseQuantity()" 
-                                    class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
-                                <span class="material-symbols-outlined">remove</span>
-                            </button>
-                            <input type="number" 
-                                   id="quantity" 
-                                   value="1" 
-                                   min="1" 
-                                   max="{{ $product->stock }}"
-                                   class="w-20 text-center px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white font-semibold focus:ring-2 focus:ring-soft-green focus:border-soft-green">
-                            <button onclick="increaseQuantity()" 
-                                    class="w-10 h-10 flex items-center justify-center bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
-                                <span class="material-symbols-outlined">add</span>
-                            </button>
-                            <span class="text-sm text-gray-600 dark:text-zinc-400">Max: {{ $product->stock }}</span>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Action Buttons -->
-                <div class="space-y-3 pt-4 border-t border-gray-200 dark:border-zinc-800">
-                    @if($product->stock > 0)
-                        <button onclick="addToCart({{ $product->id }})"
-                                class="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-soft-green to-primary text-white font-semibold rounded-xl hover:shadow-xl hover:scale-[1.02] transition-all">
-                            <span class="material-symbols-outlined text-xl">shopping_cart</span>
-                            Tambah ke Keranjang
-                        </button>
-                        <button onclick="buyNow({{ $product->id }})"
-                                class="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-semibold rounded-xl hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors">
-                            <span class="material-symbols-outlined text-xl">bolt</span>
-                            Beli Sekarang
-                        </button>
-                    @else
-                        <button disabled
-                                class="w-full flex items-center justify-center gap-2 px-6 py-4 bg-gray-200 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 font-semibold rounded-xl cursor-not-allowed">
-                            <span class="material-symbols-outlined text-xl">block</span>
-                            Stok Habis
-                        </button>
-                    @endif
-
-                    <!-- Back to Products -->
-                    <a href="{{ route('pembeli.produk.index') }}"
-                       class="w-full flex items-center justify-center gap-2 px-6 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-medium rounded-xl hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors">
-                        <span class="material-symbols-outlined">arrow_back</span>
-                        Kembali ke Katalog
-                    </a>
-                </div>
-
-                <!-- Product Info Cards -->
-                <div class="grid grid-cols-2 gap-3 pt-4">
-                    <div class="p-3 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-500/10 dark:to-emerald-500/10 rounded-lg border border-green-200 dark:border-green-500/20">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-lg">verified</span>
-                            <span class="text-xs font-medium text-green-900 dark:text-green-300">Kualitas Terjamin</span>
-                        </div>
-                        <p class="text-xs text-green-700 dark:text-green-400">Produk berkualitas premium</p>
-                    </div>
-                    <div class="p-3 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-500/10 dark:to-cyan-500/10 rounded-lg border border-blue-200 dark:border-blue-500/20">
-                        <div class="flex items-center gap-2 mb-1">
-                            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-lg">local_shipping</span>
-                            <span class="text-xs font-medium text-blue-900 dark:text-blue-300">Pengiriman Aman</span>
-                        </div>
-                        <p class="text-xs text-blue-700 dark:text-blue-400">Garansi sampai tujuan</p>
-                    </div>
-                </div>
+        <!-- Stock Label -->
+        @if($product->stock > 0 && $product->stock <= 5)
+            <div class="absolute top-3 right-3 px-3 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full shadow-md">
+                Stok {{ $product->stock }}
             </div>
-        </div>
+        @elseif($product->stock == 0)
+            <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                <span class="bg-red-600 text-white px-3 py-1 rounded-full font-semibold text-sm">Stok Habis</span>
+            </div>
+        @endif
     </div>
 
-    <!-- Related Products -->
-    @if($relatedProducts->count() > 0)
-        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
-            <div class="p-6 border-b border-gray-200 dark:border-zinc-800">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">Produk Terkait</h2>
-                        <p class="text-sm text-gray-600 dark:text-zinc-400 mt-1">Produk lain yang mungkin Anda suka</p>
-                    </div>
-                    <a href="{{ route('pembeli.produk.index', ['category' => $product->category_id]) }}"
-                       class="text-sm font-medium text-soft-green hover:text-primary transition-colors inline-flex items-center gap-1">
-                        <span>Lihat Semua</span>
-                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
-                    </a>
+    <!-- Tombol Download Sertifikat -->
+    @if($product->health_certificate)
+        <div class="w-full max-w-md flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-500/10 dark:to-cyan-500/10 border border-blue-200 dark:border-blue-500/20 rounded-lg shadow-sm">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-2xl">verified</span>
+                <div>
+                    <h4 class="text-xs font-semibold text-gray-900 dark:text-white">Sertifikat Kesehatan</h4>
+                    <p class="text-[11px] text-gray-600 dark:text-zinc-400">Produk bersertifikat resmi</p>
                 </div>
             </div>
-            
-            <div class="p-6">
-                <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    @foreach($relatedProducts as $related)
-                        <div class="group bg-gray-50 dark:bg-zinc-800/50 rounded-xl border border-gray-200 dark:border-zinc-700 hover:border-soft-green dark:hover:border-soft-green overflow-hidden transition-all">
-                            <a href="{{ route('pembeli.produk.show', $related->slug) }}" class="block relative overflow-hidden bg-gray-100 dark:bg-zinc-800 aspect-square">
-                                @if($related->image)
-                                    <img src="{{ asset('storage/' . $related->image) }}" 
-                                         alt="{{ $related->name }}"
-                                         class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center">
-                                        <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-4xl">image</span>
-                                    </div>
-                                @endif
-                            </a>
-                            <div class="p-3">
-                                <a href="{{ route('pembeli.produk.show', $related->slug) }}">
-                                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-soft-green transition-colors mb-1">
-                                        {{ $related->name }}
-                                    </h3>
-                                </a>
-                                <p class="text-sm font-bold text-soft-green">
-                                    Rp {{ number_format($related->price, 0, ',', '.') }}
-                                </p>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
+            <a href="{{ asset('storage/' . $product->health_certificate) }}" 
+               target="_blank"
+               class="flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-xs font-medium transition">
+                <span class="material-symbols-outlined text-xs">download</span>
+                Download
+            </a>
         </div>
     @endif
 </div>
 
+
+        <!-- RIGHT: DETAILS -->
+        <div class="lg:w-1/2 w-full flex flex-col justify-between">
+            <div>
+                <!-- Nama dan Harga -->
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">{{ $product->name }}</h1>
+                <p class="text-2xl font-bold text-soft-green mb-3">Rp {{ number_format($product->price, 0, ',', '.') }}</p>
+
+                <!-- Deskripsi penuh -->
+                <!-- Description -->
+<div>
+    <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
+        <span class="material-symbols-outlined text-soft-green">description</span>
+        Deskripsi Produk
+    </h3>
+    <div class="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
+        <p class="text-gray-700 dark:text-zinc-300 leading-relaxed text-justify">
+            {{ $product->description ?? 'Tidak ada deskripsi untuk produk ini.' }}
+        </p>
+    </div>
+</div>
+
+                <!-- Info stok -->
+                <p class="text-sm text-gray-600 dark:text-zinc-400 mb-3">
+                    Stok: 
+                    <span class="font-semibold {{ $product->stock > 5 ? 'text-green-600 dark:text-green-400' : 'text-yellow-600 dark:text-yellow-400' }}">
+                        {{ $product->stock }}
+                    </span>
+                </p>
+
+                <!-- JUMLAH -->
+                @if($product->stock > 0)
+                <div class="flex items-center gap-3 mb-5">
+                    <button onclick="decreaseQuantity()" class="w-9 h-9 flex items-center justify-center bg-gray-100 dark:bg-zinc-800 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700">
+                        <span class="material-symbols-outlined">remove</span>
+                    </button>
+                    <input id="quantity" type="number" value="1" min="1" max="{{ $product->stock }}"
+                           class="w-16 text-center border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 font-semibold text-gray-900 dark:text-white">
+                    <button onclick="increaseQuantity()" class="w-9 h-9 flex items-center justify-center bg-gray-100 dark:bg-zinc-800 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                </div>
+                @endif
+            </div>
+
+            <!-- BUTTONS -->
+            <div class="flex flex-col gap-3">
+                @if($product->stock > 0)
+                <button onclick="addToCart({{ $product->id }})"
+                        class="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-soft-green to-primary text-white rounded-lg font-semibold hover:shadow-md transition-all">
+                    <span class="material-symbols-outlined">shopping_cart</span>
+                    Tambah ke Keranjang
+                </button>
+                <button onclick="buyNow({{ $product->id }})"
+                        class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg font-semibold hover:opacity-90 transition-all">
+                    <span class="material-symbols-outlined">bolt</span>
+                    Beli Sekarang
+                </button>
+                @else
+                <button disabled class="px-4 py-3 bg-gray-200 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 rounded-lg cursor-not-allowed">
+                    <span class="material-symbols-outlined text-xl">block</span>
+                    Stok Habis
+                </button>
+                @endif
+
+                <a href="{{ route('pembeli.produk.index') }}"
+                   class="flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition">
+                    <span class="material-symbols-outlined">arrow_back</span>
+                    Kembali ke Katalog
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    const maxStock = {{ $product->stock }};
-    
-    function increaseQuantity() {
-        const input = document.getElementById('quantity');
-        const currentValue = parseInt(input.value);
-        if (currentValue < maxStock) {
-            input.value = currentValue + 1;
-        }
-    }
-
-    function decreaseQuantity() {
-        const input = document.getElementById('quantity');
-        const currentValue = parseInt(input.value);
-        if (currentValue > 1) {
-            input.value = currentValue - 1;
-        }
-    }
-
-    function addToCart(productId) {
-        const quantity = parseInt(document.getElementById('quantity').value);
-        
-        fetch(`/pembeli/keranjang/tambah/${productId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            },
-            body: JSON.stringify({ quantity: quantity })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert(`${quantity} produk berhasil ditambahkan ke keranjang!`);
-                location.reload();
-            } else {
-                alert(data.message || 'Gagal menambahkan ke keranjang');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Terjadi kesalahan saat menambahkan ke keranjang');
-        });
-    }
-
-    function buyNow(productId) {
-        const quantity = parseInt(document.getElementById('quantity').value);
-        // Add to cart first, then redirect to checkout
-        addToCart(productId);
-        setTimeout(() => {
-            window.location.href = '{{ route("pembeli.keranjang") }}';
-        }, 1000);
-    }
+const maxStock = {{ $product->stock }};
+function increaseQuantity() {
+    const input = document.getElementById('quantity');
+    if (parseInt(input.value) < maxStock) input.value++;
+}
+function decreaseQuantity() {
+    const input = document.getElementById('quantity');
+    if (parseInt(input.value) > 1) input.value--;
+}
+function addToCart(productId) {
+    const qty = parseInt(document.getElementById('quantity').value);
+    fetch(`/pembeli/keranjang/tambah/${productId}`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json','X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content},
+        body: JSON.stringify({ quantity: qty })
+    }).then(res=>res.json()).then(data=>{
+        if(data.success){ alert(`${qty} produk ditambahkan ke keranjang!`); location.reload();}
+        else alert(data.message||'Gagal menambahkan ke keranjang');
+    }).catch(()=>alert('Terjadi kesalahan.'));
+}
+function buyNow(id){
+    addToCart(id);
+    setTimeout(()=>window.location.href='{{ route("pembeli.keranjang") }}',800);
+}
 </script>
 @endsection
