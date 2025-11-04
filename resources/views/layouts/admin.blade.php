@@ -167,76 +167,75 @@
     <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
-    <aside class="sidebar fixed left-0 top-0 z-50 h-screen w-64 bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 flex flex-col shadow-xl" id="sidebar">
-        <!-- Logo Section -->
-        <div class="px-6 py-5 border-b border-gray-200 dark:border-zinc-800">
-            <a href="{{ route('admin.dashboard') }}" class="flex items-center gap-3 group">
-                <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                    <span class="material-symbols-outlined text-white text-2xl">eco</span>
-                </div>
-                <div>
-                    <h1 class="text-xl font-bold text-gray-900 dark:text-white font-be-vietnam">Lembah Hijau</h1>
-                    <p class="text-xs text-gray-500 dark:text-zinc-400">Admin Panel</p>
-                </div>
+   <aside id="sidebar"
+    class="sidebar fixed left-0 top-0 z-50 h-screen w-64 bg-white dark:bg-zinc-900 border-r border-gray-200 dark:border-zinc-800 flex flex-col shadow-lg transition-all duration-300">
+
+    <!-- Logo -->
+    <div class="px-6 py-5 border-b border-gray-200 dark:border-zinc-800 flex items-center gap-3">
+        <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-lg flex items-center justify-center shadow-md">
+            <span class="material-symbols-outlined text-white text-2xl">eco</span>
+        </div>
+        <div>
+            <h1 class="text-lg font-bold text-gray-900 dark:text-white font-be-vietnam">Lembah Hijau</h1>
+            <p class="text-[11px] text-gray-500 dark:text-zinc-400">Admin Panel</p>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 px-3 py-5 overflow-y-auto custom-scrollbar space-y-1">
+        @php
+            $menu = [
+                ['route' => 'admin.dashboard', 'icon' => 'dashboard', 'label' => 'Dashboard'],
+                ['route' => 'admin.categories.index', 'icon' => 'category', 'label' => 'Kategori'],
+                ['route' => 'admin.products.index', 'icon' => 'inventory_2', 'label' => 'Produk'],
+                ['route' => 'admin.orders.index', 'icon' => 'shopping_cart', 'label' => 'Pesanan'],
+                ['route' => 'admin.reports.index', 'icon' => 'analytics', 'label' => 'Laporan'],
+            ];
+        @endphp
+
+        @foreach ($menu as $item)
+            @php $active = request()->routeIs($item['route'].'*'); @endphp
+            <a href="{{ route($item['route']) }}"
+               class="relative flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group
+               {{ $active 
+                   ? 'bg-gradient-to-r from-soft-green/15 to-soft-green/10 text-soft-green font-semibold border border-soft-green/30 shadow-sm' 
+                   : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-soft-green' }}">
+               
+                @if($active)
+                    <!-- Indikator aktif -->
+                    <span class="absolute left-0 top-0 bottom-0 w-1 bg-soft-green rounded-r-full"></span>
+                @endif
+
+                <span class="material-symbols-outlined text-[20px] transition-colors
+                    {{ $active ? 'text-soft-green' : 'text-gray-500 dark:text-zinc-400 group-hover:text-soft-green' }}">
+                    {{ $item['icon'] }}
+                </span>
+                <span>{{ $item['label'] }}</span>
             </a>
-        </div>
+        @endforeach
+    </nav>
 
-        <!-- Navigation Menu -->
-        <nav class="flex-1 px-3 py-4 overflow-y-auto custom-scrollbar">
-            <div class="space-y-1">
-                <!-- Dashboard -->
-                <a href="{{ route('admin.dashboard') }}" class="menu-item menu-item-active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all">
-                    <span class="material-symbols-outlined text-xl">dashboard</span>
-                    <span>Dashboard</span>
-                </a>
-
-                <!-- Categories -->
-                <a href="{{ route('admin.categories.index') }}" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-zinc-300 transition-all">
-                    <span class="material-symbols-outlined text-xl">category</span>
-                    <span>Kategori</span>
-                </a>
-
-                <!-- Products -->
-                <a href="{{ route('admin.products.index') }}" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-zinc-300 transition-all">
-                    <span class="material-symbols-outlined text-xl">inventory_2</span>
-                    <span>Produk</span>
-                </a>
-
-                <!-- Orders -->
-                <a href="{{ route('admin.orders.index') }}" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-zinc-300 transition-all">
-                    <span class="material-symbols-outlined text-xl">shopping_cart</span>
-                    <span>Pesanan</span>
-                    <span class="ml-auto badge bg-soft-green/20 text-soft-green dark:bg-soft-green/30 dark:text-soft-green">12</span>
-                </a>
-
-                <!-- Reports -->
-                <a href="{{ route('admin.reports.index') }}" class="menu-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-700 dark:text-zinc-300 transition-all">
-                    <span class="material-symbols-outlined text-xl">analytics</span>
-                    <span>Laporan</span>
-                </a>
+    <!-- User -->
+    <div class="px-4 py-4 border-t border-gray-200 dark:border-zinc-800">
+        <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-zinc-800/50">
+            <div class="w-9 h-9 bg-gradient-to-br from-soft-green to-primary rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
+                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
             </div>
-        </nav>
-
-        <!-- User Profile Section -->
-        <div class="px-3 py-4 border-t border-gray-200 dark:border-zinc-800">
-            <div class="flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-50 dark:bg-zinc-800/50">
-                <div class="w-9 h-9 bg-gradient-to-br from-soft-green to-primary rounded-full flex items-center justify-center text-white font-bold text-sm shadow-md">
-                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-gray-500 dark:text-zinc-400">Administrator</p>
-                </div>
-                <a href="{{ route('logout') }}"
-                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                   class="text-gray-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
-                   title="Logout">
-                    <span class="material-symbols-outlined text-xl">logout</span>
-                </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</p>
+                <p class="text-xs text-gray-500 dark:text-zinc-400">Administrator</p>
             </div>
+            <a href="{{ route('logout') }}"
+               onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+               class="text-gray-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 transition-colors"
+               title="Logout">
+                <span class="material-symbols-outlined text-xl">logout</span>
+            </a>
+            <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
         </div>
-    </aside>
+    </div>
+</aside>
+
 
     <!-- Main Content Area -->
     <div class="lg:pl-64">
