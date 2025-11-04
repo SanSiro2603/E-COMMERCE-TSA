@@ -1,5 +1,5 @@
 {{-- resources/views/pembeli/produk/show.blade.php --}}
-@extends('pembeli.layouts.app')
+@extends('layouts.app')
 
 @section('title', $product->name)
 
@@ -41,10 +41,10 @@
                     class="flex-1 gradient-button text-white py-3 rounded-lg font-medium">
                 + Keranjang
             </button>
-            <a href="{{ route('pembeli.checkout') }}?product={{ $product->id }}"
+            {{-- <a href="{{ route('pembeli.checkout') }}?product={{ $product->id }}"
                class="flex-1 bg-charcoal text-white py-3 rounded-lg font-medium text-center">
                 Beli Sekarang
-            </a>
+            </a> --}}
         </div>
     </div>
 </div>
