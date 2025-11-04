@@ -112,127 +112,126 @@
         </div>
     @endif
 
-    <!-- Products Grid -->
-    @if($products->count() > 0)
-    <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            @foreach($products as $product)
-                <div class="group bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-lg transition-all overflow-hidden">
-                    <!-- Product Image -->
-                    <a href="{{ route('pembeli.produk.show', $product->slug) }}" 
-                class="block relative overflow-hidden bg-gray-100 dark:bg-zinc-800 rounded-t-lg">
-                    @if($product->image)
-                        <img src="{{ asset('storage/' . $product->image) }}" 
-                            alt="{{ $product->name }}"
-                            class="block w-[110%] max-w-none -ml-[5%] object-cover transition-transform duration-300 hover:scale-110 rounded-t-lg product-image">
-                    @else
-                        <div class="w-[110%] max-w-none -ml-[5%] flex items-center justify-center product-image">
-                            <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl">image</span>
-                        </div>
-                    @endif
+   <!-- Products Grid -->
+@if($products->count() > 0)
+<div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 lg:gap-6">
+    @foreach($products as $product)
+        <div class="group bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-lg transition-all overflow-hidden">
+            
+            <!-- Product Image -->
+            <a href="{{ route('pembeli.produk.show', $product->slug) }}" 
+               class="block relative overflow-hidden bg-gray-100 dark:bg-zinc-800 rounded-t-lg aspect-[4/3]">
+                @if($product->image)
+                    <img src="{{ asset('storage/' . $product->image) }}" 
+                         alt="{{ $product->name }}"
+                         class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">
+                @else
+                    <div class="w-full h-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl">image</span>
+                    </div>
+                @endif
 
-                    @if($product->stock <= 5 && $product->stock > 0)
-                        <div class="absolute top-2 right-2 px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
-                            Stok {{ $product->stock }}
-                        </div>
-                    @elseif($product->stock == 0)
-                        <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
-                            <span class="px-3 py-1.5 bg-red-500 text-white text-sm font-bold rounded-full">
-                                Habis
-                            </span>
-                        </div>
-                    @endif
+                @if($product->stock <= 5 && $product->stock > 0)
+                    <div class="absolute top-2 right-2 px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
+                        Stok {{ $product->stock }}
+                    </div>
+                @elseif($product->stock == 0)
+                    <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span class="px-3 py-1.5 bg-red-500 text-white text-sm font-bold rounded-full">
+                            Habis
+                        </span>
+                    </div>
+                @endif
+            </a>
+
+            <!-- Product Info -->
+            <div class="p-4">
+                <!-- Category Badge -->
+                <div class="mb-2">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
+                        <span class="material-symbols-outlined text-xs">category</span>
+                        {{ $product->category->name ?? 'Uncategorized' }}
+                    </span>
+                </div>
+
+                <!-- Product Name -->
+                <a href="{{ route('pembeli.produk.show', $product->slug) }}" class="block">
+                    <h3 class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-soft-green transition-colors mb-2">
+                        {{ $product->name }}
+                    </h3>
                 </a>
 
-                    <!-- Product Info -->
-                    <div class="p-4">
-                        <!-- Category Badge -->
-                        <div class="mb-2">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
-                                <span class="material-symbols-outlined text-xs">category</span>
-                                {{ $product->category->name ?? 'Uncategorized' }}
-                            </span>
-                        </div>
+                <!-- Description -->
+                @if($product->description)
+                    <p class="text-xs text-gray-600 dark:text-zinc-400 line-clamp-2 mb-3">
+                        {{ $product->description }}
+                    </p>
+                @endif
 
-                        <!-- Product Name -->
-                        <a href="{{ route('pembeli.produk.show', $product->slug) }}" 
-                           class="block">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-soft-green transition-colors mb-2">
-                                {{ $product->name }}
-                            </h3>
+                <!-- Price -->
+                <div class="mb-3">
+                    <p class="text-lg font-bold text-soft-green dark:text-soft-green">
+                        Rp {{ number_format($product->price, 0, ',', '.') }}
+                    </p>
+                </div>
+
+                <!-- Actions -->
+                <div class="flex gap-2">
+                    @if($product->stock > 0)
+                        <button onclick="addToCart({{ $product->id }})"
+                                class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gradient-to-r from-soft-green to-primary text-white rounded-lg text-xs font-medium hover:shadow-md transition-all">
+                            <span class="material-symbols-outlined text-base">shopping_cart</span>
+                            <span class="hidden sm:inline">Keranjang</span>
+                        </button>
+                        <a href="{{ route('pembeli.produk.show', $product->slug) }}"
+                           class="px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-base">visibility</span>
                         </a>
-
-                        <!-- Description -->
-                        @if($product->description)
-                            <p class="text-xs text-gray-600 dark:text-zinc-400 line-clamp-2 mb-3">
-                                {{ $product->description }}
-                            </p>
-                        @endif
-
-                        <!-- Price -->
-                        <div class="mb-3">
-                            <p class="text-lg font-bold text-soft-green dark:text-soft-green">
-                                Rp {{ number_format($product->price, 0, ',', '.') }}
-                            </p>
-                        </div>
-
-                        <!-- Actions -->
-                        <div class="flex gap-2">
-                            @if($product->stock > 0)
-                                <button onclick="addToCart({{ $product->id }})"
-                                        class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gradient-to-r from-soft-green to-primary text-white rounded-lg text-xs font-medium hover:shadow-md transition-all">
-                                    <span class="material-symbols-outlined text-base">shopping_cart</span>
-                                    <span class="hidden sm:inline">Keranjang</span>
-                                </button>
-                                <a href="{{ route('pembeli.produk.show', $product->slug) }}"
-                                   class="px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
-                                    <span class="material-symbols-outlined text-base">visibility</span>
-                                </a>
-                            @else
-                                <button disabled
-                                        class="flex-1 px-3 py-2 bg-gray-200 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 rounded-lg text-xs font-medium cursor-not-allowed">
-                                    Stok Habis
-                                </button>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            @endforeach
-        </div>
-
-        <!-- Pagination -->
-        @if($products->hasPages())
-            <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-4">
-                {{ $products->appends(request()->query())->links() }}
-            </div>
-        @endif
-    @else
-        <!-- Empty State -->
-        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
-            <div class="text-center py-16 px-4">
-                <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-8xl mb-4">search_off</span>
-                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                    Produk Tidak Ditemukan
-                </h3>
-                <p class="text-gray-600 dark:text-zinc-400 mb-6">
-                    Maaf, tidak ada produk yang sesuai dengan pencarian Anda
-                </p>
-                <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                    <a href="{{ route('pembeli.produk.index') }}" 
-                       class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-soft-green to-primary text-white font-medium rounded-lg hover:shadow-lg transition-all">
-                        <span class="material-symbols-outlined">refresh</span>
-                        Reset Filter
-                    </a>
-                    <a href="{{ route('pembeli.dashboard') }}" 
-                       class="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors">
-                        <span class="material-symbols-outlined">home</span>
-                        Kembali ke Beranda
-                    </a>
+                    @else
+                        <button disabled
+                                class="flex-1 px-3 py-2 bg-gray-200 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 rounded-lg text-xs font-medium cursor-not-allowed">
+                            Stok Habis
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
-    @endif
-
+    @endforeach
 </div>
+
+<!-- Pagination -->
+@if($products->hasPages())
+    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-4">
+        {{ $products->appends(request()->query())->links() }}
+    </div>
+@endif
+@else
+<!-- Empty State -->
+<div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+    <div class="text-center py-16 px-4">
+        <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-8xl mb-4">search_off</span>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
+            Produk Tidak Ditemukan
+        </h3>
+        <p class="text-gray-600 dark:text-zinc-400 mb-6">
+            Maaf, tidak ada produk yang sesuai dengan pencarian Anda
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="{{ route('pembeli.produk.index') }}" 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-soft-green to-primary text-white font-medium rounded-lg hover:shadow-lg transition-all">
+                <span class="material-symbols-outlined">refresh</span>
+                Reset Filter
+            </a>
+            <a href="{{ route('pembeli.dashboard') }}" 
+               class="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors">
+                <span class="material-symbols-outlined">home</span>
+                Kembali ke Beranda
+            </a>
+        </div>
+    </div>
+</div>
+@endif
+
 
 <script>
     // Add to Cart Function
