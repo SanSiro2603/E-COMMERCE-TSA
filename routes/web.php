@@ -126,6 +126,8 @@ Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function
         Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
         Route::post('/store', [PesananController::class, 'store'])->name('store');
         Route::get('/{order}', [PesananController::class, 'show'])->name('show');
+        Route::get('/pesanan/{order}/edit', [PesananController::class, 'edit'])->name('edit');
+        Route::put('/pesanan/{order}', [PesananController::class, 'update'])->name('update');
         Route::post('/{order}/cancel', [PesananController::class, 'cancel'])->name('cancel');
         Route::post('/{order}/complete', [PesananController::class, 'complete'])->name('complete');
     });

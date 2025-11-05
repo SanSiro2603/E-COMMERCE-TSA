@@ -159,6 +159,46 @@ class PesananController extends Controller
         }
     }
 
+    public function edit($id)
+{
+    $order = Order::with('items.product')
+        ->where('user_id', Auth::id())
+        ->findOrFail($id);
+
+    // Pastikan pesanan hanya bisa diedit jika pending
+    if ($order->status !== 'pending') {
+        return redirect()->route('pembeli.pesanan.index')
+            ->with('error', 'Pesanan hanya bisa diedit jika status menunggu pembayaran.');
+    }
+
+    return view('pembeli.pesanan.edit', compact('order'));
+}
+
+public function update(Request $request, $id)
+{
+    $order = Order::where('user_id', Auth::id())
+        ->findOrFail($id);
+
+    if ($order->status !== 'pending') {
+        return redirect()->route('pembeli.pesanan.index')
+            ->with('error', 'Pesanan hanya bisa diedit jika status menunggu pembayaran.');
+    }
+
+    $validated = $request->validate([
+        'shipping_address' => 'required|string|max:500',
+        'courier' => 'required|string|max:50',
+    ]);
+
+    $order->update([
+        'shipping_address' => $validated['shipping_address'],
+        'courier' => $validated['courier'],
+    ]);
+
+    return redirect()->route('pembeli.pesanan.index')
+        ->with('success', 'Pesanan berhasil diperbarui.');
+}
+
+
     public function cancel($id)
     {
         try {

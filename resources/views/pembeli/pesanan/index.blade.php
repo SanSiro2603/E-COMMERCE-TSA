@@ -239,6 +239,15 @@
                                 </form>
                             @endif
 
+                            @if($order->status === 'pending')
+    <a href="{{ route('pembeli.pesanan.edit', $order) }}"
+       class="inline-flex items-center gap-1 px-4 py-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-sm font-medium transition-colors">
+        <span class="material-symbols-outlined text-base">edit</span>
+        Edit
+    </a>
+@endif
+
+
                             @if($order->canBeCompleted())
                                 <form action="{{ route('pembeli.pesanan.complete', $order) }}" method="POST" 
                                       onsubmit="return confirm('Konfirmasi pesanan telah diterima?')" class="inline">
