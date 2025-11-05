@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - Lembah Hijau</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 
   <script>
@@ -25,154 +25,149 @@
   </script>
 
   <style>
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%);
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .container-login {
-      display: flex;
-      align-items: stretch;
-      justify-content: center;
-      width: 780px;
-      height: 460px;
-      background: rgba(255, 255, 255, 0.15);
-      border-radius: 24px;
-      backdrop-filter: blur(15px);
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    html, body {
+      height: 100%;
+      margin: 0;
       overflow: hidden;
     }
 
-    .image-side {
-      flex: 1;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-    }
-
-    .form-side {
-      flex: 1;
-      padding: 40px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      background: rgba(255, 255, 255, 0.35);
-      backdrop-filter: blur(25px);
-    }
-
-    /* Tombol Google kecil bulat */
-    .google-btn {
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #ffffff 0%, #f0eded 100%);
       display: flex;
       justify-content: center;
       align-items: center;
-      border: 1px solid #ccc;
-      border-radius: 9999px;
-      width: 40px;
-      height: 40px;
-      transition: background 0.3s;
-      background: #fff;
     }
 
-    .google-btn:hover {
-      background: #f3f4f6;
+    .login-card {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 56px 40px;
+      width: 100%;
+      max-width: 340px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+      animation: fadeInUp 0.4s ease;
     }
 
-    @media (max-width: 1024px) {
-      .container-login {
-        flex-direction: column;
-        width: 90%;
-        height: auto;
-      }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-      .form-side {
-        padding: 30px;
-      }
+    .google-login {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid #ddd;
+      border-radius: 7px;
+      background: white;
+      padding: 6px 12px;
+      transition: all 0.3s;
+      font-size: 13px;
+      width: 100%;
+      box-sizing: border-box;
+    }
 
-      .image-side {
-        height: 220px;
-      }
+    .google-login:hover {
+      background: #f9f9f9;
+    }
+
+    .login-btn {
+      height: 32px;
+      font-size: 13px;
+      font-weight: 600;
+      border-radius: 7px;
     }
   </style>
 </head>
 
 <body>
-  <div class="container-login">
-    <!-- Gambar samping kiri -->
-    <div class="image-side" style="background-image: url('{{ asset('images/login.png') }}');"></div>
+  <div class="login-card text-center">
+    <!-- Logo -->
+    <div class="flex justify-center mb-2 mt-2">
+  <img src="images/logo.png" alt="Logo" class="w-12 h-12 rounded-full object-cover" />
+</div>
 
-    <!-- Form login -->
-    <div class="form-side">
-      <h2 class="text-2xl font-bold text-gray-900 mb-1">Welcome Back</h2>
-      <p class="text-gray-600 text-sm mb-6">Login to your account</p>
 
-      @if ($errors->any())
-      <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-3 text-xs">
-        {{ $errors->first() }}
+    <h2 class="text-lg font-bold text-gray-900 mb-1">Welcome Back</h2>
+    <p class="text-gray-600 text-xs mb-6">Login to your account</p>
+
+    <form method="POST" action="{{ route('login') }}" class="space-y-3">
+      @csrf
+
+      <!-- Email -->
+      <div>
+        <label for="email" class="block text-xs font-semibold text-gray-900 mb-1 text-left">Alamat Email</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">mail</span>
+          <input type="email" id="email" name="email"
+            value="{{ old('email') }}" required
+            class="w-full h-9 pl-10 pr-3 rounded-lg border 
+              @error('email') border-red-500 @else border-gray-300 @enderror
+              focus:border-primary focus:ring-0 text-gray-900 placeholder-gray-400 text-xs"
+            placeholder="Masukkan email anda" />
+        </div>
+        @error('email')
+          <p class="text-red-500 text-[11px] mt-1 text-left">{{ $message }}</p>
+        @enderror
+        @if ($errors->has('login'))
+          <p class="text-red-500 text-[11px] mt-1 text-left">{{ $errors->first('login') }}</p>
+        @endif
       </div>
-      @endif
 
-      <form method="POST" action="{{ route('login') }}" class="space-y-4">
-        @csrf
-
-        <div>
-          <label for="email" class="block text-xs font-semibold text-gray-900 mb-1">Email Address</label>
-          <div class="relative">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">mail</span>
-            <input type="email" id="email" name="email" required
-              class="w-full h-10 pl-10 pr-3 rounded-xl border border-gray-300 focus:border-primary focus:ring-0 text-gray-900 placeholder-gray-400 text-sm"
-              placeholder="Enter Your Email" />
-          </div>
+      <!-- Password -->
+      <div>
+        <label for="password" class="block text-xs font-semibold text-gray-900 mb-1 text-left">Password</label>
+        <div class="relative">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">lock</span>
+          <input type="password" id="password" name="password" required
+            class="w-full h-9 pl-10 pr-9 rounded-lg border 
+              @error('password') border-red-500 @else border-gray-300 @enderror
+              focus:border-primary focus:ring-0 text-gray-900 placeholder-gray-400 text-xs"
+            placeholder="Masukkan password anda" />
+          <button type="button" onclick="togglePassword(event)"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-sm">
+            <span class="material-symbols-outlined text-sm">visibility</span>
+          </button>
         </div>
+        @error('password')
+          <p class="text-red-500 text-[11px] mt-1 text-left">{{ $message }}</p>
+        @enderror
+      </div>
 
-        <div>
-          <label for="password" class="block text-xs font-semibold text-gray-900 mb-1">Password</label>
-          <div class="relative">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">lock</span>
-            <input type="password" id="password" name="password" required
-              class="w-full h-10 pl-10 pr-10 rounded-xl border border-gray-300 focus:border-primary focus:ring-0 text-gray-900 placeholder-gray-400 text-sm"
-              placeholder="Enter Your Password" />
-            <button type="button" onclick="togglePassword(event)"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-sm">
-              <span class="material-symbols-outlined text-sm">visibility</span>
-            </button>
-          </div>
-        </div>
+      <div class="flex items-center justify-end text-[11px]">
+        <a href="#" class="text-primary hover:underline font-semibold">Lupa Password?</a>
+      </div>
 
-        <div class="flex items-center justify-between text-xs">
-          <a href="#" class="text-primary hover:underline font-semibold">Forgot Password?</a>
-        </div>
+      <!-- Tombol Login -->
+      <button type="submit"
+        class="login-btn w-full bg-gradient-to-r from-green-700 to-green-500 text-white font-bold shadow hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-1 mt-6 mb-8">
+        <span>Login</span>
+      </button>
 
-        <button type="submit"
-          class="w-full h-10 rounded-xl bg-gradient-to-r from-green-700 to-green-500 text-white font-bold shadow-md hover:shadow-lg hover:scale-[1.03] transition-all duration-300 flex items-center justify-center gap-1 text-xs">
-          <span>Sign In</span>
-          <span class="material-symbols-outlined text-xs">arrow_forward</span>
-        </button>
+      <!-- Garis pemisah -->
+      <div class="flex items-center mb-7">
+        <div class="flex-grow border-t border-gray-300"></div>
+        <span class="mx-2 text-[11px] text-gray-500">OR</span>
+        <div class="flex-grow border-t border-gray-300"></div>
+      </div>
 
-        <div class="relative flex items-center my-4">
-          <div class="flex-grow border-t border-gray-300"></div>
-          <span class="mx-2 text-xs text-gray-500">or sign in with</span>
-          <div class="flex-grow border-t border-gray-300"></div>
-        </div>
+      <!-- Tombol Google -->
+      <div class="mb-6">
+        <a href="{{ route('google.redirect') }}" class="google-login text-gray-700 font-medium">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-4 h-4" />
+          <span>Continue with Google</span>
+        </a>
+      </div>
 
-        <!-- Google button kecil -->
-        <div class="flex justify-center">
-          <a href="{{ route('google.redirect') }}"  class="google-btn">
-            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-5 h-5" />
-          </a>
-        </div>
-
-        <div class="text-center mt-4 text-xs">
-          <p class="text-gray-700">
-            Don't have an account?
-            <a href="{{ route('register') }}" class="text-green-700 font-bold hover:underline">Sign Up</a>
-          </p>
-        </div>
-      </form>
-    </div>
+      <div class="text-center mt-7 text-[11px]">
+        <p class="text-gray-700">
+          Don't have an account?
+          <a href="{{ route('register') }}" class="text-green-700 font-bold hover:underline">Sign Up</a>
+        </p>
+      </div>
+    </form>
   </div>
 
   <script>
@@ -187,7 +182,6 @@
         icon.textContent = 'visibility';
       }
     }
-  
   </script>
 </body>
 </html>

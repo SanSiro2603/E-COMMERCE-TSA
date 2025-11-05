@@ -1,7 +1,7 @@
 {{-- resources/views/admin/orders/show.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Detail Pesanan #'. $order->order_number)
+@section('title', 'Detail Pesanan #' . $order->order_number)
 
 @section('content')
 <div class="max-w-4xl">
@@ -9,6 +9,29 @@
         <h1 class="text-2xl font-bold text-charcoal">Pesanan #{{ $order->order_number }}</h1>
         <a href="{{ route('admin.orders.index') }}" class="text-soft-green hover:underline text-sm">← Kembali</a>
     </div>
+
+    {{-- Messages --}}
+    @if($errors->any())
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <ul class="text-sm text-red-600">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    @if(session('success'))
+        <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4 text-green-700">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4 text-red-700">
+            {{ session('error') }}
+        </div>
+    @endif
 
     <!-- Info Pesanan -->
     <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
@@ -28,6 +51,10 @@
                         @switch($order->status)
                             @case('pending') bg-yellow-100 text-yellow-800 @break
                             @case('paid') bg-blue-100 text-blue-800 @break
+                            @case('processing') bg-purple-100 text-purple-800 @break
+                            @case('shipped') bg-indigo-100 text-indigo-800 @break
+                            @case('completed') bg-green-100 text-green-800 @break
+                            @case('cancelled') bg-red-100 text-red-800 @break
                             @default bg-gray-100 text-gray-800
                         @endswitch">
                         {{ ucfirst(str_replace('_', ' ', $order->status)) }}
@@ -78,17 +105,19 @@
             @csrf @method('PATCH')
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <select name="status" required class="px-4 py-2 border rounded-lg">
-                    <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Menunggu Pembayaran</option>
-                    <option value="paid" {{ $order->status == 'paid' ? 'selected' : '' }}>Sudah Dibayar</option>
-                    <option value="processing" {{ $order->status == 'processing' ? 'selected' : '' }}>Diproses</option>
-                    <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Dikirim</option>
-                    <option value="completed" {{ $order->status == 'completed' ? 'selected' : '' }}>Selesai</option>
-                    <option value="cancelled" {{ $order->status == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                    <option value="pending" {{ old('status', $order->status) == 'pending' ? 'selected' : '' }}>Menunggu Pembayaran</option>
+                    <option value="paid" {{ old('status', $order->status) == 'paid' ? 'selected' : '' }}>Sudah Dibayar</option>
+                    <option value="processing" {{ old('status', $order->status) == 'processing' ? 'selected' : '' }}>Diproses</option>
+                    <option value="shipped" {{ old('status', $order->status) == 'shipped' ? 'selected' : '' }}>Dikirim</option>
+                    <option value="completed" {{ old('status', $order->status) == 'completed' ? 'selected' : '' }}>Selesai</option>
+                    <option value="cancelled" {{ old('status', $order->status) == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
                 </select>
-                <input type="text" name="courier" placeholder="Kurir (JNE, J&T, dll)" value="{{ $order->shipment?->courier ?? '' }}"
-                       class="px-4 py-2 border rounded-lg">
-                <input type="text" name="tracking_number" placeholder="Nomor Resi" value="{{ $order->shipment?->tracking_number ?? '' }}"
-                       class="px-4 py-2 border rounded-lg">
+
+                <input type="text" name="courier" placeholder="Kurir (JNE, J&T, dll)" 
+                       value="{{ old('courier', $order->shipment?->courier) }}" class="px-4 py-2 border rounded-lg">
+
+                <input type="text" name="tracking_number" placeholder="Nomor Resi" 
+                       value="{{ old('tracking_number', $order->shipment?->tracking_number) }}" class="px-4 py-2 border rounded-lg">
             </div>
             <button type="submit" class="mt-4 px-6 py-2 gradient-button text-white rounded-lg font-medium">
                 Update Status

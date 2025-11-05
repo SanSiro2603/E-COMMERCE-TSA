@@ -220,7 +220,8 @@
                             <!-- Total -->
                             <td class="px-6 py-4">
                                 <p class="text-sm font-bold text-gray-900 dark:text-white">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</p>
-                                <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->orderItems->count() }} item</p>
+                               <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->items->count() }} item</p>
+
                             </td>
 
                             <!-- Status -->

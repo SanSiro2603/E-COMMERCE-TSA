@@ -192,13 +192,13 @@
                     </div>
 
                     <div class="p-6 border-t border-gray-200 dark:border-zinc-800 space-y-3">
-                        {{-- <a href="{{ route('pembeli.checkout') }}" 
+                        <a href="{{ route('pembeli.pesanan.checkout') }}" 
                            class="block w-full px-6 py-3 bg-gradient-to-r from-soft-green to-primary text-white font-semibold rounded-xl text-center hover:shadow-lg transition-all">
                             <span class="flex items-center justify-center gap-2">
                                 <span class="material-symbols-outlined">shopping_bag</span>
                                 Lanjut ke Checkout
                             </span>
-                        </a> --}}
+                        </a>
                         <a href="{{ route('pembeli.produk.index') }}" 
                            class="block w-full px-6 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-medium rounded-xl text-center hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors">
                             <span class="flex items-center justify-center gap-2">

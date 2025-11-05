@@ -46,7 +46,7 @@
                 <p class="text-sm text-gray-600 dark:text-zinc-400 mb-1">Menunggu Pembayaran</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $pendingOrders }}</p>
                 <div class="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800">
-                    <a href="{{ route('pembeli.pesanan') }}?status=pending" 
+                    <a href="{{ route('pembeli.pesanan.index') }}?status=pending" 
                        class="text-sm text-yellow-600 dark:text-yellow-400 hover:text-yellow-700 dark:hover:text-yellow-300 font-medium inline-flex items-center gap-1">
                         <span>Lihat Detail</span>
                         <span class="material-symbols-outlined text-sm">arrow_forward</span>
@@ -71,7 +71,7 @@
                 <p class="text-sm text-gray-600 dark:text-zinc-400 mb-1">Sedang Dikirim</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $shippedOrders }}</p>
                 <div class="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800">
-                    <a href="{{ route('pembeli.pesanan') }}?status=shipped" 
+                    <a href="{{ route('pembeli.pesanan.index') }}?status=shipped" 
                        class="text-sm text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 font-medium inline-flex items-center gap-1">
                         <span>Lacak Paket</span>
                         <span class="material-symbols-outlined text-sm">arrow_forward</span>
@@ -96,7 +96,7 @@
                 <p class="text-sm text-gray-600 dark:text-zinc-400 mb-1">Pesanan Selesai</p>
                 <p class="text-3xl font-bold text-gray-900 dark:text-white">{{ $completedOrders }}</p>
                 <div class="mt-4 pt-4 border-t border-gray-100 dark:border-zinc-800">
-                    <a href="{{ route('pembeli.pesanan') }}?status=completed" 
+                    <a href="{{ route('pembeli.pesanan.index') }}?status=completed" 
                        class="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 font-medium inline-flex items-center gap-1">
                         <span>Riwayat</span>
                         <span class="material-symbols-outlined text-sm">arrow_forward</span>
@@ -117,7 +117,7 @@
                         <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pesanan Terbaru</h3>
                         <p class="text-sm text-gray-500 dark:text-zinc-400 mt-0.5">Pantau status pesanan Anda</p>
                     </div>
-                    <a href="{{ route('pembeli.pesanan') }}" 
+                    <a href="{{ route('pembeli.pesanan.index') }}" 
                        class="text-sm font-medium text-soft-green hover:text-primary transition-colors inline-flex items-center gap-1">
                         <span>Lihat Semua</span>
                         <span class="material-symbols-outlined text-lg">arrow_forward</span>
@@ -161,7 +161,7 @@
                                     {{ $order->created_at->diffForHumans() }}
                                 </p>
                             </div>
-                            <a href="{{ route('pembeli.pesanan') }}" 
+                            <a href="{{ route('pembeli.pesanan.index') }}" 
                                class="flex-shrink-0 px-3 py-1.5 bg-soft-green/10 text-soft-green hover:bg-soft-green hover:text-white rounded-lg text-xs font-medium transition-colors inline-flex items-center gap-1">
                                 <span>Detail</span>
                                 <span class="material-symbols-outlined text-sm">arrow_forward</span>
