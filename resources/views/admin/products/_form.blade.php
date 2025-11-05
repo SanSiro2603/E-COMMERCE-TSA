@@ -81,10 +81,10 @@
         <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
             <h3 class="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <span class="material-symbols-outlined text-soft-green">payments</span>
-                Harga & Stok
+                Harga, Stok & Berat
             </h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Harga -->
                 <div>
                     <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
@@ -126,10 +126,53 @@
                     </div>
                     @error('stock')
                         <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
+                            <span class="material-symbols-oriented text-sm">error</span>
+                            <span>{{ $message }}</span>
+                        </div>
+                    @enderror
+                </div>
+
+                <!-- Berat -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        Berat (gram) <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 text-xl">weight</span>
+                        <input type="number" 
+                               name="weight" 
+                               id="weight"
+                               value="{{ old('weight', $product->weight ?? 1000) }}" 
+                               required
+                               min="1"
+                               step="1"
+                               placeholder="1000"
+                               class="block w-full pl-10 pr-16 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
+                        <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 text-sm">gram</span>
+                    </div>
+                    <p class="mt-1.5 text-xs text-gray-500 dark:text-zinc-400 flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs">info</span>
+                        <span id="weightInKg">≈ 1 kg</span>
+                    </p>
+                    @error('weight')
+                        <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
                             <span class="material-symbols-outlined text-sm">error</span>
                             <span>{{ $message }}</span>
                         </div>
                     @enderror
+                </div>
+            </div>
+
+            <!-- Info Berat -->
+            <div class="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-lg p-3">
+                <div class="flex gap-2">
+                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-lg">info</span>
+                    <div class="flex-1">
+                        <p class="text-xs text-blue-700 dark:text-blue-300 font-medium">Informasi Berat Produk</p>
+                        <p class="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
+                            Berat digunakan untuk menghitung ongkos kirim otomatis. Masukkan berat dalam gram (1 kg = 1000 gram).
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -191,7 +234,7 @@
                 <!-- Gambar Produk -->
                 <div>
                     <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                        Gambar Produk <span class="text-gray-400 text-xs">(JPG, PNG - Max  10MB)</span>
+                        Gambar Produk <span class="text-gray-400 text-xs">(JPG, PNG - Max 10MB)</span>
                     </label>
                     <div class="border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg p-4 hover:border-soft-green dark:hover:border-soft-green transition-colors">
                         <input type="file" 
@@ -289,6 +332,21 @@
 </style>
 
 <script>
+    // Convert weight gram to kg display
+    const weightInput = document.getElementById('weight');
+    const weightInKgDisplay = document.getElementById('weightInKg');
+    
+    function updateWeightDisplay() {
+        const grams = parseFloat(weightInput.value) || 0;
+        const kg = (grams / 1000).toFixed(2);
+        weightInKgDisplay.textContent = `≈ ${kg} kg`;
+    }
+    
+    weightInput?.addEventListener('input', updateWeightDisplay);
+    
+    // Initial display
+    updateWeightDisplay();
+    
     // Preview image before upload
     document.getElementById('image')?.addEventListener('change', function(e) {
         const file = e.target.files[0];

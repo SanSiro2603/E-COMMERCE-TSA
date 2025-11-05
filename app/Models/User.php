@@ -17,6 +17,7 @@ class User extends Authenticatable
         'role',
         'phone',
         'address',
+        'profile_photo',
     ];
 
     protected $hidden = [
@@ -29,21 +30,21 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    // Relasi ke Order
     public function orders()
-{
-    return $this->hasMany(Order::class, 'user_id');
-}
+    {
+        return $this->hasMany(Order::class, 'user_id');
+    }
 
-public function carts()
-{
-    return $this->hasMany(Cart::class);
-}
+    // Relasi ke Cart
+    public function carts()
+    {
+        return $this->hasMany(Cart::class, 'user_id');
+    }
 
-// Helper method to get cart count
-public function getCartCountAttribute()
-{
-    return $this->carts()->count();
-}
-
-
+    // Accessor: $user->cart_count
+    public function getCartCountAttribute()
+    {
+        return $this->carts()->count();
+    }
 }

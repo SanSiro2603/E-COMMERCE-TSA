@@ -4,25 +4,39 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Order extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'user_id',
         'order_number',
-        'total_amount',
+        'subtotal',
         'shipping_cost',
         'grand_total',
         'status',
+        'recipient_name',
+        'recipient_phone',
         'shipping_address',
+        'province',
+        'province_id',
+        'city',
+        'city_id',
+        'postal_code',
         'courier',
+        'courier_service',
+        'courier_service_description',
+        'estimated_delivery',
+        'tracking_number',
+        'payment_method',
         'paid_at',
+        'notes',
     ];
 
     protected $casts = [
-        'total_amount' => 'decimal:2',
+        'subtotal' => 'decimal:2',
         'shipping_cost' => 'decimal:2',
         'grand_total' => 'decimal:2',
         'paid_at' => 'datetime',
@@ -37,16 +51,6 @@ class Order extends Model
     public function items()
     {
         return $this->hasMany(OrderItem::class);
-    }
-
-    public function payment()
-    {
-        return $this->hasOne(Payment::class);
-    }
-
-    public function shipment()
-    {
-        return $this->hasOne(Shipment::class);
     }
 
     // Scopes
@@ -74,7 +78,7 @@ class Order extends Model
         $prefix = 'ORD';
         $date = date('Ymd');
         $random = strtoupper(substr(uniqid(), -4));
-        
+
         return $prefix . $date . $random;
     }
 
@@ -114,5 +118,21 @@ class Order extends Model
     public function canBeCompleted()
     {
         return $this->status === 'shipped';
+    }
+
+    /**
+     * Hitung subtotal berdasarkan items
+     */
+    public function calculateSubtotal()
+    {
+        return $this->items->sum(fn($item) => $item->price * $item->quantity);
+    }
+
+    /**
+     * Hitung grand total (subtotal + ongkir)
+     */
+    public function calculateGrandTotal()
+    {
+        return $this->calculateSubtotal() + $this->shipping_cost;
     }
 }

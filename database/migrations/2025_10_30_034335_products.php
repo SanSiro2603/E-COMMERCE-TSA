@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->decimal('price', 12, 2);
             $table->integer('stock')->default(0);
+            $table->integer('weight')->default(1000)->comment('Berat dalam gram'); // Tambahan untuk ongkir
             $table->string('image')->nullable();
             $table->boolean('is_active')->default(true);
             $table->text('health_certificate')->nullable(); 

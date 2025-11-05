@@ -11,7 +11,7 @@ class Product extends Model
 
     protected $fillable = [
         'category_id', 'name', 'slug', 'description', 'price',
-        'stock', 'image', 'is_active', 'health_certificate', 'available_from'
+        'stock', 'image', 'weight','is_active', 'health_certificate', 'available_from'
     ];
 
     public function category()

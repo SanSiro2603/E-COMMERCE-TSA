@@ -54,19 +54,19 @@ class PesananController extends Controller
             ->get();
 
         if ($carts->isEmpty()) {
-            return redirect()->route('pembeli.keranjang')
+            return redirect()->route('pembeli.keranjang.index')
                 ->with('error', 'Keranjang Anda kosong');
         }
 
         // Check stock availability
         foreach ($carts as $cart) {
             if (!$cart->product || !$cart->product->is_active) {
-                return redirect()->route('pembeli.keranjang')
+                return redirect()->route('pembeli.keranjang.index')
                     ->with('error', 'Produk ' . ($cart->product->name ?? 'tidak tersedia') . ' sudah tidak tersedia');
             }
 
             if ($cart->product->stock < $cart->quantity) {
-                return redirect()->route('pembeli.keranjang')
+                return redirect()->route('pembeli.keranjang.index')
                     ->with('error', 'Stok produk ' . $cart->product->name . ' tidak mencukupi');
             }
         }
