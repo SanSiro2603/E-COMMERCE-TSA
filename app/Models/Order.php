@@ -73,14 +73,11 @@ class Order extends Model
     }
 
     // Helpers
-    public static function generateOrderNumber()
-    {
-        $prefix = 'ORD';
-        $date = date('Ymd');
-        $random = strtoupper(substr(uniqid(), -4));
+   public static function generateOrderNumber()
+{
+    return 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
+}
 
-        return $prefix . $date . $random;
-    }
 
     public function getStatusLabelAttribute()
     {

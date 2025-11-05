@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Cart;
+use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,7 +19,6 @@ class PesananController extends Controller
             ->where('user_id', Auth::id())
             ->latest();
 
-        // Filter by status
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
@@ -26,11 +26,11 @@ class PesananController extends Controller
         $orders = $query->paginate(10);
 
         $statuses = [
-            'all' => 'Semua',
-            'pending' => 'Menunggu Pembayaran',
-            'paid' => 'Sudah Dibayar',
-            'processing' => 'Diproses',
-            'shipped' => 'Dikirim',
+            'all'       => 'Semua',
+            'pending'   => 'Menunggu Pembayaran',
+            'paid'      => 'Sudah Dibayar',
+            'processing'=> 'Diproses',
+            'shipped'   => 'Dikirim',
             'completed' => 'Selesai',
             'cancelled' => 'Dibatalkan',
         ];
@@ -58,21 +58,24 @@ class PesananController extends Controller
                 ->with('error', 'Keranjang Anda kosong');
         }
 
-        // Check stock availability
         foreach ($carts as $cart) {
-            if (!$cart->product || !$cart->product->is_active) {
+            $product = $cart->product;
+
+            if (!$product || !$product->is_active) {
                 return redirect()->route('pembeli.keranjang.index')
-                    ->with('error', 'Produk ' . ($cart->product->name ?? 'tidak tersedia') . ' sudah tidak tersedia');
+                    ->with('error', 'Produk ' . ($product->name ?? 'tidak tersedia') . ' sudah tidak tersedia');
             }
 
-            if ($cart->product->stock < $cart->quantity) {
+            $availableStock = $product->stock + $cart->quantity;
+
+            if ($availableStock < $cart->quantity) {
                 return redirect()->route('pembeli.keranjang.index')
-                    ->with('error', 'Stok produk ' . $cart->product->name . ' tidak mencukupi');
+                    ->with('error', "Stok {$product->name} tidak mencukupi. Tersedia: {$availableStock}, Dibutuhkan: {$cart->quantity}");
             }
         }
 
         $total = $carts->sum('subtotal');
-        $shippingCost = 15000; // Default shipping cost
+        $shippingCost = 15000;
         $grandTotal = $total + $shippingCost;
 
         return view('pembeli.pesanan.checkout', compact('carts', 'total', 'shippingCost', 'grandTotal'));
@@ -82,7 +85,7 @@ class PesananController extends Controller
     {
         $validated = $request->validate([
             'shipping_address' => 'required|string',
-            'courier' => 'nullable|string|max:50',
+            'courier'          => 'nullable|string|max:50',
         ], [
             'shipping_address.required' => 'Alamat pengiriman wajib diisi',
         ]);
@@ -90,7 +93,6 @@ class PesananController extends Controller
         try {
             DB::beginTransaction();
 
-            // Get cart items
             $carts = Cart::with(['product'])
                 ->where('user_id', Auth::id())
                 ->get();
@@ -99,15 +101,18 @@ class PesananController extends Controller
                 throw new \Exception('Keranjang kosong');
             }
 
-            // Check stock and calculate total
             $totalAmount = 0;
             foreach ($carts as $cart) {
-                if (!$cart->product || !$cart->product->is_active) {
-                    throw new \Exception('Produk tidak tersedia: ' . ($cart->product->name ?? 'Unknown'));
+                $product = Product::find($cart->product_id);
+
+                if (!$product || !$product->is_active) {
+                    throw new \Exception('Produk tidak tersedia: ' . ($product->name ?? 'Unknown'));
                 }
 
-                if ($cart->product->stock < $cart->quantity) {
-                    throw new \Exception('Stok tidak mencukupi untuk: ' . $cart->product->name);
+                $availableStock = $product->stock + $cart->quantity;
+
+                if ($availableStock < $cart->quantity) {
+                    throw new \Exception("Stok tidak mencukupi untuk {$product->name}. Tersedia: {$availableStock}, Dibutuhkan: {$cart->quantity}");
                 }
 
                 $totalAmount += $cart->subtotal;
@@ -116,38 +121,35 @@ class PesananController extends Controller
             $shippingCost = 15000;
             $grandTotal = $totalAmount + $shippingCost;
 
-            // Create order
             $order = Order::create([
-                'user_id' => Auth::id(),
-                'order_number' => Order::generateOrderNumber(),
-                'total_amount' => $totalAmount,
-                'shipping_cost' => $shippingCost,
-                'grand_total' => $grandTotal,
-                'status' => 'pending',
-                'shipping_address' => $validated['shipping_address'],
-                'courier' => $validated['courier'] ?? 'JNE',
+                'user_id'         => Auth::id(),
+                'order_number'    => Order::generateOrderNumber(),
+                'total_amount'    => $totalAmount,
+                'shipping_cost'   => $shippingCost,
+                'grand_total'     => $grandTotal,
+                'status'          => 'pending',
+                'shipping_address'=> $validated['shipping_address'],
+                'courier'         => $validated['courier'] ?? 'JNE',
             ]);
 
-            // Create order items and update stock
             foreach ($carts as $cart) {
                 OrderItem::create([
-                    'order_id' => $order->id,
+                    'order_id'   => $order->id,
                     'product_id' => $cart->product_id,
-                    'quantity' => $cart->quantity,
-                    'price' => $cart->product->price,
-                    'subtotal' => $cart->subtotal,
+                    'quantity'   => $cart->quantity,
+                    'price'      => $cart->product->price,
+                    'subtotal'   => $cart->subtotal,
                 ]);
 
-                // Update product stock
-                $cart->product->decrement('stock', $cart->quantity);
+                DB::table('products')
+                    ->where('id', $cart->product_id)
+                    ->decrement('stock', $cart->quantity);
             }
 
-            // Clear cart
             Cart::where('user_id', Auth::id())->delete();
 
             DB::commit();
 
-            // Redirect to payment page
             return redirect()->route('pembeli.payment.show', $order)
                 ->with('success', 'Pesanan berhasil dibuat! Silakan selesaikan pembayaran.');
 
@@ -160,44 +162,42 @@ class PesananController extends Controller
     }
 
     public function edit($id)
-{
-    $order = Order::with('items.product')
-        ->where('user_id', Auth::id())
-        ->findOrFail($id);
+    {
+        $order = Order::with('items.product')
+            ->where('user_id', Auth::id())
+            ->findOrFail($id);
 
-    // Pastikan pesanan hanya bisa diedit jika pending
-    if ($order->status !== 'pending') {
-        return redirect()->route('pembeli.pesanan.index')
-            ->with('error', 'Pesanan hanya bisa diedit jika status menunggu pembayaran.');
+        if ($order->status !== 'pending') {
+            return redirect()->route('pembeli.pesanan.index')
+                ->with('error', 'Pesanan hanya bisa diedit jika status menunggu pembayaran.');
+        }
+
+        return view('pembeli.pesanan.edit', compact('order'));
     }
 
-    return view('pembeli.pesanan.edit', compact('order'));
-}
+    public function update(Request $request, $id)
+    {
+        $order = Order::where('user_id', Auth::id())
+            ->findOrFail($id);
 
-public function update(Request $request, $id)
-{
-    $order = Order::where('user_id', Auth::id())
-        ->findOrFail($id);
+        if ($order->status !== 'pending') {
+            return redirect()->route('pembeli.pesanan.index')
+                ->with('error', 'Pesanan hanya bisa diedit jika status menunggu pembayaran.');
+        }
 
-    if ($order->status !== 'pending') {
+        $validated = $request->validate([
+            'shipping_address' => 'required|string|max:500',
+            'courier'          => 'required|string|max:50',
+        ]);
+
+        $order->update([
+            'shipping_address' => $validated['shipping_address'],
+            'courier'          => $validated['courier'],
+        ]);
+
         return redirect()->route('pembeli.pesanan.index')
-            ->with('error', 'Pesanan hanya bisa diedit jika status menunggu pembayaran.');
+            ->with('success', 'Pesanan berhasil diperbarui.');
     }
-
-    $validated = $request->validate([
-        'shipping_address' => 'required|string|max:500',
-        'courier' => 'required|string|max:50',
-    ]);
-
-    $order->update([
-        'shipping_address' => $validated['shipping_address'],
-        'courier' => $validated['courier'],
-    ]);
-
-    return redirect()->route('pembeli.pesanan.index')
-        ->with('success', 'Pesanan berhasil diperbarui.');
-}
-
 
     public function cancel($id)
     {
@@ -211,7 +211,6 @@ public function update(Request $request, $id)
 
             DB::beginTransaction();
 
-            // Restore stock
             foreach ($order->items as $item) {
                 if ($item->product) {
                     $item->product->increment('stock', $item->quantity);
@@ -243,8 +242,8 @@ public function update(Request $request, $id)
             }
 
             $order->update([
-                'status' => 'completed',
-                'paid_at' => $order->paid_at ?? now(),
+                'status'   => 'completed',
+                'paid_at'  => $order->paid_at ?? now(),
             ]);
 
             return redirect()->back()

@@ -68,20 +68,18 @@
     @if($carts->count() > 0)
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
-            <!-- Cart Items (Left - 2/3) -->
+            <!-- Cart Items -->
             <div class="lg:col-span-2 space-y-4">
                 @foreach($carts as $cart)
-                    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden cart-item" data-cart-id="{{ $cart->id }}">
+                    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden cart-item" 
+                         data-cart-id="{{ $cart->id }}" data-product-id="{{ $cart->product_id }}">
                         <div class="p-4 sm:p-6">
                             <div class="flex flex-col sm:flex-row gap-4">
                                 <!-- Product Image -->
-                                <a href="{{ route('pembeli.produk.show', $cart->product->slug) }}" 
-                                   class="flex-shrink-0">
+                                <a href="{{ route('pembeli.produk.show', $cart->product->slug) }}" class="flex-shrink-0">
                                     <div class="w-full sm:w-24 h-24 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden">
                                         @if($cart->product->image)
-                                            <img src="{{ asset('storage/' . $cart->product->image) }}" 
-                                                 alt="{{ $cart->product->name }}"
-                                                 class="w-full h-full object-cover">
+                                            <img src="{{ asset('storage/' . $cart->product->image) }}" alt="{{ $cart->product->name }}" class="w-full h-full object-cover">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center">
                                                 <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-3xl">image</span>
@@ -94,8 +92,7 @@
                                 <div class="flex-1 min-w-0">
                                     <div class="flex items-start justify-between gap-4 mb-2">
                                         <div class="flex-1 min-w-0">
-                                            <a href="{{ route('pembeli.produk.show', $cart->product->slug) }}" 
-                                               class="block">
+                                            <a href="{{ route('pembeli.produk.show', $cart->product->slug) }}" class="block">
                                                 <h3 class="text-base font-semibold text-gray-900 dark:text-white hover:text-soft-green transition-colors line-clamp-2">
                                                     {{ $cart->product->name }}
                                                 </h3>
@@ -125,7 +122,7 @@
                                         <!-- Quantity Controls -->
                                         <div class="flex items-center gap-3">
                                             <div class="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 rounded-lg p-1">
-                                                <button onclick="updateQuantity({{ $cart->id }}, -1, {{ $cart->product->stock }})" 
+                                                <button onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, -1, {{ $cart->product->stock }})" 
                                                         class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
                                                     <span class="material-symbols-outlined text-sm">remove</span>
                                                 </button>
@@ -134,14 +131,14 @@
                                                        min="1"
                                                        max="{{ $cart->product->stock }}"
                                                        class="w-16 text-center bg-transparent border-0 text-sm font-semibold text-gray-900 dark:text-white focus:ring-0"
-                                                       onchange="updateQuantityDirect({{ $cart->id }}, this.value, {{ $cart->product->stock }})"
+                                                       onchange="updateQuantityDirect({{ $cart->id }}, {{ $cart->product_id }}, this.value, {{ $cart->product->stock }})"
                                                        id="quantity-{{ $cart->id }}">
-                                                <button onclick="updateQuantity({{ $cart->id }}, 1, {{ $cart->product->stock }})" 
+                                                <button onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, 1, {{ $cart->product->stock }})" 
                                                         class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
                                                     <span class="material-symbols-outlined text-sm">add</span>
                                                 </button>
                                             </div>
-                                            <span class="text-xs text-gray-500 dark:text-zinc-400">
+                                            <span class="text-xs text-gray-500 dark:text-zinc-400" id="stock-{{ $cart->product_id }}">
                                                 Stok: {{ $cart->product->stock }}
                                             </span>
                                         </div>
@@ -161,7 +158,7 @@
                 @endforeach
             </div>
 
-            <!-- Order Summary (Right - 1/3) -->
+            <!-- Order Summary -->
             <div class="lg:col-span-1">
                 <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm sticky top-20">
                     <div class="p-6 border-b border-gray-200 dark:border-zinc-800">
@@ -171,7 +168,7 @@
                     <div class="p-6 space-y-4">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600 dark:text-zinc-400">Total Item</span>
-                            <span class="font-semibold text-gray-900 dark:text-white">{{ $carts->sum('quantity') }} item</span>
+                            <span class="font-semibold text-gray-900 dark:text-white" id="total-items">{{ $carts->sum('quantity') }} item</span>
                         </div>
                         
                         <div class="flex justify-between text-sm">
@@ -211,7 +208,7 @@
             </div>
         </div>
     @else
-        <!-- Empty Cart State -->
+        <!-- Empty Cart -->
         <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
             <div class="text-center py-16 px-4">
                 <div class="w-24 h-24 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -236,108 +233,107 @@
 
 <style>
     @keyframes fade-in {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-    
-    .animate-fade-in {
-        animation: fade-in 0.3s ease-out;
-    }
+    .animate-fade-in { animation: fade-in 0.3s ease-out; }
 </style>
 
+@push('scripts')
 <script>
-    function updateQuantity(cartId, change, maxStock) {
+    function updateQuantity(cartId, productId, change, currentStock) {
         const input = document.getElementById(`quantity-${cartId}`);
-        let newValue = parseInt(input.value) + change;
-        
-        if (newValue < 1) newValue = 1;
-        if (newValue > maxStock) {
-            alert(`Maksimal stok: ${maxStock}`);
+        const currentQty = parseInt(input.value);
+        let newValue = currentQty + change;
+
+        if (newValue < 1) return;
+
+        const availableStock = currentStock + currentQty;
+
+        if (newValue > availableStock) {
+            alert(`Maksimal: ${availableStock} (stok ${currentStock} + ${currentQty} di keranjang)`);
             return;
         }
-        
+
         input.value = newValue;
-        saveQuantity(cartId, newValue);
+        saveQuantity(cartId, productId, newValue);
     }
 
-    function updateQuantityDirect(cartId, value, maxStock) {
-        let newValue = parseInt(value);
-        
-        if (newValue < 1) newValue = 1;
-        if (newValue > maxStock) {
-            alert(`Maksimal stok: ${maxStock}`);
-            newValue = maxStock;
+    function updateQuantityDirect(cartId, productId, value, currentStock) {
+        const currentQty = parseInt(document.getElementById(`quantity-${cartId}`).value);
+        let newValue = parseInt(value) || 1;
+
+        const availableStock = currentStock + currentQty;
+
+        if (newValue > availableStock) {
+            alert(`Maksimal: ${availableStock} (stok ${currentStock} + ${currentQty} di keranjang)`);
+            newValue = availableStock;
         }
-        
+
         document.getElementById(`quantity-${cartId}`).value = newValue;
-        saveQuantity(cartId, newValue);
+        saveQuantity(cartId, productId, newValue);
     }
 
-    function saveQuantity(cartId, quantity) {
+    function saveQuantity(cartId, productId, quantity) {
         fetch(`/pembeli/keranjang/update/${cartId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             },
-            body: JSON.stringify({ quantity: quantity })
+            body: JSON.stringify({ quantity })
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             if (data.success) {
                 document.getElementById(`subtotal-${cartId}`).textContent = `Rp ${data.subtotal}`;
                 document.getElementById('total-price').textContent = `Rp ${data.total}`;
                 document.getElementById('grand-total').textContent = `Rp ${data.total}`;
+                document.getElementById('total-items').textContent = `${data.total_items} item`;
+                document.getElementById(`stock-${productId}`).textContent = `Stok: ${data.new_stock}`;
+                window.updateCartCount(data.cart_count);
             } else {
-                alert(data.message);
+                alert(data.message || 'Gagal memperbarui jumlah');
+                location.reload();
             }
         })
-        .catch(error => {
-            console.error('Error:', error);
+        .catch(() => {
             alert('Gagal memperbarui jumlah');
+            location.reload();
         });
     }
 
     function removeFromCart(cartId) {
         if (!confirm('Hapus produk dari keranjang?')) return;
-        
+
         fetch(`/pembeli/keranjang/hapus/${cartId}`, {
             method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-            }
+            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
         })
-        .then(response => response.json())
+        .then(r => r.json())
         .then(data => {
             if (data.success) {
                 document.querySelector(`[data-cart-id="${cartId}"]`).remove();
-                
+                window.updateCartCount(data.cart_count);
+
                 if (data.cart_count === 0) {
                     location.reload();
                 } else {
                     document.getElementById('total-price').textContent = `Rp ${data.total}`;
                     document.getElementById('grand-total').textContent = `Rp ${data.total}`;
+                    document.getElementById('total-items').textContent = `${data.total_items} item`;
                 }
             } else {
                 alert(data.message);
             }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Gagal menghapus produk');
-        });
+        .catch(() => alert('Gagal menghapus produk'));
     }
 
     function clearCart() {
         if (!confirm('Yakin ingin mengosongkan keranjang?')) return;
-        
         window.location.href = '{{ route("pembeli.keranjang.clear") }}';
     }
 </script>
+@endpush
 @endsection
