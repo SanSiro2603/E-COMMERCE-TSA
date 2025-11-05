@@ -117,7 +117,7 @@
                     </button>
 
                     <!-- Cart -->
-                    <a href="{{ route('pembeli.keranjang') }}" 
+                    <a href="{{ route('pembeli.keranjang.index') }}" 
                        class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors">
                         <span class="material-symbols-outlined">shopping_cart</span>
                         @if(session('cart') && count(session('cart')) > 0)
@@ -190,7 +190,7 @@
             $menu = [
                 ['icon' => 'home', 'label' => 'Beranda', 'route' => 'pembeli.dashboard'],
                 ['icon' => 'inventory_2', 'label' => 'Produk', 'route' => 'pembeli.produk.index'],
-                ['icon' => 'shopping_cart', 'label' => 'Keranjang', 'route' => 'pembeli.keranjang'],
+                ['icon' => 'shopping_cart', 'label' => 'Keranjang', 'route' => 'pembeli.keranjang.index'],
                 ['icon' => 'receipt_long', 'label' => 'Pesanan', 'route' => 'pembeli.pesanan'],
                 ['icon' => 'person', 'label' => 'Profil', 'route' => 'pembeli.profil.edit'],
             ];
@@ -247,8 +247,8 @@
                         <span class="material-symbols-outlined">inventory_2</span>
                         <span>Produk</span>
                     </a>
-                    <a href="{{ route('pembeli.keranjang') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('pembeli.keranjang') ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }}">
+                    <a href="{{ route('pembeli.keranjang.index') }}" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('pembeli.keranjang.index') ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }}">
                         <span class="material-symbols-outlined">shopping_cart</span>
                         <span>Keranjang</span>
                     </a>

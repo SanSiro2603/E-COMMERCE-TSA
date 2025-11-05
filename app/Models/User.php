@@ -34,6 +34,16 @@ class User extends Authenticatable
     return $this->hasMany(Order::class, 'user_id');
 }
 
+public function carts()
+{
+    return $this->hasMany(Cart::class);
+}
+
+// Helper method to get cart count
+public function getCartCountAttribute()
+{
+    return $this->carts()->count();
+}
 
 
 }

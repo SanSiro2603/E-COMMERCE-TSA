@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Pembeli\PembeliDashboardController;
 use App\Http\Controllers\Pembeli\ProdukController;
+use App\Http\Controllers\Pembeli\CartController;
 
 /*
 |--------------------------------------------------------------------------
@@ -102,9 +103,19 @@ Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
     Route::get('/produk/{slug}', [ProdukController::class, 'show'])->name('produk.show');
 
+    Route::prefix('keranjang')->name('keranjang.')->group(function () {
+        Route::get('/', [CartController::class, 'index'])->name('index');
+        Route::post('/tambah/{product}', [CartController::class, 'tambah'])->name('tambah');
+        Route::put('/update/{cart}', [CartController::class, 'update'])->name('update');
+        Route::delete('/hapus/{cart}', [CartController::class, 'hapus'])->name('hapus');
+        Route::get('/clear', [CartController::class, 'clear'])->name('clear');
+        Route::get('/count', [CartController::class, 'count'])->name('count');
+}); 
+
     // Halaman lainnya
-    Route::get('/keranjang', fn() => inertia('Pembeli/Keranjang'))->name('keranjang');
+    // Route::get('/keranjang', fn() => inertia('Pembeli/Keranjang'))->name('keranjang');
     Route::get('/pesanan', fn() => inertia('Pembeli/Pesanan'))->name('pesanan');
     Route::get('/pesanan/{order}', fn() => inertia('Pembeli/PesananShow'))->name('pesanan.show');
     Route::get('/profil', fn() => inertia('Pembeli/Profil'))->name('profil.edit');
 });
+

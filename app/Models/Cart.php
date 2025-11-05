@@ -14,8 +14,15 @@ class Cart extends Model
         return $this->belongsTo(Product::class);
     }
 
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
+    
+    public function carts()
+{
+    return $this->hasMany(Cart::class);
+}
+
+// Check if product is in user's cart
+public function isInCart($userId)
+{
+    return $this->carts()->where('user_id', $userId)->exists();
+}
 }

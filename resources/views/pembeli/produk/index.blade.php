@@ -234,8 +234,22 @@
 
 
 <script>
-    // Add to Cart Function
-    function addToCart(productId) {
+document.addEventListener('DOMContentLoaded', function() {
+
+    const searchInput = document.querySelector('input[name="search"]');
+    const searchForm = document.querySelector('#searchForm');
+    const productsContainer = document.querySelector('#productsContainer');
+    const resultsCount = document.querySelector('#resultsCount');
+    const activeFiltersContainer = document.querySelector('#activeFilters');
+    const categoryLinks = document.querySelectorAll('.category-link');
+
+    let currentCategory = '';
+    let currentSearch = '';
+
+    // ===========================
+    // Add to Cart
+    // ===========================
+    window.addToCart = function(productId) {
         fetch(`/pembeli/keranjang/tambah/${productId}`, {
             method: 'POST',
             headers: {
@@ -244,217 +258,217 @@
             },
             body: JSON.stringify({ quantity: 1 })
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
             if (data.success) {
-                alert('Produk berhasil ditambahkan ke keranjang!');
-                location.reload();
+                showToast(data.message || 'Produk berhasil ditambahkan ke keranjang!', 'success');
+                updateCartCount(data.cart_count);
+            } else {
+                showToast(data.message || 'Gagal menambahkan produk ke keranjang', 'error');
             }
         })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Gagal menambahkan produk ke keranjang');
+        .catch(err => {
+            console.error(err);
+            showToast('Terjadi kesalahan saat menambahkan ke keranjang', 'error');
         });
     }
 
-    // AJAX Search & Filter
-    document.addEventListener('DOMContentLoaded', function() {
-        const searchForm = document.querySelector('form[method="GET"]');
-        const searchInput = document.querySelector('input[name="search"]');
-        const categoryLinks = document.querySelectorAll('a[href*="category"]');
-        const productsContainer = document.querySelector('.grid.grid-cols-2');
-        const resultsCount = document.querySelector('.flex.items-center.gap-2.text-sm span:last-child');
-        const activeFiltersContainer = document.querySelector('.flex.items-center.gap-2.flex-wrap');
-        
-        let debounceTimer;
-        let currentCategory = '{{ request("category") }}';
-        let currentSearch = '{{ request("search") }}';
-
-        // Debounce function
-        function debounce(func, delay) {
-            return function() {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(func, delay);
-            };
+    // ===========================
+    // Toast Notification
+    // ===========================
+    function showToast(message, type='success') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.className = 'fixed top-5 right-5 z-50 flex flex-col';
+            document.body.appendChild(container);
         }
 
-        // Fetch products with AJAX
-        async function fetchProducts() {
-            const search = searchInput.value;
-            const url = new URL(window.location.href);
-            
-            url.searchParams.set('search', search);
-            if (currentCategory) {
-                url.searchParams.set('category', currentCategory);
+        const toast = document.createElement('div');
+        toast.className = `mb-2 px-4 py-2 rounded shadow text-white ${
+            type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        }`;
+        toast.textContent = message;
+        container.appendChild(toast);
+
+        setTimeout(() => toast.remove(), 3000);
+    }
+
+    // ===========================
+    // Update Cart Badge
+    // ===========================
+    function updateCartCount(count = null) {
+        const countElem = document.getElementById('cart-count') || document.getElementById('cart-count-badge');
+        if (!countElem) return;
+
+        if (count !== null) {
+            if (count > 0) {
+                countElem.textContent = count;
+                countElem.classList.remove('hidden');
             } else {
-                url.searchParams.delete('category');
+                countElem.classList.add('hidden');
             }
-            url.searchParams.set('ajax', '1');
-
-            // Show loading state
-            showLoading();
-
-            try {
-                const response = await fetch(url.toString(), {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
+        } else {
+            // fallback fetch count from server
+            fetch('/pembeli/keranjang/count')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.count > 0) {
+                        countElem.textContent = data.count;
+                        countElem.classList.remove('hidden');
+                    } else {
+                        countElem.classList.add('hidden');
                     }
                 });
-
-                if (!response.ok) throw new Error('Network response was not ok');
-
-                const data = await response.json();
-                
-                // Update products grid
-                if (data.html) {
-                    productsContainer.innerHTML = data.html;
-                }
-
-                // Update results count
-                if (data.count !== undefined) {
-                    updateResultsCount(data.count, data.total);
-                }
-
-                // Update active filters
-                if (data.filters !== undefined) {
-                    updateActiveFilters(data.filters);
-                }
-
-                // Update URL without reload
-                const newUrl = url.toString().replace('&ajax=1', '');
-                window.history.pushState({}, '', newUrl);
-
-                // Update current values
-                currentSearch = search;
-
-            } catch (error) {
-                console.error('Error fetching products:', error);
-                showError();
-            }
         }
+    }
 
-        // Show loading state
-        function showLoading() {
-            productsContainer.innerHTML = `
-                <div class="col-span-full py-16 text-center">
-                    <div class="w-16 h-16 border-4 border-soft-green border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p class="text-sm text-gray-500 dark:text-zinc-400">Memuat produk...</p>
-                </div>
-            `;
-        }
+    updateCartCount(); // initialize on page load
 
-        // Show error state
-        function showError() {
-            productsContainer.innerHTML = `
-                <div class="col-span-full py-16 text-center">
-                    <span class="material-symbols-outlined text-red-500 text-6xl mb-3">error</span>
-                    <p class="text-sm font-medium text-red-600 dark:text-red-400">Gagal memuat produk</p>
-                    <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-soft-green text-white rounded-lg text-sm">
-                        Muat Ulang
-                    </button>
-                </div>
-            `;
-        }
+    // ===========================
+    // Fetch Products AJAX
+    // ===========================
+    async function fetchProducts() {
+        const search = searchInput.value;
+        const url = new URL(window.location.href);
+        url.searchParams.set('search', search);
+        if (currentCategory) url.searchParams.set('category', currentCategory);
+        else url.searchParams.delete('category');
+        url.searchParams.set('ajax', '1');
 
-        // Update results count
-        function updateResultsCount(count, total) {
-            resultsCount.innerHTML = `Menampilkan <strong class="text-gray-900 dark:text-white">${count}</strong> dari <strong class="text-gray-900 dark:text-white">${total}</strong> produk`;
-        }
+        showLoading();
 
-        // Update active filters display
-        function updateActiveFilters(filters) {
-            if (!activeFiltersContainer) return;
-
-            let html = '<span class="text-sm text-gray-600 dark:text-zinc-400">Filter Aktif:</span>';
-
-            if (filters.search) {
-                html += `
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded-lg text-sm">
-                        <span class="material-symbols-outlined text-base">search</span>
-                        <span>"${filters.search}"</span>
-                        <a href="#" onclick="clearSearch(event)" class="hover:text-blue-900 dark:hover:text-blue-300">
-                            <span class="material-symbols-outlined text-base">close</span>
-                        </a>
-                    </div>
-                `;
-            }
-
-            if (filters.category) {
-                html += `
-                    <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 rounded-lg text-sm">
-                        <span class="material-symbols-outlined text-base">category</span>
-                        <span>${filters.categoryName}</span>
-                        <a href="#" onclick="clearCategory(event)" class="hover:text-green-900 dark:hover:text-green-300">
-                            <span class="material-symbols-outlined text-base">close</span>
-                        </a>
-                    </div>
-                `;
-            }
-
-            if (filters.search || filters.category) {
-                html += `
-                    <a href="#" onclick="clearAllFilters(event)" class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
-                        <span class="material-symbols-outlined text-base">refresh</span>
-                        Reset Semua
-                    </a>
-                `;
-            }
-
-            activeFiltersContainer.innerHTML = html;
-        }
-
-        // Event listener for search input
-        searchInput.addEventListener('input', debounce(fetchProducts, 500));
-
-        // Event listener for search form submit
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            fetchProducts();
-        });
-
-        // Event listener for category links
-        categoryLinks.forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Update active state
-                categoryLinks.forEach(l => {
-                    l.classList.remove('bg-gradient-to-r', 'from-soft-green', 'to-primary', 'text-white', 'shadow-md');
-                    l.classList.add('bg-gray-100', 'dark:bg-zinc-800', 'text-gray-700', 'dark:text-zinc-300');
-                });
-                this.classList.remove('bg-gray-100', 'dark:bg-zinc-800', 'text-gray-700', 'dark:text-zinc-300');
-                this.classList.add('bg-gradient-to-r', 'from-soft-green', 'to-primary', 'text-white', 'shadow-md');
-
-                // Get category from URL
-                const url = new URL(this.href);
-                currentCategory = url.searchParams.get('category') || '';
-                
-                fetchProducts();
+        try {
+            const response = await fetch(url.toString(), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
             });
+            if (!response.ok) throw new Error('Network response not ok');
+
+            const data = await response.json();
+
+            if (data.html) productsContainer.innerHTML = data.html;
+            if (data.count !== undefined) updateResultsCount(data.count, data.total);
+            if (data.filters !== undefined) updateActiveFilters(data.filters);
+
+            const newUrl = url.toString().replace('&ajax=1','');
+            window.history.pushState({}, '', newUrl);
+            currentSearch = search;
+
+        } catch (err) {
+            console.error(err);
+            showError();
+        }
+    }
+
+    function showLoading() {
+        productsContainer.innerHTML = `
+            <div class="col-span-full py-16 text-center">
+                <div class="w-16 h-16 border-4 border-soft-green border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="text-sm text-gray-500 dark:text-zinc-400">Memuat produk...</p>
+            </div>
+        `;
+    }
+
+    function showError() {
+        productsContainer.innerHTML = `
+            <div class="col-span-full py-16 text-center">
+                <span class="material-symbols-outlined text-red-500 text-6xl mb-3">error</span>
+                <p class="text-sm font-medium text-red-600 dark:text-red-400">Gagal memuat produk</p>
+                <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-soft-green text-white rounded-lg text-sm">
+                    Muat Ulang
+                </button>
+            </div>
+        `;
+    }
+
+    function updateResultsCount(count, total) {
+        if (!resultsCount) return;
+        resultsCount.innerHTML = `Menampilkan <strong class="text-gray-900 dark:text-white">${count}</strong> dari <strong class="text-gray-900 dark:text-white">${total}</strong> produk`;
+    }
+
+    function updateActiveFilters(filters) {
+        if (!activeFiltersContainer) return;
+
+        let html = '<span class="text-sm text-gray-600 dark:text-zinc-400">Filter Aktif:</span>';
+
+        if (filters.search) html += `
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded-lg text-sm">
+                <span class="material-symbols-outlined text-base">search</span>
+                <span>"${filters.search}"</span>
+                <a href="#" onclick="clearSearch(event)" class="hover:text-blue-900 dark:hover:text-blue-300">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </a>
+            </div>`;
+        
+        if (filters.category) html += `
+            <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 rounded-lg text-sm">
+                <span class="material-symbols-outlined text-base">category</span>
+                <span>${filters.categoryName}</span>
+                <a href="#" onclick="clearCategory(event)" class="hover:text-green-900 dark:hover:text-green-300">
+                    <span class="material-symbols-outlined text-base">close</span>
+                </a>
+            </div>`;
+
+        if (filters.search || filters.category) html += `
+            <a href="#" onclick="clearAllFilters(event)" class="inline-flex items-center gap-1 px-3 py-1.5 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
+                <span class="material-symbols-outlined text-base">refresh</span>
+                Reset Semua
+            </a>`;
+
+        activeFiltersContainer.innerHTML = html;
+    }
+
+    function debounce(func, delay) {
+        let timer;
+        return function(...args) {
+            clearTimeout(timer);
+            timer = setTimeout(() => func.apply(this, args), delay);
+        }
+    }
+
+    // ===========================
+    // Event Listeners
+    // ===========================
+    if (searchInput) searchInput.addEventListener('input', debounce(fetchProducts, 500));
+    if (searchForm) searchForm.addEventListener('submit', e => { e.preventDefault(); fetchProducts(); });
+
+    categoryLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            categoryLinks.forEach(l => {
+                l.classList.remove('bg-gradient-to-r','from-soft-green','to-primary','text-white','shadow-md');
+                l.classList.add('bg-gray-100','dark:bg-zinc-800','text-gray-700','dark:text-zinc-300');
+            });
+            this.classList.remove('bg-gray-100','dark:bg-zinc-800','text-gray-700','dark:text-zinc-300');
+            this.classList.add('bg-gradient-to-r','from-soft-green','to-primary','text-white','shadow-md');
+
+            const url = new URL(this.href);
+            currentCategory = url.searchParams.get('category') || '';
+            fetchProducts();
         });
     });
 
-    // Clear search filter
-    function clearSearch(e) {
+    window.clearSearch = function(e) {
         e.preventDefault();
-        document.querySelector('input[name="search"]').value = '';
-        document.querySelector('input[name="search"]').dispatchEvent(new Event('input'));
+        if (searchInput) { searchInput.value = ''; fetchProducts(); }
     }
 
-    // Clear category filter
-    function clearCategory(e) {
+    window.clearCategory = function(e) {
         e.preventDefault();
         currentCategory = '';
-        document.querySelector('a[href*="Semua"]').click();
+        const firstCategory = document.querySelector('.category-link[href*="Semua"]');
+        if (firstCategory) firstCategory.click();
     }
 
-    // Clear all filters
-    function clearAllFilters(e) {
+    window.clearAllFilters = function(e) {
         e.preventDefault();
-        document.querySelector('input[name="search"]').value = '';
+        if (searchInput) searchInput.value = '';
         currentCategory = '';
         window.location.href = '{{ route("pembeli.produk.index") }}';
     }
+
+});
 </script>
+
 @endsection
