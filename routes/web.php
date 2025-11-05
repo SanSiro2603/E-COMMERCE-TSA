@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Pembeli\PembeliDashboardController;
 use App\Http\Controllers\Pembeli\ProdukController;
 use App\Http\Controllers\Pembeli\CartController;
+use App\Http\Controllers\Pembeli\PesananController;
 
 /*
 |--------------------------------------------------------------------------
@@ -112,10 +113,20 @@ Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function
         Route::get('/count', [CartController::class, 'count'])->name('count');
 }); 
 
+Route::prefix('pesanan')->name('pesanan.')->group(function () {
+        Route::get('/', [PesananController::class, 'index'])->name('index');
+        Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
+        Route::post('/store', [PesananController::class, 'store'])->name('store');
+        Route::get('/{order}', [PesananController::class, 'show'])->name('show');
+        Route::post('/{order}/cancel', [PesananController::class, 'cancel'])->name('cancel');
+        Route::post('/{order}/complete', [PesananController::class, 'complete'])->name('complete');
+    });
+
+
     // Halaman lainnya
     // Route::get('/keranjang', fn() => inertia('Pembeli/Keranjang'))->name('keranjang');
-    Route::get('/pesanan', fn() => inertia('Pembeli/Pesanan'))->name('pesanan');
-    Route::get('/pesanan/{order}', fn() => inertia('Pembeli/PesananShow'))->name('pesanan.show');
+    // Route::get('/pesanan', fn() => inertia('Pembeli/Pesanan'))->name('pesanan');
+    // Route::get('/pesanan/{order}', fn() => inertia('Pembeli/PesananShow'))->name('pesanan.show');
     Route::get('/profil', fn() => inertia('Pembeli/Profil'))->name('profil.edit');
 });
 

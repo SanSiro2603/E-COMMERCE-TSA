@@ -151,7 +151,7 @@
                                 <span class="material-symbols-outlined text-lg">person</span>
                                 Profil Saya
                             </a>
-                            <a href="{{ route('pembeli.pesanan') }}" 
+                            <a href="{{ route('pembeli.pesanan.index') }}" 
                                class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">
                                 <span class="material-symbols-outlined text-lg">receipt_long</span>
                                 Pesanan Saya
@@ -191,7 +191,7 @@
                 ['icon' => 'home', 'label' => 'Beranda', 'route' => 'pembeli.dashboard'],
                 ['icon' => 'inventory_2', 'label' => 'Produk', 'route' => 'pembeli.produk.index'],
                 ['icon' => 'shopping_cart', 'label' => 'Keranjang', 'route' => 'pembeli.keranjang.index'],
-                ['icon' => 'receipt_long', 'label' => 'Pesanan', 'route' => 'pembeli.pesanan'],
+                ['icon' => 'receipt_long', 'label' => 'Pesanan', 'route' => 'pembeli.pesanan.index'],
                 ['icon' => 'person', 'label' => 'Profil', 'route' => 'pembeli.profil.edit'],
             ];
         @endphp
@@ -252,8 +252,8 @@
                         <span class="material-symbols-outlined">shopping_cart</span>
                         <span>Keranjang</span>
                     </a>
-                    <a href="{{ route('pembeli.pesanan') }}" 
-                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('pembeli.pesanan') ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }}">
+                    <a href="{{ route('pembeli.pesanan.index') }}" 
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ request()->routeIs('pembeli.pesanan.index') ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }}">
                         <span class="material-symbols-outlined">receipt_long</span>
                         <span>Pesanan Saya</span>
                     </a>

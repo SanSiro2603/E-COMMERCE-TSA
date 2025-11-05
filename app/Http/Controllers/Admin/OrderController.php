@@ -176,58 +176,60 @@ class OrderController extends Controller
     }
 
     public function updateStatus(Request $request, Order $order)
-    {
-        try {
-            $validated = $request->validate([
-                'status' => 'required|in:pending,paid,processing,shipped,completed,cancelled',
-                'courier' => 'nullable|string|max:50',
-                'tracking_number' => 'nullable|string|max:100',
-            ], [
-                'status.required' => 'Status pesanan wajib dipilih.',
-                'status.in' => 'Status yang dipilih tidak valid.',
-                'courier.max' => 'Nama kurir maksimal 50 karakter.',
-                'tracking_number.max' => 'Nomor resi maksimal 100 karakter.',
+{
+    try {
+        $validated = $request->validate([
+            'status' => 'required|in:pending,paid,processing,shipped,completed,cancelled',
+            'courier' => 'nullable|string|max:50',
+            'tracking_number' => 'nullable|string|max:100',
+        ], [
+            'status.required' => 'Status pesanan wajib dipilih.',
+            'status.in' => 'Status yang dipilih tidak valid.',
+            'courier.max' => 'Nama kurir maksimal 50 karakter.',
+            'tracking_number.max' => 'Nomor resi maksimal 100 karakter.',
+        ]);
+
+        $order->update([
+            'status' => $request->status,
+        ]);
+
+        // Update shipment jika status shipped
+        if ($request->status === 'shipped' && $order->shipment) {
+            $order->shipment->update([
+                'courier' => $request->courier,
+                'tracking_number' => $request->tracking_number,
+                'status' => 'shipped',
+                'shipped_at' => now(),
             ]);
-
-            $order->update([
-                'status' => $request->status,
-            ]);
-
-            // Update shipment jika status shipped
-            if ($request->status === 'shipped' && $order->shipment) {
-                $order->shipment->update([
-                    'courier' => $request->courier,
-                    'tracking_number' => $request->tracking_number,
-                    'status' => 'shipped',
-                    'shipped_at' => now(),
-                ]);
-            }
-
-            // Jika completed
-            if ($request->status === 'completed' && $order->shipment) {
-                $order->shipment->update([
-                    'status' => 'delivered', 
-                    'delivered_at' => now()
-                ]);
-            }
-
-            // Update paid_at if status is paid or completed
-            if (in_array($request->status, ['paid', 'completed']) && !$order->paid_at) {
-                $order->update(['paid_at' => now()]);
-            }
-
-            return redirect()->back()
-                ->with('success', 'Status pesanan #' . $order->order_number . ' berhasil diperbarui menjadi ' . ucfirst($request->status) . '!');
-                
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back()
-                ->withErrors($e->errors())
-                ->withInput()
-                ->with('error', 'Validasi gagal. Periksa kembali input Anda.');
-                
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal memperbarui status pesanan. ' . $e->getMessage());
         }
+
+        // Jika completed
+        if ($request->status === 'completed' && $order->shipment) {
+            $order->shipment->update([
+                'status' => 'delivered', 
+                'delivered_at' => now()
+            ]);
+        }
+
+        // Update paid_at if status is paid or completed
+        if (in_array($request->status, ['paid', 'completed']) && !$order->paid_at) {
+            $order->update(['paid_at' => now()]);
+        }
+
+        // ✅ Setelah update, langsung kembali ke halaman index
+        return redirect()->route('admin.orders.index')
+            ->with('success', 'Status pesanan #' . $order->order_number . ' berhasil diperbarui menjadi ' . ucfirst($request->status) . '!');
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        return redirect()->back()
+            ->withErrors($e->errors())
+            ->withInput()
+            ->with('error', 'Validasi gagal. Periksa kembali input Anda.');
+            
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->with('error', 'Gagal memperbarui status pesanan. ' . $e->getMessage());
     }
+}
+
 }
