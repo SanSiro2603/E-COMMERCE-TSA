@@ -236,7 +236,7 @@
                         <span class="text-sm font-medium text-gray-900 dark:text-white">Jelajahi Produk</span>
                         <span class="material-symbols-outlined text-gray-400 group-hover:text-soft-green ml-auto text-sm">arrow_forward</span>
                     </a>
-                    <a href="{{ route('pembeli.keranjang') }}" 
+                    <a href="{{ route('pembeli.keranjang.index') }}" 
                        class="flex items-center gap-3 px-3 py-2 bg-white/50 dark:bg-zinc-800/50 hover:bg-white dark:hover:bg-zinc-800 rounded-lg transition-colors group">
                         <span class="material-symbols-outlined text-soft-green">shopping_cart</span>
                         <span class="text-sm font-medium text-gray-900 dark:text-white">Keranjang Saya</span>

@@ -151,7 +151,7 @@ function addToCart(productId) {
 }
 function buyNow(id){
     addToCart(id);
-    setTimeout(()=>window.location.href='{{ route("pembeli.keranjang") }}',800);
+    setTimeout(()=>window.location.href='{{ route("pembeli.keranjang.index") }}',800);
 }
 </script>
 @endsection
