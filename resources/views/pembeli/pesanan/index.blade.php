@@ -252,12 +252,13 @@
                             @endif
 
                             @if($order->status === 'pending')
-                                <a href="#"
-                                   class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-soft-green to-primary text-white hover:shadow-lg rounded-lg text-sm font-medium transition-all">
-                                    <span class="material-symbols-outlined text-base">payment</span>
-                                    Bayar Sekarang
-                                </a>
-                            @endif
+    <a href="{{ route('pembeli.payment.show', $order->id) }}"
+       class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-soft-green to-primary text-white hover:shadow-lg rounded-lg text-sm font-medium transition-all">
+        <span class="material-symbols-outlined text-base">payment</span>
+        Bayar Sekarang
+    </a>
+@endif
+
                         </div>
                     </div>
                 </div>

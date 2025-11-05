@@ -12,42 +12,31 @@ use Illuminate\Support\Facades\DB;
 
 class PesananController extends Controller
 {
-   public function index(Request $request)
-{
-    $query = Order::with(['items.product'])
-        ->where('user_id', Auth::id())
-        ->latest();
+    public function index(Request $request)
+    {
+        $query = Order::with(['items.product'])
+            ->where('user_id', Auth::id())
+            ->latest();
 
-    if ($request->filled('status') && $request->status !== 'all') {
-        $query->where('status', $request->status);
+        // Filter by status
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $orders = $query->paginate(10);
+
+        $statuses = [
+            'all' => 'Semua',
+            'pending' => 'Menunggu Pembayaran',
+            'paid' => 'Sudah Dibayar',
+            'processing' => 'Diproses',
+            'shipped' => 'Dikirim',
+            'completed' => 'Selesai',
+            'cancelled' => 'Dibatalkan',
+        ];
+
+        return view('pembeli.pesanan.index', compact('orders', 'statuses'));
     }
-
-    $orders = $query->paginate(10);
-
-    $statuses = [
-        'all' => 'Semua',
-        'pending' => 'Menunggu Pembayaran',
-        'paid' => 'Sudah Dibayar',
-        'processing' => 'Diproses',
-        'shipped' => 'Dikirim',
-        'completed' => 'Selesai',
-        'cancelled' => 'Dibatalkan',
-    ];
-
-    // Ambil cart user
-    $carts = Cart::with('product')->where('user_id', Auth::id())->get();
-
-    // Hitung total dan shipping
-    $total = $carts->sum(function ($cart) {
-        return $cart->subtotal;
-    });
-    $shippingCost = 15000; // default, bisa disesuaikan
-
-    $grandTotal = $total + $shippingCost;
-
-    return view('pembeli.pesanan.index', compact('orders', 'statuses', 'carts', 'total', 'shippingCost', 'grandTotal'));
-}
-
 
     public function show($id)
     {
@@ -158,8 +147,9 @@ class PesananController extends Controller
 
             DB::commit();
 
-            return redirect()->route('pembeli.pesanan.show', $order)
-                ->with('success', 'Pesanan berhasil dibuat! Order #' . $order->order_number);
+            // Redirect to payment page
+            return redirect()->route('pembeli.payment.show', $order)
+                ->with('success', 'Pesanan berhasil dibuat! Silakan selesaikan pembayaran.');
 
         } catch (\Exception $e) {
             DB::rollBack();

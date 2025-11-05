@@ -15,6 +15,9 @@ use App\Http\Controllers\Pembeli\PembeliDashboardController;
 use App\Http\Controllers\Pembeli\ProdukController;
 use App\Http\Controllers\Pembeli\CartController;
 use App\Http\Controllers\Pembeli\PesananController;
+use App\Http\Controllers\Pembeli\PaymentController;
+use App\Http\Controllers\Midtrans\PaymentWebhookController;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -94,16 +97,20 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 // ===============================================================
 // 🔹 PEMBELI ROUTES
 // ===============================================================
+
+
+
+
+
 Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function () {
 
-    // Dashboard Pembeli
-    Route::get('/dashboard', [PembeliDashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [PembeliDashboardController::class, 'index'])->name('dashboard');
 
     // Produk
     Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
     Route::get('/produk/{slug}', [ProdukController::class, 'show'])->name('produk.show');
 
+    // Keranjang
     Route::prefix('keranjang')->name('keranjang.')->group(function () {
         Route::get('/', [CartController::class, 'index'])->name('index');
         Route::post('/tambah/{product}', [CartController::class, 'tambah'])->name('tambah');
@@ -111,9 +118,10 @@ Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function
         Route::delete('/hapus/{cart}', [CartController::class, 'hapus'])->name('hapus');
         Route::get('/clear', [CartController::class, 'clear'])->name('clear');
         Route::get('/count', [CartController::class, 'count'])->name('count');
-}); 
+    });
 
-Route::prefix('pesanan')->name('pesanan.')->group(function () {
+    // Pesanan
+    Route::prefix('pesanan')->name('pesanan.')->group(function () {
         Route::get('/', [PesananController::class, 'index'])->name('index');
         Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
         Route::post('/store', [PesananController::class, 'store'])->name('store');
@@ -121,6 +129,19 @@ Route::prefix('pesanan')->name('pesanan.')->group(function () {
         Route::post('/{order}/cancel', [PesananController::class, 'cancel'])->name('cancel');
         Route::post('/{order}/complete', [PesananController::class, 'complete'])->name('complete');
     });
+
+    
+    Route::prefix('payment')->name('payment.')->group(function () {
+        Route::get('/{order}', [PaymentController::class, 'show'])->name('show');
+        Route::get('/finish', [PaymentController::class, 'finish'])->name('finish');
+        Route::get('/{order}/check-status', [PaymentController::class, 'checkStatus'])->name('check-status');
+
+    
+        Route::post('/notification', [PaymentController::class, 'notification'])->name('notification');
+    });
+
+
+
 
 
     // Halaman lainnya
