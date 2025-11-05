@@ -321,4 +321,52 @@
         }
     </script>
 </body>
+
+@stack('scripts')
+    <!-- Alpine.js for dropdowns -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script>
+        // Dark Mode Toggle
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const icon = document.querySelector('.dark-mode-icon');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                html.classList.add('light');
+                icon.textContent = 'light_mode';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.remove('light');
+                html.classList.add('dark');
+                icon.textContent = 'dark_mode';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // Load saved theme
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            const html = document.documentElement;
+            const icon = document.querySelector('.dark-mode-icon');
+            
+            html.classList.remove('light', 'dark');
+            html.classList.add(theme);
+            icon.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
+        })();
+
+        // Mobile Menu Toggle
+        function toggleMobileMenu() {
+            const menu = document.querySelector('.mobile-menu');
+            const overlay = document.querySelector('.mobile-overlay');
+            
+            menu.classList.toggle('active');
+            overlay.classList.toggle('hidden');
+        }
+    </script>
+
+    {{-- Tambahkan baris ini --}}
+    @stack('scripts')
+</body>
 </html>
