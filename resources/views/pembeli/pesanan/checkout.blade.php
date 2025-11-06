@@ -137,12 +137,30 @@ document.addEventListener('DOMContentLoaded', function () {
     const cityNameInput = document.getElementById('city_name');
     const cityTypeInput = document.getElementById('city_type');
 
+    console.log('Script loaded');
+
     // Load Provinces
     fetch('{{ route('pembeli.rajaongkir.provinces') }}')
-        .then(r => r.json())
+        .then(response => {
+            console.log('Province response status:', response.status);
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(provinces => {
+            console.log('Provinces data:', provinces);
+            
+            if (!Array.isArray(provinces) || provinces.length === 0) {
+                console.error('No provinces data received');
+                return;
+            }
+
             provinces.forEach(p => {
-                const opt = new Option(p.province, p.province_id);
+                // Support both formats: {id, name} and {province_id, province}
+                const id = p.province_id || p.id;
+                const name = p.province || p.name;
+                const opt = new Option(name, id);
                 provinceSelect.appendChild(opt);
             });
 
@@ -151,6 +169,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 provinceNameInput.value = '{{ old('province_name') }}';
                 provinceSelect.dispatchEvent(new Event('change'));
             @endif
+        })
+        .catch(error => {
+            console.error('Error loading provinces:', error);
+            alert('Gagal memuat data provinsi. Silakan refresh halaman.');
         });
 
     // Province Change
@@ -158,6 +180,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const provinceId = this.value;
         const selectedText = this.options[this.selectedIndex].text;
         provinceNameInput.value = selectedText;
+
+        console.log('Province changed:', provinceId);
 
         citySelect.innerHTML = '<option value="">Memuat...</option>';
         citySelect.disabled = true;
@@ -170,12 +194,31 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         fetch(`{{ route('pembeli.rajaongkir.cities') }}?province_id=${provinceId}`)
-            .then(r => r.json())
+            .then(response => {
+                console.log('City response status:', response.status);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(cities => {
+                console.log('Cities data:', cities);
+                
                 citySelect.innerHTML = '<option value="">Pilih Kota</option>';
+                
+                if (!Array.isArray(cities) || cities.length === 0) {
+                    console.error('No cities data received');
+                    citySelect.innerHTML = '<option value="">Tidak ada data kota</option>';
+                    return;
+                }
+
                 cities.forEach(c => {
-                    const label = `${c.type} ${c.city_name}`;
-                    const opt = new Option(label, c.city_id);
+                    // Support both formats
+                    const cityId = c.city_id || c.id;
+                    const cityName = c.city_name || c.name;
+                    const type = c.type || '';
+                    const label = type ? `${type} ${cityName}` : cityName;
+                    const opt = new Option(label, cityId);
                     citySelect.appendChild(opt);
                 });
                 citySelect.disabled = false;
@@ -185,12 +228,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         citySelect.value = '{{ old('city_id') }}';
                         const sel = citySelect.options[citySelect.selectedIndex];
                         if (sel && sel.value) {
-                            const [type, ...name] = sel.text.split(' ');
-                            cityTypeInput.value = type;
-                            cityNameInput.value = name.join(' ');
+                            const parts = sel.text.split(' ');
+                            cityTypeInput.value = parts[0];
+                            cityNameInput.value = parts.slice(1).join(' ');
                         }
                     }, 100);
                 @endif
+            })
+            .catch(error => {
+                console.error('Error loading cities:', error);
+                citySelect.innerHTML = '<option value="">Gagal memuat kota</option>';
+                citySelect.disabled = false;
             });
     });
 
@@ -198,15 +246,11 @@ document.addEventListener('DOMContentLoaded', function () {
     citySelect.addEventListener('change', function () {
         const sel = this.options[this.selectedIndex];
         if (sel && sel.value) {
-            const [type, ...name] = sel.text.split(' ');
-            cityTypeInput.value = type;
-            cityNameInput.value = name.join(' ');
+            const parts = sel.text.split(' ');
+            cityTypeInput.value = parts[0];
+            cityNameInput.value = parts.slice(1).join(' ');
         }
     });
-
-    @if(old('province_id'))
-        provinceSelect.dispatchEvent(new Event('change'));
-    @endif
 });
 </script>
 @endsection
