@@ -16,6 +16,7 @@ use App\Http\Controllers\Pembeli\ProdukController;
 use App\Http\Controllers\Pembeli\CartController;
 use App\Http\Controllers\Pembeli\PesananController;
 use App\Http\Controllers\Pembeli\PaymentController;
+use App\Http\Controllers\RajaOngkirController;
 use App\Http\Controllers\Midtrans\PaymentWebhookController;
 
 
@@ -142,9 +143,11 @@ Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function
         Route::post('/notification', [PaymentController::class, 'notification'])->name('notification');
     });
 
-
-
-
+// RajaOngkir API
+    Route::prefix('rajaongkir')->name('rajaongkir.')->group(function () {
+        Route::get('/provinces', [RajaOngkirController::class, 'provinces'])->name('provinces');
+        Route::get('/cities', [RajaOngkirController::class, 'cities'])->name('cities');
+    });
 
     // Halaman lainnya
     // Route::get('/keranjang', fn() => inertia('Pembeli/Keranjang'))->name('keranjang');

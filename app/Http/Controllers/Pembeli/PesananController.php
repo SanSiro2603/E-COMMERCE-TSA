@@ -82,84 +82,90 @@ class PesananController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'shipping_address' => 'required|string',
-            'courier'          => 'nullable|string|max:50',
-        ], [
-            'shipping_address.required' => 'Alamat pengiriman wajib diisi',
+{
+    $validated = $request->validate([
+        'recipient_name'    => 'required|string|max:255',
+        'recipient_phone'   => 'required|string|regex:/^08[0-9]{8,11}$/|max:15',
+        'province_id'       => 'required|string',
+        'province_name'     => 'required|string',
+        'city_id'           => 'required|string',
+        'city_name'         => 'required|string',
+        'city_type'         => 'required|string|in:Kota,Kabupaten',
+        'postal_code'       => 'nullable|string|max:10',
+        'shipping_address'  => 'required|string|max:500',
+        'courier'           => 'nullable|string|in:JNE,JNT,SiCepat,Anteraja',
+    ], [
+        'recipient_name.required'   => 'Nama penerima wajib diisi',
+        'recipient_phone.required'  => 'No. telepon wajib diisi',
+        'recipient_phone.regex'     => 'No. telepon harus diawali 08 dan berisi 10-13 angka',
+        'province_id.required'      => 'Provinsi wajib dipilih',
+        'city_id.required'          => 'Kota wajib dipilih',
+        'shipping_address.required' => 'Alamat lengkap wajib diisi',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        $carts = Cart::with('product')->where('user_id', Auth::id())->get();
+        if ($carts->isEmpty()) throw new \Exception('Keranjang kosong');
+
+        $totalAmount = 0;
+        foreach ($carts as $cart) {
+            $product = $cart->product;
+            if (!$product || !$product->is_active) {
+                throw new \Exception("Produk {$product->name} tidak tersedia");
+            }
+            $availableStock = $product->stock + $cart->quantity;
+            if ($availableStock < $cart->quantity) {
+                throw new \Exception("Stok {$product->name} tidak mencukupi");
+            }
+            $totalAmount += $cart->subtotal;
+        }
+
+        $shippingCost = 15000;
+        $grandTotal = $totalAmount + $shippingCost;
+
+        $order = Order::create([
+            'user_id'           => Auth::id(),
+            'order_number'      => Order::generateOrderNumber(),
+            'subtotal'          => $totalAmount,
+            'shipping_cost'     => $shippingCost,
+            'grand_total'       => $grandTotal,
+            'status'            => 'pending',
+
+            'recipient_name'    => $validated['recipient_name'],
+            'recipient_phone'   => $validated['recipient_phone'],
+            'province'          => $validated['province_name'],
+            'province_id'       => $validated['province_id'],
+            'city'              => $validated['city_type'] . ' ' . $validated['city_name'],
+            'city_id'           => $validated['city_id'],
+            'postal_code'       => $validated['postal_code'],
+            'shipping_address'  => $validated['shipping_address'],
+            'courier'           => $validated['courier'] ?? 'JNE',
         ]);
 
-        try {
-            DB::beginTransaction();
-
-            $carts = Cart::with(['product'])
-                ->where('user_id', Auth::id())
-                ->get();
-
-            if ($carts->isEmpty()) {
-                throw new \Exception('Keranjang kosong');
-            }
-
-            $totalAmount = 0;
-            foreach ($carts as $cart) {
-                $product = Product::find($cart->product_id);
-
-                if (!$product || !$product->is_active) {
-                    throw new \Exception('Produk tidak tersedia: ' . ($product->name ?? 'Unknown'));
-                }
-
-                $availableStock = $product->stock + $cart->quantity;
-
-                if ($availableStock < $cart->quantity) {
-                    throw new \Exception("Stok tidak mencukupi untuk {$product->name}. Tersedia: {$availableStock}, Dibutuhkan: {$cart->quantity}");
-                }
-
-                $totalAmount += $cart->subtotal;
-            }
-
-            $shippingCost = 15000;
-            $grandTotal = $totalAmount + $shippingCost;
-
-            $order = Order::create([
-                'user_id'         => Auth::id(),
-                'order_number'    => Order::generateOrderNumber(),
-                'total_amount'    => $totalAmount,
-                'shipping_cost'   => $shippingCost,
-                'grand_total'     => $grandTotal,
-                'status'          => 'pending',
-                'shipping_address'=> $validated['shipping_address'],
-                'courier'         => $validated['courier'] ?? 'JNE',
+        foreach ($carts as $cart) {
+            OrderItem::create([
+                'order_id'   => $order->id,
+                'product_id' => $cart->product_id,
+                'quantity'   => $cart->quantity,
+                'price'      => $cart->product->price,
+                'subtotal'   => $cart->subtotal,
             ]);
-
-            foreach ($carts as $cart) {
-                OrderItem::create([
-                    'order_id'   => $order->id,
-                    'product_id' => $cart->product_id,
-                    'quantity'   => $cart->quantity,
-                    'price'      => $cart->product->price,
-                    'subtotal'   => $cart->subtotal,
-                ]);
-
-                DB::table('products')
-                    ->where('id', $cart->product_id)
-                    ->decrement('stock', $cart->quantity);
-            }
-
-            Cart::where('user_id', Auth::id())->delete();
-
-            DB::commit();
-
-            return redirect()->route('pembeli.payment.show', $order)
-                ->with('success', 'Pesanan berhasil dibuat! Silakan selesaikan pembayaran.');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->withInput()
-                ->with('error', 'Gagal membuat pesanan: ' . $e->getMessage());
+            DB::table('products')->where('id', $cart->product_id)->decrement('stock', $cart->quantity);
         }
+
+        Cart::where('user_id', Auth::id())->delete();
+        DB::commit();
+
+        return redirect()->route('pembeli.payment.show', $order)
+            ->with('success', 'Pesanan berhasil dibuat!');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return redirect()->back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
     }
+}
 
     public function edit($id)
     {
