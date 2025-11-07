@@ -99,9 +99,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 // 🔹 PEMBELI ROUTES
 // ===============================================================
 
-// // Webhook Midtrans (HARUS PUBLIC & HTTPS kalau production)
-// Route::post('/midtrans/notification', [App\Http\Controllers\MidtransController::class, 'notification'])
-//     ->name('midtrans.notification');
+// Webhook Midtrans (HARUS PUBLIC & HTTPS kalau production)
+Route::post('/midtrans/notification', [App\Http\Controllers\MidtransController::class, 'notification'])
+    ->name('midtrans.notification');
 
 
 

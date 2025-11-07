@@ -117,16 +117,8 @@ class Order extends Model
         return $colors[$this->status] ?? 'gray';
     }
 
-    public function canBeCancelled()
-    {
-        return in_array($this->status, ['pending', 'paid']);
-    }
-
-    public function canBeCompleted()
-    {
-        return $this->status === 'shipped';
-    }
-
+    
+   
     public function calculateSubtotal()
     {
         return $this->items->sum(fn($item) => $item->price * $item->quantity);
@@ -136,4 +128,16 @@ class Order extends Model
     {
         return $this->calculateSubtotal() + $this->shipping_cost;
     }
+    // app/Models/Order.php
+public function canBeCancelled(): bool
+{
+    return in_array($this->status, ['pending', 'paid']) 
+        && is_null($this->cancelled_at)
+        && is_null($this->shipped_at);
+}
+
+public function canBeCompleted(): bool
+{
+    return $this->status === 'shipped' && !$this->completed_at;
+}
 }

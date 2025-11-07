@@ -60,7 +60,7 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="all">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-gray-500 dark:text-zinc-400 uppercase font-medium">Semua</span>
@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="pending">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-yellow-600 dark:text-yellow-400 uppercase font-medium">Pending</span>
@@ -84,7 +84,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="paid">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-blue-600 dark:text-blue-400 uppercase font-medium">Paid</span>
@@ -96,7 +96,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="processing">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-purple-600 dark:text-purple-400 uppercase font-medium">Processing</span>
@@ -108,7 +108,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="shipped">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-indigo-600 dark:text-indigo-400 uppercase font-medium">Shipped</span>
@@ -120,7 +120,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800">
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="completed">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-xs text-green-600 dark:text-green-400 uppercase font-medium">Completed</span>
@@ -195,13 +195,19 @@
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-zinc-800">
                     @forelse($orders as $order)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                        @php
+                            $isNewPaid = $order->status === 'paid' && $order->paid_at && $order->paid_at->diffInMinutes(now()) < 2;
+                        @endphp
+                        <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-all {{ $isNewPaid ? 'ring-2 ring-green-400 ring-opacity-50 animate-pulse' : '' }}">
                             <!-- Order Number -->
                             <td class="px-6 py-4">
                                 <a href="{{ route('admin.orders.show', $order) }}" 
                                    class="text-sm font-semibold text-soft-green hover:text-primary transition-colors">
                                     #{{ $order->order_number }}
                                 </a>
+                                @if($isNewPaid)
+                                    <span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold text-green-700 bg-green-100 dark:bg-green-500/20 dark:text-green-300 rounded-full animate-bounce">BARU!</span>
+                                @endif
                             </td>
 
                             <!-- Buyer -->
@@ -220,8 +226,7 @@
                             <!-- Total -->
                             <td class="px-6 py-4">
                                 <p class="text-sm font-bold text-gray-900 dark:text-white">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</p>
-                               <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->items->count() }} item</p>
-
+                                <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->items->count() }} item</p>
                             </td>
 
                             <!-- Status -->
@@ -235,7 +240,7 @@
                                         @case('completed') bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 @break
                                         @case('cancelled') bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 @break
                                     @endswitch">
-                                    <span class="w-1.5 h-1.5 rounded-full
+                                    <span class="w-1.5 h-1.5 rounded-full animate-ping
                                         @switch($order->status)
                                             @case('pending') bg-yellow-500 @break
                                             @case('paid') bg-blue-500 @break
@@ -287,139 +292,117 @@
     </div>
 
 </div>
-@endsection
 
-<style>
-    @keyframes fade-in {
-        from {
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .animate-fade-in {
-        animation: fade-in 0.3s ease-out;
-    }
-</style>
-
+<!-- REAL-TIME POLLING + AJAX SEARCH + CONFETTI -->
 <script>
-    // Auto dismiss alerts after 5 seconds
-    document.addEventListener('DOMContentLoaded', function() {
-        const alerts = document.querySelectorAll('.animate-fade-in');
-        alerts.forEach(alert => {
-            setTimeout(() => {
-                alert.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
-                alert.style.opacity = '0';
-                alert.style.transform = 'translateY(-10px)';
-                setTimeout(() => alert.remove(), 300);
-            }, 5000);
-        });
+document.addEventListener('DOMContentLoaded', function () {
+    const tbody = document.querySelector('tbody');
+    const statsCards = document.querySelectorAll('[data-stat] .text-2xl');
+    const searchForm = document.querySelector('form[method="GET"]');
+    const searchInput = document.querySelector('input[name="search"]');
+    const statusSelect = document.querySelector('select[name="status"]');
+    let debounceTimer;
 
-        // AJAX Search & Filter
-        const searchForm = document.querySelector('form[method="GET"]');
-        const searchInput = document.querySelector('input[name="search"]');
-        const statusSelect = document.querySelector('select[name="status"]');
-        const tableBody = document.querySelector('tbody');
-        const statsCards = document.querySelectorAll('.grid.grid-cols-2 > div p.text-2xl');
+    // Debounce
+    function debounce(func, delay) {
+        return function() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(func, delay);
+        };
+    }
+
+    // Fetch Orders
+    async function fetchOrders() {
+        const search = searchInput.value;
+        const status = statusSelect.value;
         
-        let debounceTimer;
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="px-6 py-12 text-center">
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="w-12 h-12 border-4 border-soft-green border-t-transparent rounded-full animate-spin mb-3"></div>
+                        <p class="text-sm text-gray-500 dark:text-zinc-400">Memuat data...</p>
+                    </div>
+                </td>
+            </tr>
+        `;
 
-        // Debounce function for search input
-        function debounce(func, delay) {
-            return function() {
-                clearTimeout(debounceTimer);
-                debounceTimer = setTimeout(func, delay);
-            };
-        }
+        try {
+            const url = new URL(window.location);
+            url.searchParams.set('search', search);
+            url.searchParams.set('status', status);
+            url.searchParams.set('ajax', '1');
 
-        // Function to fetch and update orders
-        async function fetchOrders() {
-            const search = searchInput.value;
-            const status = statusSelect.value;
+            const response = await fetch(url, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+
+            if (!response.ok) throw new Error();
+
+            const data = await response.json();
             
-            // Show loading state
-            tableBody.innerHTML = `
+            tbody.innerHTML = data.html;
+
+            // Update stats
+            Object.keys(data.stats).forEach(key => {
+                const el = document.querySelector(`[data-stat="${key}"] .text-2xl`);
+                if (el) el.textContent = data.stats[key];
+            });
+
+            // Update URL
+            window.history.pushState({}, '', url.toString().replace('&ajax=1', ''));
+
+            // Confetti for new paid
+            if (data.html.includes('BARU!')) {
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            }
+
+        } catch (error) {
+            tbody.innerHTML = `
                 <tr>
                     <td colspan="6" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center justify-center">
-                            <div class="w-12 h-12 border-4 border-soft-green border-t-transparent rounded-full animate-spin mb-3"></div>
-                            <p class="text-sm text-gray-500 dark:text-zinc-400">Memuat data...</p>
+                            <span class="material-symbols-outlined text-red-500 text-6xl mb-3">error</span>
+                            <p class="text-sm font-medium text-red-600 dark:text-red-400">Gagal memuat data</p>
+                            <button onclick="location.reload()" class="mt-3 px-4 py-2 bg-soft-green text-white rounded-lg text-sm">
+                                Muat Ulang
+                            </button>
                         </div>
                     </td>
                 </tr>
             `;
-
-            try {
-                const url = new URL(window.location.href);
-                url.searchParams.set('search', search);
-                url.searchParams.set('status', status);
-                url.searchParams.set('ajax', '1');
-
-                const response = await fetch(url.toString(), {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                });
-
-                if (!response.ok) throw new Error('Network response was not ok');
-
-                const data = await response.json();
-                
-                // Update table
-                if (data.html) {
-                    tableBody.innerHTML = data.html;
-                }
-
-                // Update stats cards
-                if (data.stats) {
-                    updateStats(data.stats);
-                }
-
-                // Update URL without reload
-                window.history.pushState({}, '', url.toString().replace('&ajax=1', ''));
-
-            } catch (error) {
-                console.error('Error fetching orders:', error);
-                tableBody.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-12 text-center">
-                            <div class="flex flex-col items-center justify-center">
-                                <span class="material-symbols-outlined text-red-500 text-6xl mb-3">error</span>
-                                <p class="text-sm font-medium text-red-600 dark:text-red-400">Gagal memuat data</p>
-                                <button onclick="location.reload()" class="mt-3 px-4 py-2 bg-soft-green text-white rounded-lg text-sm">
-                                    Muat Ulang
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }
         }
+    }
 
-        // Update stats cards
-        function updateStats(stats) {
-            const cards = document.querySelectorAll('.grid.grid-cols-2 > div');
-            if (cards[0]) cards[0].querySelector('p.text-2xl').textContent = stats.all || '0';
-            if (cards[1]) cards[1].querySelector('p.text-2xl').textContent = stats.pending || '0';
-            if (cards[2]) cards[2].querySelector('p.text-2xl').textContent = stats.paid || '0';
-            if (cards[3]) cards[3].querySelector('p.text-2xl').textContent = stats.processing || '0';
-            if (cards[4]) cards[4].querySelector('p.text-2xl').textContent = stats.shipped || '0';
-            if (cards[5]) cards[5].querySelector('p.text-2xl').textContent = stats.completed || '0';
-        }
+    // Event Listeners
+    searchInput.addEventListener('input', debounce(fetchOrders, 500));
+    statusSelect.addEventListener('change', fetchOrders);
+    searchForm.addEventListener('submit', e => { e.preventDefault(); fetchOrders(); });
 
-        // Event listeners
-        searchInput.addEventListener('input', debounce(fetchOrders, 500));
-        statusSelect.addEventListener('change', fetchOrders);
+    // POLLING TIAP 8 DETIK
+    setInterval(fetchOrders, 8000);
+    fetchOrders(); // pertama kali
+});
 
-        // Prevent form submission
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            fetchOrders();
-        });
+// Auto dismiss alerts
+setTimeout(() => {
+    document.querySelectorAll('.animate-fade-in').forEach(alert => {
+        alert.style.transition = 'opacity 0.3s, transform 0.3s';
+        alert.style.opacity = '0';
+        alert.style.transform = 'translateY(-10px)';
+        setTimeout(() => alert.remove(), 300);
     });
+}, 5000);
 </script>
+
+<!-- CONFETTI -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fade-in 0.3s ease-out; }
+</style>
+@endsection

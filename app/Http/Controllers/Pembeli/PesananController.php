@@ -284,36 +284,49 @@ public function update(Request $request, $id)
 }
 
     public function cancel($id)
-    {
-        try {
-            $order = Order::where('user_id', Auth::id())->findOrFail($id);
+{
+    try {
+        // === 1. CARI ORDER + CEK PEMILIK ===
+        $order = Order::where('user_id', Auth::id())->findOrFail($id);
 
-            if (!$order->canBeCancelled()) {
-                return redirect()->back()
-                    ->with('error', 'Pesanan tidak dapat dibatalkan pada status ini');
-            }
+        // === 2. CEK APAKAH BISA DIBATALKAN ===
+        if (!$order->canBeCancelled()) {
+            return back()
+                ->with('error', 'Pesanan tidak dapat dibatalkan karena sudah diproses atau dikirim.');
+        }
 
-            DB::beginTransaction();
-
+        // === 3. PROSES PEMBATALAN DALAM TRANSAKSI ===
+        DB::transaction(function () use ($order) {
+            // Restore stok produk
             foreach ($order->items as $item) {
                 if ($item->product) {
                     $item->product->increment('stock', $item->quantity);
                 }
             }
 
-            $order->update(['status' => 'cancelled']);
+            // Update status
+            $order->update([
+                'status' => 'cancelled',
+                'cancelled_at' => now(),
+            ]);
 
-            DB::commit();
+        });
 
-            return redirect()->back()
-                ->with('success', 'Pesanan berhasil dibatalkan');
+        // === 4. FLASH MESSAGE + REDIRECT ===
+        return back()->with('success', "Pesanan #{$order->order_number} berhasil dibatalkan. Stok produk telah dikembalikan.");
 
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()
-                ->with('error', 'Gagal membatalkan pesanan: ' . $e->getMessage());
-        }
+    } catch (\Exception $e) {
+        DB::rollBack();
+
+        \Log::error('Gagal batalkan pesanan ID ' . $id, [
+            'user_id' => Auth::id(),
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+
+        return back()->with('error', 'Gagal membatalkan pesanan. Silakan coba lagi atau hubungi admin.');
     }
+}
 
     public function complete($id)
     {

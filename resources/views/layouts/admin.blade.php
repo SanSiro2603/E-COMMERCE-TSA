@@ -292,7 +292,7 @@
         <footer class="px-4 lg:px-8 py-6 border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
             <div class="max-w-7xl mx-auto">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
-                    <p>© 2024 Lembah Hijau. All rights reserved.</p>
+                    <p>© 2025 Lembah Hijau. All rights reserved.</p>
                     <div class="flex items-center gap-4">
                         <a href="#" class="hover:text-soft-green transition-colors">Dokumentasi</a>
                         <span>•</span>
