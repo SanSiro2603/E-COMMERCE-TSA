@@ -92,39 +92,46 @@ class PesananController extends Controller
     return view('pembeli.pesanan.show', compact('order'));
 }
 
-    public function checkout()
-    {
-        $carts = Cart::with(['product'])
-            ->where('user_id', Auth::id())
-            ->get();
+   public function checkout()
+{
+    $carts = Cart::with(['product'])
+        ->where('user_id', Auth::id())
+        ->get();
 
-        if ($carts->isEmpty()) {
-            return redirect()->route('pembeli.keranjang.index')
-                ->with('error', 'Keranjang Anda kosong');
-        }
-
-        foreach ($carts as $cart) {
-            $product = $cart->product;
-
-            if (!$product || !$product->is_active) {
-                return redirect()->route('pembeli.keranjang.index')
-                    ->with('error', 'Produk ' . ($product->name ?? 'tidak tersedia') . ' sudah tidak tersedia');
-            }
-
-            $availableStock = $product->stock + $cart->quantity;
-
-            if ($availableStock < $cart->quantity) {
-                return redirect()->route('pembeli.keranjang.index')
-                    ->with('error', "Stok {$product->name} tidak mencukupi. Tersedia: {$availableStock}, Dibutuhkan: {$cart->quantity}");
-            }
-        }
-
-        $total = $carts->sum('subtotal');
-        $shippingCost = 15000;
-        $grandTotal = $total + $shippingCost;
-
-        return view('pembeli.pesanan.checkout', compact('carts', 'total', 'shippingCost', 'grandTotal'));
+    if ($carts->isEmpty()) {
+        return redirect()->route('pembeli.keranjang.index')
+            ->with('error', 'Keranjang Anda kosong');
     }
+
+    foreach ($carts as $cart) {
+        $product = $cart->product;
+
+        if (!$product || !$product->is_active) {
+            return redirect()->route('pembeli.keranjang.index')
+                ->with('error', 'Produk ' . ($product->name ?? 'tidak tersedia') . ' sudah tidak tersedia');
+        }
+
+        $availableStock = $product->stock + $cart->quantity;
+
+        if ($availableStock < $cart->quantity) {
+            return redirect()->route('pembeli.keranjang.index')
+                ->with('error', "Stok {$product->name} tidak mencukupi. Tersedia: {$availableStock}, Dibutuhkan: {$cart->quantity}");
+        }
+    }
+
+    $subtotal = $carts->sum('subtotal');
+    
+    // Hitung total berat (dalam gram)
+    $totalWeight = 0;
+    foreach ($carts as $cart) {
+        // Asumsikan setiap produk punya field 'weight' dalam gram
+        // Jika belum ada, set default 1000 gram (1 kg) per produk
+        $productWeight = $cart->product->weight ?? 1000; 
+        $totalWeight += ($productWeight * $cart->quantity);
+    }
+
+    return view('pembeli.pesanan.checkout', compact('carts', 'subtotal', 'totalWeight'));
+}
 
     public function store(Request $request)
 {
@@ -138,7 +145,9 @@ class PesananController extends Controller
         'city_type'         => 'required|string|in:Kota,Kabupaten',
         'postal_code'       => 'nullable|string|max:10',
         'shipping_address'  => 'required|string|max:500',
-        'courier'           => 'nullable|string|in:JNE,JNT,SiCepat,Anteraja',
+        'courier'           => 'required|string',
+        'shipping_cost'     => 'required|numeric|min:0', // TAMBAHAN: validasi ongkir
+        'shipping_service'  => 'nullable|string', // TAMBAHAN: nama service (REG, YES, dll)
     ], [
         'recipient_name.required'   => 'Nama penerima wajib diisi',
         'recipient_phone.required'  => 'No. telepon wajib diisi',
@@ -146,6 +155,7 @@ class PesananController extends Controller
         'province_id.required'      => 'Provinsi wajib dipilih',
         'city_id.required'          => 'Kota wajib dipilih',
         'shipping_address.required' => 'Alamat lengkap wajib diisi',
+        'shipping_cost.required'    => 'Ongkir belum dihitung, pilih kota tujuan terlebih dahulu',
     ]);
 
     try {
@@ -167,7 +177,8 @@ class PesananController extends Controller
             $totalAmount += $cart->subtotal;
         }
 
-        $shippingCost = 15000;
+        // Gunakan ongkir dari form (hasil kalkulasi real-time)
+        $shippingCost = $validated['shipping_cost'];
         $grandTotal = $totalAmount + $shippingCost;
 
         $order = Order::create([
@@ -186,7 +197,7 @@ class PesananController extends Controller
             'city_id'           => $validated['city_id'],
             'postal_code'       => $validated['postal_code'],
             'shipping_address'  => $validated['shipping_address'],
-            'courier'           => $validated['courier'] ?? 'JNE',
+            'courier'           => $validated['courier'],
         ]);
 
         foreach ($carts as $cart) {
@@ -211,6 +222,7 @@ class PesananController extends Controller
         return redirect()->back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
     }
 }
+
 
    public function edit($id)
 {

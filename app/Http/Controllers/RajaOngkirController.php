@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\JsonResponse;
 
 class RajaOngkirController extends Controller
 {
@@ -209,4 +210,69 @@ class RajaOngkirController extends Controller
             ], 500);
         }
     }
+
+
+    public function calculate(Request $request)
+    {
+        $destination = $request->destination;
+        $weight = $request->weight ?? 1000; // gram
+        $courier = $request->courier ?? 'jne';
+
+        // Basis data ongkir antar wilayah (contoh kasar)
+        $baseRates = [
+            'local' => 3000,   // Sesama provinsi
+            'near'  => 20000,  // Pulau sama (Sumatera)
+            'far'   => 50000,  // Antar pulau
+            'very_far' => 90000 // Papua, Maluku, NTT
+        ];
+
+        // Daftar provinsi asal toko
+        $originProvince = 'Lampung';
+
+        // Mapping kategori provinsi tujuan
+        $provinceZones = [
+            'Lampung' => 'local',
+            'Sumatera Selatan' => 'near',
+            'Bengkulu' => 'near',
+            'Jambi' => 'near',
+            'Sumatera Utara' => 'near',
+            'DKI Jakarta' => 'near',
+            'Jawa Barat' => 'far',
+            'DI Yogyakarta' => 'far',
+            'Jawa Barat' => 'far',
+            'Jawa Tengah' => 'far',
+            'Jawa Timur' => 'far',
+            'Kalimantan Timur' => 'far',
+            'Sulawesi Selatan' => 'far',
+            'Papua' => 'very_far',
+            'Papua Barat' => 'very_far',
+            'Maluku' => 'very_far',
+            'Nusa Tenggara Timur' => 'very_far',
+        ];
+
+        // Ambil nama provinsi dari request (nanti dikirim JS)
+        $provinceName = $request->province_name ?? 'Lampung';
+        $zone = $provinceZones[$provinceName] ?? 'far';
+
+        // Hitung ongkir berdasarkan berat
+        $ratePerKg = $baseRates[$zone];
+        $totalCost = ceil($weight / 1000) * $ratePerKg;
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'service' => strtoupper($courier) . ' REG',
+                'description' => 'Estimasi pengiriman ' . ucfirst(str_replace('_', ' ', $zone)),
+                'etd' => match ($zone) {
+                    'local' => '1-2',
+                    'near' => '2-3',
+                    'far' => '3-5',
+                    'very_far' => '5-10',
+                    default => '3-7',
+                },
+                'cost' => $totalCost
+            ]
+        ]);
+    }
 }
+
