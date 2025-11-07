@@ -99,9 +99,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 // 🔹 PEMBELI ROUTES
 // ===============================================================
 
+// // Webhook Midtrans (HARUS PUBLIC & HTTPS kalau production)
+// Route::post('/midtrans/notification', [App\Http\Controllers\MidtransController::class, 'notification'])
+//     ->name('midtrans.notification');
 
 
 
+// ===============================================================
+// PEMBELI ROUTES
+// ===============================================================
 
 Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function () {
 
@@ -133,25 +139,19 @@ Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function
         Route::post('/{order}/complete', [PesananController::class, 'complete'])->name('complete');
     });
 
-    
+    // Payment Routes – RAPI DI BAWAH PREFIX payment.
     Route::prefix('payment')->name('payment.')->group(function () {
         Route::get('/{order}', [PaymentController::class, 'show'])->name('show');
         Route::get('/finish', [PaymentController::class, 'finish'])->name('finish');
         Route::get('/{order}/check-status', [PaymentController::class, 'checkStatus'])->name('check-status');
-
-    
-        Route::post('/notification', [PaymentController::class, 'notification'])->name('notification');
     });
 
-Route::prefix('rajaongkir')->name('rajaongkir.')->group(function () {
-    Route::get('/provinces', [RajaOngkirController::class, 'provinces'])->name('provinces');
-    Route::get('/cities', [RajaOngkirController::class, 'cities'])->name('cities');
-});
+    // RajaOngkir
+    Route::prefix('rajaongkir')->name('rajaongkir.')->group(function () {
+        Route::get('/provinces', [RajaOngkirController::class, 'provinces'])->name('provinces');
+        Route::get('/cities', [RajaOngkirController::class, 'cities'])->name('cities');
+    });
 
-    // Halaman lainnya
-    // Route::get('/keranjang', fn() => inertia('Pembeli/Keranjang'))->name('keranjang');
-    // Route::get('/pesanan', fn() => inertia('Pembeli/Pesanan'))->name('pesanan');
-    // Route::get('/pesanan/{order}', fn() => inertia('Pembeli/PesananShow'))->name('pesanan.show');
+    // Profil
     Route::get('/profil', fn() => inertia('Pembeli/Profil'))->name('profil.edit');
 });
-

@@ -87,40 +87,18 @@ class PaymentController extends Controller
     /**
      * Payment finish callback
      */
-    public function finish(Request $request)
-    {
-        $orderId = $request->order_id;
-        $transactionStatus = $request->transaction_status;
+    // app/Http/Controllers/Pembeli/PaymentController.php
 
-        $order = Order::where('order_number', $orderId)->first();
+public function finish(Request $request)
+{
+    $orderNumber = $request->order_id; // Midtrans kirim order_number
+    $transactionStatus = $request->transaction_status;
 
-        if (!$order) {
-            return redirect()->route('pembeli.pesanan.index')
-                ->with('error', 'Pesanan tidak ditemukan');
-        }
-
-        $message = '';
-        
-        switch ($transactionStatus) {
-            case 'capture':
-            case 'settlement':
-                $message = 'Pembayaran berhasil! Pesanan Anda sedang diproses.';
-                break;
-            case 'pending':
-                $message = 'Menunggu pembayaran. Silakan selesaikan pembayaran Anda.';
-                break;
-            case 'deny':
-            case 'expire':
-            case 'cancel':
-                $message = 'Pembayaran gagal atau dibatalkan.';
-                break;
-            default:
-                $message = 'Status pembayaran: ' . $transactionStatus;
-        }
-
-        return redirect()->route('pembeli.pesanan.show', $order)
-            ->with('success', $message);
-    }
+    // Langsung redirect ke daftar pesanan dengan parameter
+    return redirect()->route('pembeli.pesanan.index')
+        ->with('check_status', $orderNumber)
+        ->with('transaction_status', $transactionStatus);
+}
 
     /**
      * Webhook/Notification handler from Midtrans
@@ -203,52 +181,63 @@ class PaymentController extends Controller
     /**
      * Check payment status manually
      */
-    public function checkStatus($orderId)
-    {
-        try {
-            $order = Order::with('payment')
-                ->where('user_id', Auth::id())
-                ->findOrFail($orderId);
+    // app/Http/Controllers/Pembeli/PaymentController.php
 
-            $result = $this->midtrans->checkStatus($order->order_number);
+public function checkStatus($orderNumber)
+{
+    try {
+        $order = Order::with('payment')
+            ->where('order_number', $orderNumber)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
 
-            if ($result['success']) {
-                $status = $result['data'];
-                
-                // Update payment
-                if ($order->payment) {
-                    $order->payment->update([
-                        'transaction_status' => $status->transaction_status,
-                        'metadata' => json_decode(json_encode($status), true),
-                    ]);
+        // Kalau sudah paid, langsung return
+        if ($order->status === 'paid') {
+            return response()->json([
+                'success' => true,
+                'status' => 'settlement',
+                'message' => 'Sudah dibayar'
+            ]);
+        }
 
-                    // Update order status if paid
-                    if (in_array($status->transaction_status, ['capture', 'settlement'])) {
-                        $order->update([
-                            'status' => 'paid',
-                            'paid_at' => now()
-                        ]);
-                    }
-                }
+        // Cek ke Midtrans
+        $result = $this->midtrans->checkStatus($order->order_number);
 
-                return response()->json([
-                    'success' => true,
-                    'status' => $status->transaction_status,
-                    'message' => 'Status pembayaran berhasil diperbarui'
+        if ($result['success']) {
+            $status = $result['data'];
+            
+            if ($order->payment) {
+                $order->payment->update([
+                    'transaction_status' => $status->transaction_status,
+                    'metadata' => json_decode(json_encode($status), true),
                 ]);
+
+                // Update order jika sukses
+                if (in_array($status->transaction_status, ['capture', 'settlement'])) {
+                    $order->update([
+                        'status' => 'paid',
+                        'paid_at' => now()
+                    ]);
+                }
             }
 
             return response()->json([
-                'success' => false,
-                'message' => $result['message']
-            ], 400);
-
-        } catch (\Exception $e) {
-            Log::error('Check Status Error: ' . $e->getMessage());
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengecek status pembayaran'
-            ], 500);
+                'success' => true,
+                'status' => $status->transaction_status,
+                'message' => 'Status diperbarui'
+            ]);
         }
+
+        return response()->json([
+            'success' => false,
+            'message' => $result['message']
+        ], 400);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal cek status'
+        ], 500);
     }
+}
 }

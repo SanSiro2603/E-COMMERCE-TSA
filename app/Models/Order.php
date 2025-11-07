@@ -42,7 +42,7 @@ class Order extends Model
         'paid_at' => 'datetime',
     ];
 
-    // Relationships
+    // === RELATIONSHIPS ===
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -53,7 +53,18 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // Scopes
+    // RELASI PAYMENT — INI YANG HILANG!
+    public function payment()
+    {
+        return $this->hasOne(Payment::class, 'order_id');
+    }
+
+    public function shipment() 
+    {
+        return $this->hasOne(Shipment::class, 'order_id'); 
+    }
+
+    // === SCOPES ===
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
@@ -72,12 +83,11 @@ class Order extends Model
         return $query->latest();
     }
 
-    // Helpers
-   public static function generateOrderNumber()
-{
-    return 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
-}
-
+    // === HELPERS ===
+    public static function generateOrderNumber()
+    {
+        return 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
+    }
 
     public function getStatusLabelAttribute()
     {
@@ -117,17 +127,11 @@ class Order extends Model
         return $this->status === 'shipped';
     }
 
-    /**
-     * Hitung subtotal berdasarkan items
-     */
     public function calculateSubtotal()
     {
         return $this->items->sum(fn($item) => $item->price * $item->quantity);
     }
 
-    /**
-     * Hitung grand total (subtotal + ongkir)
-     */
     public function calculateGrandTotal()
     {
         return $this->calculateSubtotal() + $this->shipping_cost;
