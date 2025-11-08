@@ -205,6 +205,7 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'weight' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Multiple images
             'health_certificate' => 'nullable|mimes:pdf|max:5120',
             'available_from' => 'nullable|date',
             'is_active' => 'required|boolean',
@@ -213,10 +214,26 @@ class ProductController extends Controller
         $data = $request->all();
         $data['slug'] = Str::slug($request->name);
 
-        // Upload gambar
+        // Handle multiple images untuk gallery
+        $imagesPaths = [];
+        
+        // Upload gambar utama (main image)
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('products', 'public');
+            $mainImage = $request->file('image')->store('products', 'public');
+            $data['image'] = $mainImage;
+            $imagesPaths[] = $mainImage; // Tambahkan ke array images
         }
+
+        // Upload gambar tambahan (gallery images)
+       if ($request->hasFile('gallery_images')) {
+        foreach ($request->file('gallery_images') as $image) {
+            $path = $image->store('products', 'public');
+            $imagesPaths[] = $path; // Tambahkan ke array
+        }
+    }
+
+        // Simpan semua path gambar ke kolom images (JSON)
+        $data['images'] = !empty($imagesPaths) ? $imagesPaths : null;
 
         // Upload sertifikat
         if ($request->hasFile('health_certificate')) {
@@ -245,21 +262,65 @@ class ProductController extends Controller
             'stock' => 'required|integer|min:0',
             'weight' => 'nullable|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Multiple images
             'health_certificate' => 'nullable|mimes:pdf|max:5120',
             'available_from' => 'nullable|date',
             'is_active' => 'required|boolean',
+            'remove_images' => 'nullable|array', // Array of images to remove
         ]);
 
         $data = $request->all();
         $data['slug'] = Str::slug($request->name);
 
-        if ($request->hasFile('image')) {
-            if ($product->image) Storage::disk('public')->delete($product->image);
-            $data['image'] = $request->file('image')->store('products', 'public');
+        // Get existing images
+        $existingImages = $product->images ?? [];
+        
+        // Remove selected images
+        if ($request->filled('remove_images')) {
+            foreach ($request->remove_images as $imageToRemove) {
+                // Delete from storage
+                if (Storage::disk('public')->exists($imageToRemove)) {
+                    Storage::disk('public')->delete($imageToRemove);
+                }
+                // Remove from array
+                $existingImages = array_values(array_filter($existingImages, function($img) use ($imageToRemove) {
+                    return $img !== $imageToRemove;
+                }));
+            }
         }
 
+        // Update main image if uploaded
+        if ($request->hasFile('image')) {
+            // Delete old main image if exists and not in existing images array
+            if ($product->image && !in_array($product->image, $existingImages)) {
+                Storage::disk('public')->delete($product->image);
+            }
+            
+            $mainImage = $request->file('image')->store('products', 'public');
+            $data['image'] = $mainImage;
+            
+            // Add to existing images if not already there
+            if (!in_array($mainImage, $existingImages)) {
+                array_unshift($existingImages, $mainImage);
+            }
+        }
+
+        // Upload new gallery images
+        if ($request->hasFile('gallery_images')) {
+            foreach ($request->file('gallery_images') as $image) {
+                $path = $image->store('products', 'public');
+                $existingImages[] = $path;
+            }
+        }
+
+        // Update images array
+        $data['images'] = !empty($existingImages) ? array_values($existingImages) : null;
+
+        // Update health certificate
         if ($request->hasFile('health_certificate')) {
-            if ($product->health_certificate) Storage::disk('public')->delete($product->health_certificate);
+            if ($product->health_certificate) {
+                Storage::disk('public')->delete($product->health_certificate);
+            }
             $data['health_certificate'] = $request->file('health_certificate')->store('certificates', 'public');
         }
 
@@ -271,8 +332,25 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->image) Storage::disk('public')->delete($product->image);
-        if ($product->health_certificate) Storage::disk('public')->delete($product->health_certificate);
+        // Delete main image
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+        
+        // Delete all gallery images
+        if (!empty($product->images)) {
+            foreach ($product->images as $image) {
+                if (Storage::disk('public')->exists($image)) {
+                    Storage::disk('public')->delete($image);
+                }
+            }
+        }
+        
+        // Delete health certificate
+        if ($product->health_certificate) {
+            Storage::disk('public')->delete($product->health_certificate);
+        }
+        
         $product->delete();
 
         return back()->with('success', 'Produk berhasil dihapus!');

@@ -7,12 +7,13 @@
 <div class="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
     <div class="flex flex-col lg:flex-row gap-8">
 
-        <!-- LEFT: PRODUCT IMAGE -->
+        <!-- LEFT: PRODUCT IMAGE GALLERY -->
         <div class="lg:w-1/2 w-full flex flex-col items-center space-y-4">
-            <!-- Gambar Produk -->
+            <!-- Gambar Utama -->
             <div class="relative w-full max-w-md aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700">
                 @if($product->image)
-                    <img src="{{ asset('storage/' . $product->image) }}" 
+                    <img id="main-image" 
+                         src="{{ asset('storage/' . $product->image) }}" 
                          alt="{{ $product->name }}"
                          class="w-full h-full object-cover">
                 @else
@@ -33,7 +34,49 @@
                         </div>
                     @endif
                 </div>
+
+                <!-- Navigation Arrows -->
+                @if(isset($product->images) && count($product->images) > 1)
+                <button onclick="prevImage()" class="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm">
+                    <span class="material-symbols-outlined">chevron_left</span>
+                </button>
+                <button onclick="nextImage()" class="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/70 text-white rounded-full flex items-center justify-center transition backdrop-blur-sm">
+                    <span class="material-symbols-outlined">chevron_right</span>
+                </button>
+
+                <!-- Image Counter -->
+                <div class="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/60 text-white text-xs rounded-full backdrop-blur-sm">
+                    <span id="current-image-index">1</span> / {{ count($product->images) }}
+                </div>
+                @endif
             </div>
+
+            <!-- Thumbnail Gallery (Horizontal Scroll) -->
+            @if(isset($product->images) && count($product->images) > 1)
+            <div class="w-full max-w-md">
+                <div class="relative">
+                    <!-- Scroll Container -->
+                    <div id="thumbnail-container" class="flex gap-2 overflow-x-auto scrollbar-hide scroll-smooth pb-2">
+                        @foreach($product->images as $index => $image)
+                        <button onclick="selectImage({{ $index }})" 
+                                class="thumbnail-btn flex-shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all {{ $index === 0 ? 'border-soft-green' : 'border-gray-200 dark:border-zinc-700' }} hover:border-soft-green">
+                            <img src="{{ asset('storage/' . $image) }}" 
+                                 alt="Gambar {{ $index + 1 }}"
+                                 class="w-full h-full object-cover">
+                        </button>
+                        @endforeach
+                    </div>
+
+                    <!-- Scroll Indicators (optional) -->
+                    <div class="absolute -left-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <div class="w-8 h-20 bg-gradient-to-r from-white dark:from-zinc-900 to-transparent"></div>
+                    </div>
+                    <div class="absolute -right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <div class="w-8 h-20 bg-gradient-to-l from-white dark:from-zinc-900 to-transparent"></div>
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- Tombol Download Sertifikat -->
             @if($product->health_certificate)
@@ -140,9 +183,113 @@
     </div>
 </div>
 
+<style>
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+
 <script>
 let currentStock = {{ $product->stock }};
 const productId = {{ $product->id }};
+
+// Image Gallery Variables
+const productImages = @json($product->images ?? [$product->image]);
+let currentImageIndex = 0;
+
+function selectImage(index) {
+    currentImageIndex = index;
+    updateMainImage();
+    updateThumbnails();
+}
+
+function nextImage() {
+    currentImageIndex = (currentImageIndex + 1) % productImages.length;
+    updateMainImage();
+    updateThumbnails();
+}
+
+function prevImage() {
+    currentImageIndex = (currentImageIndex - 1 + productImages.length) % productImages.length;
+    updateMainImage();
+    updateThumbnails();
+}
+
+function updateMainImage() {
+    const mainImage = document.getElementById('main-image');
+    const imageCounter = document.getElementById('current-image-index');
+    
+    if (mainImage && productImages[currentImageIndex]) {
+        mainImage.src = "{{ asset('storage') }}/" + productImages[currentImageIndex];
+        mainImage.style.opacity = '0';
+        setTimeout(() => {
+            mainImage.style.transition = 'opacity 0.3s';
+            mainImage.style.opacity = '1';
+        }, 50);
+    }
+    
+    if (imageCounter) {
+        imageCounter.textContent = currentImageIndex + 1;
+    }
+}
+
+function updateThumbnails() {
+    const thumbnails = document.querySelectorAll('.thumbnail-btn');
+    thumbnails.forEach((thumb, index) => {
+        if (index === currentImageIndex) {
+            thumb.classList.remove('border-gray-200', 'dark:border-zinc-700');
+            thumb.classList.add('border-soft-green');
+        } else {
+            thumb.classList.remove('border-soft-green');
+            thumb.classList.add('border-gray-200', 'dark:border-zinc-700');
+        }
+    });
+    
+    // Auto scroll thumbnail into view
+    const container = document.getElementById('thumbnail-container');
+    const selectedThumb = thumbnails[currentImageIndex];
+    if (container && selectedThumb) {
+        selectedThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') {
+        prevImage();
+    } else if (e.key === 'ArrowRight') {
+        nextImage();
+    }
+});
+
+// Touch swipe support
+let touchStartX = 0;
+let touchEndX = 0;
+
+const mainImageEl = document.getElementById('main-image');
+if (mainImageEl) {
+    mainImageEl.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    });
+
+    mainImageEl.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        handleSwipe();
+    });
+}
+
+function handleSwipe() {
+    if (touchEndX < touchStartX - 50) {
+        nextImage();
+    }
+    if (touchEndX > touchStartX + 50) {
+        prevImage();
+    }
+}
 
 function increaseQuantity() {
     const input = document.getElementById('quantity');

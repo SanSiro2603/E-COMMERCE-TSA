@@ -83,6 +83,9 @@ class ProdukController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
         
+        // Process images for gallery
+        $product = $this->processProductImages($product);
+        
         // Get related products
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
@@ -93,5 +96,64 @@ class ProdukController extends Controller
             ->get();
         
         return view('pembeli.produk.show', compact('product', 'relatedProducts'));
+    }
+    
+    /**
+     * Process product images for gallery display
+     * 
+     * @param Product $product
+     * @return Product
+     */
+    private function processProductImages($product)
+    {
+        $images = [];
+        
+        // LANGKAH 1: Cek kolom 'images' (JSON array dari gallery)
+        if (isset($product->images) && !empty($product->images)) {
+            // Jika images adalah string JSON, decode dulu
+            if (is_string($product->images)) {
+                $decoded = json_decode($product->images, true);
+                if (is_array($decoded) && !empty($decoded)) {
+                    $images = $decoded;
+                }
+            } 
+            // Jika sudah array (dari cast di Model)
+            elseif (is_array($product->images)) {
+                $images = $product->images;
+            }
+        }
+        
+        // LANGKAH 2: Jika tidak ada images ATAU kosong, gunakan image utama saja
+        if (empty($images) && !empty($product->image)) {
+            $images = [$product->image];
+        }
+        
+        // LANGKAH 3: Filter images yang valid (tidak null/empty)
+        $images = array_filter($images, function($img) {
+            return !empty($img) && is_string($img);
+        });
+        
+        // LANGKAH 4: Reset array keys dan pastikan unique
+        $images = array_values(array_unique($images));
+        
+        // LANGKAH 5: Jika masih kosong, fallback ke array kosong
+        if (empty($images)) {
+            $images = [];
+        }
+        
+        // Set ke product untuk digunakan di view
+        $product->images = $images;
+        
+        // // Debug log (opsional, hapus di production)
+        // \Log::info('Product Images Processed', [
+        //     'product_id' => $product->id,
+        //     'product_name' => $product->name,
+        //     'raw_images_column' => $product->getOriginal('images'),
+        //     'main_image' => $product->image,
+        //     'processed_images' => $images,
+        //     'total_images' => count($images)
+        // ]);
+        
+        return $product;
     }
 }

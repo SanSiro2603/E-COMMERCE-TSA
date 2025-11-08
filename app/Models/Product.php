@@ -18,6 +18,7 @@ class Product extends Model
         'stock', 
         'unit', // Tambahkan ini jika belum ada
         'image', 
+        'images', 
         'weight',
         'is_active', 
         'health_certificate', 
@@ -30,6 +31,7 @@ class Product extends Model
         'weight' => 'decimal:2',
         'stock' => 'integer',
         'available_from' => 'date',
+        'images' => 'array',
     ];
 
     public function category()
