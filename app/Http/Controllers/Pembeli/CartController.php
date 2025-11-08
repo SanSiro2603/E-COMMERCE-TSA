@@ -155,16 +155,69 @@ class CartController extends Controller
         }
     }
 
-    public function clear()
-    {
-        try {
+  public function clear()
+{
+    try {
+        DB::transaction(function () {
+            // Ambil semua item keranjang user
+            $carts = Cart::where('user_id', Auth::id())->get();
+            
+            // Kembalikan stok untuk setiap item
+            foreach ($carts as $cart) {
+                if ($cart->product) {
+                    $cart->product->increment('stock', $cart->quantity);
+                }
+            }
+            
+            // Hapus semua item keranjang
             Cart::where('user_id', Auth::id())->delete();
-            return redirect()->back()->with('success', 'Keranjang berhasil dikosongkan');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal mengosongkan keranjang: ' . $e->getMessage());
-        }
+        });
+        
+        return redirect()->back()->with('success', 'Keranjang berhasil dikosongkan dan stok dikembalikan');
+    } catch (\Exception $e) {
+        return redirect()->back()->with('error', 'Gagal mengosongkan keranjang: ' . $e->getMessage());
     }
+}
 
+public function hapus($cartId)
+{
+    try {
+        $response = DB::transaction(function () use ($cartId) {
+            $cart = Cart::where('user_id', Auth::id())->findOrFail($cartId);
+            $productId = $cart->product_id;
+            
+            // Kembalikan stok
+            if ($cart->product) {
+                $cart->product->increment('stock', $cart->quantity);
+            }
+            
+            // Hapus item
+            $cart->delete();
+            
+            // Hitung ulang total
+            $carts = Cart::where('user_id', Auth::id())->get();
+            $total = $carts->sum('subtotal');
+            $cartCount = $carts->count();
+            $totalItems = $carts->sum('quantity');
+            
+            return [
+                'success' => true,
+                'message' => 'Produk berhasil dihapus dari keranjang',
+                'cart_count' => $cartCount,
+                'total' => number_format($total, 0, ',', '.'),
+                'total_items' => $totalItems,
+                'product_id' => $productId
+            ];
+        });
+        
+        return response()->json($response);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Gagal menghapus produk: ' . $e->getMessage()
+        ], 500);
+    }
+}
     public function count()
     {
         $count = Cart::where('user_id', Auth::id())->count();

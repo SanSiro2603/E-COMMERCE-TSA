@@ -303,37 +303,115 @@
         });
     }
 
-    function removeFromCart(cartId) {
-        if (!confirm('Hapus produk dari keranjang?')) return;
+  function removeFromCart(cartId) {
+    if (!confirm('Hapus produk dari keranjang?')) return;
 
-        fetch(`/pembeli/keranjang/hapus/${cartId}`, {
-            method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
-        })
-        .then(r => r.json())
-        .then(data => {
-            if (data.success) {
-                document.querySelector(`[data-cart-id="${cartId}"]`).remove();
-                window.updateCartCount(data.cart_count);
+    fetch(`/pembeli/keranjang/hapus/${cartId}`, {
+        method: 'DELETE',
+        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            // Tampilkan alert success
+            showSuccessAlert(data.message || 'Produk berhasil dihapus dari keranjang');
+            
+            // Hapus item dari tampilan
+            document.querySelector(`[data-cart-id="${cartId}"]`).remove();
+            window.updateCartCount(data.cart_count);
 
-                if (data.cart_count === 0) {
-                    location.reload();
-                } else {
-                    document.getElementById('total-price').textContent = `Rp ${data.total}`;
-                    document.getElementById('grand-total').textContent = `Rp ${data.total}`;
-                    document.getElementById('total-items').textContent = `${data.total_items} item`;
-                }
+            if (data.cart_count === 0) {
+                // Reload jika keranjang kosong
+                setTimeout(() => location.reload(), 1000);
             } else {
-                alert(data.message);
+                // Update total
+                document.getElementById('total-price').textContent = `Rp ${data.total}`;
+                document.getElementById('grand-total').textContent = `Rp ${data.total}`;
+                document.getElementById('total-items').textContent = `${data.total_items} item`;
+                
+                // Update jumlah item di header
+                const itemCount = document.querySelector('.text-sm.text-gray-600.dark\\:text-zinc-400.mt-1');
+                if (itemCount) {
+                    itemCount.textContent = `${data.cart_count} item dalam keranjang Anda`;
+                }
             }
-        })
-        .catch(() => alert('Gagal menghapus produk'));
-    }
+        } else {
+            showErrorAlert(data.message || 'Gagal menghapus produk');
+        }
+    })
+    .catch(() => showErrorAlert('Gagal menghapus produk'));
+}
 
-    function clearCart() {
-        if (!confirm('Yakin ingin mengosongkan keranjang?')) return;
-        window.location.href = '{{ route("pembeli.keranjang.clear") }}';
-    }
+function showSuccessAlert(message) {
+    const alertHtml = `
+        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4 animate-fade-in mb-6" id="success-alert">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-green-900 dark:text-green-300">Berhasil!</h3>
+                    <p class="text-sm text-green-800 dark:text-green-400 mt-1">${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Hapus alert lama jika ada
+    const oldAlert = document.getElementById('success-alert');
+    if (oldAlert) oldAlert.remove();
+    
+    // Tambahkan alert baru di awal content
+    const content = document.querySelector('.space-y-6');
+    content.insertAdjacentHTML('afterbegin', alertHtml);
+    
+    // Auto remove setelah 5 detik
+    setTimeout(() => {
+        const alert = document.getElementById('success-alert');
+        if (alert) alert.remove();
+    }, 5000);
+}
+
+function showErrorAlert(message) {
+    const alertHtml = `
+        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-fade-in mb-6" id="error-alert">
+            <div class="flex items-start gap-3">
+                <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">error</span>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-red-900 dark:text-red-300">Gagal!</h3>
+                    <p class="text-sm text-red-800 dark:text-red-400 mt-1">${message}</p>
+                </div>
+                <button onclick="this.parentElement.parentElement.remove()" 
+                        class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    // Hapus alert lama jika ada
+    const oldAlert = document.getElementById('error-alert');
+    if (oldAlert) oldAlert.remove();
+    
+    // Tambahkan alert baru di awal content
+    const content = document.querySelector('.space-y-6');
+    content.insertAdjacentHTML('afterbegin', alertHtml);
+    
+    // Auto remove setelah 5 detik
+    setTimeout(() => {
+        const alert = document.getElementById('error-alert');
+        if (alert) alert.remove();
+    }, 5000);
+}
+
+function clearCart() {
+    if (!confirm('Yakin ingin mengosongkan keranjang?')) return;
+    
+    // Karena route menggunakan GET, kita redirect dengan query parameter
+    window.location.href = '/pembeli/keranjang/clear';
+}
 </script>
 @endpush
 @endsection
