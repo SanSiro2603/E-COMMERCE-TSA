@@ -58,6 +58,17 @@
         .mobile-menu.active {
             transform: translateX(0);
         }
+
+        /* Cart Badge Animation */
+        .cart-badge {
+            animation: badge-pop 0.3s ease-out;
+        }
+        
+        @keyframes badge-pop {
+            0% { transform: scale(0); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 
@@ -90,15 +101,23 @@
                         <span class="material-symbols-outlined dark-mode-icon">light_mode</span>
                     </button>
 
-                    <!-- Cart -->
+                    <!-- Cart with Real-time Badge -->
                     <a href="{{ route('pembeli.keranjang.index') }}" 
-                       class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors">
-                        <span class="material-symbols-outlined">shopping_cart</span>
-                        @if(session('cart') && count(session('cart')) > 0)
-                            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                                {{ count(session('cart')) }}
-                            </span>
-                        @endif
+                       class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors group">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform">shopping_cart</span>
+                        
+                        @php
+                            $cartCount = 0;
+                            if(session('cart')) {
+                                $cartCount = array_sum(array_column(session('cart'), 'quantity'));
+                            }
+                        @endphp
+                        
+                        <span id="cart-count-badge" 
+                              class="cart-badge absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg
+                                     {{ $cartCount > 0 ? '' : 'hidden' }}">
+                            {{ $cartCount }}
+                        </span>
                     </a>
 
                     <!-- User Dropdown -->
@@ -160,7 +179,7 @@
                     $menu = [
                         ['icon' => 'home', 'label' => 'Beranda', 'route' => 'pembeli.dashboard'],
                         ['icon' => 'inventory_2', 'label' => 'Produk', 'route' => 'pembeli.produk.index'],
-                        ['icon' => 'shopping_cart', 'label' => 'Keranjang', 'route' => 'pembeli.keranjang.index'],
+                        ['icon' => 'shopping_cart', 'label' => 'Keranjang', 'route' => 'pembeli.keranjang.index', 'badge' => $cartCount],
                         ['icon' => 'receipt_long', 'label' => 'Pesanan', 'route' => 'pembeli.pesanan.index'],
                         ['icon' => 'person', 'label' => 'Profil', 'route' => 'pembeli.profil.edit'],
                     ];
@@ -178,7 +197,13 @@
                         <span class="material-symbols-outlined text-[20px] {{ $active ? 'text-soft-green' : 'text-gray-500 dark:text-zinc-400 group-hover:text-soft-green' }}">
                             {{ $item['icon'] }}
                         </span>
-                        <span class="truncate">{{ $item['label'] }}</span>
+                        <span class="truncate flex-1">{{ $item['label'] }}</span>
+                        
+                        @if(isset($item['badge']) && $item['badge'] > 0)
+                            <span class="cart-badge ml-auto px-2 py-0.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full font-bold shadow-sm">
+                                {{ $item['badge'] }}
+                            </span>
+                        @endif
                     </a>
                 @endforeach
             </nav>
@@ -205,7 +230,13 @@
                         <a href="{{ route($item['route']) }}"
                            class="flex items-center gap-3 px-4 py-3 rounded-lg {{ $active ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }}">
                             <span class="material-symbols-outlined">{{ $item['icon'] }}</span>
-                            <span>{{ $item['label'] }}</span>
+                            <span class="flex-1">{{ $item['label'] }}</span>
+                            
+                            @if(isset($item['badge']) && $item['badge'] > 0)
+                                <span class="cart-badge px-2 py-0.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full font-bold">
+                                    {{ $item['badge'] }}
+                                </span>
+                            @endif
                         </a>
                     @endforeach
                 </nav>
@@ -225,19 +256,18 @@
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
 
     <!-- Footer -->
-        <footer class="px-4 lg:px-8 py-6 border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-            <div class="max-w-7xl mx-auto">
-                <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
-                    <p>© 2025 Lembah Hijau. All rights reserved.</p>
-                    <div class="flex items-center gap-4">
-                        <a href="#" class="hover:text-soft-green transition-colors">Dokumentasi</a>
-                        <span>•</span>
-                        <a href="#" class="hover:text-soft-green transition-colors">Support</a>
-                    </div>
+    <footer class="px-4 lg:px-8 py-6 border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
+                <p>© 2025 Lembah Hijau. All rights reserved.</p>
+                <div class="flex items-center gap-4">
+                    <a href="#" class="hover:text-soft-green transition-colors">Dokumentasi</a>
+                    <span>•</span>
+                    <a href="#" class="hover:text-soft-green transition-colors">Support</a>
                 </div>
             </div>
-        </footer>
-    </div>
+        </div>
+    </footer>
 
     <!-- Scripts -->
     @stack('scripts')
@@ -277,14 +307,58 @@
             document.querySelector('.mobile-overlay').classList.toggle('hidden');
         }
 
-        // Update Cart Count (Real-time)
+        // Update Cart Count (Real-time) - Enhanced
         window.updateCartCount = function(count) {
-            const badge = document.querySelector('a[href*="keranjang"] .absolute');
+            const badge = document.getElementById('cart-count-badge');
+            const sidebarBadges = document.querySelectorAll('a[href*="keranjang"] .cart-badge');
+            
             if (badge) {
-                badge.textContent = count;
-                badge.style.display = count > 0 ? 'flex' : 'none';
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.classList.remove('hidden');
+                    // Trigger animation
+                    badge.style.animation = 'none';
+                    setTimeout(() => {
+                        badge.style.animation = 'badge-pop 0.3s ease-out';
+                    }, 10);
+                } else {
+                    badge.classList.add('hidden');
+                }
             }
+            
+            // Update sidebar badges
+            sidebarBadges.forEach(sidebarBadge => {
+                if (count > 0) {
+                    sidebarBadge.textContent = count;
+                    sidebarBadge.style.display = 'inline-flex';
+                } else {
+                    sidebarBadge.style.display = 'none';
+                }
+            });
         };
+
+        // Fetch and update cart count on page load
+        function fetchCartCount() {
+            fetch('/pembeli/keranjang/count', {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.count !== undefined) {
+                    updateCartCount(data.count);
+                }
+            })
+            .catch(error => console.error('Error fetching cart count:', error));
+        }
+
+        // Initialize cart count on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchCartCount();
+        });
     </script>
 </body>
 </html>
