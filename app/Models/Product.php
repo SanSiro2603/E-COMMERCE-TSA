@@ -27,8 +27,8 @@ class Product extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
-        'price' => 'decimal:2',
-        'weight' => 'decimal:2',
+        'price' => 'float',
+        'weight' => 'float',
         'stock' => 'integer',
         'available_from' => 'date',
         'images' => 'array',
