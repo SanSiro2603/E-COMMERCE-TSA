@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Lembah Hijau - Premium Livestock Marketplace</title>
+  <title>Lembah Hijau Official Web</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -137,7 +137,7 @@
           </div>
           <div>
             <h2 class="text-xl font-bold text-gradient">Lembah Hijau</h2>
-            <p class="text-xs text-gray-600 dark:text-gray-400">Premium Livestock</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400">E-Commerce</p>
           </div>
         </div>
 
