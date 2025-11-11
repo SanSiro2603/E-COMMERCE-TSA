@@ -244,579 +244,179 @@
         </div> --}}
 
         <!-- Products Grid -->
-        <main class="flex-1 py-12">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Product Card 6 -->
-                    <div class="group card-hover glass-strong rounded-3xl overflow-hidden shadow-xl animate-fade-in" style="animation-delay: 0.5s;">
-                        <div class="relative overflow-hidden">
-                            <div class="aspect-square bg-cover bg-center transition-transform duration-500 group-hover:scale-110" 
-                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                            </div>
-                            <span class="badge-pulse absolute top-4 right-4 px-3 py-1.5 bg-blue-500 text-white text-xs font-bold rounded-full shadow-xl">FEATURED</span>
-                            <button class="absolute top-4 left-4 w-10 h-10 bg-white/90 dark:bg-gray-800/90 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110">
-                                <span class="material-symbols-outlined text-red-500">favorite</span>
-                            </button>
-                            <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                <button class="w-full px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md text-white font-semibold hover:bg-white/30 transition-colors">
-                                    Quick View
-                                </button>
-                            </div>
-                        </div>
-                        <div class="p-6">
-                            <div class="flex items-start justify-between mb-2">
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                                <span class="px-2.5 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-xs font-bold rounded-full">In Stock</span>
-                            </div>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">Rich, creamy milk and smaller frame.</p>
-                            <div class="flex items-center gap-2 mb-4">
-                                <div class="flex text-yellow-400">
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star</span>
-                                    <span class="material-symbols-outlined text-base">star_half</span>
-                                </div>
-                                <span class="text-xs text-gray-600 dark:text-gray-400 font-semibold">(21 reviews)</span>
-                            </div>
-                            <div class="flex items-center justify-between mb-4">
-                                <div>
-                                    <p class="text-3xl font-black gradient-text">$1,500</p>
-                                </div>
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="flex-1 h-12 rounded-xl bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                                    Details
-                                </button>
-                                <button class="flex-1 h-12 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                                    Add to Cart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+        <!-- Products Grid -->
+<main class="flex-1 py-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 
-
+            <!-- Product Card -->
+            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
+                <div class="relative overflow-hidden">
+                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
+                    </div>
+                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
+                </div>
+                <div class="p-3">
+                    <div class="flex items-start justify-between mb-1">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
+                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                        Rich, creamy milk and smaller frame.
+                    </p>
+                    <div class="flex text-yellow-400 text-xs mb-3">
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star_half</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
+                            Details
+                        </button>
+                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+                            Add
+                        </button>
                     </div>
                 </div>
+            </div>
 
+            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
+                <div class="relative overflow-hidden">
+                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
+                    </div>
+                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
+                </div>
+                <div class="p-3">
+                    <div class="flex items-start justify-between mb-1">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
+                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                        Rich, creamy milk and smaller frame.
+                    </p>
+                    <div class="flex text-yellow-400 text-xs mb-3">
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star_half</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
+                            Details
+                        </button>
+                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
+                <div class="relative overflow-hidden">
+                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
+                    </div>
+                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
+                </div>
+                <div class="p-3">
+                    <div class="flex items-start justify-between mb-1">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
+                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                        Rich, creamy milk and smaller frame.
+                    </p>
+                    <div class="flex text-yellow-400 text-xs mb-3">
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star_half</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
+                            Details
+                        </button>
+                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
+                <div class="relative overflow-hidden">
+                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
+                    </div>
+                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
+                </div>
+                <div class="p-3">
+                    <div class="flex items-start justify-between mb-1">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
+                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                        Rich, creamy milk and smaller frame.
+                    </p>
+                    <div class="flex text-yellow-400 text-xs mb-3">
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star_half</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
+                            Details
+                        </button>
+                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
+                <div class="relative overflow-hidden">
+                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
+                    </div>
+                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
+                </div>
+                <div class="p-3">
+                    <div class="flex items-start justify-between mb-1">
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
+                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                        Rich, creamy milk and smaller frame.
+                    </p>
+                    <div class="flex text-yellow-400 text-xs mb-3">
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star</span>
+                        <span class="material-symbols-outlined text-sm">star_half</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
+                            Details
+                        </button>
+                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+                            Add
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
                 <!-- Load More Section -->
                 <div class="flex justify-center mt-16">
                     <button class="group flex items-center gap-3 px-8 h-14 rounded-2xl glass-strong font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Lembah Hijau - Premium Livestock Marketplace</title>
+  <title>Lembah Hijau Official Web</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -50,7 +50,7 @@
   </script>
   <style>
     .glass {
-      background: rgba(255, 255, 255, 0.7);
+      background: rgba(236, 236, 236, 0.7);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.3);
@@ -60,10 +60,10 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
     }
     .glass-strong {
-      background: rgba(255, 255, 255, 0.9);
+      background: rgba(254, 249, 249, 0.9);
       backdrop-filter: blur(30px);
       -webkit-backdrop-filter: blur(30px);
-      border: 1px solid rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(244, 236, 236, 0.5);
     }
     .dark .glass-strong {
       background: rgba(19, 31, 19, 0.9);
@@ -137,7 +137,7 @@
           </div>
           <div>
             <h2 class="text-xl font-bold text-gradient">Lembah Hijau</h2>
-            <p class="text-xs text-gray-600 dark:text-gray-400">Premium Livestock</p>
+            <p class="text-xs text-gray-600 dark:text-gray-400">E-Commerce</p>
           </div>
         </div>
 
@@ -727,11 +727,11 @@
           <form class="space-y-6">
             <div>
               <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Your Name</label>
-              <input type="text" placeholder="John Doe" class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
+              <input type="text" placeholder="Lembah Hijau" class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Your Email</label>
-              <input type="email" placeholder="john@example.com" class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
+              <input type="email" placeholder="lembahijau@gmail.com" class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
             </div>
             <div>
               <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Your Message</label>
@@ -752,7 +752,7 @@
               </div>
               <div>
                 <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Visit Us</h3>
-                <p class="text-gray-600 dark:text-gray-400">123 Green Valley, Farmville, Indonesia</p>
+                <p class="text-gray-600 dark:text-gray-400">Lembah Hijau, Lampung, Indonesia</p>
               </div>
             </div>
           </div>
@@ -829,7 +829,7 @@
                     <div>
                         <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Contact</h4>
                         <ul class="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
-                            <li>123 Green Valley</li>
+                            <li>123 Lembah Hijau Lampung</li>
                             <li>Farmville, Indonesia</li>
                             <li>contact@lembahhijau.com</li>
                             <li>(123) 456-7890</li>

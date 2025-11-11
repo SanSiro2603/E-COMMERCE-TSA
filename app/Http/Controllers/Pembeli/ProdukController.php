@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/Pembeli/ProdukController.php
 
 namespace App\Http\Controllers\Pembeli;
 
@@ -9,34 +10,41 @@ use Illuminate\Http\Request;
 
 class ProdukController extends Controller
 {
+    /**
+     * Display product catalog with search and filter
+     */
     public function index(Request $request)
     {
-        $categories = Category::where('is_active', true)->get();
+        // Get all categories for filter (disesuaikan dengan model Anda)
+        $categories = Category::where('is_active', true)->orderBy('name')->get();
         
+        // Start query (disesuaikan dengan field di database Anda)
         $query = Product::with('category')
             ->where('is_active', true)
             ->latest();
-
-        // Filter by category
-        if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
-        }
-
-        // Search
+        
+        // Apply search filter
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('description', 'like', '%' . $search . '%')
-                  ->orWhere('slug', 'like', '%' . $search . '%');
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('slug', 'like', "%{$search}%");
             });
         }
-
-        $products = $query->paginate(12);
-
-        // Handle AJAX request
+        
+        // Apply category filter
+        if ($request->filled('category')) {
+            $query->where('category_id', $request->category);
+        }
+        
+        // Paginate results (24 untuk grid 6 kolom, 20 untuk 5 kolom, 12 untuk 4 kolom)
+        $products = $query->paginate(24);
+        
+        // If AJAX request, return JSON with HTML
         if ($request->ajax() || $request->has('ajax')) {
-            $html = $this->generateProductsGrid($products);
+            // Gunakan partial view untuk render HTML
+            $html = view('pembeli.produk.partials.products-grid', compact('products'))->render();
             
             // Get active category name
             $categoryName = null;
@@ -44,11 +52,14 @@ class ProdukController extends Controller
                 $category = $categories->firstWhere('id', $request->category);
                 $categoryName = $category ? $category->name : null;
             }
-
+            
             return response()->json([
+                'success' => true,
                 'html' => $html,
                 'count' => $products->count(),
                 'total' => $products->total(),
+                'current_page' => $products->currentPage(),
+                'last_page' => $products->lastPage(),
                 'filters' => [
                     'search' => $request->search,
                     'category' => $request->category,
@@ -56,147 +67,93 @@ class ProdukController extends Controller
                 ],
             ]);
         }
-
+        
+        // Regular request, return view
         return view('pembeli.produk.index', compact('products', 'categories'));
     }
-
-    private function generateProductsGrid($products)
-    {
-        if ($products->isEmpty()) {
-            return '
-                <div class="col-span-full bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
-                    <div class="text-center py-16 px-4">
-                        <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-8xl mb-4">search_off</span>
-                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">
-                            Produk Tidak Ditemukan
-                        </h3>
-                        <p class="text-gray-600 dark:text-zinc-400 mb-6">
-                            Maaf, tidak ada produk yang sesuai dengan pencarian Anda
-                        </p>
-                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                            <a href="' . route('pembeli.produk.index') . '" 
-                               class="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-soft-green to-primary text-white font-medium rounded-lg hover:shadow-lg transition-all">
-                                <span class="material-symbols-outlined">refresh</span>
-                                Reset Filter
-                            </a>
-                            <a href="' . route('pembeli.dashboard') . '" 
-                               class="inline-flex items-center gap-2 px-6 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors">
-                                <span class="material-symbols-outlined">home</span>
-                                Kembali ke Beranda
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            ';
-        }
-
-       $html = '';
-foreach ($products as $product) {
-    $stockBadge = '';
-    $imageOverlay = '';
-
-    if ($product->stock <= 5 && $product->stock > 0) {
-        $stockBadge = '
-            <div class="absolute top-2 right-2 px-2 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full">
-                Stok ' . $product->stock . '
-            </div>';
-    } elseif ($product->stock == 0) {
-        $imageOverlay = '
-            <div class="absolute inset-0 bg-black/50 flex items-center justify-center">
-                <span class="px-3 py-1.5 bg-red-500 text-white text-sm font-bold rounded-full">
-                    Habis
-                </span>
-            </div>';
-    }
-
-    // Tombol aksi (keranjang + lihat produk)
-    if ($product->stock > 0) {
-        $actionButtons = '
-            <div class="flex items-center gap-2">
-                <button onclick="addToCart(' . $product->id . ')"
-                        class="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-gradient-to-r from-soft-green to-primary text-white rounded-lg text-xs font-medium hover:shadow-md transition-all">
-                    <span class="material-symbols-outlined text-base">shopping_cart</span>
-                    <span class="hidden sm:inline">Keranjang</span>
-                </button>
-                <a href="' . route('pembeli.produk.show', $product->slug) . '"
-                   class="px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
-                    <span class="material-symbols-outlined text-base">visibility</span>
-                </a>
-            </div>';
-    } else {
-        $actionButtons = '
-            <button disabled
-                    class="flex-1 px-3 py-2 bg-gray-200 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 rounded-lg text-xs font-medium cursor-not-allowed">
-                Stok Habis
-            </button>';
-    }
-
-    // Deskripsi pendek
-    $description = $product->description
-        ? '<p class="text-xs text-gray-600 dark:text-zinc-400 line-clamp-2 mb-3 text-justify">'
-            . e($product->description) . '</p>'
-        : '';
-
-    // HTML produk
-    $html .= '
-    <div class="group bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm hover:shadow-lg transition-all overflow-hidden">
-        <a href="' . route('pembeli.produk.show', $product->slug) . '" 
-           class="block relative overflow-hidden bg-gray-100 dark:bg-zinc-800 rounded-t-lg aspect-[4/3]">
-            ' . ($product->image
-                ? '<img src="' . asset('storage/' . $product->image) . '" 
-                      alt="' . e($product->name) . '"
-                      class="w-full h-full object-cover transition-transform duration-300 hover:scale-110">'
-                : '<div class="w-full h-full flex items-center justify-center">
-                      <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl">image</span>
-                   </div>') . '
-            ' . $stockBadge . $imageOverlay . '
-        </a>
-
-        <div class="p-4">
-            <div class="mb-2">
-                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
-                    <span class="material-symbols-outlined text-xs">category</span>
-                    ' . e($product->category->name ?? 'Uncategorized') . '
-                </span>
-            </div>
-
-            <a href="' . route('pembeli.produk.show', $product->slug) . '" class="block">
-                <h3 class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 group-hover:text-soft-green transition-colors mb-2">
-                    ' . e($product->name) . '
-                </h3>
-            </a>
-
-            ' . $description . '
-
-            <div class="mb-3">
-                <p class="text-lg font-bold text-soft-green dark:text-soft-green">
-                    Rp ' . number_format($product->price, 0, ',', '.') . '
-                </p>
-            </div>
-
-            ' . $actionButtons . '
-        </div>
-    </div>';
-}
-
-
-        return $html;
-    }
-
+    
+    /**
+     * Display single product detail
+     */
     public function show($slug)
     {
+        // Disesuaikan dengan field database Anda
         $product = Product::with(['category'])
             ->where('slug', $slug)
             ->where('is_active', true)
             ->firstOrFail();
-
-        // Related products
+        
+        // Process images for gallery
+        $product = $this->processProductImages($product);
+        
+        // Get related products
         $relatedProducts = Product::where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('is_active', true)
-            ->limit(4)
+            ->where('stock', '>', 0)
+            ->inRandomOrder()
+            ->limit(6)
             ->get();
-
+        
         return view('pembeli.produk.show', compact('product', 'relatedProducts'));
+    }
+    
+    /**
+     * Process product images for gallery display
+     * 
+     * @param Product $product
+     * @return Product
+     */
+    private function processProductImages($product)
+    {
+        $images = [];
+        
+        // LANGKAH 1: Cek kolom 'images' (JSON array dari gallery)
+        if (isset($product->images) && !empty($product->images)) {
+            // Jika images adalah string JSON, decode dulu
+            if (is_string($product->images)) {
+                $decoded = json_decode($product->images, true);
+                if (is_array($decoded) && !empty($decoded)) {
+                    $images = $decoded;
+                }
+            } 
+            // Jika sudah array (dari cast di Model)
+            elseif (is_array($product->images)) {
+                $images = $product->images;
+            }
+        }
+        
+        // LANGKAH 2: Jika tidak ada images ATAU kosong, gunakan image utama saja
+        if (empty($images) && !empty($product->image)) {
+            $images = [$product->image];
+        }
+        
+        // LANGKAH 3: Filter images yang valid (tidak null/empty)
+        $images = array_filter($images, function($img) {
+            return !empty($img) && is_string($img);
+        });
+        
+        // LANGKAH 4: Reset array keys dan pastikan unique
+        $images = array_values(array_unique($images));
+        
+        // LANGKAH 5: Jika masih kosong, fallback ke array kosong
+        if (empty($images)) {
+            $images = [];
+        }
+        
+        // Set ke product untuk digunakan di view
+        $product->images = $images;
+        
+        // // Debug log (opsional, hapus di production)
+        // \Log::info('Product Images Processed', [
+        //     'product_id' => $product->id,
+        //     'product_name' => $product->name,
+        //     'raw_images_column' => $product->getOriginal('images'),
+        //     'main_image' => $product->image,
+        //     'processed_images' => $images,
+        //     'total_images' => count($images)
+        // ]);
+        
+        return $product;
     }
 }

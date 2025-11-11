@@ -20,17 +20,9 @@ use App\Http\Controllers\RajaOngkirController;
 use App\Http\Controllers\Midtrans\PaymentWebhookController;
 
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Di sini kamu bisa mendefinisikan semua route aplikasi kamu.
-| Route ini akan dimuat oleh RouteServiceProvider dalam group "web".
-|
-*/
-
-// 🔹 Halaman utama dan gallery (umum)
+// ===============================================================
+// 🔹 HALAMAN UTAMA
+// ===============================================================
 Route::get('/', [DashboardController::class, 'index'])->name('landing');
 Route::get('/gallery-hewan', [DashboardController::class, 'hewan'])->name('gallery.hewan');
 
@@ -38,21 +30,21 @@ Route::get('/gallery-hewan', [DashboardController::class, 'hewan'])->name('galle
 // ===============================================================
 // 🔹 AUTH GOOGLE LOGIN
 // ===============================================================
-
 Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
 
-// 🔹 Route hanya untuk tamu (belum login)
+// ===============================================================
+// 🔹 AUTHENTICATION (LOGIN & REGISTER)
+// ===============================================================
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('login', [LoginController::class, 'login']);
-    
+
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register']);
 });
 
-// 🔹 Logout hanya untuk user login
 Route::post('logout', [LoginController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
@@ -63,32 +55,20 @@ Route::post('logout', [LoginController::class, 'logout'])
 // ===============================================================
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
 
-    // Dashboard Admin
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
-        ->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // Manajemen Produk
-    Route::get('/products', [ProductController::class, 'index'])->name('products.index');
-    Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
-    Route::post('/products', [ProductController::class, 'store'])->name('products.store');
-    Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
-    Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
-    Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+    // Produk
+    Route::resource('products', ProductController::class);
 
-    // Manajemen Kategori
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
-    Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
-    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
-    Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
-    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    // Kategori
+    Route::resource('categories', CategoryController::class);
 
-    // Manajemen Pesanan
+    // Pesanan
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
-    // Laporan Penjualan
+    // Laporan
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
     Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.exportExcel');
@@ -96,19 +76,15 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
 
 
 // ===============================================================
-// 🔹 PEMBELI ROUTES
+// 🔹 WEBHOOK MIDTRANS
 // ===============================================================
-
-// Webhook Midtrans (HARUS PUBLIC & HTTPS kalau production)
 Route::post('/midtrans/notification', [App\Http\Controllers\MidtransController::class, 'notification'])
     ->name('midtrans.notification');
 
 
-
 // ===============================================================
-// PEMBELI ROUTES
+// 🔹 PEMBELI ROUTES
 // ===============================================================
-
 Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function () {
 
     Route::get('/dashboard', [PembeliDashboardController::class, 'index'])->name('dashboard');
@@ -133,25 +109,25 @@ Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function
         Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
         Route::post('/store', [PesananController::class, 'store'])->name('store');
         Route::get('/{order}', [PesananController::class, 'show'])->name('show');
-        Route::get('/pesanan/{order}/edit', [PesananController::class, 'edit'])->name('edit');
-        Route::put('/pesanan/{order}', [PesananController::class, 'update'])->name('update');
+        Route::get('/{order}/edit', [PesananController::class, 'edit'])->name('edit');
+        Route::put('/{order}', [PesananController::class, 'update'])->name('update');
         Route::post('/{order}/cancel', [PesananController::class, 'cancel'])->name('cancel');
         Route::post('/{order}/complete', [PesananController::class, 'complete'])->name('complete');
     });
 
-    // Payment Routes – RAPI DI BAWAH PREFIX payment.
+    // Pembayaran
     Route::prefix('payment')->name('payment.')->group(function () {
         Route::get('/{order}', [PaymentController::class, 'show'])->name('show');
         Route::get('/finish', [PaymentController::class, 'finish'])->name('finish');
         Route::get('/{order}/check-status', [PaymentController::class, 'checkStatus'])->name('check-status');
     });
 
-    // RajaOngkir
-    Route::prefix('rajaongkir')->name('rajaongkir.')->group(function () {
-        Route::get('/provinces', [RajaOngkirController::class, 'provinces'])->name('provinces');
-        Route::get('/cities', [RajaOngkirController::class, 'cities'])->name('cities');
-    });
-
+    // RajaOngkir (✅ fix)
+      Route::prefix('rajaongkir')->name('rajaongkir.')->group(function () {
+        Route::get('/provinces', [\App\Http\Controllers\RajaOngkirController::class, 'provinces'])->name('provinces');
+        Route::get('/cities', [\App\Http\Controllers\RajaOngkirController::class, 'cities'])->name('cities');
+        Route::post('/calculate', [\App\Http\Controllers\RajaOngkirController::class, 'calculateShipping'])->name('calculate');
+ });
     // Profil
     Route::get('/profil', fn() => inertia('Pembeli/Profil'))->name('profil.edit');
 });

@@ -9,204 +9,120 @@ use Illuminate\Support\Facades\Log;
 class RajaOngkirController extends Controller
 {
     /**
-     * Menampilkan daftar provinsi dari API Raja Ongkir
-     *
-     * @return \Illuminate\Http\JsonResponse
+     * Ambil daftar provinsi
      */
     public function provinces()
     {
         try {
-            // Validasi API Key
             $apiKey = config('rajaongkir.api_key');
-            
             if (empty($apiKey)) {
-                Log::error('RajaOngkir: API Key tidak ditemukan di config');
-                return response()->json([
-                    'error' => 'API Key not configured'
-                ], 500);
+                Log::warning('RajaOngkir: API Key not configured');
+                return response()->json(['error' => 'API Key not configured'], 500);
             }
 
-            Log::info('RajaOngkir: Fetching provinces');
+            $response = Http::withHeaders(['key' => $apiKey])
+                ->timeout(30)
+                ->get('https://rajaongkir.komerce.id/api/v1/destination/province');
 
-            // Request ke API
-            $response = Http::withHeaders([
-                'key' => $apiKey,
-                'Accept' => 'application/json',
-            ])
-            ->timeout(30)
-            ->get('https://rajaongkir.komerce.id/api/v1/destination/province');
-
-            // Log status response
-            Log::info('RajaOngkir provinces response', [
-                'status' => $response->status(),
-                'successful' => $response->successful()
-            ]);
-
-            // Cek jika request gagal
             if (!$response->successful()) {
-                Log::error('RajaOngkir provinces error', [
+                Log::error('RajaOngkir provinces failed', [
                     'status' => $response->status(),
                     'body' => $response->body()
                 ]);
-                return response()->json([
-                    'error' => 'Failed to fetch provinces',
-                    'status' => $response->status()
-                ], $response->status());
+                return response()->json(['error' => 'Failed to fetch provinces'], $response->status());
             }
 
             $body = $response->json();
 
-            // Log sample data untuk debugging
-            Log::info('RajaOngkir provinces data received', [
-                'has_data_key' => isset($body['data']),
-                'is_array' => is_array($body),
-                'count' => is_array($body) ? count($body) : 0,
-                'sample' => is_array($body) ? array_slice($body, 0, 2) : $body
-            ]);
+            // Support berbagai struktur response
+            $rawProvinces = $body['rajaongkir']['results'] ?? $body['data'] ?? $body ?? [];
 
-            // Auto-detect format response
-            // Format 1: Langsung array of provinces
-            if (is_array($body) && count($body) > 0 && isset($body[0]['province_id'])) {
-                Log::info('RajaOngkir: Using direct array format');
-                return response()->json($body);
+            if (empty($rawProvinces)) {
+                Log::warning('RajaOngkir provinces empty response', ['body' => $body]);
+                return response()->json([], 200);
             }
 
-            // Format 2: Ada wrapper 'data'
-            if (isset($body['data']) && is_array($body['data'])) {
-                Log::info('RajaOngkir: Using wrapped data format', [
-                    'count' => count($body['data'])
-                ]);
-                return response()->json($body['data']);
-            }
+            // Normalisasi data
+            $provinces = array_map(function ($p) {
+                return [
+                    'province_id' => $p['province_id'] ?? $p['id'] ?? null,
+                    'name'        => $p['province'] ?? $p['name'] ?? 'Unknown Province',
+                ];
+            }, $rawProvinces);
 
-            
-            Log::warning('RajaOngkir: Unknown response format', [
-                'body_structure' => array_keys($body ?? [])
-            ]);
-            
-            return response()->json([]);
+            // Filter yang valid
+            $provinces = array_filter($provinces, fn($p) => !empty($p['province_id']));
+
+            return response()->json(array_values($provinces));
 
         } catch (\Exception $e) {
             Log::error('RajaOngkir provinces exception', [
                 'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
                 'trace' => $e->getTraceAsString()
             ]);
-            
-            return response()->json([
-                'error' => 'Internal server error',
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Server error'], 500);
         }
     }
 
     /**
-     * Menampilkan daftar kota berdasarkan provinsi dari API Raja Ongkir
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * Ambil daftar kota berdasarkan province_id
      */
     public function cities(Request $request)
     {
+        $provinceId = $request->query('province_id');
+
+        if (!$provinceId || !is_numeric($provinceId)) {
+            return response()->json(['error' => 'province_id required and must be numeric'], 400);
+        }
+
         try {
-            // Validasi province_id
-            $provinceId = $request->query('province_id');
-            
-            if (!$provinceId) {
-                Log::warning('RajaOngkir cities: province_id not provided');
-                return response()->json([
-                    'error' => 'province_id is required'
-                ], 400);
-            }
-
-            // Validasi API Key
             $apiKey = config('rajaongkir.api_key');
-            
             if (empty($apiKey)) {
-                Log::error('RajaOngkir: API Key tidak ditemukan di config');
-                return response()->json([
-                    'error' => 'API Key not configured'
-                ], 500);
+                return response()->json(['error' => 'API Key not configured'], 500);
             }
 
-            Log::info('RajaOngkir: Fetching cities', [
-                'province_id' => $provinceId
-            ]);
+            $response = Http::withHeaders(['key' => $apiKey])
+                ->timeout(30)
+                ->get("https://rajaongkir.komerce.id/api/v1/destination/city/{$provinceId}");
 
-            // Request ke API
-            $response = Http::withHeaders([
-                'key' => $apiKey,
-                'Accept' => 'application/json',
-            ])
-            ->timeout(30)
-            ->get("https://rajaongkir.komerce.id/api/v1/destination/city/{$provinceId}");
-
-            // Log status response
-            Log::info('RajaOngkir cities response', [
-                'province_id' => $provinceId,
-                'status' => $response->status(),
-                'successful' => $response->successful()
-            ]);
-
-            // Cek jika request gagal
             if (!$response->successful()) {
-                Log::error('RajaOngkir cities error', [
+                Log::error('RajaOngkir cities failed', [
                     'province_id' => $provinceId,
                     'status' => $response->status(),
                     'body' => $response->body()
                 ]);
-                return response()->json([
-                    'error' => 'Failed to fetch cities',
-                    'status' => $response->status()
-                ], $response->status());
+                return response()->json(['error' => 'Failed to fetch cities'], $response->status());
             }
 
             $body = $response->json();
+            $rawCities = $body['rajaongkir']['results'] ?? $body['data'] ?? $body ?? [];
 
-            // Log sample data
-            Log::info('RajaOngkir cities data received', [
-                'province_id' => $provinceId,
-                'has_data_key' => isset($body['data']),
-                'is_array' => is_array($body),
-                'count' => is_array($body) ? count($body) : 0
-            ]);
-
-            // Auto-detect format response
-            // Format 1: Langsung array of cities
-            if (is_array($body) && count($body) > 0 && isset($body[0]['city_id'])) {
-                Log::info('RajaOngkir cities: Using direct array format');
-                return response()->json($body);
+            if (empty($rawCities)) {
+                return response()->json([], 200);
             }
 
-            // Format 2: Ada wrapper 'data'
-            if (isset($body['data']) && is_array($body['data'])) {
-                Log::info('RajaOngkir cities: Using wrapped data format', [
-                    'count' => count($body['data'])
-                ]);
-                return response()->json($body['data']);
-            }
+            // Normalisasi data kota
+            $cities = array_map(function ($c) {
+                return [
+                    'city_id'   => $c['city_id'] ?? $c['id'] ?? null,
+                    'name'      => $c['city_name'] ?? $c['name'] ?? 'Unknown City',
+                    'type'      => $c['type'] ?? $c['city_type'] ?? 'Kota', // Kota / Kabupaten
+                    'postal_code' => $c['postal_code'] ?? null,
+                ];
+            }, $rawCities);
 
-            // Jika format tidak dikenali
-            Log::warning('RajaOngkir cities: Unknown response format', [
-                'province_id' => $provinceId,
-                'body_structure' => array_keys($body ?? [])
-            ]);
-            
-            return response()->json([]);
+            // Filter valid
+            $cities = array_filter($cities, fn($c) => !empty($c['city_id']));
+
+            return response()->json(array_values($cities));
 
         } catch (\Exception $e) {
             Log::error('RajaOngkir cities exception', [
-                'province_id' => $provinceId ?? null,
+                'province_id' => $provinceId,
                 'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'trace' => $e->getTraceAsString()
             ]);
-            
-            return response()->json([
-                'error' => 'Internal server error',
-                'message' => $e->getMessage()
-            ], 500);
+            return response()->json(['error' => 'Server error'], 500);
         }
     }
 }

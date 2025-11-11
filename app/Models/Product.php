@@ -10,8 +10,28 @@ class Product extends Model
     use HasFactory;
 
     protected $fillable = [
-        'category_id', 'name', 'slug', 'description', 'price',
-        'stock', 'image', 'weight','is_active', 'health_certificate', 'available_from'
+        'category_id', 
+        'name', 
+        'slug', 
+        'description', 
+        'price',
+        'stock', 
+        'unit', // Tambahkan ini jika belum ada
+        'image', 
+        'images', 
+        'weight',
+        'is_active', 
+        'health_certificate', 
+        'available_from'
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
+        'price' => 'float',
+        'weight' => 'float',
+        'stock' => 'integer',
+        'available_from' => 'date',
+        'images' => 'array',
     ];
 
     public function category()

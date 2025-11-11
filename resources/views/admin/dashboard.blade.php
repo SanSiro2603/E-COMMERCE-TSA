@@ -17,7 +17,6 @@
                 <span class="material-symbols-outlined text-lg">download</span>
                 Export
             </button>
-            
         </div>
     </div>
 
@@ -123,9 +122,9 @@
                         <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">Performa 7 hari terakhir</p>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button class="px-3 py-1.5 text-xs font-medium text-white dark:text-white bg-soft-green dark:bg-soft-green rounded-lg">
+                        <span class="px-3 py-1.5 text-xs font-medium text-soft-green dark:text-soft-green bg-soft-green/10 dark:bg-soft-green/10 rounded-lg border border-soft-green/20">
                             7 Hari
-                        </button>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -248,59 +247,58 @@
             </div>
         </div>
 
-        <!-- Summary Info -->
+        <!-- Recent Orders -->
         <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
             <div class="p-6 border-b border-gray-200 dark:border-zinc-800">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ringkasan Pesanan</h3>
-                        <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">Status pesanan saat ini</p>
+                        <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Pesanan Terbaru</h3>
+                        <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">5 pesanan terakhir</p>
                     </div>
+                    <a href="{{ route('admin.orders.index') }}" class="text-sm font-medium text-soft-green hover:text-primary transition-colors flex items-center gap-1">
+                        Lihat Semua
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                    </a>
                 </div>
             </div>
             <div class="p-6">
-                <div class="space-y-4">
-                    <!-- Pending Orders -->
-                    <div class="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-500/10 rounded-lg border border-yellow-200 dark:border-yellow-500/20">
-                        <div class="flex-shrink-0 w-10 h-10 bg-yellow-100 dark:bg-yellow-500/20 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-xl">hourglass_top</span>
+                <div class="space-y-3">
+                    @forelse($recentOrders ?? [] as $order)
+                        <div class="flex items-center gap-4 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors group">
+                            <div class="flex-shrink-0 w-10 h-10 bg-gradient-to-br from-soft-green/20 to-primary/20 rounded-lg flex items-center justify-center">
+                                <span class="material-symbols-outlined text-soft-green text-xl">receipt_long</span>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="font-medium text-gray-900 dark:text-white truncate">
+                                    {{ $order->order_number ?? 'ORD-' . $order->id }}
+                                </p>
+                                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
+                                    {{ $order->user->name ?? 'Customer' }} • {{ $order->created_at->diffForHumans() }}
+                                </p>
+                            </div>
+                            <div class="flex-shrink-0 text-right">
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">Rp {{ number_format($order->total_price ?? 0, 0, ',', '.') }}</p>
+                                @if($order->status == 'pending')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 mt-1">
+                                        Pending
+                                    </span>
+                                @elseif($order->status == 'processing')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 mt-1">
+                                        Proses
+                                    </span>
+                                @elseif($order->status == 'completed')
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 mt-1">
+                                        Selesai
+                                    </span>
+                                @endif
+                            </div>
                         </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">Menunggu Konfirmasi</p>
-                            <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mt-1">{{ number_format($pendingOrders) }}</p>
-                            <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">Pesanan perlu dikonfirmasi</p>
+                    @empty
+                        <div class="text-center py-8">
+                            <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-5xl">receipt_long</span>
+                            <p class="text-sm text-gray-500 dark:text-zinc-400 mt-2">Belum ada pesanan</p>
                         </div>
-                    </div>
-
-                    <!-- Processing Orders -->
-                    <div class="flex items-start gap-3 p-4 bg-blue-50 dark:bg-blue-500/10 rounded-lg border border-blue-200 dark:border-blue-500/20">
-                        <div class="flex-shrink-0 w-10 h-10 bg-blue-100 dark:bg-blue-500/20 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-xl">local_shipping</span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">Sedang Diproses</p>
-                            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 mt-1">{{ number_format($processingOrders) }}</p>
-                            <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">Pesanan dalam pengiriman</p>
-                        </div>
-                    </div>
-
-                    <!-- Completed Orders -->
-                    <div class="flex items-start gap-3 p-4 bg-green-50 dark:bg-green-500/10 rounded-lg border border-green-200 dark:border-green-500/20">
-                        <div class="flex-shrink-0 w-10 h-10 bg-green-100 dark:bg-green-500/20 rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-xl">check_circle</span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">Selesai</p>
-                            <p class="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">{{ number_format($completedOrders) }}</p>
-                            <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">Pesanan berhasil diselesaikan</p>
-                        </div>
-                    </div>
-
-                    <!-- Action Button -->
-                    <a href="{{ route('admin.orders.index') }}" class="flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-soft-green to-primary text-white rounded-lg hover:shadow-lg transition-all">
-                        <span class="material-symbols-outlined text-lg">visibility</span>
-                        <span class="text-sm font-medium">Lihat Semua Pesanan</span>
-                    </a>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -316,31 +314,30 @@
     // Detect dark mode
     const isDarkMode = document.documentElement.classList.contains('dark');
     
-    // Create gradient
-    const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-    gradient.addColorStop(0, 'rgba(123, 182, 97, 0.3)');
-    gradient.addColorStop(1, 'rgba(123, 182, 97, 0.01)');
-    
     new Chart(ctx, {
-        type: 'line',
+        type: 'bar',
         data: {
             labels: @json($dates->map(fn($d) => \Carbon\Carbon::parse($d)->format('d M'))),
             datasets: [{
                 label: 'Pendapatan',
                 data: @json($revenues),
-                borderColor: '#7BB661',
-                backgroundColor: gradient,
-                borderWidth: 3,
-                tension: 0.4,
-                fill: true,
-                pointRadius: 5,
-                pointBackgroundColor: '#7BB661',
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointHoverRadius: 7,
-                pointHoverBackgroundColor: '#7BB661',
-                pointHoverBorderColor: '#fff',
-                pointHoverBorderWidth: 3
+                backgroundColor: function(context) {
+                    const chart = context.chart;
+                    const {ctx, chartArea} = chart;
+                    
+                    if (!chartArea) {
+                        return '#7BB661';
+                    }
+                    
+                    const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
+                    gradient.addColorStop(0, 'rgba(123, 182, 97, 0.6)');
+                    gradient.addColorStop(1, 'rgba(123, 182, 97, 1)');
+                    return gradient;
+                },
+                borderRadius: 8,
+                borderSkipped: false,
+                barPercentage: 0.7,
+                categoryPercentage: 0.8,
             }]
         },
         options: {
@@ -355,44 +352,83 @@
                     display: false 
                 },
                 tooltip: {
-                    backgroundColor: isDarkMode ? 'rgba(24, 24, 27, 0.95)' : 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    borderRadius: 8,
+                    backgroundColor: isDarkMode ? 'rgba(24, 24, 27, 0.95)' : 'rgba(0, 0, 0, 0.85)',
+                    padding: 16,
+                    borderRadius: 12,
                     titleColor: '#fff',
                     bodyColor: '#fff',
+                    titleFont: {
+                        size: 13,
+                        weight: '600'
+                    },
+                    bodyFont: {
+                        size: 14,
+                        weight: '700'
+                    },
                     displayColors: false,
                     callbacks: {
                         label: function(context) {
                             return 'Rp ' + context.parsed.y.toLocaleString('id-ID');
                         }
-                    }
+                    },
+                    yAlign: 'bottom',
+                    caretSize: 0,
+                    caretPadding: 10
                 }
             },
             scales: {
                 x: {
                     grid: {
+                        display: false,
+                        drawBorder: false
+                    },
+                    border: {
                         display: false
                     },
                     ticks: {
-                        color: isDarkMode ? '#a1a1aa' : '#9ca3af',
+                        color: isDarkMode ? '#71717a' : '#9ca3af',
                         font: {
-                            size: 12
-                        }
+                            size: 11,
+                            weight: '500'
+                        },
+                        padding: 8
                     }
                 },
                 y: { 
                     beginAtZero: true,
                     grid: {
-                        color: isDarkMode ? 'rgba(161, 161, 170, 0.1)' : 'rgba(156, 163, 175, 0.1)',
-                        drawBorder: false
+                        color: isDarkMode ? 'rgba(113, 113, 122, 0.1)' : 'rgba(156, 163, 175, 0.1)',
+                        drawBorder: false,
+                        lineWidth: 1
+                    },
+                    border: {
+                        display: false,
+                        dash: [5, 5]
                     },
                     ticks: { 
-                        color: isDarkMode ? '#a1a1aa' : '#9ca3af',
+                        color: isDarkMode ? '#71717a' : '#9ca3af',
                         font: {
-                            size: 12
+                            size: 11,
+                            weight: '500'
                         },
-                        callback: value => 'Rp ' + (value / 1000) + 'k'
+                        padding: 12,
+                        callback: function(value) {
+                            if (value === 0) return '0';
+                            if (value >= 1000000) {
+                                return 'Rp ' + (value / 1000000) + 'jt';
+                            }
+                            return 'Rp ' + (value / 1000) + 'k';
+                        },
+                        maxTicksLimit: 6
                     }
+                }
+            },
+            layout: {
+                padding: {
+                    top: 10,
+                    right: 0,
+                    bottom: 0,
+                    left: 0
                 }
             }
         }
