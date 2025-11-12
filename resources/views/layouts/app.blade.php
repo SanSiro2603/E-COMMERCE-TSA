@@ -147,6 +147,11 @@
                                 <span class="material-symbols-outlined text-lg">receipt_long</span>
                                 Pesanan Saya
                             </a>
+                            <a href="{{ route('pembeli.alamat.index') }}" 
+                               class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">
+                                <span class="material-symbols-outlined text-lg">location_on</span>
+                                Alamat Saya
+                            </a>
                             <div class="border-t border-gray-200 dark:border-zinc-700 mt-2 pt-2">
                                 <a href="{{ route('logout') }}"
                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
@@ -160,14 +165,6 @@
                 </div>
             </div>
 
-            <!-- Mobile Search -->
-            <div class="md:hidden pb-3">
-                <div class="relative">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">search</span>
-                    <input type="search" placeholder="Cari produk..." 
-                           class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-zinc-800 border-0 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-zinc-400 focus:ring-2 focus:ring-soft-green focus:bg-white dark:focus:bg-zinc-700">
-                </div>
-            </div>
         </div>
     </nav>
 
@@ -181,6 +178,7 @@
                         ['icon' => 'inventory_2', 'label' => 'Produk', 'route' => 'pembeli.produk.index'],
                         ['icon' => 'shopping_cart', 'label' => 'Keranjang', 'route' => 'pembeli.keranjang.index', 'badge' => $cartCount],
                         ['icon' => 'receipt_long', 'label' => 'Pesanan', 'route' => 'pembeli.pesanan.index'],
+                        ['icon' => 'location_on', 'label' => 'Alamat Saya', 'route' => 'pembeli.alamat.index'], // TAMBAHAN
                         ['icon' => 'person', 'label' => 'Profil', 'route' => 'pembeli.profil.edit'],
                     ];
                 @endphp
@@ -307,7 +305,7 @@
             document.querySelector('.mobile-overlay').classList.toggle('hidden');
         }
 
-        // Update Cart Count (Real-time) - Enhanced
+        // Update Cart Count (Real-time)
         window.updateCartCount = function(count) {
             const badge = document.getElementById('cart-count-badge');
             const sidebarBadges = document.querySelectorAll('a[href*="keranjang"] .cart-badge');
@@ -316,7 +314,6 @@
                 if (count > 0) {
                     badge.textContent = count;
                     badge.classList.remove('hidden');
-                    // Trigger animation
                     badge.style.animation = 'none';
                     setTimeout(() => {
                         badge.style.animation = 'badge-pop 0.3s ease-out';
@@ -326,7 +323,6 @@
                 }
             }
             
-            // Update sidebar badges
             sidebarBadges.forEach(sidebarBadge => {
                 if (count > 0) {
                     sidebarBadge.textContent = count;

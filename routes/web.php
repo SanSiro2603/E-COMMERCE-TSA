@@ -18,6 +18,7 @@ use App\Http\Controllers\Pembeli\PesananController;
 use App\Http\Controllers\Pembeli\PaymentController;
 use App\Http\Controllers\RajaOngkirController;
 use App\Http\Controllers\Midtrans\PaymentWebhookController;
+use App\Http\Controllers\Pembeli\AddressController; // TAMBAHAN: Impor AddressController
 
 
 // ===============================================================
@@ -128,6 +129,11 @@ Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function
         Route::get('/cities', [\App\Http\Controllers\RajaOngkirController::class, 'cities'])->name('cities');
         Route::post('/calculate', [\App\Http\Controllers\RajaOngkirController::class, 'calculateShipping'])->name('calculate');
  });
+
+    // Alamat (TAMBAHAN: Route untuk fitur alamat)
+    Route::resource('alamat', AddressController::class)->except(['show']);
+    Route::post('alamat/{alamat}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
+
     // Profil
     Route::get('/profil', fn() => inertia('Pembeli/Profil'))->name('profil.edit');
 });
