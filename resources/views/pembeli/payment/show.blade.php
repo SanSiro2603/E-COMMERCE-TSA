@@ -81,12 +81,24 @@
                 <h2 class="font-semibold mb-4">Produk yang Dibeli ({{ $order->items->count() }})</h2>
                 <div class="space-y-3">
                     @foreach($order->items as $item)
-                        <div class="flex justify-between text-sm pb-3 border-b last:border-0">
-                            <div>
-                                <p class="font-medium">{{ $item->product->name }}</p>
-                                <p class="text-gray-500">{{ $item->quantity }} × Rp {{ number_format($item->product->price, 0, ',', '.') }}</p>
+                        <div class="flex items-center justify-between pb-3 border-b last:border-0">
+                            <div class="flex items-center gap-4">
+                                <!-- Gambar Produk -->
+                                <img src="{{ asset('storage/' . $item->product->image) }}" 
+                                     alt="{{ $item->product->name }}" 
+                                     class="w-16 h-16 object-cover rounded-lg border">
+
+                                <div class="text-sm">
+                                    <p class="font-medium">{{ $item->product->name }}</p>
+                                    <p class="text-gray-500">
+                                        {{ $item->quantity }} × Rp {{ number_format($item->product->price, 0, ',', '.') }}
+                                    </p>
+                                </div>
                             </div>
-                            <p class="font-medium">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</p>
+
+                            <p class="font-medium text-sm">
+                                Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                            </p>
                         </div>
                     @endforeach
                 </div>
@@ -130,7 +142,6 @@
 <script>
 document.getElementById('pay-button').onclick = function(){
     snap.pay('{{ $snapToken }}', {
-        // URL RETURN MERCHANT PAGE → LANGSUNG KE PESANAN INDEX
         onSuccess: function(result){
             console.log('Payment success:', result);
             window.location.href = '{{ route("pembeli.pesanan.index") }}?status=success&order={{ $order->order_number }}';
@@ -146,7 +157,6 @@ document.getElementById('pay-button').onclick = function(){
         },
         onClose: function(){
             console.log('Popup ditutup');
-            // Optional: arahkan juga kalau ditutup
             window.location.href = '{{ route("pembeli.pesanan.index") }}?status=cancelled&order={{ $order->order_number }}';
         }
     });

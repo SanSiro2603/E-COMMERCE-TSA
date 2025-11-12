@@ -140,4 +140,10 @@ public function canBeCompleted(): bool
 {
     return $this->status === 'shipped' && !$this->completed_at;
 }
+
+// app/Models/Order.php
+public function address()
+{
+    return $this->belongsTo(\App\Models\Address::class);
+}
 }

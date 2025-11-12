@@ -47,4 +47,9 @@ class User extends Authenticatable
     {
         return $this->carts()->count();
     }
+    public function addresses()
+{
+    return $this->hasMany(\App\Models\Address::class, 'user_id');
+}
+
 }

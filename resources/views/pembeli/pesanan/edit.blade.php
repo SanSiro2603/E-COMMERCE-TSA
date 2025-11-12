@@ -1,131 +1,202 @@
+{{-- resources/views/pembeli/pesanan/edit.blade.php --}}
 @extends('layouts.app')
-@section('title', 'Edit Pesanan - Lembah Hijau')
+@section('title', 'Edit Pesanan')
 
 @section('content')
-<div class="max-w-6xl mx-auto p-4 space-y-6">
-    <h1 class="text-2xl font-bold">Edit Pesanan</h1>
+<div class="max-w-6xl mx-auto space-y-6">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Edit Pesanan</h1>
 
+    {{-- Alert Error --}}
     @if(session('error'))
-        <div class="bg-red-100 text-red-700 p-4 rounded-lg border border-red-300">
-            {{ session('error') }}
+        <div class="bg-red-50 dark:bg-red-900/30 border border-red-400 dark:border-red-700 text-red-700 dark:text-red-300 p-4 rounded-lg flex items-center gap-2">
+            <span class="material-symbols-outlined">error</span>
+            <p>{{ session('error') }}</p>
         </div>
     @endif
 
+    {{-- Alert Success --}}
     @if(session('success'))
-        <div class="bg-green-100 text-green-700 p-4 rounded-lg border border-green-300">
-            {{ session('success') }}
+        <div class="bg-green-50 dark:bg-green-900/30 border border-green-400 dark:border-green-700 text-green-700 dark:text-green-300 p-4 rounded-lg flex items-center gap-2">
+            <span class="material-symbols-outlined">check_circle</span>
+            <p>{{ session('success') }}</p>
         </div>
     @endif
 
-    <form action="{{ route('pembeli.pesanan.update', $order->id) }}" method="POST" id="editForm">
+    <form action="{{ route('pembeli.pesanan.update', $order->id) }}" method="POST" id="editOrderForm">
         @csrf
         @method('PUT')
 
-        <!-- Hidden inputs untuk RajaOngkir -->
-        <input type="hidden" name="province_name" id="province_name" value="{{ old('province_name', $order->province) }}">
-        @error('province_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-
-        <input type="hidden" name="city_name" id="city_name" value="{{ old('city_name', $order->city_name ?? explode(' ', $order->city)[1] ?? '') }}">
-        @error('city_name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-
-        <input type="hidden" name="city_type" id="city_type" value="{{ old('city_type', $order->city_type ?? (str_starts_with($order->city, 'Kota') ? 'Kota' : 'Kabupaten')) }}">
-        @error('city_type') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-
         <div class="grid md:grid-cols-3 gap-6">
-            <!-- Left: Form -->
+            <!-- ==================== KIRI ==================== -->
             <div class="md:col-span-2 space-y-6">
-                <!-- Alamat Pengiriman -->
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <h2 class="font-semibold mb-4">Alamat Pengiriman</h2>
-                    <div class="space-y-4">
-                        <div class="grid md:grid-cols-2 gap-4">
+
+                <!-- 1. ALAMAT PENGIRIMAN -->
+                <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-700">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="font-semibold text-lg text-gray-900 dark:text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-lg">location_on</span>
+                            Alamat Pengiriman
+                        </h2>
+                        <a href="{{ route('pembeli.alamat.index') }}" class="text-sm text-soft-green hover:underline">
+                            Kelola Alamat
+                        </a>
+                    </div>
+
+                    @if($addresses->isEmpty())
+                        <div class="text-center py-8">
+                            <span class="material-symbols-outlined text-6xl text-gray-300 dark:text-zinc-600 mb-3">location_off</span>
+                            <p class="text-gray-600 dark:text-zinc-400">Belum ada alamat tersimpan.</p>
+                            <a href="{{ route('pembeli.alamat.create') }}" class="mt-3 inline-flex items-center gap-2 text-soft-green hover:underline">
+                                <span class="material-symbols-outlined text-lg">add</span>
+                                Tambah Alamat
+                            </a>
+                        </div>
+                    @else
+                        <div class="space-y-3">
+                            @foreach($addresses as $addr)
+                                <label class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-700 transition
+                                           {{ $order->address_id == $addr->id ? 'border-soft-green ring-2 ring-soft-green' : 'border-gray-300 dark:border-zinc-600' }}">
+                                    <input type="radio" name="address_id" value="{{ $addr->id }}"
+                                           class="mt-1 text-soft-green focus:ring-soft-green"
+                                           {{ $order->address_id == $addr->id ? 'checked' : '' }}
+                                           onchange="selectAddress(this, {{ $addr->id }})">
+                                    <div class="ml-3 flex-1">
+                                        <div class="flex justify-between items-center">
+                                            <span class="font-medium text-gray-900 dark:text-white">{{ $addr->label }}</span>
+                                            @if($addr->is_default)
+                                                <span class="bg-gradient-to-r from-soft-green to-primary text-white text-xs px-3 py-1 rounded-full font-bold flex items-center gap-1">
+                                                    <span class="material-symbols-outlined text-sm">star</span> Utama
+                                                </span>
+                                            @endif
+                                        </div>
+                                        <p class="text-sm text-gray-700 dark:text-zinc-300 mt-1">
+                                            <strong>{{ $addr->recipient_name }}</strong> ({{ $addr->recipient_phone }})
+                                        </p>
+                                        <p class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
+                                            {{ $addr->full_address }}<br>
+                                            {{ $addr->city_type }} {{ $addr->city_name }}, {{ $addr->province_name }}
+                                            @if($addr->postal_code) • {{ $addr->postal_code }} @endif
+                                        </p>
+                                    </div>
+                                </label>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                <!-- 2. KURIR -->
+                <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-700">
+                    <h2 class="font-semibold text-lg mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">local_shipping</span>
+                        Kurir Pengiriman
+                    </h2>
+
+                    <select name="courier" id="courier" required
+                            class="w-full p-3 border border-gray-300 dark:border-zinc-600 rounded-lg 
+                                   focus:ring-2 focus:ring-soft-green focus:border-soft-green dark:bg-zinc-700 dark:text-white">
+                        <option value="">Pilih Kurir</option>
+                        <option value="jne" {{ $order->courier == 'jne' ? 'selected' : '' }}>JNE</option>
+                        <option value="pos" {{ $order->courier == 'pos' ? 'selected' : '' }}>POS Indonesia</option>
+                        <option value="tiki" {{ $order->courier == 'tiki' ? 'selected' : '' }}>TIKI</option>
+                        <option value="jnt" {{ $order->courier == 'jnt' ? 'selected' : '' }}>J&T Express</option>
+                        <option value="sicepat" {{ $order->courier == 'sicepat' ? 'selected' : '' }}>SiCepat</option>
+                        <option value="anteraja" {{ $order->courier == 'anteraja' ? 'selected' : '' }}>AnterAja</option>
+                    </select>
+
+                    <div id="shippingLoading" class="hidden mt-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 flex items-center gap-2">
+                        <svg class="animate-spin h-5 w-5 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.3 0 0 5.3 0 12h4z"></path>
+                        </svg>
+                        <span class="text-blue-700 dark:text-blue-300 font-medium">Menghitung ongkir...</span>
+                    </div>
+
+                    <div id="shippingResult" class="hidden mt-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg p-4">
+                        <div class="flex justify-between items-center">
                             <div>
-                                <label class="block mb-1">Provinsi <span class="text-red-500">*</span></label>
-                                <select name="province_id" id="province" required class="w-full p-2 border rounded @error('province_id') border-red-500 @enderror">
-                                    <option value="">Pilih Provinsi</option>
-                                </select>
-                                @error('province_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                                <p class="font-semibold text-green-800 dark:text-green-300" id="serviceName">JNE REG</p>
+                                <p class="text-xs text-green-600 dark:text-green-400" id="etd">Estimasi 1-2 hari</p>
                             </div>
-                            <div>
-                                <label class="block mb-1">Kota/Kabupaten <span class="text-red-500">*</span></label>
-                                <select name="city_id" id="city" required class="w-full p-2 border rounded @error('city_id') border-red-500 @enderror" disabled>
-                                    <option value="">Pilih Kota/Kabupaten</option>
-                                </select>
-                                @error('city_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                            </div>
-                        </div>
-
-                        <div>
-                            <label class="block mb-1">Kode Pos</label>
-                            <input type="text" name="postal_code" class="w-full p-2 border rounded @error('postal_code') border-red-500 @enderror"
-                                   value="{{ old('postal_code', $order->postal_code) }}" placeholder="Otomatis terisi">
-                            @error('postal_code') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <div>
-                            <label class="block mb-1">Alamat Lengkap <span class="text-red-500">*</span></label>
-                            <textarea name="shipping_address" rows="3" required class="w-full p-2 border rounded @error('shipping_address') border-red-500 @enderror"
-                                      placeholder="Jalan, RT/RW, Kelurahan, Kecamatan, dll.">{{ old('shipping_address', $order->shipping_address) }}</textarea>
-                            @error('shipping_address') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
-                        </div>
-
-                        <div>
-                            <label class="block mb-1">Kurir Pengiriman <span class="text-red-500">*</span></label>
-                            <select name="courier" required class="w-full p-2 border rounded @error('courier') border-red-500 @enderror">
-                                <option value="">Pilih Kurir</option>
-                                <option value="JNE" {{ old('courier', $order->courier) == 'JNE' ? 'selected' : '' }}>JNE</option>
-                                <option value="JNT" {{ old('courier', $order->courier) == 'JNT' ? 'selected' : '' }}>J&T</option>
-                                <option value="SiCepat" {{ old('courier', $order->courier) == 'SiCepat' ? 'selected' : '' }}>SiCepat</option>
-                                <option value="Anteraja" {{ old('courier', $order->courier) == 'Anteraja' ? 'selected' : '' }}>Anteraja</option>
-                            </select>
-                            @error('courier') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                            <p class="text-xl font-bold text-green-600 dark:text-green-400" id="costDisplay">Rp 0</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Daftar Produk -->
-                <div class="bg-white p-6 rounded-lg shadow">
-                    <h2 class="font-semibold mb-4">Produk Dipesan ({{ $order->items->count() }})</h2>
+                <!-- 3. PRODUK DENGAN GAMBAR -->
+                <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-700">
+                    <h2 class="font-semibold text-lg mb-4 text-gray-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">inventory_2</span>
+                        Produk Dipesan ({{ $order->items->count() }})
+                    </h2>
                     <div class="space-y-3">
                         @foreach($order->items as $item)
-                            <div class="flex justify-between text-sm pb-3 border-b last:border-0">
-                                <div>
-                                    <p class="font-medium">{{ $item->product->name }}</p>
-                                    <p class="text-gray-500">{{ $item->quantity }} × Rp {{ number_format($item->product->price, 0, ',', '.') }}</p>
+                            <div class="flex items-center justify-between py-3 border-b border-gray-200 dark:border-zinc-700 last:border-0">
+                                <div class="flex items-center gap-4 flex-1">
+                                    <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-zinc-700 flex-shrink-0">
+                                        @if($item->product && $item->product->image)
+                                            <img src="{{ asset('storage/' . $item->product->image) }}" class="w-full h-full object-cover" alt="{{ $item->product->name }}">
+                                        @else
+                                            <div class="w-full h-full flex items-center justify-center">
+                                                <span class="material-symbols-outlined text-gray-400 text-2xl">image</span>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <div>
+                                        <p class="font-medium text-gray-800 dark:text-white">{{ $item->product->name }}</p>
+                                        <p class="text-sm text-gray-500 dark:text-zinc-400">
+                                            {{ $item->quantity }} × Rp {{ number_format($item->product->price, 0, ',', '.') }}
+                                            @if($item->product->weight)
+                                                ({{ $item->product->weight * $item->quantity }} gr)
+                                            @endif
+                                        </p>
+                                    </div>
                                 </div>
-                                <p class="font-medium">Rp {{ number_format($item->subtotal, 0, ',', '.') }}</p>
+
+                                <p class="font-semibold text-gray-800 dark:text-white">
+                                    Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                                </p>
                             </div>
                         @endforeach
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Ringkasan Pesanan -->
+            <!-- ==================== KANAN: RINGKASAN ==================== -->
             <div>
-                <div class="bg-white p-6 rounded-lg shadow sticky top-4">
-                    <h2 class="font-semibold mb-4">Ringkasan Pesanan</h2>
-                    <div class="space-y-2 text-sm">
+                <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-zinc-700 sticky top-4">
+                    <h2 class="font-semibold text-lg mb-4 text-gray-900 dark:text-white">Ringkasan Pesanan</h2>
+                    <div class="space-y-3 text-sm">
                         <div class="flex justify-between">
-                            <span>Subtotal Produk</span>
-                            <span>Rp {{ number_format($order->subtotal, 0, ',', '.') }}</span>
+                            <span class="text-gray-600 dark:text-zinc-400">Subtotal Produk</span>
+                            <span class="font-medium text-gray-900 dark:text-white">
+                                Rp {{ number_format($order->subtotal, 0, ',', '.') }}
+                            </span>
                         </div>
                         <div class="flex justify-between">
-                            <span>Ongkos Kirim</span>
-                            <span>Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}</span>
+                            <span class="text-gray-600 dark:text-zinc-400">Ongkos Kirim</span>
+                            <span id="summaryCost" class="font-medium text-gray-900 dark:text-white">
+                                Rp {{ number_format($order->shipping_cost, 0, ',', '.') }}
+                            </span>
                         </div>
-                        <div class="border-t pt-3 mt-3">
+                        <div class="border-t border-gray-200 dark:border-zinc-700 pt-3 mt-3">
                             <div class="flex justify-between text-lg font-bold">
-                                <span>Total Bayar</span>
-                                <span class="text-green-600">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</span>
+                                <span class="text-gray-900 dark:text-white">Total Bayar</span>
+                                <span class="text-soft-green" id="grandTotal">
+                                    Rp {{ number_format($order->grand_total, 0, ',', '.') }}
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full mt-6 bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-semibold transition">
+                    <button type="submit" id="submitBtn"
+                            class="w-full mt-6 bg-gradient-to-r from-soft-green to-primary text-white py-3 rounded-lg font-semibold hover:shadow-lg transition flex items-center justify-center gap-2">
+                        <span class="material-symbols-outlined text-lg">save</span>
                         Perbarui Pesanan
                     </button>
 
-                    <a href="{{ route('pembeli.pesanan.index') }}" class="block text-center mt-3 text-sm text-gray-600 hover:text-gray-800">
+                    <a href="{{ route('pembeli.pesanan.index') }}"
+                       class="block text-center mt-3 text-sm text-gray-600 dark:text-zinc-400 hover:text-soft-green">
                         ← Kembali ke Daftar Pesanan
                     </a>
                 </div>
@@ -134,102 +205,71 @@
     </form>
 </div>
 
+{{-- ==================== SCRIPT ==================== --}}
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const provinceSelect = document.getElementById('province');
-    const citySelect = document.getElementById('city');
-    const provinceNameInput = document.getElementById('province_name');
-    const cityNameInput = document.getElementById('city_name');
-    const cityTypeInput = document.getElementById('city_type');
+    const courier = document.getElementById('courier');
+    const submitBtn = document.getElementById('submitBtn');
+    const loading = document.getElementById('shippingLoading');
+    const result = document.getElementById('shippingResult');
+    const serviceName = document.getElementById('serviceName');
+    const etd = document.getElementById('etd');
+    const costDisplay = document.getElementById('costDisplay');
+    const summaryCost = document.getElementById('summaryCost');
+    const grandTotal = document.getElementById('grandTotal');
+    const subtotal = {{ $order->subtotal }};
+    const totalWeight = {{ $order->items->sum(fn($i) => $i->product->weight * $i->quantity) }};
+    const addresses = @json($addresses->keyBy('id'));
+    const ongkirMap = {
+        '31': 15000, '1': 40000, '2': 40000, '3': 40000, '4': 40000, '5': 40000,
+        '32': 30000, '33': 35000, '34': 40000, '35': 35000, '36': 40000,
+        '61': 70000, '62': 75000, '63': 75000, '64': 80000,
+        '71': 70000, '72': 75000, '73': 75000, '74': 80000,
+        '51': 60000, '52': 90000, '53': 95000, '81': 120000, '91': 130000
+    };
 
-    function setCityTypeAndName() {
-        const selected = citySelect.options[citySelect.selectedIndex];
-        if (!selected || !selected.value) {
-            cityTypeInput.value = '';
-            cityNameInput.value = '';
-            return;
-        }
-        const text = selected.text.trim();
-        const parts = text.split(' ');
-        let type = '';
-        let nameStart = 0;
-        if (parts[0] === 'Kota' || parts[0] === 'Kabupaten') {
-            type = parts[0];
-            nameStart = 1;
-        }
-        cityTypeInput.value = type;
-        cityNameInput.value = parts.slice(nameStart).join(' ');
+    function formatRupiah(n) { return 'Rp ' + parseInt(n).toLocaleString('id-ID'); }
+
+    function calculateShipping() {
+        const selectedId = document.querySelector('input[name="address_id"]:checked')?.value;
+        if (!selectedId || !courier.value) return;
+        const addr = addresses[selectedId];
+        if (!addr) return;
+
+        loading.classList.remove('hidden');
+        result.classList.add('hidden');
+        submitBtn.disabled = true;
+
+        setTimeout(() => {
+            const weightKg = Math.ceil(totalWeight / 1000);
+            const baseCost = ongkirMap[addr.province_id] || 60000;
+            const totalCost = baseCost + (weightKg > 1 ? (weightKg - 1) * 10000 : 0);
+
+            serviceName.textContent = `${courier.value.toUpperCase()} REG`;
+            etd.textContent = 'Estimasi 2-3 hari';
+            costDisplay.textContent = formatRupiah(totalCost);
+            summaryCost.textContent = formatRupiah(totalCost);
+            grandTotal.textContent = formatRupiah(subtotal + totalCost);
+
+            loading.classList.add('hidden');
+            result.classList.remove('hidden');
+            submitBtn.disabled = false;
+        }, 600);
     }
 
-    // Load Provinces
-    fetch('{{ route('pembeli.rajaongkir.provinces') }}')
-        .then(r => r.ok ? r.json() : Promise.reject())
-        .then(provinces => {
-            provinces.forEach(p => {
-                const id = p.province_id || p.id;
-                const name = p.province || p.name;
-                provinceSelect.appendChild(new Option(name, id));
-            });
-
-            // Restore province lama
-            const oldProvinceId = '{{ old('province_id', $order->province_id) }}';
-            if (oldProvinceId) {
-                provinceSelect.value = oldProvinceId;
-                provinceNameInput.value = '{{ old('province_name', $order->province) }}';
-                provinceSelect.dispatchEvent(new Event('change'));
-            }
-        })
-        .catch(() => alert('Gagal memuat provinsi'));
-
-    // Province change
-    provinceSelect.addEventListener('change', function () {
-        const provinceId = this.value;
-        provinceNameInput.value = this.options[this.selectedIndex]?.text || '';
-
-        citySelect.innerHTML = '<option value="">Memuat kota...</option>';
-        citySelect.disabled = true;
-        cityTypeInput.value = '';
-        cityNameInput.value = '';
-
-        if (!provinceId) {
-            citySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
-            citySelect.disabled = false;
-            return;
-        }
-
-        fetch(`{{ route('pembeli.rajaongkir.cities') }}?province_id=${provinceId}`)
-            .then(r => r.ok ? r.json() : Promise.reject())
-            .then(cities => {
-                citySelect.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
-                cities.forEach(c => {
-                    const cityId = c.city_id || c.id;
-                    const cityName = c.city_name || c.name;
-                    const type = c.type || (c.city_type === 'Kota' ? 'Kota' : 'Kabupaten');
-                    const label = type ? `${type} ${cityName}` : cityName;
-                    citySelect.appendChild(new Option(label, cityId));
-                });
-                citySelect.disabled = false;
-
-                // Restore city lama
-                const oldCityId = '{{ old('city_id', $order->city_id) }}';
-                if (oldCityId) {
-                    citySelect.value = oldCityId;
-                    setCityTypeAndName();
-                }
-            })
-            .catch(() => {
-                citySelect.innerHTML = '<option value="">Gagal memuat kota</option>';
-                citySelect.disabled = false;
-            });
+    document.querySelectorAll('input[name="address_id"]').forEach(radio => {
+        radio.addEventListener('change', calculateShipping);
     });
+    courier.addEventListener('change', calculateShipping);
 
-    // City change
-    citySelect.addEventListener('change', setCityTypeAndName);
-
-    // Trigger awal jika sudah ada data
-    @if(old('province_id') || $order->province_id)
-        provinceSelect.dispatchEvent(new Event('change'));
-    @endif
+    // Auto trigger jika kurir sudah dipilih
+    if (courier.value) calculateShipping();
 });
+
+function selectAddress(radio, id) {
+    document.getElementById('selectedAddressId').value = id;
+}
 </script>
+@endpush
 @endsection
