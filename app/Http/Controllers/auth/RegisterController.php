@@ -49,11 +49,11 @@ class RegisterController extends Controller
             'address' => $request->address,
         ]);
 
-        // Login otomatis setelah registrasi
-        auth()->login($user);
+        // // Login otomatis setelah registrasi
+        // auth()->login($user);
 
         // Redirect ke dashboard atau home
-        return redirect()->route('dashboard')->with('success', 'Registrasi berhasil! Selamat datang.');
+        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silahkan login.');
     }
 
     /**
