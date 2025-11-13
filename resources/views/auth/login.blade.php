@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - Lembah Hijau</title>
+  <title>Login - Ecommerce TSA</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
@@ -137,7 +137,7 @@
       </div>
 
       <div class="flex items-center justify-end text-[11px]">
-        <a href="#" class="text-primary hover:underline font-semibold">Lupa Password?</a>
+        <a href="{{route('password.request')}}" class="text-primary hover:underline font-semibold">Lupa Password?</a>
       </div>
 
       <!-- Tombol Login -->
