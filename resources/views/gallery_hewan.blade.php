@@ -313,11 +313,12 @@
     
                 <!-- Load More Section -->
                 <div class="flex justify-center mt-16">
-                    <button class="group flex items-center gap-3 px-8 h-14 rounded-2xl glass-strong font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                    <a href="{{route('login')}}" 
+                    class="group flex items-center gap-3 px-8 h-14 rounded-2xl glass-strong font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                         <span class="material-symbols-outlined text-primary dark:text-secondary">pets</span>
                         <span>Muat Lebih Banyak Hewan</span>
                         <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         </main>
