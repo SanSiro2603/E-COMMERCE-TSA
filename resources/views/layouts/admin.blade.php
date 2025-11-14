@@ -197,6 +197,8 @@
 </head>
 <body class="bg-gray-50 dark:bg-zinc-950">
 
+    
+
     <!-- Mobile Overlay -->
     <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
 
@@ -320,6 +322,7 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
         // Sidebar Toggle for Mobile
@@ -363,6 +366,31 @@
                 overlay.classList.remove('active');
             }
         });
+
+      
+
+@if(session('success'))
+
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: '{{ session("success") }}',
+        timer: 2000,
+        showConfirmButton: false
+    });
+
+@endif
+
+@if(session('error'))
+
+    Swal.fire({
+        icon: 'error',
+        title: 'Login gagal!',
+        text: '{{ session("error") }}'
+    });
+
+@endif
+
     </script>
 
     @stack('scripts')

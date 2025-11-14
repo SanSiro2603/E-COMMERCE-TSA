@@ -4,9 +4,16 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - Ecommerce TSA</title>
+
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+  <!-- reCAPTCHA -->
+  {!! NoCaptcha::renderJs() !!}
 
   <script>
     tailwind.config = {
@@ -39,12 +46,13 @@
       align-items: center;
     }
 
+    /* Card compact */
     .login-card {
       background: #ffffff;
       border-radius: 16px;
-      padding: 56px 40px;
+      padding: 28px 26px;
       width: 100%;
-      max-width: 340px;
+      max-width: 310px;
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
       animation: fadeInUp 0.4s ease;
     }
@@ -52,6 +60,24 @@
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Captcha center kecil */
+    .captcha-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-top: 4px;
+    }
+
+    .g-recaptcha {
+      transform: scale(0.80);
+      -webkit-transform: scale(0.80);
+      transform-origin: center;
+      -webkit-transform-origin: center;
+    }
+
+    .space-y-3 > * + * {
+      margin-top: 0.55rem !important;
     }
 
     .google-login {
@@ -74,24 +100,40 @@
     }
 
     .login-btn {
-      height: 32px;
-      font-size: 13px;
+      height: 30px;
+      font-size: 12.5px;
       font-weight: 600;
       border-radius: 7px;
+      margin-top: 14px !important;
+      margin-bottom: 18px !important;
     }
   </style>
 </head>
 
 <body>
   <div class="login-card text-center">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        title: "Berhasil!",
+        text: "{{ session('success') }}",
+        icon: "success",
+        confirmButtonText: "OK"
+    });
+</script>
+@endif
+
+
+
     <!-- Logo -->
-    <div class="flex justify-center mb-2 mt-2">
-  <img src="images/logo.png" alt="Logo" class="w-12 h-12 rounded-full object-cover" />
-</div>
+    <div class="flex justify-center mb-2 mt-1">
+      <img src="images/logo.png" alt="Logo" class="w-12 h-12 rounded-full object-cover" />
+    </div>
 
-
-    <h2 class="text-lg font-bold text-gray-900 mb-1">Welcome Back</h2>
-    <p class="text-gray-600 text-xs mb-6">Login to your account</p>
+    <h2 class="text-lg font-bold text-gray-900 mb-0">Welcome Back</h2>
+    <p class="text-gray-600 text-[11px] mb-4">Login to your account</p>
 
     <form method="POST" action="{{ route('login') }}" class="space-y-3">
       @csrf
@@ -101,8 +143,7 @@
         <label for="email" class="block text-xs font-semibold text-gray-900 mb-1 text-left">Alamat Email</label>
         <div class="relative">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">mail</span>
-          <input type="email" id="email" name="email"
-            value="{{ old('email') }}" required
+          <input type="email" id="email" name="email" value="{{ old('email') }}" required
             class="w-full h-9 pl-10 pr-3 rounded-lg border 
               @error('email') border-red-500 @else border-gray-300 @enderror
               focus:border-primary focus:ring-0 text-gray-900 placeholder-gray-400 text-xs"
@@ -111,9 +152,6 @@
         @error('email')
           <p class="text-red-500 text-[11px] mt-1 text-left">{{ $message }}</p>
         @enderror
-        @if ($errors->has('login'))
-          <p class="text-red-500 text-[11px] mt-1 text-left">{{ $errors->first('login') }}</p>
-        @endif
       </div>
 
       <!-- Password -->
@@ -136,32 +174,41 @@
         @enderror
       </div>
 
-      <div class="flex items-center justify-end text-[11px]">
+      <!-- Lupa Password -->
+      <div class="flex items-center justify-end text-[10.5px]">
         <a href="{{route('password.request')}}" class="text-primary hover:underline font-semibold">Lupa Password?</a>
       </div>
 
-      <!-- Tombol Login -->
+      <!-- reCAPTCHA -->
+      <div class="captcha-wrapper">
+        {!! NoCaptcha::display() !!}
+      </div>
+      @error('g-recaptcha-response')
+        <p class="text-red-500 text-[11px] mt-1 text-left">{{ $message }}</p>
+      @enderror
+
+      <!-- Login Button -->
       <button type="submit"
-        class="login-btn w-full bg-gradient-to-r from-green-700 to-green-500 text-white font-bold shadow hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-1 mt-6 mb-8">
+        class="login-btn w-full bg-gradient-to-r from-green-700 to-green-500 text-white font-bold shadow hover:scale-[1.02] transition-all duration-200 flex items-center justify-center gap-1">
         <span>Login</span>
       </button>
 
-      <!-- Garis pemisah -->
-      <div class="flex items-center mb-7">
+      <!-- Garis OR -->
+      <div class="flex items-center mb-5">
         <div class="flex-grow border-t border-gray-300"></div>
-        <span class="mx-2 text-[11px] text-gray-500">OR</span>
+        <span class="mx-2 text-[10.5px] text-gray-500">OR</span>
         <div class="flex-grow border-t border-gray-300"></div>
       </div>
 
-      <!-- Tombol Google -->
-      <div class="mb-6">
+      <!-- Google -->
+      <div class="mb-4">
         <a href="{{ route('google.redirect') }}" class="google-login text-gray-700 font-medium">
           <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-4 h-4" />
           <span>Continue with Google</span>
         </a>
       </div>
 
-      <div class="text-center mt-7 text-[11px]">
+      <div class="text-center mt-4 text-[11px]">
         <p class="text-gray-700">
           Don't have an account?
           <a href="{{ route('register') }}" class="text-green-700 font-bold hover:underline">Sign Up</a>

@@ -114,6 +114,16 @@
       </div>
 
       <div>
+  <label for="phone" class="block text-xs font-semibold text-gray-900 mb-1">Nomor Telepon</label>
+  <div class="relative">
+    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">call</span>
+    <input type="text" id="phone" name="phone" value="{{ old('phone') }}"
+      class="w-full h-9 pl-10 pr-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-0 text-gray-900 placeholder-gray-400 text-xs"
+      placeholder="Masukkan nomor telepon " />
+  </div>
+</div>
+r
+      <div>
         <label for="password" class="block text-xs font-semibold text-gray-900 mb-1">Password</label>
         <div class="relative">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">lock</span>
