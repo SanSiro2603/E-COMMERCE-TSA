@@ -271,6 +271,7 @@
     @stack('scripts')
 
     <!-- Alpine.js -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 
     <script>
@@ -356,5 +357,19 @@
             fetchCartCount();
         });
     </script>
+
+    @if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: '{{ session("success") }}',
+        toast: true,
+        position: 'top-end',
+        timer: 2000,
+        showConfirmButton: false,
+    });
+</script>
+@endif
+
 </body>
 </html>
