@@ -301,6 +301,8 @@
     }
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('searchInput');
@@ -423,5 +425,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initial pagination handlers
     attachPaginationHandlers();
 });
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: '{{ session("success") }}',
+        toast: true,
+        position: 'top-end',
+        timer: 2000,
+        showConfirmButton: false,
+    });
+</script>
+@endif
 </script>
 @endsection
