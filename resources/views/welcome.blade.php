@@ -114,13 +114,13 @@
       <div class="flex items-center justify-between py-4">
         <!-- Logo -->
         <div class="flex items-center gap-3 group cursor-pointer">
-          <div class="size-11 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center transform group-hover:rotate-12 transition-all duration-300 shadow-lg">
-              <span class="material-symbols-outlined text-3xl text-white">storefront</span>
+                        <div class="size-11 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center transform group-hover:rotate-12 transition-all duration-300 shadow-lg">
+                            <span class="material-symbols-outlined text-3xl text-white">storefront</span>
+                        </div>
+          <div>
+            <h2 class="text-xl font-bold text-gradient">E-Commerce TSA</h2>
+            <p class="text-xs text-gray-600 dark:text-gray-400">Perdagangan Hewan</p>
           </div>
-              <div>
-                  <a href="{{route('landing')}}" class="text-2xl font-bold gradient-text">E-commerce TSA</a>
-                  <p class="text-xs text-gray-600 dark:text-gray-400">Ternak Berkualitas Premium</p>
-              </div>
         </div>
 
         <!-- Desktop Nav -->
