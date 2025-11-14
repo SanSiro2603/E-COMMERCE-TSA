@@ -18,7 +18,8 @@ class AppServiceProvider extends ServiceProvider
     /**
      * Bootstrap any application services.
      */
-    
+
+
 
 public function boot()
 {
@@ -26,6 +27,8 @@ public function boot()
     Config::$isProduction = config('midtrans.is_production');
     Config::$isSanitized = true;
     Config::$is3ds = true;
+
+    date_default_timezone_set('Asia/Jakarta');
 }
 
 }

@@ -36,7 +36,8 @@
                 Pesanan #{{ $order->order_number }}
             </h1>
             <p class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
-                Dibuat: {{ $order->created_at->format('d M Y, H:i') }}
+              <p>Pesanan dibuat: {{ $order->created_at->timezone('Asia/Jakarta')->format('d-m-Y H:i:s') }}</p>
+
             </p>
         </div>
         <div class="flex items-center gap-3">

@@ -12,12 +12,6 @@
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white font-be-vietnam">Dashboard</h1>
             <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">Selamat datang kembali, {{ Auth::user()->name }}! 👋</p>
         </div>
-        <div class="flex items-center gap-3">
-            <button class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-200 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors flex items-center gap-2">
-                <span class="material-symbols-outlined text-lg">download</span>
-                Export
-            </button>
-        </div>
     </div>
 
     <!-- Stat Cards -->
