@@ -362,7 +362,7 @@
                         <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Kontak</h4>
                         <ul class="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
                             <li>Jl. Peternakan No. 123</li>
-                            <li>Jakarta, Indonesia</li>
+                            <li>Lampung, Indonesia</li>
                             <li>kontak@tsa-ecommerce.com</li>
                             <li>(021) 123-4567</li>
                         </ul>
