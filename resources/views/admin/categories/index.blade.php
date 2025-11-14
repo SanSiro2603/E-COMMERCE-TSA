@@ -190,7 +190,7 @@
                                     </div>
                                     <div>
                                         <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $category->name }}</p>
-                                        <p class="text-xs text-gray-500 dark:text-zinc-400">ID: {{ $category->id }}</p>
+                                        {{-- <p class="text-xs text-gray-500 dark:text-zinc-400">ID: {{ $category->id }}</p> --}}
                                     </div>
                                 </div>
                             </td>
@@ -284,7 +284,10 @@
 
 </div>
 
+ <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
+    
     document.addEventListener('DOMContentLoaded', function () {
         const successAlert = document.getElementById('alert-success');
         const errorAlert = document.getElementById('alert-error');
@@ -300,5 +303,33 @@
             }
         });
     });
+
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: '{{ session("success") }}',
+        toast: true,
+        position: 'top-end',
+        timer: 2000,
+        showConfirmButton: false,
+    });
+</script>
+@endif
+
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: '{{ session("success") }}',
+        toast: true,
+        position: 'top-end',
+        timer: 2000,
+        showConfirmButton: false,
+    });
+</script>
+@endif
+
 </script>
 @endsection
