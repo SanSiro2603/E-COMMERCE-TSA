@@ -144,11 +144,13 @@
                         {{ $order->status_label ?? ucfirst(str_replace('_', ' ', $order->status)) }}
                     </span>
 
-                    @if($order->paid_at)
-                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-2">
-                            Dibayar pada {{ $order->paid_at->format('d M Y, H:i') }}
-                        </p>
-                    @endif
+                   @if($order->paid_at)
+    <p class="text-xs text-gray-500 dark:text-zinc-400 mt-2" 
+       id="paid-at-text"
+       data-time="{{ $order->paid_at->setTimezone(config('app.timezone'))->toIso8601String() }}">
+    </p>
+@endif
+
                 </div>
             </div>
         </div>
@@ -281,6 +283,35 @@
         }, 500);
     </script>
 @endif
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const el = document.getElementById('paid-at-text');
+    if (!el) return;
+
+    // ambil ISO string dengan offset dari data attribute
+    const iso = el.dataset.time;
+    if (!iso) return;
+
+    const date = new Date(iso); // parsed correctly thanks to ISO+offset
+
+    // Format: 07 Januari 2025, 16:22
+    const options = {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    };
+
+    // gunakan locale 'id-ID' agar nama bulan bahasa Indonesia
+    const formatted = date.toLocaleString('id-ID', options).replace(',', '');
+    el.textContent = 'Dibayar pada ' + formatted;
+});
+</script>
+
+
 
 <style>
     @keyframes fade-in {
