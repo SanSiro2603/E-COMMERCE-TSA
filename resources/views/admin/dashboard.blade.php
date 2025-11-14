@@ -277,20 +277,57 @@
                                 </p>
                             </div>
                             <div class="flex-shrink-0 text-right">
-                                <p class="text-sm font-bold text-gray-900 dark:text-white">Rp {{ number_format($order->total_price ?? 0, 0, ',', '.') }}</p>
-                                @if($order->status == 'pending')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 mt-1">
-                                        Pending
-                                    </span>
-                                @elseif($order->status == 'processing')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 mt-1">
-                                        Proses
-                                    </span>
-                                @elseif($order->status == 'completed')
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 mt-1">
-                                        Selesai
-                                    </span>
-                                @endif
+                                <p class="text-sm font-bold text-gray-900 dark:text-white">Rp {{ number_format($order->grand_total ?? 0, 0, ',', '.') }}</p>
+                                @switch($order->status)
+                                    @case('pending')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                                            bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 mt-1">
+                                            Pending
+                                        </span>
+                                        @break
+
+                                    @case('paid')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                                            bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 mt-1">
+                                            Sudah Dibayar
+                                        </span>
+                                        @break
+
+                                    @case('processing')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                                            bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 mt-1">
+                                            Diproses
+                                        </span>
+                                        @break
+
+                                    @case('shipped')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                                            bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 mt-1">
+                                            Dikirim
+                                        </span>
+                                        @break
+
+                                    @case('completed')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                                            bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 mt-1">
+                                            Selesai
+                                        </span>
+                                        @break
+
+                                    @case('cancelled')
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                                            bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 mt-1">
+                                            Dibatalkan
+                                        </span>
+                                        @break
+
+                                    @default
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                                            bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-400 mt-1">
+                                            Unknown
+                                        </span>
+                                @endswitch
+
                             </div>
                         </div>
                     @empty
