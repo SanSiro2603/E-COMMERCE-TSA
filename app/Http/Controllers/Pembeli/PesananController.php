@@ -92,42 +92,25 @@ class PesananController extends Controller
     return view('pembeli.pesanan.show', compact('order'));
 }
     // === CHECKOUT: PILIH ALAMAT TERSIMPAN + KURIR ===
-   public function checkout(Request $request)
-{
-    // Ambil cart_ids dari request (jika ada)
-    $cartIds = $request->input('cart_ids', []);
+    public function checkout()
+    {
+        $carts = Cart::with('product')->where('user_id', Auth::id())->get();
+        if ($carts->isEmpty()) {
+            return redirect()->route('pembeli.keranjang.index')
+                ->with('error', 'Keranjang kosong');
+        }
 
-    if (!is_array($cartIds) || empty($cartIds)) {
-        return redirect()->route('pembeli.keranjang.index')
-            ->with('error', 'Pilih minimal 1 produk untuk checkout.');
+        $addresses = Auth::user()->addresses()->get();
+        if ($addresses->isEmpty()) {
+            return redirect()->route('pembeli.alamat.create')
+                ->with('error', 'Silakan tambah alamat terlebih dahulu');
+        }
+
+        $subtotal = $carts->sum('subtotal');
+        $totalWeight = $carts->sum(fn($c) => ($c->product->weight ?? 1000) * $c->quantity);
+
+        return view('pembeli.pesanan.checkout', compact('carts', 'subtotal', 'totalWeight', 'addresses'));
     }
-
-    // Ambil cart yang dicentang untuk user saat ini
-    $carts = Cart::with('product')
-                 ->where('user_id', Auth::id())
-                 ->whereIn('id', $cartIds)
-                 ->get();
-
-    if ($carts->isEmpty()) {
-        return redirect()->route('pembeli.keranjang.index')
-            ->with('error', 'Produk tidak ditemukan atau sudah tidak tersedia.');
-    }
-
-    // Pastikan user punya alamat
-    $addresses = Auth::user()->addresses()->get();
-    if ($addresses->isEmpty()) {
-        return redirect()->route('pembeli.alamat.create')
-            ->with('error', 'Silakan tambah alamat terlebih dahulu.');
-    }
-
-    // Hitung subtotal & total berat
-    $subtotal = $carts->sum('subtotal');
-    $totalWeight = $carts->sum(fn($c) => ($c->product->weight ?? 1000) * $c->quantity);
-
-    // Kirim ke view checkout
-    return view('pembeli.pesanan.checkout', compact('carts', 'subtotal', 'totalWeight', 'addresses'));
-}
-
 
     // === STORE: BUAT PESANAN DARI ALAMAT TERPILIH ===
     public function store(Request $request)

@@ -65,32 +65,19 @@
         @endif
     </div>
 
-    {{-- Tambahkan di atas daftar cart items --}}
-<div class="flex items-center gap-2 mb-4">
-    <input type="checkbox" id="select-all" class="w-5 h-5 text-soft-green">
-    <label for="select-all" class="text-gray-700 dark:text-zinc-300 text-sm font-medium">Pilih Semua</label>
-</div>
-
-
     @if($carts->count() > 0)
-        <form action="{{ route('pembeli.pesanan.checkout') }}" method="GET" id="checkout-form">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                <!-- Cart Items -->
-                <div class="lg:col-span-2 space-y-4">
-                    @foreach($carts as $cart)
-                        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden cart-item" 
-                             data-cart-id="{{ $cart->id }}" data-product-id="{{ $cart->product_id }}">
-                            <div class="p-4 sm:p-6 flex items-start gap-4">
-                                
-                                <!-- Checkbox -->
-                                <div class="flex-shrink-0 mt-2">
-                                    <input type="checkbox" name="cart_ids[]" value="{{ $cart->id }}" class="w-5 h-5 text-soft-green">
-                                </div>
-
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            <!-- Cart Items -->
+            <div class="lg:col-span-2 space-y-4">
+                @foreach($carts as $cart)
+                    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden cart-item" 
+                         data-cart-id="{{ $cart->id }}" data-product-id="{{ $cart->product_id }}">
+                        <div class="p-4 sm:p-6">
+                            <div class="flex flex-col sm:flex-row gap-4">
                                 <!-- Product Image -->
                                 <a href="{{ route('pembeli.produk.show', $cart->product->slug) }}" class="flex-shrink-0">
-                                    <div class="w-24 h-24 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden">
+                                    <div class="w-full sm:w-24 h-24 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden">
                                         @if($cart->product->image)
                                             <img src="{{ asset('storage/' . $cart->product->image) }}" alt="{{ $cart->product->name }}" class="w-full h-full object-cover">
                                         @else
@@ -117,7 +104,7 @@
                                                 </span>
                                             </p>
                                         </div>
-                                        <button type="button" onclick="removeFromCart({{ $cart->id }})" 
+                                        <button onclick="removeFromCart({{ $cart->id }})" 
                                                 class="flex-shrink-0 text-gray-400 hover:text-red-500 transition-colors">
                                             <span class="material-symbols-outlined">delete</span>
                                         </button>
@@ -135,7 +122,7 @@
                                         <!-- Quantity Controls -->
                                         <div class="flex items-center gap-3">
                                             <div class="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800 rounded-lg p-1">
-                                                <button type="button" onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, -1, {{ $cart->product->stock }})" 
+                                                <button onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, -1, {{ $cart->product->stock }})" 
                                                         class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
                                                     <span class="material-symbols-outlined text-sm">remove</span>
                                                 </button>
@@ -146,7 +133,7 @@
                                                        class="w-16 text-center bg-transparent border-0 text-sm font-semibold text-gray-900 dark:text-white focus:ring-0"
                                                        onchange="updateQuantityDirect({{ $cart->id }}, {{ $cart->product_id }}, this.value, {{ $cart->product->stock }})"
                                                        id="quantity-{{ $cart->id }}">
-                                                <button type="button" onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, 1, {{ $cart->product->stock }})" 
+                                                <button onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, 1, {{ $cart->product->stock }})" 
                                                         class="w-8 h-8 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
                                                     <span class="material-symbols-outlined text-sm">add</span>
                                                 </button>
@@ -167,59 +154,59 @@
                                 </div>
                             </div>
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endforeach
+            </div>
 
-                <!-- Order Summary -->
-                <div class="lg:col-span-1">
-                    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm sticky top-20">
-                        <div class="p-6 border-b border-gray-200 dark:border-zinc-800">
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Ringkasan Belanja</h2>
+            <!-- Order Summary -->
+            <div class="lg:col-span-1">
+                <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm sticky top-20">
+                    <div class="p-6 border-b border-gray-200 dark:border-zinc-800">
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">Ringkasan Belanja</h2>
+                    </div>
+                    
+                    <div class="p-6 space-y-4">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-zinc-400">Total Item</span>
+                            <span class="font-semibold text-gray-900 dark:text-white" id="total-items">{{ $carts->sum('quantity') }} item</span>
                         </div>
                         
-                        <div class="p-6 space-y-4">
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600 dark:text-zinc-400">Total Item</span>
-                                <span class="font-semibold text-gray-900 dark:text-white" id="total-items">{{ $carts->sum('quantity') }} item</span>
-                            </div>
-                            
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600 dark:text-zinc-400">Total Harga</span>
-                                <span class="font-semibold text-gray-900 dark:text-white" id="total-price">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600 dark:text-zinc-400">Total Harga</span>
+                            <span class="font-semibold text-gray-900 dark:text-white" id="total-price">
+                                Rp {{ number_format($total, 0, ',', '.') }}
+                            </span>
+                        </div>
+
+                        <div class="pt-4 border-t border-gray-200 dark:border-zinc-800">
+                            <div class="flex justify-between mb-2">
+                                <span class="text-base font-semibold text-gray-900 dark:text-white">Total Bayar</span>
+                                <span class="text-xl font-bold text-soft-green" id="grand-total">
                                     Rp {{ number_format($total, 0, ',', '.') }}
                                 </span>
                             </div>
-
-                            <div class="pt-4 border-t border-gray-200 dark:border-zinc-800">
-                                <div class="flex justify-between mb-2">
-                                    <span class="text-base font-semibold text-gray-900 dark:text-white">Total Bayar</span>
-                                    <span class="text-xl font-bold text-soft-green" id="grand-total">
-                                        Rp {{ number_format($total, 0, ',', '.') }}
-                                    </span>
-                                </div>
-                            </div>
                         </div>
+                    </div>
 
-                        <div class="p-6 border-t border-gray-200 dark:border-zinc-800 space-y-3">
-                            <button type="submit" 
-                               class="w-full px-6 py-3 bg-gradient-to-r from-soft-green to-primary text-white font-semibold rounded-xl text-center hover:shadow-lg transition-all">
-                                <span class="flex items-center justify-center gap-2">
-                                    <span class="material-symbols-outlined">shopping_bag</span>
-                                    Lanjut ke Checkout
-                                </span>
-                            </button>
-                            <a href="{{ route('pembeli.produk.index') }}" 
-                               class="block w-full px-6 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-medium rounded-xl text-center hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors">
-                                <span class="flex items-center justify-center gap-2">
-                                    <span class="material-symbols-outlined">storefront</span>
-                                    Lanjut Belanja
-                                </span>
-                            </a>
-                        </div>
+                    <div class="p-6 border-t border-gray-200 dark:border-zinc-800 space-y-3">
+                        <a href="{{ route('pembeli.pesanan.checkout') }}" 
+                           class="block w-full px-6 py-3 bg-gradient-to-r from-soft-green to-primary text-white font-semibold rounded-xl text-center hover:shadow-lg transition-all">
+                            <span class="flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">shopping_bag</span>
+                                Lanjut ke Checkout
+                            </span>
+                        </a>
+                        <a href="{{ route('pembeli.produk.index') }}" 
+                           class="block w-full px-6 py-3 bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-medium rounded-xl text-center hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors">
+                            <span class="flex items-center justify-center gap-2">
+                                <span class="material-symbols-outlined">storefront</span>
+                                Lanjut Belanja
+                            </span>
+                        </a>
                     </div>
                 </div>
             </div>
-        </form>
+        </div>
     @else
         <!-- Empty Cart -->
         <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
@@ -241,6 +228,7 @@
             </div>
         </div>
     @endif
+
 </div>
 
 <style>
@@ -424,26 +412,6 @@ function clearCart() {
     // Karena route menggunakan GET, kita redirect dengan query parameter
     window.location.href = '/pembeli/keranjang/clear';
 }
-
-// Select All / Deselect All
-const selectAllCheckbox = document.getElementById('select-all');
-const clearSelectionBtn = document.getElementById('clear-selection');
-
-if (selectAllCheckbox) {
-    selectAllCheckbox.addEventListener('change', function() {
-        const checkboxes = document.querySelectorAll('input[name="cart_ids[]"]');
-        checkboxes.forEach(cb => cb.checked = this.checked);
-    });
-}
-
-if (clearSelectionBtn) {
-    clearSelectionBtn.addEventListener('click', function() {
-        const checkboxes = document.querySelectorAll('input[name="cart_ids[]"]');
-        checkboxes.forEach(cb => cb.checked = false);
-        selectAllCheckbox.checked = false;
-    });
-}
-
 </script>
 @endpush
 @endsection
