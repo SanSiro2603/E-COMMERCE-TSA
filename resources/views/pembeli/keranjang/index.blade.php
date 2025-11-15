@@ -1,7 +1,7 @@
 {{-- resources/views/pembeli/keranjang/index.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Keranjang Belanja - Lembah Hijau')
+@section('title', 'Keranjang Belanja - E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">

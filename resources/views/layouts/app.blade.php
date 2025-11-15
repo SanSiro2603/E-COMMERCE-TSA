@@ -1,11 +1,11 @@
 {{-- resources/views/pembeli/layouts/app.blade.php --}}
 <!DOCTYPE html>
-<html lang="id" class="light">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Pembeli - Lembah Hijau')</title>
+    <title>@yield('title', 'Pembeli - E-Commerce TSA')</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
@@ -89,7 +89,7 @@
                         <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-lg flex items-center justify-center">
                             <span class="material-symbols-outlined text-white text-xl">eco</span>
                         </div>
-                        <span class="text-xl font-bold text-gray-900 dark:text-white font-be-vietnam hidden sm:block">Lembah Hijau</span>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white font-be-vietnam hidden sm:block">E-Commerce TSA</span>
                     </a>
                 </div>
 
@@ -257,7 +257,7 @@
     <footer class="px-4 lg:px-8 py-6 border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <div class="max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
-                <p>© 2025 Lembah Hijau. All rights reserved.</p>
+                <p>© 2025 E-Commerce TSA. All rights reserved.</p>
                 <div class="flex items-center gap-4">
                     <a href="#" class="hover:text-soft-green transition-colors">Dokumentasi</a>
                     <span>•</span>

@@ -14,7 +14,7 @@
 </head>
 <body>
     <div class="header">
-        <h1>Lembah Hijau</h1>
+        <h1>E-Commerce TSA</h1>
         <h2>Laporan Penjualan</h2>
         <p>{{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} - {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}</p>
         <p><strong>Total Pendapatan: Rp {{ number_format($totalRevenue) }}</strong></p>

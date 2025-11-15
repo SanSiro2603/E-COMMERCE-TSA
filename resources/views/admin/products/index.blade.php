@@ -1,7 +1,7 @@
 {{-- resources/views/admin/products/index.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Kelola Produk - Lembah Hijau')
+@section('title', 'Kelola Produk - E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">

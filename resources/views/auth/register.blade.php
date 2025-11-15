@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Register - Lembah Hijau</title>
+  <title>Register - E-Commerce TSA</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -122,14 +122,14 @@
       placeholder="Masukkan nomor telepon " />
   </div>
 </div>
-r
+
       <div>
         <label for="password" class="block text-xs font-semibold text-gray-900 mb-1">Password</label>
         <div class="relative">
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">lock</span>
           <input type="password" id="password" name="password" required
             class="w-full h-9 pl-10 pr-9 rounded-lg border border-gray-300 focus:border-primary focus:ring-0 text-gray-900 placeholder-gray-400 text-xs"
-            placeholder="Buat Password 6 Karakter" />
+            placeholder="Buat Password 8 Karakter" />
           <button type="button" onclick="togglePassword(event, 'password')"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 text-sm">
             <span class="material-symbols-outlined text-sm">visibility</span>

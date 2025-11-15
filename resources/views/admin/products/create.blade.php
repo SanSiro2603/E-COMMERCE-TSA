@@ -1,7 +1,7 @@
 {{-- resources/views/admin/products/create.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Tambah Produk - Lembah Hijau')
+@section('title', 'Tambah Produk - E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">

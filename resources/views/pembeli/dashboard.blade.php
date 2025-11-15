@@ -1,7 +1,7 @@
 {{-- resources/views/pembeli/dashboard.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Dashboard - Lembah Hijau')
+@section('title', 'Dashboard - E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">

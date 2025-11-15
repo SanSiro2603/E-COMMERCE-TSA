@@ -35,10 +35,10 @@
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                 Pesanan #{{ $order->order_number }}
             </h1>
-            <p class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
-              <p>Pesanan dibuat: {{ $order->created_at->timezone('Asia/Jakarta')->format('d-m-Y H:i:s') }}</p>
-
+            <p class="text-sm text-white dark:text-white mt-1">
+                Pesanan dibuat: {{ $order->created_at->timezone('Asia/Jakarta')->format('d-m-Y H:i:s') }}
             </p>
+
         </div>
         <div class="flex items-center gap-3">
             <span class="px-4 py-2 rounded-full text-xs font-bold

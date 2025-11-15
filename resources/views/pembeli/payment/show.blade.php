@@ -1,7 +1,7 @@
 {{-- resources/views/pembeli/payment/show.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Pembayaran - Lembah Hijau')
+@section('title', 'Pembayaran - E-Commerce TSA')
 
 @section('content')
 <div class="max-w-6xl mx-auto p-4 space-y-6">

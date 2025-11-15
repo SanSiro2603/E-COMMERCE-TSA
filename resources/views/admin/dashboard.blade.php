@@ -1,7 +1,7 @@
 {{-- resources/views/admin/dashboard.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Dashboard Admin - Lembah Hijau')
+@section('title', 'Dashboard Admin - E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">

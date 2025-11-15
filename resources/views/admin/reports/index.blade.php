@@ -1,7 +1,7 @@
 {{-- resources/views/admin/reports/index.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Laporan Penjualan')
+@section('title', 'Laporan Penjualan E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">
