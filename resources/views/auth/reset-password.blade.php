@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reset Password - Lembah Hijau</title>
+  <title>Reset Password - E-Commerce TSA</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
@@ -65,7 +65,7 @@
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">lock</span>
           <input type="password" name="password" required
             class="w-full h-9 pl-10 pr-3 rounded-lg border @error('password') border-red-500 @else border-gray-300 @enderror
-                   focus:border-primary focus:ring-0 text-xs" placeholder="Min. 6 karakter" />
+                   focus:border-primary focus:ring-0 text-xs" placeholder="Min. 8 karakter" />
         </div>
         @error('password') <p class="text-red-500 text-[11px] mt-1 text-left">{{ $message }}</p> @enderror
       </div>
@@ -76,7 +76,7 @@
           <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">lock</span>
           <input type="password" name="password_confirmation" required
             class="w-full h-9 pl-10 pr-3 rounded-lg border border-gray-300 focus:border-primary focus:ring-0 text-xs"
-            placeholder="Ulangi password" />
+            placeholder="Konfirmasi password" />
         </div>
       </div>
 
