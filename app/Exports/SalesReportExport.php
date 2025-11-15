@@ -21,31 +21,55 @@ class SalesReportExport implements FromCollection, WithHeadings, WithMapping
 
     public function collection()
     {
-        return Order::whereBetween('created_at', [$this->startDate, $this->endDate])
+        $orders = Order::whereBetween('created_at', [$this->startDate, $this->endDate])
             ->where('status', 'completed')
-            ->with('user')
+            ->with(['user', 'address', 'items'])
+            ->orderBy('created_at', 'asc')
             ->get();
+
+        // Tambahkan jumlah transaksi per pengguna
+        $orders->each(function($order) {
+            $order->transactions_count = Order::where('user_id', $order->user_id)
+                ->where('status', 'completed')
+                ->whereBetween('created_at', [$this->startDate, $this->endDate])
+                ->count();
+        });
+
+        return $orders;
     }
 
     public function headings(): array
     {
         return [
+            'No.',
             'No. Pesanan',
-            'Pembeli',
             'Tanggal',
+            'Nama Pembeli',
+            'Provinsi',
+            'Kota',
+            'Alamat',
+            'No. Telp',
+            // 'Jumlah Transaksi',
             'Total (Rp)',
-            'Status'
         ];
     }
 
     public function map($order): array
     {
+        static $no = 1; // untuk nomor urut
+
         return [
+            $no++,
             $order->order_number,
-            $order->user->name,
-            $order->created_at->format('d/m/Y H:i'),
+            $order->created_at->format('d/m/Y'),
+            $order->recipient_name ?? $order->user->name,
+            $order->province ?? '-',
+            $order->city ?? '-',
+            $order->address?->full_address ?? $order->shipping_address ?? '-',
+            $order->recipient_phone ?? '-',
+            // $order->transactions_count,
             number_format($order->grand_total),
-            ucfirst($order->status)
         ];
     }
+
 }

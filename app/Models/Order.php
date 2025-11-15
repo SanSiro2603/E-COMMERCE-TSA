@@ -33,6 +33,7 @@ class Order extends Model
         'payment_method',
         'paid_at',
         'notes',
+        'address_id',
     ];
 
     protected $casts = [

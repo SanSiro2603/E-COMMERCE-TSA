@@ -53,27 +53,41 @@ class ReportController extends Controller
         ));
     }
 
-    public function exportPdf(Request $request)
-    {
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
 
-        $orders = Order::whereBetween('created_at', [$startDate, $endDate])
+public function exportPdf(Request $request)
+{
+    $startDate = $request->start_date;
+    $endDate = $request->end_date;
+
+    $orders = Order::whereBetween('created_at', [$startDate, $endDate])
+        ->where('status', 'completed')
+        ->with(['user', 'items', 'address'])
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+    // Tambahkan jumlah transaksi per pengguna di periode ini
+    $orders->each(function($order) use ($startDate, $endDate) {
+        $order->transactions_count = Order::where('user_id', $order->user_id)
             ->where('status', 'completed')
-            ->with('user', 'items.product')
-            ->get();
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+    });
 
-        $totalRevenue = $orders->sum('grand_total');
+    $totalRevenue = $orders->sum('grand_total');
 
-        $pdf = Pdf::loadView('admin.reports.pdf', compact('orders', 'totalRevenue', 'startDate', 'endDate'));
-        return $pdf->download('laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.pdf');
-    }
+    $pdf = Pdf::loadView('admin.reports.pdf', compact('orders', 'totalRevenue', 'startDate', 'endDate'))
+              ->setPaper('a4', 'landscape'); // <-- landscape
 
-    public function exportExcel(Request $request)
-    {
-        return Excel::download(
-            new SalesReportExport($request->start_date, $request->end_date),
-            'laporan-penjualan-' . $request->start_date . '-sd-' . $request->end_date . '.xlsx'
-        );
-    }
+    return $pdf->download('laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.pdf');
+}
+
+public function exportExcel(Request $request)
+{
+    $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+    $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+
+    $fileName = 'laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.xlsx';
+
+    return Excel::download(new SalesReportExport($startDate, $endDate), $fileName);
+}
 }
