@@ -122,22 +122,35 @@ document.addEventListener('DOMContentLoaded', function () {
     const cityName = document.getElementById('city_name');
     const cityType = document.getElementById('city_type');
 
-    // Load Provinces + Select old
+    /**
+     * ======================================================
+     * 1. LOAD PROVINCE (dengan selected otomatis)
+     * ======================================================
+     */
     fetch('{{ route("pembeli.rajaongkir.provinces") }}')
         .then(r => r.json())
         .then(provinces => {
             provinces.forEach(p => {
                 const opt = new Option(p.name, p.province_id);
                 opt.dataset.name = p.name;
-                if (p.province_id === '{{ old('province_id', $alamat->province_id) }}') {
+
+                if (p.province_id == '{{ old('province_id', $alamat->province_id) }}') {
                     opt.selected = true;
                 }
+
                 province.appendChild(opt);
             });
+
+            // Trigger load cities
             province.dispatchEvent(new Event('change'));
         });
 
-    // Load Cities
+
+    /**
+     * ======================================================
+     * 2. LOAD CITY (FIX: gunakan c.city_name & c.type)
+     * ======================================================
+     */
     province.addEventListener('change', function () {
         const id = this.value;
         city.innerHTML = '<option value="">Memuat...</option>';
@@ -149,20 +162,35 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(r => r.json())
             .then(cities => {
                 city.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
+
                 cities.forEach(c => {
-                    const opt = new Option(c.name, c.city_id);
-                    opt.dataset.type = c.type || 'Kota';
-                    if (c.city_id === '{{ old('city_id', $alamat->city_id) }}') {
+                    // FIX: gunakan c.city_name, bukan c.name
+                    const opt = new Option(c.city_name, c.city_id);
+
+                    // FIX: type sesuai dari controller (Kota / Kabupaten)
+                    opt.dataset.type = c.type;
+
+                    // Selected jika sedang edit alamat
+                    if (c.city_id == '{{ old('city_id', $alamat->city_id) }}') {
                         opt.selected = true;
                     }
+
                     city.appendChild(opt);
                 });
+
                 city.disabled = false;
+
+                // Agar hidden field ikut terisi
                 city.dispatchEvent(new Event('change'));
             });
     });
 
-    // Update hidden
+
+    /**
+     * ======================================================
+     * 3. SIMPAN HIDDEN FIELD
+     * ======================================================
+     */
     province.addEventListener('change', function () {
         const selected = this.options[this.selectedIndex];
         provinceName.value = selected.dataset.name || selected.text;
@@ -170,9 +198,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     city.addEventListener('change', function () {
         const selected = this.options[this.selectedIndex];
-        cityName.value = selected.text;
-        cityType.value = selected.dataset.type || 'Kota';
+        cityName.value = selected.text;         // Nama kota/kabupaten
+        cityType.value = selected.dataset.type; // Kota / Kabupaten
     });
+
 });
 </script>
 @endpush

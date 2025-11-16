@@ -55,7 +55,7 @@
                     <select name="province_id" id="province" required
                             class="w-full px-4 py-2.5 border border-gray-300 dark:border-zinc-600 rounded-lg 
                                    focus:ring-2 focus:ring-soft-green focus:border-soft-green dark:bg-zinc-700 dark:text-white">
-                        <option value="">Pilih Provinsi</option>
+                        <option value="">Memuat provinsi...</option>
                     </select>
                     @error('province_id') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                 </div>
@@ -77,7 +77,7 @@
             <input type="hidden" name="city_name" id="city_name">
             <input type="hidden" name="city_type" id="city_type">
 
-            <!-- Kode Pos & Alamat Lengkap -->
+            <!-- Kode Pos & Alamat -->
             <div class="mb-5">
                 <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Kode Pos</label>
                 <input type="text" name="postal_code" maxlength="10"
@@ -124,55 +124,87 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+
     const province = document.getElementById('province');
     const city = document.getElementById('city');
+
     const provinceName = document.getElementById('province_name');
     const cityName = document.getElementById('city_name');
     const cityType = document.getElementById('city_type');
 
-    // Load Provinces
+    // =====================================================
+    // LOAD PROVINSI
+    // =====================================================
     fetch('{{ route("pembeli.rajaongkir.provinces") }}')
         .then(r => r.json())
-        .then(provinces => {
-            provinces.forEach(p => {
+        .then(data => {
+
+            province.innerHTML = '<option value="">Pilih Provinsi</option>';
+
+            data.forEach(p => {
                 const opt = new Option(p.name, p.province_id);
-                opt.dataset.name = p.name;
+                opt.dataset.name = p.name;        // simpan nama provinsi
                 province.appendChild(opt);
             });
+
+        })
+        .catch(() => {
+            province.innerHTML = '<option value="">Gagal memuat provinsi</option>';
         });
 
-    // Load Cities
+
+    // =====================================================
+    // LOAD KOTA SETELAH PROVINSI DIPILIH
+    // =====================================================
     province.addEventListener('change', function () {
         const id = this.value;
-        city.innerHTML = '<option value="">Memuat...</option>';
+
+        // isi hidden province_name
+        const selected = this.options[this.selectedIndex];
+        provinceName.value = selected.dataset.name ?? selected.text;
+
+        city.innerHTML = '<option value="">Memuat kota...</option>';
         city.disabled = true;
 
         if (!id) return;
 
         fetch(`{{ route("pembeli.rajaongkir.cities") }}?province_id=${id}`)
             .then(r => r.json())
-            .then(cities => {
+            .then(data => {
+
                 city.innerHTML = '<option value="">Pilih Kota/Kabupaten</option>';
-                cities.forEach(c => {
-                    const opt = new Option(c.name, c.city_id);
-                    opt.dataset.type = c.type || 'Kota';
+
+                data.forEach(kota => {
+
+                    const fullName = `${kota.type} ${kota.city_name}`;
+
+                    const opt = new Option(fullName, kota.city_id);
+                    opt.dataset.type = kota.type;          // Kota / Kabupaten
+                    opt.dataset.name = kota.city_name;      // Nama kota murni
                     city.appendChild(opt);
                 });
+
                 city.disabled = false;
+
+            })
+            .catch(() => {
+                city.innerHTML = '<option value="">Gagal memuat kota</option>';
             });
     });
 
-    // Update hidden fields
-    province.addEventListener('change', function () {
-        const selected = this.options[this.selectedIndex];
-        provinceName.value = selected.dataset.name || selected.text;
-    });
 
+    // =====================================================
+    // ISI HIDDEN INPUT SAAT KOTA DIPILIH
+    // =====================================================
     city.addEventListener('change', function () {
         const selected = this.options[this.selectedIndex];
-        cityName.value = selected.text;
-        cityType.value = selected.dataset.type || 'Kota';
+
+        if (!selected) return;
+
+        cityName.value = selected.dataset.name;   // contoh: "Lampung Selatan"
+        cityType.value = selected.dataset.type;   // "Kabupaten" atau "Kota"
     });
+
 });
 </script>
 @endpush
