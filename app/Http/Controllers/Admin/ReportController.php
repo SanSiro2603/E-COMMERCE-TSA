@@ -90,4 +90,36 @@ public function exportExcel(Request $request)
 
     return Excel::download(new SalesReportExport($startDate, $endDate), $fileName);
 }
+
+public function preview(Request $request)
+{
+    $startDate = $request->start_date;
+    $endDate   = $request->end_date;
+
+    // Data order SAMA seperti PDF
+    $orders = Order::whereBetween('created_at', [$startDate, $endDate])
+        ->where('status', 'completed')
+        ->with(['user', 'items', 'address'])
+        ->orderBy('created_at', 'asc')
+        ->get();
+
+    // Hitung jumlah transaksi per user (SAMA seperti PDF)
+    $orders->each(function($order) use ($startDate, $endDate) {
+        $order->transactions_count = Order::where('user_id', $order->user_id)
+            ->where('status', 'completed')
+            ->whereBetween('created_at', [$startDate, $endDate])
+            ->count();
+    });
+
+    // Total pendapatan
+    $totalRevenue = $orders->sum('grand_total');
+
+    return view('admin.reports.preview', [
+        'orders'      => $orders,
+        'totalRevenue'=> $totalRevenue,
+        'startDate'   => $startDate,
+        'endDate'     => $endDate,
+    ]);
+}
+
 }
