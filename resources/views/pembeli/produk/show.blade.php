@@ -1,7 +1,7 @@
 {{-- resources/views/pembeli/produk/show.blade.php --}}
 @extends('layouts.app')
 
-@section('title', $product->name . ' - Lembah Hijau')
+@section('title', $product->name . ' - E-Commerce TSA')
 
 @section('content')
 <div class="p-6 bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">

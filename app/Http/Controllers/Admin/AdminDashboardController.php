@@ -53,10 +53,15 @@ class AdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $recentOrders = Order::with('user')  
+        ->latest()                        
+        ->limit(5)
+        ->get();
+            
         return view('admin.dashboard', compact(
             'totalOrders', 'pendingOrders', 'processingOrders', 'completedOrders',
             'totalRevenue', 'todayRevenue', 'totalProducts', 'lowStockProducts',
-            'totalCustomers', 'dates', 'revenues', 'topProducts'
+            'totalCustomers', 'dates', 'revenues', 'topProducts', 'recentOrders'
         ));
     }
 }

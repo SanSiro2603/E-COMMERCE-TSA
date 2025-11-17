@@ -1,7 +1,7 @@
 {{-- resources/views/admin/categories/create.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Tambah Kategori - Lembah Hijau')
+@section('title', 'Tambah Kategori - E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">

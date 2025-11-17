@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="dark" lang="id">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>Lembah Hijau - Product Catalog</title>
+    <title>TSA E-commerce - Katalog Produk</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -141,11 +141,11 @@
                     <!-- Logo -->
                     <div class="flex items-center gap-3 group cursor-pointer">
                         <div class="size-11 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center transform group-hover:rotate-12 transition-all duration-300 shadow-lg">
-                            <span class="material-symbols-outlined text-3xl text-white">eco</span>
+                            <span class="material-symbols-outlined text-3xl text-white">storefront</span>
                         </div>
                         <div>
-                            <a href="{{route("landing")}}" class="text-2xl font-bold gradient-text">Lembah Hijau</a>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">Premium Livestock</p>
+                            <a href="{{route('landing')}}" class="text-2xl font-bold gradient-text">E-commerce TSA</a>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">Ternak Berkualitas Premium</p>
                         </div>
                     </div>
 
@@ -155,7 +155,7 @@
                             <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">search</span>
                             <input 
                                 class="w-full h-12 pl-12 pr-4 rounded-2xl glass-strong border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-400 shadow-sm transition-all duration-300"
-                                placeholder="Search for animals, breeds, or categories..."
+                                placeholder="Cari hewan, ras, atau kategori..."
                                 type="text"
                             />
                         </div>
@@ -163,16 +163,11 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-3">
-                        <a href="{{ route('login') }}" 
+                        <a href="{{route('login')}}" 
                         class="hidden sm:flex items-center gap-2 px-6 h-11 rounded-2xl bg-gradient-to-r from-secondary to-yellow-400 text-primary font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                             <span class="material-symbols-outlined">person</span>
                             <span>Login</span>
                         </a>
-
-                        {{-- <button class="relative flex items-center justify-center w-11 h-11 rounded-2xl glass-strong shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                            <span class="material-symbols-outlined text-primary dark:text-white">shopping_cart</span>
-                            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">3</span>
-                        </button> --}}
                         
                         <button 
                             onclick="document.documentElement.classList.toggle('dark')" 
@@ -192,40 +187,40 @@
                         <div class="glass-strong px-5 py-2 rounded-full shadow-lg">
                             <p class="text-sm font-bold text-primary dark:text-secondary flex items-center gap-2">
                                 <span class="size-2 bg-green-500 rounded-full animate-pulse"></span>
-                                Premium Quality 
+                                Kualitas Premium 
                             </p>
                         </div>
                     </div>
                     <h2 class="text-5xl md:text-6xl font-black mb-4">
-                        <span class="gradient-text">Our Gallery Animals</span>
+                        <span class="gradient-text">Galeri Hewan Kami</span>
                     </h2>
                     <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                        Ethically raised, certified livestock for your farm. Quality guaranteed.
+                        Ternak yang dibesarkan secara etis dan bersertifikat untuk peternakan Anda. Kualitas terjamin.
                     </p>
                 </div>
             </div>
         </div>
 
         <!-- Filters -->
-        {{-- <div class="sticky top-[89px] z-40 glass border-y border-white/10 shadow-lg">
+        <div class="sticky top-[89px] z-40 glass border-y border-white/10 shadow-lg">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div class="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-2">
                     <!-- Category Filters -->
                     <button class="flex items-center gap-2 px-5 h-11 rounded-2xl bg-gradient-to-r from-primary to-green-600 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 whitespace-nowrap">
-                        <span>All Products</span>
+                        <span>Semua Produk</span>
                         <span class="bg-white/20 px-2 py-0.5 rounded-full text-xs font-bold">12</span>
                     </button>
                     <button class="flex items-center gap-2 px-5 h-11 rounded-2xl glass-strong font-semibold hover:bg-primary hover:text-white transition-all duration-300 whitespace-nowrap">
-                        <span>🐐 Goats</span>
+                        <span>🐐 Kambing</span>
                     </button>
                     <button class="flex items-center gap-2 px-5 h-11 rounded-2xl glass-strong font-semibold hover:bg-primary hover:text-white transition-all duration-300 whitespace-nowrap">
-                        <span>🐄 Cows</span>
+                        <span>🐄 Sapi</span>
                     </button>
                     <button class="flex items-center gap-2 px-5 h-11 rounded-2xl glass-strong font-semibold hover:bg-primary hover:text-white transition-all duration-300 whitespace-nowrap">
-                        <span>🐰 Rabbits</span>
+                        <span>🐰 Kelinci</span>
                     </button>
                     <button class="flex items-center gap-2 px-5 h-11 rounded-2xl glass-strong font-semibold hover:bg-primary hover:text-white transition-all duration-300 whitespace-nowrap">
-                        <span>🦜 Birds</span>
+                        <span>🦜 Unggas</span>
                     </button>
                     
                     <div class="w-px h-8 bg-gray-300 dark:bg-gray-700 mx-2"></div>
@@ -233,197 +228,97 @@
                     <!-- Action Filters -->
                     <button class="flex items-center gap-2 px-5 h-11 rounded-2xl glass-strong font-semibold hover:shadow-lg transition-all duration-300 whitespace-nowrap">
                         <span class="material-symbols-outlined text-lg">tune</span>
-                        <span>More Filters</span>
+                        <span>Filter Lainnya</span>
                     </button>
                     <button class="flex items-center gap-2 px-5 h-11 rounded-2xl glass-strong font-semibold hover:shadow-lg transition-all duration-300 whitespace-nowrap">
-                        <span>Sort By: Popular</span>
+                        <span>Urutkan: Populer</span>
                         <span class="material-symbols-outlined text-lg">expand_more</span>
                     </button>
                 </div>
             </div>
-        </div> --}}
+        </div> 
 
         <!-- Products Grid -->
-        <!-- Products Grid -->
-<main class="flex-1 py-10">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <main class="flex-1 py-10">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
 
-            <!-- Product Card -->
-            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
-                <div class="relative overflow-hidden">
-                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
+                    <!-- Product Card -->
+                    <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
+                        <div class="relative overflow-hidden">
+                            <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
+                            </div>
+                            <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">UNGGULAN</span>
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-start justify-between mb-1">
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Sapi Jersey</h3>
+                                <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">Tersedia</span>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                                Susu kaya dan lembut dengan postur lebih kecil.
+                            </p>
+                            <div class="flex text-yellow-400 text-xs mb-3">
+                                <span class="material-symbols-outlined text-sm">star</span>
+                                <span class="material-symbols-outlined text-sm">star</span>
+                                <span class="material-symbols-outlined text-sm">star</span>
+                                <span class="material-symbols-outlined text-sm">star</span>
+                                <span class="material-symbols-outlined text-sm">star_half</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
+                                    Detail
+                                </button>
+                                <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+                                    Tambah
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
-                </div>
-                <div class="p-3">
-                    <div class="flex items-start justify-between mb-1">
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
-                    </div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-                        Rich, creamy milk and smaller frame.
-                    </p>
-                    <div class="flex text-yellow-400 text-xs mb-3">
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star_half</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                            Details
-                        </button>
-                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-                            Add
-                        </button>
-                    </div>
-                </div>
-            </div>
 
-            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
-                <div class="relative overflow-hidden">
-                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                    </div>
-                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
-                </div>
-                <div class="p-3">
-                    <div class="flex items-start justify-between mb-1">
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
-                    </div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-                        Rich, creamy milk and smaller frame.
-                    </p>
-                    <div class="flex text-yellow-400 text-xs mb-3">
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star_half</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                            Details
-                        </button>
-                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-                            Add
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
-                <div class="relative overflow-hidden">
-                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                    </div>
-                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
-                </div>
-                <div class="p-3">
-                    <div class="flex items-start justify-between mb-1">
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
-                    </div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-                        Rich, creamy milk and smaller frame.
-                    </p>
-                    <div class="flex text-yellow-400 text-xs mb-3">
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star_half</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                            Details
-                        </button>
-                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-                            Add
-                        </button>
+                    <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.6s;">
+                        <div class="relative overflow-hidden">
+                            <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
+                                 style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
+                            </div>
+                            <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">UNGGULAN</span>
+                        </div>
+                        <div class="p-3">
+                            <div class="flex items-start justify-between mb-1">
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white">Sapi Jersey</h3>
+                                <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">Tersedia</span>
+                            </div>
+                            <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                                Susu kaya dan lembut dengan postur lebih kecil.
+                            </p>
+                            <div class="flex text-yellow-400 text-xs mb-3">
+                                <span class="material-symbols-outlined text-sm">star</span>
+                                <span class="material-symbols-outlined text-sm">star</span>
+                                <span class="material-symbols-outlined text-sm">star</span>
+                                <span class="material-symbols-outlined text-sm">star</span>
+                                <span class="material-symbols-outlined text-sm">star_half</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
+                                    Detail
+                                </button>
+                                <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
+                                    Tambah
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
-                <div class="relative overflow-hidden">
-                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                    </div>
-                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
-                </div>
-                <div class="p-3">
-                    <div class="flex items-start justify-between mb-1">
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
-                    </div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-                        Rich, creamy milk and smaller frame.
-                    </p>
-                    <div class="flex text-yellow-400 text-xs mb-3">
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star_half</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                            Details
-                        </button>
-                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-                            Add
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="group card-hover glass-strong rounded-2xl overflow-hidden shadow-md animate-fade-in" style="animation-delay: 0.5s;">
-                <div class="relative overflow-hidden">
-                    <div class="aspect-[4/5] bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
-                         style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCG38J6NGcRX_R7e7vK8MalwEXqqeR4EWamcNY9seK_G9jNUiEoQzQoLRp2mEARNxxMSOvWE2Cw8EBcQPNnqnHDMlasW4znGwmjPcTbnOzXuhxBeEbdqEUwtlG5zdz2JOQW86cPZjQldCq--Y1SV2oduI5uZ4eKONqp8IpN6PiMiOqmSZALZmk1BWJovQ58fx-yEF3w0NzZOkonTYA5EhyXfEcfh6gap2d5ct5xsKA6mPGFpdw1Nb3ovywY4oCr9JmL1aUK6kfFJ9vc");'>
-                    </div>
-                    <span class="badge-pulse absolute top-3 right-3 px-2 py-1 bg-blue-500 text-white text-[10px] font-bold rounded-full shadow-lg">FEATURED</span>
-                </div>
-                <div class="p-3">
-                    <div class="flex items-start justify-between mb-1">
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Jersey Cow</h3>
-                        <span class="px-2 py-0.5 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 text-[10px] font-bold rounded-full">In Stock</span>
-                    </div>
-                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
-                        Rich, creamy milk and smaller frame.
-                    </p>
-                    <div class="flex text-yellow-400 text-xs mb-3">
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star</span>
-                        <span class="material-symbols-outlined text-sm">star_half</span>
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="flex-1 h-8 rounded-lg bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary text-xs font-semibold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all duration-300">
-                            Details
-                        </button>
-                        <button class="flex-1 h-8 rounded-lg bg-gradient-to-r from-primary to-green-600 text-white text-xs font-semibold shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300">
-                            Add
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
     
                 <!-- Load More Section -->
                 <div class="flex justify-center mt-16">
-                    <button class="group flex items-center gap-3 px-8 h-14 rounded-2xl glass-strong font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                        <span class="material-symbols-outlined text-primary dark:text-secondary">eco</span>
-                        <span>Load More Animals</span>
+                    <a href="{{route('login')}}" 
+                    class="group flex items-center gap-3 px-8 h-14 rounded-2xl glass-strong font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <span class="material-symbols-outlined text-primary dark:text-secondary">pets</span>
+                        <span>Muat Lebih Banyak Hewan</span>
                         <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </button>
+                    </a>
                 </div>
             </div>
         </main>
@@ -436,46 +331,40 @@
                     <div class="md:col-span-2">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="size-12 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                <span class="material-symbols-outlined text-3xl text-white">eco</span>
+                                <span class="material-symbols-outlined text-3xl text-white">storefront</span>
                             </div>
                             <div>
-                                <h3 class="text-xl font-bold gradient-text">Lembah Hijau</h3>
-                                <p class="text-xs text-gray-600 dark:text-gray-400">Premium </p>
+                                <h3 class="text-xl font-bold gradient-text">E-commerce TSA</h3>
+                                <p class="text-xs text-gray-600 dark:text-gray-400">Ternak Premium</p>
                             </div>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md">Your trusted partner in eco-friendly and sustainable livestock marketplace.</p>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md">Mitra terpercaya Anda dalam pasar ternak yang ramah lingkungan dan berkelanjutan.</p>
                         <div class="flex gap-3">
-                            {{-- <a href="#" class="size-10 rounded-xl glass-strong flex items-center justify-center hover:scale-110 transition-transform">
-                                <span class="material-symbols-outlined text-primary dark:text-secondary">facebook</span>
-                            </a>
-                            {{-- <a href="#" class="size-10 rounded-xl glass-strong flex items-center justify-center hover:scale-110 transition-transform">
-                                <span class="material-symbols-outlined text-primary dark:text-secondary">instagram</span>
-                            </a> --}}
-                            {{-- <a href="#" class="size-10 rounded-xl glass-strong flex items-center justify-center hover:scale-110 transition-transform">
+                            <a href="#" class="size-10 rounded-xl glass-strong flex items-center justify-center hover:scale-110 transition-transform">
                                 <span class="material-symbols-outlined text-primary dark:text-secondary">mail</span>
-                            </a> -- --}}
+                            </a>
                         </div>
                     </div>
 
                     <!-- Quick Links -->
                     <div>
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Links</h4>
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Tautan Cepat</h4>
                         <ul class="space-y-3">
-                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">About Us</a></li>
-                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Products</a></li>
+                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Tentang Kami</a></li>
+                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Produk</a></li>
                             <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Blog</a></li>
-                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Contact</a></li>
+                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Kontak</a></li>
                         </ul>
                     </div>
 
                     <!-- Contact -->
                     <div>
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Contact</h4>
+                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Kontak</h4>
                         <ul class="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
-                            <li>123 Green Valley</li>
-                            <li>Farmville, Indonesia</li>
-                            <li>contact@lembahhijau.com</li>
-                            <li>(123) 456-7890</li>
+                            <li>Jl. Peternakan No. 123</li>
+                            <li>Lampung, Indonesia</li>
+                            <li>kontak@tsa-ecommerce.com</li>
+                            <li>(021) 123-4567</li>
                         </ul>
                     </div>
                 </div>
@@ -483,10 +372,10 @@
                 <!-- Bottom Bar -->
                 <div class="border-t border-white/10 pt-8">
                     <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                        <p class="text-sm text-gray-600 dark:text-gray-400">© 2025 Lembah Hijau. All rights reserved.</p>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">© 2025 E-commerce TSA. Hak cipta dilindungi.</p>
                         <div class="flex gap-6 text-sm">
-                            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Privacy Policy</a>
-                            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Terms of Service</a>
+                            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Kebijakan Privasi</a>
+                            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Syarat Layanan</a>
                         </div>
                     </div>
                 </div>

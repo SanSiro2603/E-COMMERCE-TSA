@@ -6,6 +6,8 @@ use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
+use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -18,6 +20,7 @@ use App\Http\Controllers\Pembeli\PesananController;
 use App\Http\Controllers\Pembeli\PaymentController;
 use App\Http\Controllers\RajaOngkirController;
 use App\Http\Controllers\Midtrans\PaymentWebhookController;
+use App\Http\Controllers\Pembeli\AddressController; // TAMBAHAN: Impor AddressController
 
 
 // ===============================================================
@@ -34,16 +37,27 @@ Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name(
 Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 
 
-// ===============================================================
-// 🔹 AUTHENTICATION (LOGIN & REGISTER)
-// ===============================================================
 Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('login', [LoginController::class, 'login']);
 
     Route::get('register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('register', [RegisterController::class, 'register']);
+
+    // Lupa Password
+    Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
+        ->name('password.request');
+    Route::post('forgot-password', [PasswordResetLinkController::class, 'store'])
+        ->name('password.email');
 });
+
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+    ->name('password.reset')
+    ->middleware('guest');
+
+Route::post('/reset-password', [NewPasswordController::class, 'store'])
+    ->name('password.update')
+    ->middleware('guest');
 
 Route::post('logout', [LoginController::class, 'logout'])
     ->name('logout')
@@ -72,6 +86,9 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
     Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
     Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.exportExcel');
+    Route::get('/admin/reports/preview', [ReportController::class, 'preview'])
+     ->name('reports.preview');
+
 });
 
 
@@ -128,6 +145,11 @@ Route::middleware(['auth'])->prefix('pembeli')->name('pembeli.')->group(function
         Route::get('/cities', [\App\Http\Controllers\RajaOngkirController::class, 'cities'])->name('cities');
         Route::post('/calculate', [\App\Http\Controllers\RajaOngkirController::class, 'calculateShipping'])->name('calculate');
  });
+
+    // Alamat (TAMBAHAN: Route untuk fitur alamat)
+    Route::resource('alamat', AddressController::class)->except(['show']);
+    Route::post('alamat/{alamat}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
+
     // Profil
     Route::get('/profil', fn() => inertia('Pembeli/Profil'))->name('profil.edit');
 });

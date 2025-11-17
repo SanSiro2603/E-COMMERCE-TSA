@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pesanan Saya - Lembah Hijau')
+@section('title', 'Pesanan Saya - E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">
@@ -188,7 +188,7 @@
                                 <a href="{{ route('pembeli.pesanan.edit', $order) }}"
                                    class="inline-flex items-center gap-1 px-4 py-2 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-500/30 rounded-lg text-sm font-medium transition-colors">
                                     <span class="material-symbols-outlined text-base">edit</span>
-                                    Edit Alamat
+                                    Edit Pesanan
                                 </a>
                             @endif
 

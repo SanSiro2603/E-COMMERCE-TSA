@@ -1,7 +1,7 @@
 {{-- resources/views/pembeli/produk/index.blade.php --}}
 @extends('layouts.app')
 
-@section('title', 'Katalog Produk - Lembah Hijau')
+@section('title', 'Katalog Produk - E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">

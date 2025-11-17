@@ -1,7 +1,7 @@
 {{-- resources/views/admin/categories/edit.blade.php --}}
 @extends('layouts.admin')
 
-@section('title', 'Edit Kategori - Lembah Hijau')
+@section('title', 'Edit Kategori - E-Commerce TSA')
 
 @section('content')
 <div class="space-y-6">

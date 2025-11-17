@@ -9,119 +9,175 @@ use Illuminate\Support\Facades\Log;
 class RajaOngkirController extends Controller
 {
     /**
-     * Ambil daftar provinsi
+     * LIST KOTA RESMI INDONESIA
+     * (jika nama ada di list ini → otomatis type = Kota)
+     */
+    private $cityList = [
+        "BANDA ACEH","SABANG","LANGSA","LHOKSEUMAWE","SUBULUSSALAM",
+        "MEDAN","PEMATANGSIANTAR","SIBOLGA","TANJUNGBALAI","BINJAI",
+        "PADANGSIDIMPUAN","GUNUNGSITOLI",
+        "PADANG","SOLOK","SAWAHLUNTO","PADANG PANJANG","BUKITTINGGI","PAYAKUMBUH","PARIAMAN",
+        "PEKANBARU","DUMAI",
+        "JAMBI","SUNGAI PENÙH",
+        "PALEMBANG","PRABUMULIH","PAGAR ALAM","LUBUKLINGGAU",
+        "BENGKULU",
+        "BANDAR LAMPUNG","METRO",
+        "PANGKAL PINANG",
+        "TANJUNG PINANG","BATAM",
+        "JAKARTA","BOGOR","DEPOK","TANGERANG","TANGERANG SELATAN","BEKASI",
+        "BANDUNG","CIMAHI","CIREBON","BANJAR",
+        "SEMARANG","SURAKARTA","MAGELANG","PEKALONGAN","SALATIGA","TEGAL",
+        "YOGYAKARTA",
+        "SURABAYA","BATU","MADIUN","MOJOKERTO","PASURUAN","PROBOLINGGO","KEDIRI","BLITAR","MALANG",
+        "DENPASAR",
+        "MATARAM","BIMA",
+        "KUPANG",
+        "PONTIANAK","SINGKAWANG",
+        "BANJARMASIN","BANJARBARU",
+        "PALANGKA RAYA",
+        "SAMARINDA","BALIKPAPAN","BONTANG",
+        "TARAKAN",
+        "MANADO","BITUNG","TOMOHON","KOTAMOBAGU",
+        "PALU","PARIGI MOUTONG",
+        "MAKASSAR","PALOPO","PAREPARE",
+        "KENDARI","BAU-BAU",
+        "GORONTALO",
+        "AMBON","TUAL",
+        "TERNATE","TIDORE KEPULAUAN",
+        "JAYAPURA","MERAUKE","SORONG",
+    ];
+
+    /**
+     * Tambahan khusus Lampung (karena API salah)
+     */
+    private $lampungCities = ["BANDAR LAMPUNG", "METRO"];
+
+    /**
+     * Tambahan khusus DKI Jakarta (API salah semua)
+     */
+    private $jakartaCities = [
+        "JAKARTA SELATAN",
+        "JAKARTA TIMUR",
+        "JAKARTA PUSAT",
+        "JAKARTA BARAT",
+        "JAKARTA UTARA"
+    ];
+
+    /**
+     * ======================================================
+     * 1. LIST PROVINSI
+     * ======================================================
      */
     public function provinces()
     {
         try {
+
             $apiKey = config('rajaongkir.api_key');
-            if (empty($apiKey)) {
-                Log::warning('RajaOngkir: API Key not configured');
-                return response()->json(['error' => 'API Key not configured'], 500);
-            }
 
             $response = Http::withHeaders(['key' => $apiKey])
                 ->timeout(30)
                 ->get('https://rajaongkir.komerce.id/api/v1/destination/province');
 
             if (!$response->successful()) {
-                Log::error('RajaOngkir provinces failed', [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-                return response()->json(['error' => 'Failed to fetch provinces'], $response->status());
+                return response()->json(['error' => 'Failed'], 500);
             }
 
             $body = $response->json();
 
-            // Support berbagai struktur response
-            $rawProvinces = $body['rajaongkir']['results'] ?? $body['data'] ?? $body ?? [];
+            $raw = $body['rajaongkir']['results']
+                ?? $body['data']
+                ?? $body
+                ?? [];
 
-            if (empty($rawProvinces)) {
-                Log::warning('RajaOngkir provinces empty response', ['body' => $body]);
-                return response()->json([], 200);
-            }
-
-            // Normalisasi data
             $provinces = array_map(function ($p) {
                 return [
-                    'province_id' => $p['province_id'] ?? $p['id'] ?? null,
-                    'name'        => $p['province'] ?? $p['name'] ?? 'Unknown Province',
+                    'province_id' => $p['province_id'] ?? $p['id'],
+                    'name'        => $p['province'] ?? $p['name'],
                 ];
-            }, $rawProvinces);
+            }, $raw);
 
-            // Filter yang valid
-            $provinces = array_filter($provinces, fn($p) => !empty($p['province_id']));
-
-            return response()->json(array_values($provinces));
+            return response()->json($provinces);
 
         } catch (\Exception $e) {
-            Log::error('RajaOngkir provinces exception', [
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
             return response()->json(['error' => 'Server error'], 500);
         }
     }
 
     /**
-     * Ambil daftar kota berdasarkan province_id
+     * ======================================================
+     * 2. CITIES WITH FIXED TYPE
+     * ======================================================
      */
     public function cities(Request $request)
     {
         $provinceId = $request->query('province_id');
 
-        if (!$provinceId || !is_numeric($provinceId)) {
-            return response()->json(['error' => 'province_id required and must be numeric'], 400);
+        if (!$provinceId) {
+            return response()->json(['error' => 'province_id required'], 400);
         }
 
         try {
             $apiKey = config('rajaongkir.api_key');
-            if (empty($apiKey)) {
-                return response()->json(['error' => 'API Key not configured'], 500);
-            }
 
             $response = Http::withHeaders(['key' => $apiKey])
                 ->timeout(30)
                 ->get("https://rajaongkir.komerce.id/api/v1/destination/city/{$provinceId}");
 
             if (!$response->successful()) {
-                Log::error('RajaOngkir cities failed', [
-                    'province_id' => $provinceId,
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-                return response()->json(['error' => 'Failed to fetch cities'], $response->status());
+                return response()->json(['error' => 'Failed'], 500);
             }
 
             $body = $response->json();
-            $rawCities = $body['rajaongkir']['results'] ?? $body['data'] ?? $body ?? [];
+            $raw = $body['rajaongkir']['results']
+                ?? $body['data']
+                ?? $body
+                ?? [];
 
-            if (empty($rawCities)) {
-                return response()->json([], 200);
-            }
+            $cities = array_map(function ($c) use ($provinceId) {
 
-            // Normalisasi data kota
-            $cities = array_map(function ($c) {
+                $name = strtoupper($c['city_name'] ?? $c['name']);
+                $originalType = $c['type'] ?? "Kota";
+
+                /**
+                 * FIX KHUSUS PROVINSI LAMPUNG (ID = 8)
+                 */
+                if ($provinceId == 8) {
+                    $type = in_array($name, $this->lampungCities) ? "Kota" : "Kabupaten";
+                }
+
+                /**
+                 * FIX KHUSUS DKI JAKARTA (ID = 10)
+                 */
+                elseif ($provinceId == 10) {
+
+                    if (in_array($name, $this->jakartaCities)) {
+                        $type = "Kota"; // Kota Administrasi
+                    } elseif ($name == "KEPULAUAN SERIBU") {
+                        $type = "Kabupaten";
+                    } else {
+                        $type = "Kota";
+                    }
+                }
+
+                /**
+                 * FIX PROVINSI LAIN → pakai daftar resmi kota
+                 */
+                else {
+                    $type = in_array($name, $this->cityList)
+                        ? "Kota"
+                        : "Kabupaten";
+                }
+
                 return [
-                    'city_id'   => $c['city_id'] ?? $c['id'] ?? null,
-                    'name'      => $c['city_name'] ?? $c['name'] ?? 'Unknown City',
-                    'type'      => $c['type'] ?? $c['city_type'] ?? 'Kota', // Kota / Kabupaten
-                    'postal_code' => $c['postal_code'] ?? null,
+                    'city_id'   => $c['city_id'] ?? $c['id'],
+                    'city_name' => ucwords(strtolower($name)),
+                    'type'      => $type
                 ];
-            }, $rawCities);
+            }, $raw);
 
-            // Filter valid
-            $cities = array_filter($cities, fn($c) => !empty($c['city_id']));
-
-            return response()->json(array_values($cities));
+            return response()->json($cities);
 
         } catch (\Exception $e) {
-            Log::error('RajaOngkir cities exception', [
-                'province_id' => $provinceId,
-                'message' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
             return response()->json(['error' => 'Server error'], 500);
         }
     }

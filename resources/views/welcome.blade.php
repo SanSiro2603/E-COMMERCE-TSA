@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="dark" lang="id">
 <head>
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <title>Lembah Hijau Official Web</title>
+  <title>Ecommerce TSA Website Resmi</title>
   <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
@@ -76,23 +76,6 @@
         radial-gradient(at 100% 100%, rgba(129, 212, 250, 0.15) 0px, transparent 50%),
         radial-gradient(at 0% 100%, rgba(46, 125, 50, 0.1) 0px, transparent 50%);
     }
-    .hide-scrollbar::-webkit-scrollbar {
-      display: none;
-    }
-    .hide-scrollbar {
-      -ms-overflow-style: none;
-      scrollbar-width: none;
-    }
-    @keyframes scroll {
-      0% { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
-    .animate-scroll {
-      animation: scroll 40s linear infinite;
-    }
-    .animate-scroll:hover {
-      animation-play-state: paused;
-    }
     .card-hover {
       transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -115,7 +98,6 @@
       50% { border-radius: 50% 50% 33% 67% / 55% 27% 73% 45%; }
       75% { border-radius: 33% 67% 58% 42% / 63% 68% 32% 37%; }
     }
-    
   </style>
 </head>
 <body class="bg-white dark:bg-[#0a0f0a] font-display text-gray-900 dark:text-white overflow-x-hidden">
@@ -132,22 +114,22 @@
       <div class="flex items-center justify-between py-4">
         <!-- Logo -->
         <div class="flex items-center gap-3 group cursor-pointer">
-          <div class="size-12 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center transform group-hover:rotate-12 transition-transform duration-300 shadow-lg">
-            <span class="material-symbols-outlined text-3xl text-white">eco</span>
-          </div>
+                        <div class="size-11 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center transform group-hover:rotate-12 transition-all duration-300 shadow-lg">
+                            <span class="material-symbols-outlined text-3xl text-white">storefront</span>
+                        </div>
           <div>
-            <h2 class="text-xl font-bold text-gradient">Lembah Hijau</h2>
-            <p class="text-xs text-gray-600 dark:text-gray-400">E-Commerce</p>
+            <h2 class="text-xl font-bold text-gradient">E-Commerce TSA</h2>
+            <p class="text-xs text-gray-600 dark:text-gray-400">Perdagangan Hewan</p>
           </div>
         </div>
 
         <!-- Desktop Nav -->
         <nav class="hidden md:flex items-center gap-8">
-          <a href="#home" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Home</a>
-          <a href="#about" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">About</a>
-          <a href="#shop" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Animals</a>
-          <a href="#why" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Why Us</a>
-          <a href="#contact" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Contact</a>
+          <a href="#home" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Beranda</a>
+          <a href="#about" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Tentang</a>
+          <a href="#shop" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Hewan</a>
+          <a href="#why" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Keunggulan</a>
+          <a href="#contact" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Kontak</a>
         </nav>
 
         <!-- CTA Buttons -->
@@ -155,8 +137,8 @@
           <button onclick="document.documentElement.classList.toggle('dark')" class="size-11 rounded-full glass-strong flex items-center justify-center hover:scale-110 transition-transform duration-300">
             <span class="material-symbols-outlined text-primary dark:text-secondary">dark_mode</span>
           </button>
-          <a href="{{route("login")}}" class="px-6 h-11 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2">
-            <span>Shop Now</span>
+          <a href="{{route('login')}}" class="px-6 h-11 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2">
+            <span>Belanja Sekarang</span>
             <span class="material-symbols-outlined">arrow_forward</span>
           </a>
         </div>
@@ -170,17 +152,17 @@
       <!-- Mobile Menu -->
       <div id="mobile-menu" class="hidden md:hidden pb-4">
         <nav class="flex flex-col gap-3 glass-strong rounded-2xl p-4 mt-2">
-          <a href="#home" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Home</a>
-          <a href="#about" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">About</a>
-          <a href="#shop" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Animals</a>
-          <a href="#why" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Why Us</a>
-          <a href="#contact" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Contact</a>
+          <a href="#home" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Beranda</a>
+          <a href="#about" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Tentang</a>
+          <a href="#shop" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Hewan</a>
+          <a href="#why" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Keunggulan</a>
+          <a href="#contact" class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Kontak</a>
           <div class="flex gap-2 mt-2">
             <button onclick="document.documentElement.classList.toggle('dark')" class="flex-1 h-11 rounded-full glass-strong flex items-center justify-center gap-2">
               <span class="material-symbols-outlined text-primary dark:text-secondary">dark_mode</span>
             </button>
             <a href="#shop" class="flex-1 h-11 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold flex items-center justify-center gap-2">
-              <span>Shop</span>
+              <span>Belanja</span>
             </a>
           </div>
         </nav>
@@ -194,7 +176,7 @@
   class="relative min-h-screen flex items-center justify-center pt-20 bg-center bg-cover bg-no-repeat"
   style="background-image: url('images/gajah.jpg');"
 >
-  <!-- Overlay gradient hitam agar teks jelas -->
+  <!-- Overlay gradient -->
   <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/30"></div>
 
   <!-- Konten utama -->
@@ -206,68 +188,60 @@
         <div class="glass-strong px-6 py-3 rounded-full">
           <p class="text-sm font-semibold text-primary dark:text-secondary flex items-center gap-2">
             <span class="size-2 bg-green-500 rounded-full animate-pulse"></span>
-            Premium Quality Guaranteed
+            Kualitas Premium Terjamin
           </p>
         </div>
       </div>
 
       <!-- Judul utama -->
       <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-tight mb-6 text-white">
-        <span class="text-gradient">Fresh & Natural</span><br/>
-        <span class="text-gray-100">Livestock Marketplace</span>
+        <span class="text-gradient">Segar & Alami</span><br/>
+        <span class="text-gray-100">Pasar Ternak Terpercaya</span>
       </h1>
 
       <!-- Deskripsi -->
       <p class="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-12">
-        Welcome to Lembah Hijau, your trusted source for eco-farmed and naturally raised livestock with complete transparency and ethical standards.
+        Selamat datang di Ecommerce TSA, sumber terpercaya untuk ternak yang dibesarkan secara alami dengan transparansi lengkap dan standar etika tinggi.
       </p>
 
       <!-- Tombol -->
       <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
         <a href="{{route('gallery.hewan')}}" class="group px-8 h-14 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center gap-3">
-          <span>Explore Animals</span>
+          <span>Jelajahi Hewan</span>
           <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
         </a>
         <a href="#about" class="px-8 h-14 rounded-full glass-strong font-bold hover:scale-105 transition-all duration-300 flex items-center gap-2">
           <span class="material-symbols-outlined text-primary dark:text-secondary">play_circle</span>
-          <span>Learn More</span>
+          <span>Pelajari Lebih Lanjut</span>
         </a>
       </div>
     </div>
   </div>
 </section>
 
-<!-- STATS SECTION (di area putih, terpisah dari background) -->
+<!-- STATS SECTION -->
 <section class="bg-dark dark:bg-gray-900 py-24">
   <div class="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
       <div class="rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-xl text-center card-hover">
         <p class="text-4xl font-black text-gradient mb-2">500+</p>
-        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Happy Customers</p>
+        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Pelanggan Puas</p>
       </div>
       <div class="rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-xl text-center card-hover">
         <p class="text-4xl font-black text-gradient mb-2">1000+</p>
-        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Animals Sold</p>
+        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Hewan Terjual</p>
       </div>
       <div class="rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-xl text-center card-hover">
         <p class="text-4xl font-black text-gradient mb-2">50+</p>
-        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Partner Farms</p>
+        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Mitra Peternakan</p>
       </div>
       <div class="rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-xl text-center card-hover">
         <p class="text-4xl font-black text-gradient mb-2">100%</p>
-        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Eco-Friendly</p>
+        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Ramah Lingkungan</p>
       </div>
     </div>
   </div>
 </section>
-
-
-
-
-    <!-- Scroll Indicator -->
-    <div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
-    </div>
-  </section>
 
   <!-- ABOUT SECTION -->
   <section id="about" class="py-24 relative">
@@ -277,7 +251,7 @@
         <div class="relative animate-slide-up">
           <div class="glass-strong rounded-3xl p-3 shadow-2xl">
             <div class="aspect-[4/3] rounded-2xl overflow-hidden">
-              <img src="images/gajah.jpg" alt="Farm" class="w-full h-full object-cover">
+              <img src="images/gajah.jpg" alt="Peternakan" class="w-full h-full object-cover">
             </div>
           </div>
           <!-- Floating Badge -->
@@ -287,8 +261,8 @@
                 <span class="material-symbols-outlined text-2xl text-white">verified</span>
               </div>
               <div>
-                <p class="text-sm font-bold text-gray-900 dark:text-white">Certified</p>
-                <p class="text-xs text-gray-600 dark:text-gray-400">100% Organic</p>
+                <p class="text-sm font-bold text-gray-900 dark:text-white">Bersertifikat</p>
+                <p class="text-xs text-gray-600 dark:text-gray-400">100% Organik</p>
               </div>
             </div>
           </div>
@@ -298,20 +272,20 @@
         <div class="animate-slide-up" style="animation-delay: 0.2s;">
           <div class="inline-block mb-6">
             <div class="glass-strong px-4 py-2 rounded-full">
-              <p class="text-sm font-semibold text-primary dark:text-secondary">About Us</p>
+              <p class="text-sm font-semibold text-primary dark:text-secondary">Tentang Kami</p>
             </div>
           </div>
           
           <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">
-            Your Trusted Partner in <span class="text-gradient">Sustainable Farming</span>
+            Mitra Terpercaya Anda dalam <span class="text-gradient">Peternakan Berkelanjutan</span>
           </h2>
           
           <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-            Lembah Hijau is dedicated to providing the freshest and most naturally raised livestock. Our commitment to eco-farming practices ensures that our animals are healthy, happy, and raised in a sustainable environment.
+            Ecommerce TSA berdedikasi untuk menyediakan ternak yang paling segar dan dibesarkan secara alami. Komitmen kami terhadap praktik peternakan ramah lingkungan memastikan bahwa hewan kami sehat, bahagia, dan dibesarkan dalam lingkungan yang berkelanjutan.
           </p>
           
           <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-            We believe in a transparent and ethical approach to livestock sales, connecting you directly with trusted farms that share our values.
+            Kami percaya pada pendekatan yang transparan dan etis dalam penjualan ternak, menghubungkan Anda langsung dengan peternakan terpercaya yang memiliki nilai-nilai yang sama.
           </p>
 
           <!-- Features -->
@@ -320,25 +294,25 @@
               <div class="size-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                 <span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
               </div>
-              <p class="font-semibold text-gray-900 dark:text-white">Eco-Friendly</p>
+              <p class="font-semibold text-gray-900 dark:text-white">Ramah Lingkungan</p>
             </div>
             <div class="flex items-center gap-3">
               <div class="size-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                 <span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
               </div>
-              <p class="font-semibold text-gray-900 dark:text-white">100% Natural</p>
+              <p class="font-semibold text-gray-900 dark:text-white">100% Alami</p>
             </div>
             <div class="flex items-center gap-3">
               <div class="size-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                 <span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
               </div>
-              <p class="font-semibold text-gray-900 dark:text-white">Certified Farms</p>
+              <p class="font-semibold text-gray-900 dark:text-white">Peternakan Bersertifikat</p>
             </div>
             <div class="flex items-center gap-3">
               <div class="size-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
                 <span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
               </div>
-              <p class="font-semibold text-gray-900 dark:text-white">Ethical Trade</p>
+              <p class="font-semibold text-gray-900 dark:text-white">Perdagangan Etis</p>
             </div>
           </div>
         </div>
@@ -352,170 +326,93 @@
       <div class="text-center mb-16">
         <div class="inline-block mb-4">
           <div class="glass-strong px-4 py-2 rounded-full">
-            <p class="text-sm font-semibold text-primary dark:text-secondary">Featured Collection</p>
+            <p class="text-sm font-semibold text-primary dark:text-secondary">Koleksi Unggulan</p>
           </div>
         </div>
         <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-          Premium <span class="text-gradient">Livestock</span>
+          Ternak <span class="text-gradient">Premium</span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Explore our carefully selected collection of healthy, naturally raised animals
+          Jelajahi koleksi hewan sehat yang dipilih dengan cermat dan dibesarkan secara alami
         </p>
       </div>
 
-      <!-- Infinite Scroll -->
-      <div class="relative">
-        <div class="overflow-hidden">
-          <div class="flex animate-scroll gap-6">
-            <!-- Card 1 -->
-            <div class="shrink-0 w-60">
-              <div class="glass-strong rounded-3xl overflow-hidden shadow-xl card-hover">
-                <div class="relative aspect-square overflow-hidden">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqWW5BgZoA9HFpPNUrLR2y4tdyy0MKq6tz1_c4Tc2XuaYuEpNETCpDMcLFNp4cCzi5zwOdm-rYvW_E-_7NfSO_x7Zb3adGQ7wc4i2K_XF8Hx4gF9j7mQGu6AqpwSyn1YvWZyBzHtofn7e8zLB0veeVTa3nMuB0q9VvzdGMQWBrKpfpWny5GGpXBMqsNP0Hu9QKLR8ujPhFGC9tZ1TgQN6YrfedUwMYzulx9Smb-dqqzVjL6nLnrQMrlLewfzsgpcZG8U__JNweNKk" alt="Goat" class="w-full h-full object-cover">
-                  <div class="absolute top-4 left-4">
-                    <div class="glass-strong px-3 py-1 rounded-full">
-                      <p class="text-xs font-bold text-green-600 dark:text-green-400">Available</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Premium Goat</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Healthy breed, perfect for farming</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-2xl font-black text-gradient">$250</p>
-                    <button class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
-                      Details
-                    </button>
-                  </div>
-                </div>
+      <!-- Grid Layout tanpa scroll horizontal -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="glass-strong rounded-3xl overflow-hidden shadow-xl card-hover">
+          <div class="relative aspect-square overflow-hidden">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqWW5BgZoA9HFpPNUrLR2y4tdyy0MKq6tz1_c4Tc2XuaYuEpNETCpDMcLFNp4cCzi5zwOdm-rYvW_E-_7NfSO_x7Zb3adGQ7wc4i2K_XF8Hx4gF9j7mQGu6AqpwSyn1YvWZyBzHtofn7e8zLB0veeVTa3nMuB0q9VvzdGMQWBrKpfpWny5GGpXBMqsNP0Hu9QKLR8ujPhFGC9tZ1TgQN6YrfedUwMYzulx9Smb-dqqzVjL6nLnrQMrlLewfzsgpcZG8U__JNweNKk" alt="Kambing" class="w-full h-full object-cover">
+            <div class="absolute top-4 left-4">
+              <div class="glass-strong px-3 py-1 rounded-full">
+                <p class="text-xs font-bold text-green-600 dark:text-green-400">Tersedia</p>
               </div>
             </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Kambing Premium</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Jenis sehat, cocok untuk peternakan</p>
+            <div class="flex items-center justify-between">
+              <p class="text-2xl font-black text-gradient">Rp 3.500.000</p>
+              <button class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
+                Detail
+              </button>
+            </div>
+          </div>
+        </div>
 
-            <div class="shrink-0 w-60">
-              <div class="glass-strong rounded-3xl overflow-hidden shadow-xl card-hover">
-                <div class="relative aspect-square overflow-hidden">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqWW5BgZoA9HFpPNUrLR2y4tdyy0MKq6tz1_c4Tc2XuaYuEpNETCpDMcLFNp4cCzi5zwOdm-rYvW_E-_7NfSO_x7Zb3adGQ7wc4i2K_XF8Hx4gF9j7mQGu6AqpwSyn1YvWZyBzHtofn7e8zLB0veeVTa3nMuB0q9VvzdGMQWBrKpfpWny5GGpXBMqsNP0Hu9QKLR8ujPhFGC9tZ1TgQN6YrfedUwMYzulx9Smb-dqqzVjL6nLnrQMrlLewfzsgpcZG8U__JNweNKk" alt="Goat" class="w-full h-full object-cover">
-                  <div class="absolute top-4 left-4">
-                    <div class="glass-strong px-3 py-1 rounded-full">
-                      <p class="text-xs font-bold text-green-600 dark:text-green-400">Available</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Premium Goat</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Healthy breed, perfect for farming</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-2xl font-black text-gradient">$250</p>
-                    <button class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
-                      Details
-                    </button>
-                  </div>
-                </div>
+        <!-- Card 2 -->
+        <div class="glass-strong rounded-3xl overflow-hidden shadow-xl card-hover">
+          <div class="relative aspect-square overflow-hidden">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqWW5BgZoA9HFpPNUrLR2y4tdyy0MKq6tz1_c4Tc2XuaYuEpNETCpDMcLFNp4cCzi5zwOdm-rYvW_E-_7NfSO_x7Zb3adGQ7wc4i2K_XF8Hx4gF9j7mQGu6AqpwSyn1YvWZyBzHtofn7e8zLB0veeVTa3nMuB0q9VvzdGMQWBrKpfpWny5GGpXBMqsNP0Hu9QKLR8ujPhFGC9tZ1TgQN6YrfedUwMYzulx9Smb-dqqzVjL6nLnrQMrlLewfzsgpcZG8U__JNweNKk" alt="Kambing" class="w-full h-full object-cover">
+            <div class="absolute top-4 left-4">
+              <div class="glass-strong px-3 py-1 rounded-full">
+                <p class="text-xs font-bold text-green-600 dark:text-green-400">Tersedia</p>
               </div>
             </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Kambing Premium</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Jenis sehat, cocok untuk peternakan</p>
+            <div class="flex items-center justify-between">
+              <p class="text-2xl font-black text-gradient">Rp 3.500.000</p>
+              <button class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
+                Detail
+              </button>
+            </div>
+          </div>
+        </div>
 
-            <div class="shrink-0 w-60">
-              <div class="glass-strong rounded-3xl overflow-hidden shadow-xl card-hover">
-                <div class="relative aspect-square overflow-hidden">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqWW5BgZoA9HFpPNUrLR2y4tdyy0MKq6tz1_c4Tc2XuaYuEpNETCpDMcLFNp4cCzi5zwOdm-rYvW_E-_7NfSO_x7Zb3adGQ7wc4i2K_XF8Hx4gF9j7mQGu6AqpwSyn1YvWZyBzHtofn7e8zLB0veeVTa3nMuB0q9VvzdGMQWBrKpfpWny5GGpXBMqsNP0Hu9QKLR8ujPhFGC9tZ1TgQN6YrfedUwMYzulx9Smb-dqqzVjL6nLnrQMrlLewfzsgpcZG8U__JNweNKk" alt="Goat" class="w-full h-full object-cover">
-                  <div class="absolute top-4 left-4">
-                    <div class="glass-strong px-3 py-1 rounded-full">
-                      <p class="text-xs font-bold text-green-600 dark:text-green-400">Available</p>
-                    </div>
-                  </div>
-                </div>
+        <!-- Card 3 -->
+        <div class="glass-strong rounded-3xl overflow-hidden shadow-xl card-hover">
+          <div class="relative aspect-square overflow-hidden">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqWW5BgZoA9HFpPNUrLR2y4tdyy0MKq6tz1_c4Tc2XuaYuEpNETCpDMcLFNp4cCzi5zwOdm-rYvW_E-_7NfSO_x7Zb3adGQ7wc4i2K_XF8Hx4gF9j7mQGu6AqpwSyn1YvWZyBzHtofn7e8zLB0veeVTa3nMuB0q9VvzdGMQWBrKpfpWny5GGpXBMqsNP0Hu9QKLR8ujPhFGC9tZ1TgQN6YrfedUwMYzulx9Smb-dqqzVjL6nLnrQMrlLewfzsgpcZG8U__JNweNKk" alt="Kambing" class="w-full h-full object-cover">
+            <div class="absolute top-4 left-4">
+              <div class="glass-strong px-3 py-1 rounded-full">
+                <p class="text-xs font-bold text-green-600 dark:text-green-400">Tersedia</p>
+              </div>
+            </div>
+          </div>
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Kambing Premium</h3>
+            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Jenis sehat, cocok untuk peternakan</p>
+            <div class="flex items-center justify-between">
+              <p class="text-2xl font-black text-gradient">Rp 3.500.000</p>
+              <button class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
+                Detail
+              </button>
+            </div>
+          </div>
+        </div>
 
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Premium Goat</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Healthy breed, perfect for farming</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-2xl font-black text-gradient">$250</p>
-                    <button class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
-                      Details
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="shrink-0 w-60">
-              <div class="glass-strong rounded-3xl overflow-hidden shadow-xl card-hover">
-                <div class="relative aspect-square overflow-hidden">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqWW5BgZoA9HFpPNUrLR2y4tdyy0MKq6tz1_c4Tc2XuaYuEpNETCpDMcLFNp4cCzi5zwOdm-rYvW_E-_7NfSO_x7Zb3adGQ7wc4i2K_XF8Hx4gF9j7mQGu6AqpwSyn1YvWZyBzHtofn7e8zLB0veeVTa3nMuB0q9VvzdGMQWBrKpfpWny5GGpXBMqsNP0Hu9QKLR8ujPhFGC9tZ1TgQN6YrfedUwMYzulx9Smb-dqqzVjL6nLnrQMrlLewfzsgpcZG8U__JNweNKk" alt="Goat" class="w-full h-full object-cover">
-                  <div class="absolute top-4 left-4">
-                    <div class="glass-strong px-3 py-1 rounded-full">
-                      <p class="text-xs font-bold text-green-600 dark:text-green-400">Available</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Premium Goat</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Healthy breed, perfect for farming</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-2xl font-black text-gradient">$250</p>
-                    <button class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
-                      Details
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="shrink-0 w-60">
-              <div class="glass-strong rounded-3xl overflow-hidden shadow-xl card-hover">
-                <div class="relative aspect-square overflow-hidden">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqWW5BgZoA9HFpPNUrLR2y4tdyy0MKq6tz1_c4Tc2XuaYuEpNETCpDMcLFNp4cCzi5zwOdm-rYvW_E-_7NfSO_x7Zb3adGQ7wc4i2K_XF8Hx4gF9j7mQGu6AqpwSyn1YvWZyBzHtofn7e8zLB0veeVTa3nMuB0q9VvzdGMQWBrKpfpWny5GGpXBMqsNP0Hu9QKLR8ujPhFGC9tZ1TgQN6YrfedUwMYzulx9Smb-dqqzVjL6nLnrQMrlLewfzsgpcZG8U__JNweNKk" alt="Goat" class="w-full h-full object-cover">
-                  <div class="absolute top-4 left-4">
-                    <div class="glass-strong px-3 py-1 rounded-full">
-                      <p class="text-xs font-bold text-green-600 dark:text-green-400">Available</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Premium Goat</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Healthy breed, perfect for farming</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-2xl font-black text-gradient">$250</p>
-                    <button class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
-                      Details
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="shrink-0 w-60">
-              <div class="glass-strong rounded-3xl overflow-hidden shadow-xl card-hover">
-                <div class="relative aspect-square overflow-hidden">
-                  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHqWW5BgZoA9HFpPNUrLR2y4tdyy0MKq6tz1_c4Tc2XuaYuEpNETCpDMcLFNp4cCzi5zwOdm-rYvW_E-_7NfSO_x7Zb3adGQ7wc4i2K_XF8Hx4gF9j7mQGu6AqpwSyn1YvWZyBzHtofn7e8zLB0veeVTa3nMuB0q9VvzdGMQWBrKpfpWny5GGpXBMqsNP0Hu9QKLR8ujPhFGC9tZ1TgQN6YrfedUwMYzulx9Smb-dqqzVjL6nLnrQMrlLewfzsgpcZG8U__JNweNKk" alt="Goat" class="w-full h-full object-cover">
-                  <div class="absolute top-4 left-4">
-                    <div class="glass-strong px-3 py-1 rounded-full">
-                      <p class="text-xs font-bold text-green-600 dark:text-green-400">Available</p>
-                    </div>
-                  </div>
-                </div>
-                <div class="p-6">
-                  <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Premium Goat</h3>
-                  <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Healthy breed, perfect for farming</p>
-                  <div class="flex items-center justify-between">
-                    <p class="text-2xl font-black text-gradient">$250</p>
-                    <button class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
-                      Details
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
       <!-- View All Button -->
       <div class="text-center mt-12">
-        <a href="{{route("gallery.hewan")}}" class="inline-flex items-center gap-2 px-8 h-14 rounded-full glass-strong font-bold hover:scale-105 transition-all duration-300">
-          <span>View All Animals</span>
+        <a href="{{route('gallery.hewan')}}" class="inline-flex items-center gap-2 px-8 h-14 rounded-full glass-strong font-bold hover:scale-105 transition-all duration-300">
+          <span>Lihat Semua Hewan</span>
           <span class="material-symbols-outlined">arrow_forward</span>
         </a>
       </div>
@@ -528,14 +425,14 @@
       <div class="text-center mb-16">
         <div class="inline-block mb-4">
           <div class="glass-strong px-4 py-2 rounded-full">
-            <p class="text-sm font-semibold text-primary dark:text-secondary">Our Advantages</p>
+            <p class="text-sm font-semibold text-primary dark:text-secondary">Keunggulan Kami</p>
           </div>
         </div>
         <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-          Why Choose <span class="text-gradient">Lembah Hijau</span>
+          Mengapa Memilih <span class="text-gradient">Ecommerce TSA</span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          We provide unmatched quality and service in the livestock marketplace
+          Kami menyediakan kualitas dan layanan tak tertandingi di pasar ternak
         </p>
       </div>
 
@@ -545,9 +442,9 @@
           <div class="inline-flex items-center justify-center size-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 mb-6 shadow-lg">
             <span class="material-symbols-outlined text-4xl text-white">health_and_safety</span>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Healthy Animals</h3>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Hewan Sehat</h3>
           <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-            Our livestock are raised in natural, stress-free environments, ensuring their health and well-being with veterinary care.
+            Ternak kami dibesarkan dalam lingkungan alami tanpa stres, memastikan kesehatan dan kesejahteraan mereka dengan perawatan dokter hewan.
           </p>
         </div>
 
@@ -556,9 +453,9 @@
           <div class="inline-flex items-center justify-center size-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 mb-6 shadow-lg">
             <span class="material-symbols-outlined text-4xl text-white">verified</span>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Certified Farms</h3>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Peternakan Bersertifikat</h3>
           <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-            We partner with verified farms that uphold the highest standards of ethical and sustainable farming practices.
+            Kami bermitra dengan peternakan terverifikasi yang menjunjung tinggi standar tertinggi dalam praktik peternakan yang etis dan berkelanjutan.
           </p>
         </div>
 
@@ -567,9 +464,9 @@
           <div class="inline-flex items-center justify-center size-20 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 mb-6 shadow-lg">
             <span class="material-symbols-outlined text-4xl text-white">shopping_cart</span>
           </div>
-          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Easy Purchase</h3>
+          <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Pembelian Mudah</h3>
           <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-            Browse, select, and purchase your livestock with our simple and secure online platform with full support.
+            Jelajahi, pilih, dan beli ternak Anda dengan platform online kami yang sederhana dan aman dengan dukungan penuh.
           </p>
         </div>
       </div>
@@ -584,20 +481,20 @@
         <div>
           <div class="inline-block mb-6">
             <div class="glass-strong px-4 py-2 rounded-full">
-              <p class="text-sm font-semibold text-primary dark:text-secondary">Our Commitment</p>
+              <p class="text-sm font-semibold text-primary dark:text-secondary">Komitmen Kami</p>
             </div>
           </div>
           
           <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">
-            Complete <span class="text-gradient">Transparency</span> & Ethics
+            <span class="text-gradient">Transparansi</span> & Etika Lengkap
           </h2>
           
           <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-            At Lembah Hijau, we believe in complete transparency and adherence to the highest legality standards. We are committed to ethical practices, ensuring every animal is sourced and sold responsibly.
+            Di Ecommerce TSA, kami percaya pada transparansi lengkap dan kepatuhan pada standar legalitas tertinggi. Kami berkomitmen pada praktik etis, memastikan setiap hewan bersumber dan dijual secara bertanggung jawab.
           </p>
 
           <a href="#contact" class="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-            <span>View Certifications</span>
+            <span>Lihat Sertifikasi</span>
             <span class="material-symbols-outlined">arrow_forward</span>
           </a>
         </div>
@@ -608,32 +505,32 @@
             <div class="inline-flex items-center justify-center size-16 rounded-full bg-primary/10 dark:bg-primary/20 mb-4">
               <span class="material-symbols-outlined text-3xl text-primary dark:text-secondary">gavel</span>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Sales Regulations</h3>
-            <a href="#" class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Learn more →</a>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Regulasi Penjualan</h3>
+            <a href="#" class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Pelajari lebih lanjut →</a>
           </div>
 
           <div class="glass-strong rounded-3xl p-6 text-center card-hover">
             <div class="inline-flex items-center justify-center size-16 rounded-full bg-primary/10 dark:bg-primary/20 mb-4">
               <span class="material-symbols-outlined text-3xl text-primary dark:text-secondary">workspace_premium</span>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Quality Assurance</h3>
-            <a href="#" class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Learn more →</a>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Jaminan Kualitas</h3>
+            <a href="#" class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Pelajari lebih lanjut →</a>
           </div>
 
           <div class="glass-strong rounded-3xl p-6 text-center card-hover">
             <div class="inline-flex items-center justify-center size-16 rounded-full bg-primary/10 dark:bg-primary/20 mb-4">
               <span class="material-symbols-outlined text-3xl text-primary dark:text-secondary">shield</span>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Ethical Guidelines</h3>
-            <a href="#" class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Learn more →</a>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Pedoman Etika</h3>
+            <a href="#" class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Pelajari lebih lanjut →</a>
           </div>
 
           <div class="glass-strong rounded-3xl p-6 text-center card-hover">
             <div class="inline-flex items-center justify-center size-16 rounded-full bg-primary/10 dark:bg-primary/20 mb-4">
               <span class="material-symbols-outlined text-3xl text-primary dark:text-secondary">eco</span>
             </div>
-            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Eco-Farming</h3>
-            <a href="#" class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Learn more →</a>
+            <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Peternakan Ramah Lingkungan</h3>
+            <a href="#" class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Pelajari lebih lanjut →</a>
           </div>
         </div>
       </div>
@@ -646,11 +543,11 @@
       <div class="text-center mb-16">
         <div class="inline-block mb-4">
           <div class="glass-strong px-4 py-2 rounded-full">
-            <p class="text-sm font-semibold text-primary dark:text-secondary">Testimonials</p>
+            <p class="text-sm font-semibold text-primary dark:text-secondary">Testimoni</p>
           </div>
         </div>
         <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-          What Our <span class="text-gradient">Customers Say</span>
+          Apa Kata <span class="text-gradient">Pelanggan Kami</span>
         </h2>
       </div>
 
@@ -665,15 +562,15 @@
             <span class="material-symbols-outlined text-yellow-400">star</span>
           </div>
           <p class="text-gray-600 dark:text-gray-400 italic mb-6 leading-relaxed">
-            "The goat we purchased was incredibly healthy and well-cared for. The entire process was seamless and professional. Highly recommend Lembah Hijau!"
+            "Kambing yang kami beli sangat sehat dan terawat dengan baik. Seluruh prosesnya lancar dan profesional. Sangat merekomendasikan Ecommerce TSA!"
           </p>
           <div class="flex items-center gap-4">
             <div class="size-12 rounded-full bg-gradient-to-br from-primary to-green-600 flex items-center justify-center">
-              <span class="text-white font-bold">SJ</span>
+              <span class="text-white font-bold">BW</span>
             </div>
             <div>
-              <p class="font-bold text-gray-900 dark:text-white">Sarah Johnson</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Farm Owner</p>
+              <p class="font-bold text-gray-900 dark:text-white">Budi Wibowo</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Pemilik Peternakan</p>
             </div>
           </div>
         </div>
@@ -688,15 +585,15 @@
             <span class="material-symbols-outlined text-yellow-400">star</span>
           </div>
           <p class="text-gray-600 dark:text-gray-400 italic mb-6 leading-relaxed">
-            "Finally, a place that cares about animal welfare. The quality of their livestock is unmatched. Will definitely be a returning customer."
+            "Akhirnya, tempat yang peduli pada kesejahteraan hewan. Kualitas ternak mereka tidak tertandingi. Pasti akan menjadi pelanggan tetap."
           </p>
           <div class="flex items-center gap-4">
             <div class="size-12 rounded-full bg-gradient-to-br from-secondary to-yellow-600 flex items-center justify-center">
-              <span class="text-white font-bold">MB</span>
+              <span class="text-white font-bold">AS</span>
             </div>
             <div>
-              <p class="font-bold text-gray-900 dark:text-white">Michael Brown</p>
-              <p class="text-sm text-gray-600 dark:text-gray-400">Rancher</p>
+              <p class="font-bold text-gray-900 dark:text-white">Ani Susanti</p>
+              <p class="text-sm text-gray-600 dark:text-gray-400">Peternak</p>
             </div>
           </div>
         </div>
@@ -710,14 +607,14 @@
       <div class="text-center mb-16">
         <div class="inline-block mb-4">
           <div class="glass-strong px-4 py-2 rounded-full">
-            <p class="text-sm font-semibold text-primary dark:text-secondary">Get In Touch</p>
+            <p class="text-sm font-semibold text-primary dark:text-secondary">Hubungi Kami</p>
           </div>
         </div>
         <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-          Contact <span class="text-gradient">Us</span>
+          Kontak <span class="text-gradient">Kami</span>
         </h2>
         <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Have questions? We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+          Ada pertanyaan? Kami ingin mendengar dari Anda. Kirimkan pesan dan kami akan merespons sesegera mungkin.
         </p>
       </div>
 
@@ -726,19 +623,19 @@
         <div class="glass-strong rounded-3xl p-8">
           <form class="space-y-6">
             <div>
-              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Your Name</label>
-              <input type="text" placeholder="Lembah Hijau" class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
+              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Nama Anda</label>
+              <input type="text" placeholder="Nama Lengkap" class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Your Email</label>
-              <input type="email" placeholder="lembahijau@gmail.com" class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
+              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Email Anda</label>
+              <input type="email" placeholder="email@contoh.com" class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
             </div>
             <div>
-              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Your Message</label>
-              <textarea rows="5" placeholder="Tell us what you're looking for..." class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all"></textarea>
+              <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Pesan Anda</label>
+              <textarea rows="5" placeholder="Beri tahu kami apa yang Anda cari..." class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all"></textarea>
             </div>
             <button type="submit" class="w-full h-14 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-              Send Message
+              Kirim Pesan
             </button>
           </form>
         </div>
@@ -751,8 +648,8 @@
                 <span class="material-symbols-outlined text-primary dark:text-secondary">location_on</span>
               </div>
               <div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Visit Us</h3>
-                <p class="text-gray-600 dark:text-gray-400">Lembah Hijau, Lampung, Indonesia</p>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Kunjungi Kami</h3>
+                <p class="text-gray-600 dark:text-gray-400">Lampung, Indonesia</p>
               </div>
             </div>
           </div>
@@ -763,8 +660,8 @@
                 <span class="material-symbols-outlined text-primary dark:text-secondary">mail</span>
               </div>
               <div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Email Us</h3>
-                <p class="text-gray-600 dark:text-gray-400">contact@lembahhijau.com</p>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Email Kami</h3>
+                <p class="text-gray-600 dark:text-gray-400">kontak@ecommercetsa.com</p>
               </div>
             </div>
           </div>
@@ -775,8 +672,8 @@
                 <span class="material-symbols-outlined text-primary dark:text-secondary">phone</span>
               </div>
               <div>
-                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Call Us</h3>
-                <p class="text-gray-600 dark:text-gray-400">(123) 456-7890</p>
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Telepon Kami</h3>
+                <p class="text-gray-600 dark:text-gray-400">+62 812-3456-7890</p>
               </div>
             </div>
           </div>
@@ -786,73 +683,60 @@
   </section>
 
   <!-- FOOTER -->
-   <footer class="relative py-12 glass border-t border-white/10 mt-20">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                    <!-- Brand -->
-                    <div class="md:col-span-2">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="size-12 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                                <span class="material-symbols-outlined text-3xl text-white">eco</span>
-                            </div>
-                            <div>
-                                <h3 class="text-xl font-bold gradient-text">Lembah Hijau</h3>
-                                <p class="text-xs text-gray-600 dark:text-gray-400">Premium </p>
-                            </div>
-                        </div>
-                        <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md">Your trusted partner in eco-friendly and sustainable livestock marketplace.</p>
-                        <div class="flex gap-3">
-                            {{-- <a href="#" class="size-10 rounded-xl glass-strong flex items-center justify-center hover:scale-110 transition-transform">
-                                <span class="material-symbols-outlined text-primary dark:text-secondary">facebook</span>
-                            </a>
-                            {{-- <a href="#" class="size-10 rounded-xl glass-strong flex items-center justify-center hover:scale-110 transition-transform">
-                                <span class="material-symbols-outlined text-primary dark:text-secondary">instagram</span>
-                            </a> --}}
-                            {{-- <a href="#" class="size-10 rounded-xl glass-strong flex items-center justify-center hover:scale-110 transition-transform">
-                                <span class="material-symbols-outlined text-primary dark:text-secondary">mail</span>
-                            </a> -- --}}
-                        </div>
-                    </div>
-
-                    <!-- Quick Links -->
-                    <div>
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Quick Links</h4>
-                        <ul class="space-y-3">
-                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">About Us</a></li>
-                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Products</a></li>
-                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Blog</a></li>
-                            <li><a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Contact</a></li>
-                        </ul>
-                    </div>
-
-                    <!-- Contact -->
-                    <div>
-                        <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Contact</h4>
-                        <ul class="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
-                            <li>123 Lembah Hijau Lampung</li>
-                            <li>Farmville, Indonesia</li>
-                            <li>contact@lembahhijau.com</li>
-                            <li>(123) 456-7890</li>
-                        </ul>
-                    </div>
-                </div>
-
-      <!-- Bottom Bar -->
-            <div class="border-t border-white/10 pt-8">
-              <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <p class="text-sm text-gray-600 dark:text-gray-400">© 2025 Lembah Hijau. All rights reserved.</p>
-                <div class="flex gap-6 text-sm">
-                  <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Privacy Policy</a>
-                  <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Terms of Service</a>
-                  <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Cookies</a>
-                </div>
-              </div>
+  <footer class="relative py-12 glass border-t border-white/10 mt-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+        <!-- Brand -->
+        <div class="md:col-span-2">
+          <div class="flex items-center gap-3 mb-4">
+            <div class="size-12 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
+              <span class="material-symbols-outlined text-3xl text-white">eco</span>
+            </div>
+            <div>
+              <h3 class="text-xl font-bold text-gradient">Ecommerce TSA</h3>
+              <p class="text-xs text-gray-600 dark:text-gray-400">Perdagangan Hewan Premium</p>
             </div>
           </div>
-        </footer>
+          <p class="text-gray-600 dark:text-gray-400 mb-6 max-w-md">Mitra terpercaya Anda dalam pasar ternak ramah lingkungan dan berkelanjutan.</p>
+        </div>
+
+        <!-- Quick Links -->
+        <div>
+          <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Tautan Cepat</h4>
+          <ul class="space-y-3">
+            <li><a href="#about" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Tentang Kami</a></li>
+            <li><a href="#shop" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Produk</a></li>
+            <li><a href="#why" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Keunggulan</a></li>
+            <li><a href="#contact" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Kontak</a></li>
+          </ul>
+        </div>
+
+        <!-- Contact -->
+        <div>
+          <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Kontak</h4>
+          <ul class="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
+            <li>Lampung, Indonesia</li>
+            <li>kontak@ecommercetsa.com</li>
+            <li>+62 812-3456-7890</li>
+          </ul>
+        </div>
       </div>
 
-<!-- SCRIPTS -->
+      <!-- Bottom Bar -->
+      <div class="border-t border-white/10 pt-8">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p class="text-sm text-gray-600 dark:text-gray-400">© 2025 Ecommerce TSA. Semua hak dilindungi.</p>
+          <div class="flex gap-6 text-sm">
+            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Kebijakan Privasi</a>
+            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Syarat Layanan</a>
+            <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Cookies</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+</div>
+
 <script>
   document.addEventListener("DOMContentLoaded", function() {
     const headerHeight = 80;

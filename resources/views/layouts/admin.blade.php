@@ -1,10 +1,10 @@
 {{-- resources/views/layouts/admin.blade.php --}}
 <!DOCTYPE html>
-<html lang="id" class="light">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Admin - Lembah Hijau')</title>
+    <title>@yield('title', 'Admin - E-Commerce TSA')</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -197,6 +197,8 @@
 </head>
 <body class="bg-gray-50 dark:bg-zinc-950">
 
+    
+
     <!-- Mobile Overlay -->
     <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
 
@@ -210,7 +212,7 @@
                 <span class="material-symbols-outlined text-white text-[22px]">eco</span>
             </div>
             <div>
-                <h1 class="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">Lembah Hijau</h1>
+                <h1 class="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">E-Commerce TSA</h1>
                 <p class="text-[10px] text-gray-400 dark:text-zinc-500 font-medium tracking-wide uppercase">Admin Panel</p>
             </div>
         </div>
@@ -307,7 +309,7 @@
         <footer class="px-4 lg:px-8 py-6 border-t border-gray-100 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-900/50">
             <div class="max-w-7xl mx-auto">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-3 text-[12px] text-gray-500 dark:text-zinc-500">
-                    <p class="font-medium">© 2025 Lembah Hijau. All rights reserved.</p>
+                    <p class="font-medium">© 2025 E-Commerce TSA. All rights reserved.</p>
                     <div class="flex items-center gap-4">
                         <a href="#" class="hover:text-soft-green transition-colors font-medium">Dokumentasi</a>
                         <span class="text-gray-300 dark:text-zinc-700">•</span>
@@ -320,6 +322,7 @@
 
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
         // Sidebar Toggle for Mobile
@@ -363,6 +366,31 @@
                 overlay.classList.remove('active');
             }
         });
+
+      
+
+@if(session('success'))
+
+    Swal.fire({
+        icon: 'success',
+        title: 'Berhasil!',
+        text: '{{ session("success") }}',
+        timer: 2000,
+        showConfirmButton: false
+    });
+
+@endif
+
+@if(session('error'))
+
+    Swal.fire({
+        icon: 'error',
+        title: 'Login gagal!',
+        text: '{{ session("error") }}'
+    });
+
+@endif
+
     </script>
 
     @stack('scripts')
