@@ -4,25 +4,31 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d1242d9ba7d40687b6c06effcd19caeb",
+    "content-hash": "f1dade11b2533f12d9b153f81ef6e529",
     "packages": [
         {
             "name": "anhskohbo/no-captcha",
-            "version": "3.7.0",
+            "version": "3.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/anhskohbo/no-captcha.git",
-                "reference": "87666572f0dbe1e3380a2e9ae7574bf3a2d0804e"
+                "reference": "6f129419a7f0d0a1ed9849fdaaed34e6d83a03cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/anhskohbo/no-captcha/zipball/87666572f0dbe1e3380a2e9ae7574bf3a2d0804e",
-                "reference": "87666572f0dbe1e3380a2e9ae7574bf3a2d0804e",
-                "shasum": ""
+                "url": "https://api.github.com/repos/anhskohbo/no-captcha/zipball/6f129419a7f0d0a1ed9849fdaaed34e6d83a03cc",
+                "reference": "6f129419a7f0d0a1ed9849fdaaed34e6d83a03cc",
+                "shasum": "",
+                "mirrors": [
+                    {
+                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
+                        "preferred": true
+                    }
+                ]
             },
             "require": {
                 "guzzlehttp/guzzle": "^6.2|^7.0",
-                "illuminate/support": "^5.0|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
+                "illuminate/support": "^5.0|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
                 "php": ">=5.5.5"
             },
             "require-dev": {
@@ -66,9 +72,9 @@
             ],
             "support": {
                 "issues": "https://github.com/anhskohbo/no-captcha/issues",
-                "source": "https://github.com/anhskohbo/no-captcha/tree/3.7.0"
+                "source": "https://github.com/anhskohbo/no-captcha/tree/3.6.0"
             },
-            "time": "2025-02-25T18:53:34+00:00"
+            "time": "2024-03-13T02:22:17+00:00"
         },
         {
             "name": "barryvdh/laravel-dompdf",
