@@ -195,7 +195,7 @@
 
       <!-- Judul utama -->
       <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-tight mb-6 text-white">
-        <span class="text-gradient">Segar & Alami</span><br/>
+        <span class="text-gradient">ECommerce TSA</span><br/>
         <span class="text-gray-100">Pasar Ternak Terpercaya</span>
       </h1>
 
