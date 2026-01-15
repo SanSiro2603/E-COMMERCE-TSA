@@ -7,26 +7,21 @@ use App\Models\Cart;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class CartController extends Controller
 {
     public function index()
     {
-        $carts = Cart::with(['product.category'])
-            ->where('user_id', Auth::id())
-            ->get();
-
+        // Hapus item keranjang yang produknya sudah dihapus admin
+        $carts = Cart::with(['product.category'])->where('user_id', Auth::id())->get();
         $carts->each(function ($cart) {
-            if (!$cart->product || !$cart->product->is_active) {
-                $cart->delete();
+            if (!$cart->product || !$cart->product->is_active) { 
+                $cart->delete(); 
             }
         });
 
-        $carts = Cart::with(['product.category'])
-            ->where('user_id', Auth::id())
-            ->get();
-
+        // Refresh data
+        $carts = Cart::with(['product.category'])->where('user_id', Auth::id())->get();
         $total = $carts->sum('subtotal');
 
         return view('pembeli.keranjang.index', compact('carts', 'total'));
@@ -35,213 +30,109 @@ class CartController extends Controller
     public function tambah(Request $request, $productId)
     {
         try {
-            DB::transaction(function () use ($request, $productId, &$product, &$cart) {
-                $product = Product::where('is_active', true)->findOrFail($productId);
+            $product = Product::where('is_active', true)->findOrFail($productId);
+            $userId = Auth::id();
+            
+            $quantity = $request->input('quantity', 1);
 
-                $validated = $request->validate([
-                    'quantity' => 'nullable|integer|min:1',
+            // Cek apakah user sudah punya produk ini di keranjang
+            $cart = Cart::where('user_id', $userId)->where('product_id', $productId)->first();
+            $currentQty = $cart ? $cart->quantity : 0;
+            $newTotalQty = $currentQty + $quantity;
+
+            // 1. CEK STOK (Hanya Cek, JANGAN KURANGI DATABASE)
+            if ($newTotalQty > $product->stock) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Stok tidak cukup! Tersedia: {$product->stock}"
+                ], 400);
+            }
+
+            // 2. Simpan ke Keranjang
+            if ($cart) {
+                $cart->quantity = $newTotalQty;
+                $cart->subtotal = $product->price * $newTotalQty;
+                $cart->save();
+            } else {
+                Cart::create([
+                    'user_id' => $userId,
+                    'product_id' => $productId,
+                    'quantity' => $quantity,
+                    'subtotal' => $product->price * $quantity,
                 ]);
+            }
 
-                $quantity = $validated['quantity'] ?? 1;
-
-                $cart = Cart::where('user_id', Auth::id())
-                    ->where('product_id', $productId)
-                    ->first();
-
-                $currentQty = $cart ? $cart->quantity : 0;
-                $newTotalQty = $currentQty + $quantity;
-
-                // PERBAIKAN: Stok tersedia = stok tersisa + qty di cart
-                $availableStock = $product->stock + $currentQty;
-
-                if ($newTotalQty > $availableStock) {
-                    abort(response()->json([
-                        'success' => false,
-                        'message' => "Stok tidak mencukupi. Tersedia: {$availableStock}, Dibutuhkan: {$newTotalQty}"
-                    ], 400));
-                }
-
-                if ($cart) {
-                    $cart->quantity = $newTotalQty;
-                    $cart->subtotal = $product->price * $newTotalQty;
-                    $cart->save();
-                } else {
-                    $cart = Cart::create([
-                        'user_id' => Auth::id(),
-                        'product_id' => $productId,
-                        'quantity' => $quantity,
-                        'subtotal' => $product->price * $quantity,
-                    ]);
-                }
-
-                $product->decrement('stock', $quantity);
-            });
-
-            $cartCount = Cart::where('user_id', Auth::id())->count();
+            // PENTING: TIDAK ADA $product->decrement() DISINI!
+            
+            $cartCount = Cart::where('user_id', $userId)->count();
 
             return response()->json([
                 'success' => true,
-                'message' => 'Produk berhasil ditambahkan ke keranjang',
-                'cart_count' => $cartCount,
-                'cart' => $cart,
-                'new_stock' => $product->stock,
+                'message' => 'Produk masuk keranjang',
+                'cart_count' => $cartCount
             ]);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menambahkan produk: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
 
     public function update(Request $request, $cartId)
     {
         try {
-            $validated = $request->validate([
-                'quantity' => 'required|integer|min:1',
-            ]);
+            $cart = Cart::with('product')->where('user_id', Auth::id())->findOrFail($cartId);
+            $newQty = $request->quantity;
 
-            $cart = Cart::where('user_id', Auth::id())->findOrFail($cartId);
-            $product = $cart->product;
-
-            $oldQuantity = $cart->quantity;
-            $newQuantity = $validated['quantity'];
-
-            // PERBAIKAN: Stok tersedia = stok tersisa + qty lama
-            $availableStock = $product->stock + $oldQuantity;
-
-            if ($newQuantity > $availableStock) {
+            // 1. CEK STOK REAL-TIME
+            if ($newQty > $cart->product->stock) {
                 return response()->json([
                     'success' => false,
-                    'message' => "Stok tidak mencukupi. Tersedia: {$availableStock}, Dibutuhkan: {$newQuantity}"
+                    'message' => "Stok maksimal: {$cart->product->stock}"
                 ], 400);
             }
 
-            DB::transaction(function () use ($cart, $product, $newQuantity, $oldQuantity) {
-                $quantityDiff = $newQuantity - $oldQuantity;
+            // 2. Update Keranjang
+            $cart->update([
+                'quantity' => $newQty,
+                'subtotal' => $cart->product->price * $newQty
+            ]);
 
-                $cart->quantity = $newQuantity;
-                $cart->subtotal = $product->price * $newQuantity;
-                $cart->save();
-
-                if ($quantityDiff > 0) {
-                    $product->decrement('stock', $quantityDiff);
-                } elseif ($quantityDiff < 0) {
-                    $product->increment('stock', abs($quantityDiff));
-                }
-            });
-
+            // Hitung ulang total
             $carts = Cart::where('user_id', Auth::id())->get();
-            $total = $carts->sum('subtotal');
-            $cartCount = $carts->count();
-            $totalItems = $carts->sum('quantity');
-
+            
             return response()->json([
                 'success' => true,
-                'message' => 'Jumlah produk berhasil diperbarui',
                 'subtotal' => number_format($cart->subtotal, 0, ',', '.'),
-                'total' => number_format($total, 0, ',', '.'),
-                'new_stock' => $product->stock,
-                'cart_count' => $cartCount,
-                'total_items' => $totalItems,
+                'total' => number_format($carts->sum('subtotal'), 0, ',', '.'),
+                'cart_count' => $carts->count()
             ]);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui keranjang: ' . $e->getMessage()
-            ], 500);
+            return response()->json(['success' => false, 'message' => 'Error'], 500);
         }
     }
 
-  public function clear()
-{
-    try {
-        DB::transaction(function () {
-            // Ambil semua item keranjang user
-            $carts = Cart::where('user_id', Auth::id())->get();
-            
-            // Kembalikan stok untuk setiap item
-            foreach ($carts as $cart) {
-                if ($cart->product) {
-                    $cart->product->increment('stock', $cart->quantity);
-                }
-            }
-            
-            // Hapus semua item keranjang
-            Cart::where('user_id', Auth::id())->delete();
-        });
-        
-        return redirect()->back()->with('success', 'Keranjang berhasil dikosongkan dan stok dikembalikan');
-    } catch (\Exception $e) {
-        return redirect()->back()->with('error', 'Gagal mengosongkan keranjang: ' . $e->getMessage());
-    }
-}
+    public function hapus($cartId)
+    {
+        Cart::where('user_id', Auth::id())->where('id', $cartId)->delete();
+        // TIDAK ADA Increment Stok Disini (Karena stok memang belum diambil)
 
-public function hapus($cartId)
-{
-    try {
-        $response = DB::transaction(function () use ($cartId) {
-            $cart = Cart::where('user_id', Auth::id())->findOrFail($cartId);
-            $productId = $cart->product_id;
-            
-            // Kembalikan stok
-            if ($cart->product) {
-                $cart->product->increment('stock', $cart->quantity);
-            }
-            
-            // Hapus item
-            $cart->delete();
-            
-            // Hitung ulang total
-            $carts = Cart::where('user_id', Auth::id())->get();
-            $total = $carts->sum('subtotal');
-            $cartCount = $carts->count();
-            $totalItems = $carts->sum('quantity');
-            
-            return [
-                'success' => true,
-                'message' => 'Produk berhasil dihapus dari keranjang',
-                'cart_count' => $cartCount,
-                'total' => number_format($total, 0, ',', '.'),
-                'total_items' => $totalItems,
-                'product_id' => $productId
-            ];
-        });
-        
-        return response()->json($response);
-    } catch (\Exception $e) {
+        $carts = Cart::where('user_id', Auth::id())->get();
         return response()->json([
-            'success' => false,
-            'message' => 'Gagal menghapus produk: ' . $e->getMessage()
-        ], 500);
+            'success' => true,
+            'cart_count' => $carts->count(),
+            'total' => number_format($carts->sum('subtotal'), 0, ',', '.')
+        ]);
     }
-}
+
+    public function clear()
+    {
+        Cart::where('user_id', Auth::id())->delete();
+        return redirect()->back()->with('success', 'Keranjang dibersihkan');
+    }
+
     public function count()
     {
-        $count = Cart::where('user_id', Auth::id())->count();
-        return response()->json(['count' => $count]);
-    }
-
-    public function getStock($productId)
-    {
-        $product = Product::select('stock')->find($productId);
-        if (!$product) {
-            return response()->json(['success' => false, 'message' => 'Produk tidak ditemukan'], 404);
-        }
-        return response()->json(['success' => true, 'stock' => $product->stock]);
-    }
-
-    public function updateStockAfterAdd($productId, Request $request)
-    {
-        $quantity = $request->input('quantity', 1);
-        $product = Product::find($productId);
-        if (!$product) return response()->json(['success' => false], 404);
-        if ($product->stock < $quantity) {
-            return response()->json(['success' => false, 'message' => 'Stok tidak cukup'], 400);
-        }
-        $product->decrement('stock', $quantity);
-        return response()->json(['success' => true, 'new_stock' => $product->stock]);
+        return response()->json(['count' => Cart::where('user_id', Auth::id())->count()]);
     }
 }

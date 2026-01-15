@@ -48,6 +48,9 @@ class AddressController extends Controller
 
     public function edit(Address $alamat)
     {
+        // memastikan alamat ini milik user yang sedang login
+        $this->authorizeAddress($alamat); 
+        
         return view('pembeli.alamat.edit', compact('alamat'));
     }
 

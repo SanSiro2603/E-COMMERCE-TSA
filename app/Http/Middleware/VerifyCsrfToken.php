@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+    // Mengizinkan Midtrans mengirim data tanpa token CSRF
+    'midtrans/notification',
     ];
 }

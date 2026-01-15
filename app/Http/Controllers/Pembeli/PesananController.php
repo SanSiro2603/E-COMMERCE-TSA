@@ -147,6 +147,22 @@ class PesananController extends Controller
             $shippingCost = $baseCost + ($weightKg > 1 ? ($weightKg - 1) * 10000 : 0);
             $grandTotal = $totalAmount + $shippingCost;
 
+
+            // 1. VALIDASI STOK EKSTRA KETAT (PENTING!)
+            // Kita lock baris database untuk mencegah Race Condition (rebutan stok)
+            foreach ($carts as $cart) {
+                $product = Product::lockForUpdate()->find($cart->product_id);
+                
+                if (!$product) {
+                    throw new \Exception("Produk tidak ditemukan.");
+                }
+
+                if ($product->stock < $cart->quantity) {
+                    throw new \Exception("Stok produk '{$product->name}' tidak mencukupi (Sisa: {$product->stock}). Silakan update keranjang.");
+                }
+            }
+
+            // 2. JIKA AMAN, BUAT ORDER
             $order = Order::create([
                 'user_id'           => Auth::id(),
                 'order_number'      => Order::generateOrderNumber(),
@@ -166,6 +182,7 @@ class PesananController extends Controller
                 'courier'           => $validated['courier'],
             ]);
 
+            // 3. KURANGI STOK & BUAT ORDER ITEMS
             foreach ($carts as $cart) {
                 OrderItem::create([
                     'order_id'   => $order->id,
@@ -174,7 +191,10 @@ class PesananController extends Controller
                     'price'      => $cart->product->price,
                     'subtotal'   => $cart->subtotal,
                 ]);
-                $cart->product->decrement('stock', $cart->quantity);
+
+                // Kurangi stok (Aman karena sudah divalidasi & dilock di atas)
+                $product = Product::find($cart->product_id);
+                $product->decrement('stock', $cart->quantity);
             }
 
             Cart::where('user_id', Auth::id())->delete();
