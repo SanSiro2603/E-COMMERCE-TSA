@@ -26,10 +26,10 @@ class LoginController extends Controller
         $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-            'g-recaptcha-response' => ['required', 'captcha'], 
+            // 'g-recaptcha-response' => ['required', 'captcha'], 
         ], [
-            'g-recaptcha-response.required' => 'Silakan verifikasi captcha terlebih dahulu.',
-            'g-recaptcha-response.captcha' => 'Captcha tidak valid, coba lagi.',
+            // 'g-recaptcha-response.required' => 'Silakan verifikasi captcha terlebih dahulu.',
+            // 'g-recaptcha-response.captcha' => 'Captcha tidak valid, coba lagi.',
         ]);
 
         $credentials = $request->only('email', 'password');

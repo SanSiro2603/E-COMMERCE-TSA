@@ -177,12 +177,32 @@
                         </div>
                     </div>
 
-                    <button type="submit" id="submitBtn"
-                            class="w-full mt-6 bg-gradient-to-r from-soft-green to-primary text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                            disabled>
-                        <span class="material-symbols-outlined text-lg">payment</span>
-                        Buat Pesanan & Bayar
-                    </button>
+                    {{-- LOGIKA TOMBOL TOKO BUKA/TUTUP --}}
+                    @if($shoppingEnabled)
+                        {{-- Jika Buka: Tampilkan Tombol Normal --}}
+                        <button type="submit" id="submitBtn"
+                                class="w-full mt-6 bg-gradient-to-r from-soft-green to-primary text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                disabled>
+                            <span class="material-symbols-outlined text-lg">payment</span>
+                            Buat Pesanan & Bayar
+                        </button>
+                    @else
+                        {{-- Jika Tutup: Tampilkan Pesan Error & Disable Tombol --}}
+                        <div class="mt-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg flex items-start gap-3">
+                            <span class="material-symbols-outlined text-red-600 dark:text-red-400">store_off</span>
+                            <div>
+                                <p class="font-bold text-red-800 dark:text-red-300">Toko Sedang Tutup</p>
+                                <p class="text-sm text-red-700 dark:text-red-400">
+                                    Mohon maaf, fitur transaksi belanja sedang dinonaktifkan oleh Admin.
+                                </p>
+                            </div>
+                        </div>
+                        <button type="button" disabled
+                                class="w-full mt-3 bg-gray-400 text-white py-3 rounded-lg font-semibold cursor-not-allowed flex items-center justify-center gap-2">
+                            <span class="material-symbols-outlined text-lg">block</span>
+                            Checkout Nonaktif
+                        </button>
+                    @endif
 
                     <a href="{{ route('pembeli.keranjang.index') }}"
                        class="block text-center mt-3 text-sm text-gray-600 dark:text-zinc-400 hover:text-soft-green">

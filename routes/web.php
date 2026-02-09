@@ -108,6 +108,10 @@ Route::middleware(['auth', 'role:admin,super_admin'])
         Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
         Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.exportExcel');
         Route::get('/reports/preview', [ReportController::class, 'preview'])->name('reports.preview');
+        
+        // Settings
+        Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
     });
 
 /*

@@ -7,13 +7,15 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration {
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->foreignId('address_id')
-                  ->nullable()
-                  ->constrained('addresses')
-                  ->onDelete('set null')
-                  ->after('user_id'); // posisi kolom bisa diubah
-        });
+        if (!Schema::hasColumn('orders', 'address_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->foreignId('address_id')
+                      ->nullable()
+                      ->constrained('addresses')
+                      ->onDelete('set null')
+                      ->after('user_id'); // posisi kolom bisa diubah
+            });
+        }
     }
 
     public function down(): void

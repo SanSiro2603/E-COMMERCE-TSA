@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Payment;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -94,6 +95,13 @@ class PesananController extends Controller
     // === CHECKOUT: PILIH ALAMAT TERSIMPAN + KURIR ===
     public function checkout()
     {
+        // --- TAMBAHAN BARU ---
+    $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
+    if ($isStoreOpen !== '1') {
+        return redirect()->route('pembeli.keranjang.index')
+            ->with('error', 'Maaf, toko sedang tutup. Fitur checkout sementara dinonaktifkan.');
+    }
+
         $carts = Cart::with('product')->where('user_id', Auth::id())->get();
         if ($carts->isEmpty()) {
             return redirect()->route('pembeli.keranjang.index')
@@ -115,6 +123,13 @@ class PesananController extends Controller
     // === STORE: BUAT PESANAN DARI ALAMAT TERPILIH ===
     public function store(Request $request)
     {
+        // --- TAMBAHAN BARU ---
+    $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
+    if ($isStoreOpen !== '1') {
+        return redirect()->back()
+            ->with('error', 'Transaksi DITOLAK: Toko sedang tutup.');
+    }
+
         $validated = $request->validate([
             'address_id' => 'required|exists:addresses,id',
             'courier'    => 'required|in:jne,pos,tiki,jnt,sicepat,anteraja',
