@@ -3,21 +3,28 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 
+// =========================
 // AUTH
+// =========================
 use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\NewPasswordController;
 
+// =========================
 // ADMIN
+// =========================
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\SettingsController;
 
+// =========================
 // PEMBELI
+// =========================
 use App\Http\Controllers\Pembeli\PembeliDashboardController;
 use App\Http\Controllers\Pembeli\ProdukController;
 use App\Http\Controllers\Pembeli\CartController;
@@ -25,7 +32,9 @@ use App\Http\Controllers\Pembeli\PesananController;
 use App\Http\Controllers\Pembeli\PaymentController;
 use App\Http\Controllers\Pembeli\AddressController;
 
+// =========================
 // LAINNYA
+// =========================
 use App\Http\Controllers\RajaOngkirController;
 use App\Http\Controllers\MidtransController;
 
@@ -53,7 +62,7 @@ Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallb
 Route::middleware('guest')->group(function () {
 
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('login', [LoginController::class, 'login'])->middleware('throttle:5,1'); // maksimal 5 request menit
+    Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
     Route::post('/register', [RegisterController::class, 'register']);
@@ -82,7 +91,7 @@ Route::post('/logout', [LoginController::class, 'logout'])
 
 /*
 |--------------------------------------------------------------------------
-| ADMIN ROUTES (ADMIN & SUPER ADMIN SAJA 🔒)
+| ADMIN ROUTES (ADMIN & SUPER ADMIN 🔒)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth', 'role:admin,super_admin'])
@@ -101,17 +110,55 @@ Route::middleware(['auth', 'role:admin,super_admin'])
         // Pesanan
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
+            ->name('orders.updateStatus');
 
         // Laporan
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
         Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.exportExcel');
         Route::get('/reports/preview', [ReportController::class, 'preview'])->name('reports.preview');
-        
+
         // Settings
-        Route::get('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'index'])->name('settings.index');
-        Route::post('/settings', [App\Http\Controllers\Admin\SettingsController::class, 'update'])->name('settings.update');
+        Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+    });
+
+/*
+|--------------------------------------------------------------------------
+| SUPER ADMIN ROUTES (KHUSUS SUPER ADMIN 🔒)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:super_admin'])
+    ->prefix('superadmin')
+    ->name('superadmin.')
+    ->group(function () {
+
+        // Dashboard
+        Route::get('/dashboard',
+            [App\Http\Controllers\SuperAdmin\SuperAdminDashboardController::class, 'index']
+        )->name('dashboard');
+
+        // Manajemen Admin
+        Route::resource('admins',
+            App\Http\Controllers\SuperAdmin\AdminManagementController::class
+        );
+
+        // Laporan
+        Route::prefix('reports')->name('reports.')->group(function () {
+
+            Route::get('/',
+                [App\Http\Controllers\SuperAdmin\SuperAdminReportController::class, 'index']
+            )->name('index');
+
+            Route::get('/export-pdf',
+                [App\Http\Controllers\SuperAdmin\SuperAdminReportController::class, 'exportPdf']
+            )->name('exportPdf');
+
+            Route::get('/export-excel',
+                [App\Http\Controllers\SuperAdmin\SuperAdminReportController::class, 'exportExcel']
+            )->name('exportExcel');
+        });
     });
 
 /*
@@ -176,7 +223,8 @@ Route::middleware(['auth', 'role:pembeli'])
 
         // Alamat
         Route::resource('alamat', AddressController::class)->except(['show']);
-        Route::post('alamat/{alamat}/default', [AddressController::class, 'setDefault'])->name('alamat.default');
+        Route::post('alamat/{alamat}/default', [AddressController::class, 'setDefault'])
+            ->name('alamat.default');
 
         // Profil
         Route::get('/profil', fn () => inertia('Pembeli/Profil'))->name('profil.edit');

@@ -69,6 +69,18 @@
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
+
+        /* Active nav link indicator */
+        .nav-link-active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(to right, #7BB661, #72e236);
+            border-radius: 2px 2px 0 0;
+        }
     </style>
 </head>
 
@@ -93,6 +105,36 @@
                     </a>
                 </div>
 
+                {{-- ===== FEATURE NAV LINKS (Desktop) ===== --}}
+                @php
+                    $cartCount = 0;
+                    if(session('cart')) {
+                        $cartCount = array_sum(array_column(session('cart'), 'quantity'));
+                    }
+
+                    $menu = [
+                        ['icon' => 'home',         'label' => 'Beranda',    'route' => 'pembeli.dashboard'],
+                        ['icon' => 'inventory_2',  'label' => 'Produk',     'route' => 'pembeli.produk.index'],
+                        ['icon' => 'receipt_long', 'label' => 'Pesanan',    'route' => 'pembeli.pesanan.index'],
+                        ['icon' => 'location_on',  'label' => 'Alamat',     'route' => 'pembeli.alamat.index'],
+                        ['icon' => 'person',       'label' => 'Profil',     'route' => 'pembeli.profil.edit'],
+                    ];
+                @endphp
+
+                <div class="hidden lg:flex items-center gap-1">
+                    @foreach($menu as $item)
+                        @php $active = request()->routeIs($item['route'].'*'); @endphp
+                        <a href="{{ route($item['route']) }}"
+                           class="relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                           {{ $active
+                               ? 'nav-link-active text-soft-green bg-soft-green/10'
+                               : 'text-gray-600 dark:text-zinc-300 hover:text-soft-green hover:bg-gray-100 dark:hover:bg-zinc-800' }}">
+                            <span class="material-symbols-outlined text-[18px]">{{ $item['icon'] }}</span>
+                            <span>{{ $item['label'] }}</span>
+                        </a>
+                    @endforeach
+                </div>
+
                 <!-- Right Side Actions -->
                 <div class="flex items-center gap-2 sm:gap-4">
                     <!-- Dark Mode Toggle -->
@@ -105,13 +147,6 @@
                     <a href="{{ route('pembeli.keranjang.index') }}" 
                        class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors group">
                         <span class="material-symbols-outlined group-hover:scale-110 transition-transform">shopping_cart</span>
-                        
-                        @php
-                            $cartCount = 0;
-                            if(session('cart')) {
-                                $cartCount = array_sum(array_column(session('cart'), 'quantity'));
-                            }
-                        @endphp
                         
                         <span id="cart-count-badge" 
                               class="cart-badge absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg
@@ -169,44 +204,6 @@
     </nav>
 
     <div class="flex relative">
-        <!-- Desktop Sidebar -->
-        <aside class="hidden lg:flex flex-col w-56 bg-white dark:bg-zinc-900 min-h-[calc(100vh-4rem)] border-r border-gray-200 dark:border-zinc-800 sticky top-16">
-            <nav class="flex-1 py-4 space-y-1">
-                @php
-                    $menu = [
-                        ['icon' => 'home', 'label' => 'Beranda', 'route' => 'pembeli.dashboard'],
-                        ['icon' => 'inventory_2', 'label' => 'Produk', 'route' => 'pembeli.produk.index'],
-                        ['icon' => 'shopping_cart', 'label' => 'Keranjang', 'route' => 'pembeli.keranjang.index', 'badge' => $cartCount],
-                        ['icon' => 'receipt_long', 'label' => 'Pesanan', 'route' => 'pembeli.pesanan.index'],
-                        ['icon' => 'location_on', 'label' => 'Alamat Saya', 'route' => 'pembeli.alamat.index'], // TAMBAHAN
-                        ['icon' => 'person', 'label' => 'Profil', 'route' => 'pembeli.profil.edit'],
-                    ];
-                @endphp
-
-                @foreach($menu as $item)
-                    @php $active = request()->routeIs($item['route'].'*'); @endphp
-                    <a href="{{ route($item['route']) }}"
-                       class="group relative flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg 
-                       {{ $active ? 'text-soft-green bg-soft-green/10 font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }}
-                       transition-all duration-200">
-                        @if($active)
-                            <span class="absolute left-0 w-1 h-8 bg-soft-green rounded-r-full"></span>
-                        @endif
-                        <span class="material-symbols-outlined text-[20px] {{ $active ? 'text-soft-green' : 'text-gray-500 dark:text-zinc-400 group-hover:text-soft-green' }}">
-                            {{ $item['icon'] }}
-                        </span>
-                        <span class="truncate flex-1">{{ $item['label'] }}</span>
-                        
-                        @if(isset($item['badge']) && $item['badge'] > 0)
-                            <span class="cart-badge ml-auto px-2 py-0.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full font-bold shadow-sm">
-                                {{ $item['badge'] }}
-                            </span>
-                        @endif
-                    </a>
-                @endforeach
-            </nav>
-        </aside>
-
         <!-- Mobile Sidebar -->
         <div class="lg:hidden mobile-menu fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-900 shadow-xl z-40 overflow-y-auto">
             <div class="p-4">
@@ -229,12 +226,6 @@
                            class="flex items-center gap-3 px-4 py-3 rounded-lg {{ $active ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }}">
                             <span class="material-symbols-outlined">{{ $item['icon'] }}</span>
                             <span class="flex-1">{{ $item['label'] }}</span>
-                            
-                            @if(isset($item['badge']) && $item['badge'] > 0)
-                                <span class="cart-badge px-2 py-0.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full font-bold">
-                                    {{ $item['badge'] }}
-                                </span>
-                            @endif
                         </a>
                     @endforeach
                 </nav>
@@ -309,7 +300,6 @@
         // Update Cart Count (Real-time)
         window.updateCartCount = function(count) {
             const badge = document.getElementById('cart-count-badge');
-            const sidebarBadges = document.querySelectorAll('a[href*="keranjang"] .cart-badge');
             
             if (badge) {
                 if (count > 0) {
@@ -323,15 +313,6 @@
                     badge.classList.add('hidden');
                 }
             }
-            
-            sidebarBadges.forEach(sidebarBadge => {
-                if (count > 0) {
-                    sidebarBadge.textContent = count;
-                    sidebarBadge.style.display = 'inline-flex';
-                } else {
-                    sidebarBadge.style.display = 'none';
-                }
-            });
         };
 
         // Fetch and update cart count on page load
