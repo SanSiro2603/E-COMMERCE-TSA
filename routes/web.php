@@ -122,6 +122,7 @@ Route::middleware(['auth', 'role:admin,super_admin'])
         // Settings
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        
     });
 
 /*

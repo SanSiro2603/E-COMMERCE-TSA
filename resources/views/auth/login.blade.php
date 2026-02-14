@@ -219,7 +219,7 @@
             <!-- Google -->
             <div class="mb-4">
                 <a href="{{ route('google.redirect') }}" class="google-login text-gray-700 font-medium">
-                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-4 h-4" />
+                    <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo in blue, red, yellow, and green colors" class="w-4 h-4" />
                     <span>Continue with Google</span>
                 </a>
             </div>
