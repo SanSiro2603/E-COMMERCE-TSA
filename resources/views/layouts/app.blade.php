@@ -1,6 +1,6 @@
 {{-- resources/views/pembeli/layouts/app.blade.php --}}
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -113,11 +113,11 @@
                     }
 
                     $menu = [
-                        ['icon' => 'home',         'label' => 'Beranda',    'route' => 'pembeli.dashboard'],
-                        ['icon' => 'inventory_2',  'label' => 'Produk',     'route' => 'pembeli.produk.index'],
-                        ['icon' => 'receipt_long', 'label' => 'Pesanan',    'route' => 'pembeli.pesanan.index'],
-                        ['icon' => 'location_on',  'label' => 'Alamat',     'route' => 'pembeli.alamat.index'],
-                        ['icon' => 'person',       'label' => 'Profil',     'route' => 'pembeli.profil.edit'],
+                        ['icon' => 'home',         'label' => __('Home'),    'route' => 'pembeli.dashboard'],
+                        ['icon' => 'inventory_2',  'label' => __('Products'),     'route' => 'pembeli.produk.index'],
+                        ['icon' => 'receipt_long', 'label' => __('Orders'),    'route' => 'pembeli.pesanan.index'],
+                        ['icon' => 'location_on',  'label' => __('Address'),     'route' => 'pembeli.alamat.index'],
+                        ['icon' => 'person',       'label' => __('Profile'),     'route' => 'pembeli.profil.edit'],
                     ];
                 @endphp
 
@@ -137,6 +137,28 @@
 
                 <!-- Right Side Actions -->
                 <div class="flex items-center gap-2 sm:gap-4">
+                    <!-- Language Switcher -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" 
+                                class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors flex items-center gap-1">
+                            <span class="material-symbols-outlined">language</span>
+                            <span class="text-xs font-bold uppercase">{{ app()->getLocale() }}</span>
+                        </button>
+                        <div x-show="open" @click.away="open = false" x-transition
+                             class="absolute right-0 mt-2 w-40 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 py-2 z-50">
+                            <a href="{{ route('lang.switch', 'id') }}" 
+                               class="flex items-center justify-between px-4 py-2 text-sm {{ app()->getLocale() == 'id' ? 'text-soft-green font-bold bg-soft-green/5' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                                <span>Bahasa Indonesia</span>
+                                @if(app()->getLocale() == 'id') <span class="material-symbols-outlined text-sm">check</span> @endif
+                            </a>
+                            <a href="{{ route('lang.switch', 'en') }}" 
+                               class="flex items-center justify-between px-4 py-2 text-sm {{ app()->getLocale() == 'en' ? 'text-soft-green font-bold bg-soft-green/5' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700' }}">
+                                <span>English</span>
+                                @if(app()->getLocale() == 'en') <span class="material-symbols-outlined text-sm">check</span> @endif
+                            </a>
+                        </div>
+                    </div>
+
                     <!-- Dark Mode Toggle -->
                     <button onclick="toggleDarkMode()" 
                             class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors">
@@ -175,24 +197,24 @@
                             <a href="{{ route('pembeli.profil.edit') }}" 
                                class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">
                                 <span class="material-symbols-outlined text-lg">person</span>
-                                Profil Saya
+                                {{ __('Profile') }}
                             </a>
                             <a href="{{ route('pembeli.pesanan.index') }}" 
                                class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">
                                 <span class="material-symbols-outlined text-lg">receipt_long</span>
-                                Pesanan Saya
+                                {{ __('Orders') }}
                             </a>
                             <a href="{{ route('pembeli.alamat.index') }}" 
                                class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">
                                 <span class="material-symbols-outlined text-lg">location_on</span>
-                                Alamat Saya
+                                {{ __('Address') }}
                             </a>
                             <div class="border-t border-gray-200 dark:border-zinc-700 mt-2 pt-2">
                                 <a href="{{ route('logout') }}"
                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                                    class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10">
                                     <span class="material-symbols-outlined text-lg">logout</span>
-                                    Keluar
+                                    {{ __('Logout') }}
                                 </a>
                             </div>
                         </div>
@@ -212,7 +234,7 @@
                         <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-lg flex items-center justify-center">
                             <span class="material-symbols-outlined text-white text-xl">eco</span>
                         </div>
-                        <span class="text-xl font-bold text-gray-900 dark:text-white font-be-vietnam">Menu</span>
+                        <span class="text-xl font-bold text-gray-900 dark:text-white font-be-vietnam">{{ __('Menu') }}</span>
                     </div>
                     <button onclick="toggleMobileMenu()" class="text-gray-600 dark:text-zinc-300">
                         <span class="material-symbols-outlined">close</span>
@@ -248,11 +270,11 @@
     <footer class="px-4 lg:px-8 py-6 border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
         <div class="max-w-7xl mx-auto">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
-                <p>© 2025 E-Commerce TSA. All rights reserved.</p>
+                <p>© 2025 E-Commerce TSA. {{ __('All rights reserved.') }}</p>
                 <div class="flex items-center gap-4">
-                    <a href="#" class="hover:text-soft-green transition-colors">Dokumentasi</a>
+                    <a href="#" class="hover:text-soft-green transition-colors">{{ __('Documentation') }}</a>
                     <span>•</span>
-                    <a href="#" class="hover:text-soft-green transition-colors">Support</a>
+                    <a href="#" class="hover:text-soft-green transition-colors">{{ __('Support') }}</a>
                 </div>
             </div>
         </div>

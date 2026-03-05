@@ -230,3 +230,15 @@ Route::middleware(['auth', 'role:pembeli'])
         // Profil
         Route::get('/profil', fn () => inertia('Pembeli/Profil'))->name('profil.edit');
     });
+
+/*
+|--------------------------------------------------------------------------
+| BAHASA
+|--------------------------------------------------------------------------
+*/
+Route::get('lang/{locale}', function ($locale) {
+    if (in_array($locale, ['en', 'id'])) {
+        session()->put('locale', $locale);
+    }
+    return redirect()->back();
+})->name('lang.switch');
