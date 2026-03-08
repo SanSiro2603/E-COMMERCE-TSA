@@ -1,56 +1,69 @@
 {{-- resources/views/pembeli/layouts/app.blade.php --}}
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id" class="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Pembeli - E-Commerce TSA')</title>
+    <title>@yield('title', 'Tunas Sejahtera Adi Perkasa - E-Commerce Ternak')</title>
 
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;700;900&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
 
     <!-- Tailwind Config -->
-    <script>
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#72e236",
-                        "soft-green": "#7BB661",
-                        "warm-yellow": "#FFD54F",
-                        "charcoal": "#333333",
-                        "background-light": "#FDFBF5",
-                        "background-dark": "#172111",
+                        "primary": "#13ec6d",
+                        "background-light": "#f6f8f7",
+                        "background-dark": "#102218",
                     },
                     fontFamily: {
-                        "display": ["Poppins", "sans-serif"],
-                        "be-vietnam": ["Be Vietnam Pro", "sans-serif"]
-                    }
-                }
-            }
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
         }
     </script>
 
     <style>
-        .gradient-button {
-            background-image: linear-gradient(to right, #8fcf72, #7BB661);
+        body {
+            font-family: 'Manrope', sans-serif;
         }
-        .gradient-button:hover {
-            background-image: linear-gradient(to right, #9bd980, #8fcf72);
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
 
-        * { transition: background-color 0.2s ease, color 0.2s ease; }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #7BB661; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #72e236; }
+        /* Scrollbar Custom */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #13ec6d;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #10d161;
+        }
 
+        /* Mobile Menu Animation */
         .mobile-menu {
             transform: translateX(-100%);
             transition: transform 0.3s ease;
@@ -60,235 +73,290 @@
         }
 
         /* Cart Badge Animation */
-        .cart-badge {
-            animation: badge-pop 0.3s ease-out;
-        }
-        
         @keyframes badge-pop {
             0% { transform: scale(0); }
             50% { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
-
-        /* Active nav link indicator */
-        .nav-link-active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            right: 0;
-            height: 2px;
-            background: linear-gradient(to right, #7BB661, #72e236);
-            border-radius: 2px 2px 0 0;
+        .cart-badge {
+            animation: badge-pop 0.3s ease-out;
         }
     </style>
 </head>
 
-<body class="bg-gray-50 dark:bg-zinc-950 font-display min-h-screen">
+<body class="bg-background-light dark:bg-background-dark text-[#0d1b13] dark:text-white transition-colors duration-300">
 
-    <!-- Top Navbar -->
-    <nav class="bg-white dark:bg-zinc-900 shadow-sm border-b border-gray-200 dark:border-zinc-800 sticky top-0 z-50">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center h-16">
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-[#e7f3ec] dark:border-primary/20">
+        <div class="max-w-[1280px] mx-auto px-4 md:px-10 py-3 flex items-center justify-between gap-4">
+            
+            <!-- Logo -->
+            <div class="flex items-center gap-3 shrink-0">
+                <!-- Mobile Menu Toggle -->
+                <button onclick="toggleMobileMenu()" class="md:hidden text-[#0d1b13] dark:text-white hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-3xl">menu</span>
+                </button>
 
-                <!-- Logo & Mobile Menu Button -->
-                <div class="flex items-center gap-4">
-                    <button onclick="toggleMobileMenu()" class="lg:hidden text-gray-600 dark:text-zinc-300 hover:text-soft-green transition-colors">
-                        <span class="material-symbols-outlined text-3xl">menu</span>
-                    </button>
+                <a href="{{ route('pembeli.dashboard') }}" class="flex items-center gap-3">
+                    <div class="size-10 bg-primary rounded-lg flex items-center justify-center text-white">
+                        <span class="material-symbols-outlined text-2xl">agriculture</span>
+                    </div>
+                    <h2 class="hidden md:block text-[#0d1b13] dark:text-white text-lg font-extrabold leading-tight tracking-tight">
+                        Tunas Sejahtera<br/>
+                        <span class="text-primary/80 text-sm">Adi Perkasa</span>
+                    </h2>
+                </a>
+            </div>
 
-                    <a href="{{ route('pembeli.dashboard') }}" class="flex items-center gap-2">
-                        <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-white text-xl">eco</span>
+            <!-- Search Bar (Desktop Only) -->
+            <div class="hidden lg:block flex-1 max-w-xl">
+                <form action="{{ route('pembeli.produk.index') }}" method="GET">
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-primary/70">
+                            <span class="material-symbols-outlined">search</span>
                         </div>
-                        <span class="text-xl font-bold text-gray-900 dark:text-white font-be-vietnam hidden sm:block">E-Commerce TSA</span>
-                    </a>
-                </div>
+                        <input 
+                            type="text"
+                            name="search"
+                            value="{{ request('search') }}"
+                            class="block w-full pl-10 pr-3 py-2 border-none bg-[#e7f3ec] dark:bg-primary/10 rounded-lg focus:ring-2 focus:ring-primary/50 text-sm placeholder:text-primary/60 text-[#0d1b13] dark:text-white" 
+                            placeholder="Cari Produk Kami Disini...">
+                    </div>
+                </form>
+            </div>
 
-                {{-- ===== FEATURE NAV LINKS (Desktop) ===== --}}
+            <!-- Actions -->
+            <div class="flex items-center gap-2 md:gap-4 shrink-0">
+                
+                <!-- Search Icon (Mobile) -->
+                <a href="{{ route('pembeli.produk.index') }}" class="lg:hidden p-2 hover:bg-primary/10 rounded-lg text-[#0d1b13] dark:text-white">
+                    <span class="material-symbols-outlined">search</span>
+                </a>
+
+                <!-- Dark Mode Toggle -->
+                <button onclick="toggleDarkMode()" class="p-2 hover:bg-primary/10 rounded-lg text-[#0d1b13] dark:text-white transition-colors">
+                    <span class="material-symbols-outlined dark-mode-icon">light_mode</span>
+                </button>
+
+                <!-- Cart with Badge -->
                 @php
                     $cartCount = 0;
                     if(session('cart')) {
                         $cartCount = array_sum(array_column(session('cart'), 'quantity'));
                     }
+                @endphp
+                <a href="{{ route('pembeli.keranjang.index') }}" class="relative p-2 hover:bg-primary/10 rounded-lg text-[#0d1b13] dark:text-white cursor-pointer transition-colors">
+                    <span class="material-symbols-outlined">shopping_cart</span>
+                    <span id="cart-count-badge" class="cart-badge absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white {{ $cartCount > 0 ? '' : 'hidden' }}">
+                        {{ $cartCount }}
+                    </span>
+                </a>
 
+                <!-- Profile Dropdown -->
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" class="flex items-center gap-3 pl-2 border-l border-gray-200 dark:border-primary/20">
+                        <div class="hidden lg:block text-right">
+                            <p class="text-xs font-bold leading-none text-[#0d1b13] dark:text-white">{{ Str::limit(auth()->user()->name, 15) }}</p>
+                            <p class="text-[10px] text-primary font-medium">Mitra Utama</p>
+                        </div>
+                        <div class="size-10 rounded-full bg-primary/20 border-2 border-primary overflow-hidden">
+                            <img 
+                                src="{{ auth()->user()->profile_photo ? asset('storage/' . auth()->user()->profile_photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=13ec6d&color=fff' }}"
+                                alt="{{ auth()->user()->name }}" 
+                                class="w-full h-full object-cover">
+                        </div>
+                    </button>
+
+                    <!-- Dropdown Menu -->
+                    <div x-show="open" @click.away="open = false" x-transition
+                         class="absolute right-0 mt-2 w-56 bg-white dark:bg-[#0d1b13] rounded-lg shadow-lg border border-gray-200 dark:border-primary/20 py-2 z-50">
+                        
+                        <div class="px-4 py-3 border-b border-gray-200 dark:border-primary/20">
+                            <p class="text-sm font-semibold text-[#0d1b13] dark:text-white">{{ auth()->user()->name }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ auth()->user()->email }}</p>
+                        </div>
+
+                        <a href="{{ route('pembeli.profil.edit') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-[#0d1b13] dark:text-white hover:bg-primary/10">
+                            <span class="material-symbols-outlined text-lg">person</span>
+                            Profil Saya
+                        </a>
+                        <a href="{{ route('pembeli.pesanan.index') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-[#0d1b13] dark:text-white hover:bg-primary/10">
+                            <span class="material-symbols-outlined text-lg">receipt_long</span>
+                            Pesanan Saya
+                        </a>
+                        <a href="{{ route('pembeli.alamat.index') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-[#0d1b13] dark:text-white hover:bg-primary/10">
+                            <span class="material-symbols-outlined text-lg">location_on</span>
+                            Alamat Saya
+                        </a>
+
+                        <div class="border-t border-gray-200 dark:border-primary/20 mt-2 pt-2">
+                            <a href="{{ route('logout') }}"
+                               onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                               class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10">
+                                <span class="material-symbols-outlined text-lg">logout</span>
+                                Keluar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Sidebar -->
+    <div class="md:hidden mobile-menu fixed inset-y-0 left-0 w-64 bg-white dark:bg-background-dark shadow-xl z-40 overflow-y-auto">
+        <div class="p-4">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-xl">agriculture</span>
+                    </div>
+                    <span class="text-xl font-bold text-[#0d1b13] dark:text-white">Menu</span>
+                </div>
+                <button onclick="toggleMobileMenu()" class="text-[#0d1b13] dark:text-white">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
+
+            <nav class="space-y-1">
+                @php
                     $menu = [
-                        ['icon' => 'home',         'label' => 'Beranda',    'route' => 'pembeli.dashboard'],
-                        ['icon' => 'inventory_2',  'label' => 'Produk',     'route' => 'pembeli.produk.index'],
-                        ['icon' => 'receipt_long', 'label' => 'Pesanan',    'route' => 'pembeli.pesanan.index'],
-                        ['icon' => 'location_on',  'label' => 'Alamat',     'route' => 'pembeli.alamat.index'],
-                        ['icon' => 'person',       'label' => 'Profil',     'route' => 'pembeli.profil.edit'],
+                        ['icon' => 'home', 'label' => 'Beranda', 'route' => 'pembeli.dashboard'],
+                        ['icon' => 'inventory_2', 'label' => 'Produk', 'route' => 'pembeli.produk.index'],
+                        ['icon' => 'receipt_long', 'label' => 'Pesanan', 'route' => 'pembeli.pesanan.index'],
+                        ['icon' => 'location_on', 'label' => 'Alamat', 'route' => 'pembeli.alamat.index'],
+                        ['icon' => 'person', 'label' => 'Profil', 'route' => 'pembeli.profil.edit'],
                     ];
                 @endphp
-
-                <div class="hidden lg:flex items-center gap-1">
-                    @foreach($menu as $item)
-                        @php $active = request()->routeIs($item['route'].'*'); @endphp
-                        <a href="{{ route($item['route']) }}"
-                           class="relative flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
-                           {{ $active
-                               ? 'nav-link-active text-soft-green bg-soft-green/10'
-                               : 'text-gray-600 dark:text-zinc-300 hover:text-soft-green hover:bg-gray-100 dark:hover:bg-zinc-800' }}">
-                            <span class="material-symbols-outlined text-[18px]">{{ $item['icon'] }}</span>
-                            <span>{{ $item['label'] }}</span>
-                        </a>
-                    @endforeach
-                </div>
-
-                <!-- Right Side Actions -->
-                <div class="flex items-center gap-2 sm:gap-4">
-                    <!-- Dark Mode Toggle -->
-                    <button onclick="toggleDarkMode()" 
-                            class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors">
-                        <span class="material-symbols-outlined dark-mode-icon">light_mode</span>
-                    </button>
-
-                    <!-- Cart with Real-time Badge -->
-                    <a href="{{ route('pembeli.keranjang.index') }}" 
-                       class="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-600 dark:text-zinc-300 transition-colors group">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform">shopping_cart</span>
-                        
-                        <span id="cart-count-badge" 
-                              class="cart-badge absolute -top-1 -right-1 min-w-[20px] h-5 px-1.5 bg-gradient-to-r from-red-500 to-red-600 text-white text-xs rounded-full flex items-center justify-center font-bold shadow-lg
-                                     {{ $cartCount > 0 ? '' : 'hidden' }}">
-                            {{ $cartCount }}
-                        </span>
+                
+                @foreach($menu as $item)
+                    @php $active = request()->routeIs($item['route'].'*'); @endphp
+                    <a href="{{ route($item['route']) }}"
+                       class="flex items-center gap-3 px-4 py-3 rounded-lg {{ $active ? 'bg-primary/10 text-primary font-semibold' : 'text-[#0d1b13] dark:text-white hover:bg-gray-100 dark:hover:bg-primary/10' }}">
+                        <span class="material-symbols-outlined">{{ $item['icon'] }}</span>
+                        <span class="flex-1">{{ $item['label'] }}</span>
                     </a>
-
-                    <!-- User Dropdown -->
-                    <div class="relative" x-data="{ open: false }">
-                        <button @click="open = !open" 
-                                class="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
-                            <img src="{{ auth()->user()->profile_photo ? asset('storage/' . auth()->user()->profile_photo) : 'https://ui-avatars.com/api/?name=' . urlencode(auth()->user()->name) . '&background=7BB661&color=fff' }}"
-                                 class="w-8 h-8 rounded-full object-cover border-2 border-soft-green">
-                            <span class="hidden md:block text-sm font-medium text-gray-900 dark:text-white">{{ Str::limit(auth()->user()->name, 15) }}</span>
-                            <span class="material-symbols-outlined text-gray-600 dark:text-zinc-300 text-lg">expand_more</span>
-                        </button>
-
-                        <!-- Dropdown Menu -->
-                        <div x-show="open" @click.away="open = false" x-transition
-                             class="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-800 rounded-lg shadow-lg border border-gray-200 dark:border-zinc-700 py-2 z-50">
-                            <div class="px-4 py-3 border-b border-gray-200 dark:border-zinc-700">
-                                <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ auth()->user()->name }}</p>
-                                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">{{ auth()->user()->email }}</p>
-                            </div>
-                            <a href="{{ route('pembeli.profil.edit') }}" 
-                               class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">
-                                <span class="material-symbols-outlined text-lg">person</span>
-                                Profil Saya
-                            </a>
-                            <a href="{{ route('pembeli.pesanan.index') }}" 
-                               class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">
-                                <span class="material-symbols-outlined text-lg">receipt_long</span>
-                                Pesanan Saya
-                            </a>
-                            <a href="{{ route('pembeli.alamat.index') }}" 
-                               class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700">
-                                <span class="material-symbols-outlined text-lg">location_on</span>
-                                Alamat Saya
-                            </a>
-                            <div class="border-t border-gray-200 dark:border-zinc-700 mt-2 pt-2">
-                                <a href="{{ route('logout') }}"
-                                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                                   class="flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10">
-                                    <span class="material-symbols-outlined text-lg">logout</span>
-                                    Keluar
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+                @endforeach
+            </nav>
         </div>
-    </nav>
-
-    <div class="flex relative">
-        <!-- Mobile Sidebar -->
-        <div class="lg:hidden mobile-menu fixed inset-y-0 left-0 w-64 bg-white dark:bg-zinc-900 shadow-xl z-40 overflow-y-auto">
-            <div class="p-4">
-                <div class="flex items-center justify-between mb-6">
-                    <div class="flex items-center gap-2">
-                        <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-lg flex items-center justify-center">
-                            <span class="material-symbols-outlined text-white text-xl">eco</span>
-                        </div>
-                        <span class="text-xl font-bold text-gray-900 dark:text-white font-be-vietnam">Menu</span>
-                    </div>
-                    <button onclick="toggleMobileMenu()" class="text-gray-600 dark:text-zinc-300">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                </div>
-
-                <nav class="space-y-1">
-                    @foreach($menu as $item)
-                        @php $active = request()->routeIs($item['route'].'*'); @endphp
-                        <a href="{{ route($item['route']) }}"
-                           class="flex items-center gap-3 px-4 py-3 rounded-lg {{ $active ? 'bg-soft-green/10 text-soft-green font-semibold' : 'text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800' }}">
-                            <span class="material-symbols-outlined">{{ $item['icon'] }}</span>
-                            <span class="flex-1">{{ $item['label'] }}</span>
-                        </a>
-                    @endforeach
-                </nav>
-            </div>
-        </div>
-
-        <!-- Mobile Overlay -->
-        <div class="lg:hidden fixed inset-0 bg-black/50 z-30 hidden mobile-overlay" onclick="toggleMobileMenu()"></div>
-
-        <!-- Main Content -->
-        <main class="flex-1 p-4 lg:p-6 min-h-[calc(100vh-4rem)]">
-            @yield('content')
-        </main>
     </div>
 
-    <!-- Logout Form -->
-    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
+    <!-- Mobile Overlay -->
+    <div class="md:hidden fixed inset-0 bg-black/50 z-30 hidden mobile-overlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Main Content -->
+    <main class="max-w-[1280px] mx-auto px-4 md:px-10 pb-20">
+        @yield('content')
+    </main>
 
     <!-- Footer -->
-    <footer class="px-4 lg:px-8 py-6 border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900">
-        <div class="max-w-7xl mx-auto">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-zinc-400">
-                <p>© 2025 E-Commerce TSA. All rights reserved.</p>
-                <div class="flex items-center gap-4">
-                    <a href="#" class="hover:text-soft-green transition-colors">Dokumentasi</a>
-                    <span>•</span>
-                    <a href="#" class="hover:text-soft-green transition-colors">Support</a>
+    <footer class="bg-white dark:bg-background-dark border-t border-[#e7f3ec] dark:border-primary/20 py-12">
+        <div class="max-w-[1280px] mx-auto px-4 md:px-10 grid grid-cols-1 md:grid-cols-4 gap-10">
+            
+            <!-- About -->
+            <div>
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="size-8 bg-primary rounded flex items-center justify-center text-white">
+                        <span class="material-symbols-outlined text-xl">agriculture</span>
+                    </div>
+                    <h2 class="text-[#0d1b13] dark:text-white text-lg font-extrabold leading-tight">Tunas Sejahtera</h2>
                 </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                    Platform e-commerce ternak terdepan di Indonesia. Menghubungkan peternak lokal dengan pembeli melalui sistem yang aman dan transparan.
+                </p>
+            </div>
+
+            <!-- Navigation -->
+            <div>
+                <h4 class="font-bold mb-6 text-[#0d1b13] dark:text-white">Navigasi</h4>
+                <ul class="space-y-4 text-sm text-gray-500 dark:text-gray-400">
+                    <li><a href="{{ route('pembeli.dashboard') }}" class="hover:text-primary transition-colors">Beranda</a></li>
+                    <li><a href="{{ route('pembeli.produk.index') }}" class="hover:text-primary transition-colors">Katalog</a></li>
+                    <li><a href="{{ route('pembeli.pesanan.index') }}" class="hover:text-primary transition-colors">Pesanan</a></li>
+                    <li><a href="{{ route('pembeli.profil.edit') }}" class="hover:text-primary transition-colors">Profil</a></li>
+                </ul>
+            </div>
+
+            <!-- Help -->
+            <div>
+                <h4 class="font-bold mb-6 text-[#0d1b13] dark:text-white">Bantuan</h4>
+                <ul class="space-y-4 text-sm text-gray-500 dark:text-gray-400">
+                    <li><a href="#" class="hover:text-primary transition-colors">Cara Pembelian</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Pengiriman Ternak</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Syarat & Ketentuan</a></li>
+                    <li><a href="#" class="hover:text-primary transition-colors">Kebijakan Privasi</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div>
+                <h4 class="font-bold mb-6 text-[#0d1b13] dark:text-white">Hubungi Kami</h4>
+                <div class="space-y-4 text-sm text-gray-500 dark:text-gray-400">
+                    <p class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-sm">mail</span>
+                        support@tsap-ternak.id
+                    </p>
+                    <p class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary text-sm">call</span>
+                        +62 812-3456-7890
+                    </p>
+                    <p class="flex items-start gap-2">
+                        <span class="material-symbols-outlined text-primary text-sm">location_on</span>
+                        Jl. Agribisnis No. 45,<br/>Jakarta Selatan, Indonesia
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Bottom -->
+        <div class="max-w-[1280px] mx-auto px-4 md:px-10 mt-12 pt-8 border-t border-gray-100 dark:border-primary/10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p class="text-xs text-gray-400">© 2024 Tunas Sejahtera Adi Perkasa. All rights reserved.</p>
+            <div class="flex gap-6">
+                <span class="material-symbols-outlined text-gray-400 hover:text-primary cursor-pointer transition-colors">public</span>
+                <span class="material-symbols-outlined text-gray-400 hover:text-primary cursor-pointer transition-colors">share</span>
             </div>
         </div>
     </footer>
 
-    <!-- Scripts -->
-    @stack('scripts')
+    <!-- Logout Form -->
+    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
 
     <!-- Alpine.js -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- Scripts -->
     <script>
         // Dark Mode Toggle
         function toggleDarkMode() {
             const html = document.documentElement;
             const icon = document.querySelector('.dark-mode-icon');
+            
             if (html.classList.contains('dark')) {
-                html.classList.remove('dark'); html.classList.add('light');
+                html.classList.remove('dark');
+                html.classList.add('light');
                 icon.textContent = 'light_mode';
                 localStorage.setItem('theme', 'light');
             } else {
-                html.classList.remove('light'); html.classList.add('dark');
+                html.classList.remove('light');
+                html.classList.add('dark');
                 icon.textContent = 'dark_mode';
                 localStorage.setItem('theme', 'dark');
             }
         }
 
-        // Load Theme
-        (function () {
+        // Load Theme on Page Load
+        (function() {
             const theme = localStorage.getItem('theme') || 'light';
             const html = document.documentElement;
             const icon = document.querySelector('.dark-mode-icon');
+            
             html.classList.remove('light', 'dark');
             html.classList.add(theme);
-            icon.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
+            
+            if (icon) {
+                icon.textContent = theme === 'dark' ? 'dark_mode' : 'light_mode';
+            }
         })();
 
         // Mobile Menu Toggle
@@ -297,7 +365,7 @@
             document.querySelector('.mobile-overlay').classList.toggle('hidden');
         }
 
-        // Update Cart Count (Real-time)
+        // Update Cart Count
         window.updateCartCount = function(count) {
             const badge = document.getElementById('cart-count-badge');
             
@@ -315,7 +383,7 @@
             }
         };
 
-        // Fetch and update cart count on page load
+        // Fetch Cart Count
         function fetchCartCount() {
             fetch('/pembeli/keranjang/count', {
                 method: 'GET',
@@ -333,24 +401,25 @@
             .catch(error => console.error('Error fetching cart count:', error));
         }
 
-        // Initialize cart count on page load
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
             fetchCartCount();
         });
     </script>
 
     @if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: '{{ session("success") }}',
-        toast: true,
-        position: 'top-end',
-        timer: 2000,
-        showConfirmButton: false,
-    });
-</script>
-@endif
+    <script>
+        Swal.fire({
+            icon: 'success',
+            title: '{{ session("success") }}',
+            toast: true,
+            position: 'top-end',
+            timer: 2000,
+            showConfirmButton: false,
+        });
+    </script>
+    @endif
 
+    @stack('scripts')
 </body>
 </html>
