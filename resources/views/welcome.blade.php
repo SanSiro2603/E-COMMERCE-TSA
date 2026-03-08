@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="dark" lang="id">
+<html class="dark" lang="{{ str_replace('_', '-', app()->getLocale()) }}" x-data="{ locale: '{{ app()->getLocale() }}' }">
 
 <head>
     <meta charset="utf-8" />
@@ -9,6 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: "class",
@@ -167,33 +168,54 @@
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-gradient">E-Commerce TSA</h2>
-                            <p class="text-xs text-gray-600 dark:text-gray-400">Perdagangan Hewan</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('Livestock Trade') }}</p>
                         </div>
                     </div>
 
                     <!-- Desktop Nav -->
                     <nav class="hidden md:flex items-center gap-8">
                         <a href="#home"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Beranda</a>
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Home') }}</a>
                         <a href="#about"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Tentang</a>
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('About') }}</a>
                         <a href="#shop"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Hewan</a>
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Livestock') }}</a>
                         <a href="#why"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Keunggulan</a>
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Advantages') }}</a>
                         <a href="#contact"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">Kontak</a>
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Contact') }}</a>
                     </nav>
 
                     <!-- CTA Buttons -->
                     <div class="hidden md:flex items-center gap-3">
+                        <!-- Language Switcher -->
+                        <div class="relative" x-data="{ open: false }">
+                            <button @click="open = !open" 
+                                    class="size-11 rounded-full glass-strong flex items-center justify-center hover:scale-110 transition-transform duration-300 text-primary dark:text-secondary">
+                                <span class="material-symbols-outlined">language</span>
+                            </button>
+                            <div x-show="open" @click.away="open = false" x-transition
+                                 class="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-800 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-700 py-2 z-50">
+                                <a href="{{ route('lang.switch', 'id') }}" 
+                                   class="flex items-center justify-between px-4 py-2 text-sm {{ app()->getLocale() == 'id' ? 'text-primary font-bold bg-primary/5' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/5' }}">
+                                    <span>Bahasa Indonesia</span>
+                                    @if(app()->getLocale() == 'id') <span class="material-symbols-outlined text-sm">check</span> @endif
+                                </a>
+                                <a href="{{ route('lang.switch', 'en') }}" 
+                                   class="flex items-center justify-between px-4 py-2 text-sm {{ app()->getLocale() == 'en' ? 'text-primary font-bold bg-primary/5' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/5' }}">
+                                    <span>English</span>
+                                    @if(app()->getLocale() == 'en') <span class="material-symbols-outlined text-sm">check</span> @endif
+                                </a>
+                            </div>
+                        </div>
+
                         <button onclick="document.documentElement.classList.toggle('dark')"
                             class="size-11 rounded-full glass-strong flex items-center justify-center hover:scale-110 transition-transform duration-300">
                             <span class="material-symbols-outlined text-primary dark:text-secondary">dark_mode</span>
                         </button>
                         <a href="{{ route('login') }}"
                             class="px-6 h-11 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2">
-                            <span>Belanja Sekarang</span>
+                            <span>{{ __('Shop Now') }}</span>
                             <span class="material-symbols-outlined">arrow_forward</span>
                         </a>
                     </div>
@@ -209,16 +231,30 @@
                 <div id="mobile-menu" class="hidden md:hidden pb-4">
                     <nav class="flex flex-col gap-3 glass-strong rounded-2xl p-4 mt-2">
                         <a href="#home"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Beranda</a>
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">{{ __('Home') }}</a>
                         <a href="#about"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Tentang</a>
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">{{ __('About') }}</a>
                         <a href="#shop"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Hewan</a>
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">{{ __('Livestock') }}</a>
                         <a href="#why"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Keunggulan</a>
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">{{ __('Advantages') }}</a>
                         <a href="#contact"
-                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">Kontak</a>
-                        <div class="flex gap-2 mt-2">
+                            class="nav-link text-sm font-semibold text-gray-700 dark:text-gray-300 py-2 px-4 rounded-lg hover:bg-primary/10 transition-colors">{{ __('Contact') }}</a>
+                        <div class="flex gap-2 mt-2" x-data="{ open: false }">
+                            <div class="relative flex-1">
+                                <button @click="open = !open" 
+                                    class="w-full h-11 rounded-full glass-strong flex items-center justify-center gap-2 text-primary dark:text-secondary">
+                                    <span class="material-symbols-outlined">language</span>
+                                    <span class="text-xs font-bold uppercase">{{ app()->getLocale() }}</span>
+                                </button>
+                                <div x-show="open" @click.away="open = false" x-transition
+                                     class="absolute bottom-full left-0 right-0 mb-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-xl border border-gray-200 dark:border-zinc-700 py-2 z-50">
+                                    <a href="{{ route('lang.switch', 'id') }}" 
+                                       class="flex items-center justify-between px-4 py-2 text-sm {{ app()->getLocale() == 'id' ? 'text-primary font-bold bg-primary/5' : 'text-gray-700 dark:text-gray-300 hover:bg-primary/5' }}">
+                                        <span>{{ app()->getLocale() == 'id' ? 'Bahasa Indonesia' : 'English' }}</span>
+                                    </a>
+                                </div>
+                            </div>
                             <button onclick="document.documentElement.classList.toggle('dark')"
                                 class="flex-1 h-11 rounded-full glass-strong flex items-center justify-center gap-2">
                                 <span
@@ -226,7 +262,7 @@
                             </button>
                             <a href="#shop"
                                 class="flex-1 h-11 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold flex items-center justify-center gap-2">
-                                <span>Belanja</span>
+                                <span>{{ __('Shop') }}</span>
                             </a>
                         </div>
                     </nav>
@@ -250,35 +286,34 @@
                         <div class="glass-strong px-6 py-3 rounded-full">
                             <p class="text-sm font-semibold text-primary dark:text-secondary flex items-center gap-2">
                                 <span class="size-2 bg-green-500 rounded-full animate-pulse"></span>
-                                Kualitas Premium Terjamin
+                                {{ __('Guaranteed Premium Quality') }}
                             </p>
                         </div>
                     </div>
 
                     <!-- Judul utama -->
                     <h1 class="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black leading-tight mb-6 text-white">
-                        <span class="text-gradient">ECommerce TSA</span><br />
-                        <span class="text-gray-100">Pasar Ternak Terpercaya</span>
+                        <span class="text-gradient">E-Commerce TSA</span><br />
+                        <span class="text-gray-100">{{ __('Trusted Livestock Market') }}</span>
                     </h1>
 
                     <!-- Deskripsi -->
                     <p class="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-12">
-                        Selamat datang di Ecommerce TSA, sumber terpercaya untuk ternak yang dibesarkan secara alami
-                        dengan transparansi lengkap dan standar etika tinggi.
+                        {{ __('Welcome to Ecommerce TSA, your trusted source for naturally raised livestock with full transparency and high ethical standards.') }}
                     </p>
 
                     <!-- Tombol -->
                     <div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
                         <a href="{{ route('gallery.hewan') }}"
                             class="group px-8 h-14 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all duration-300 flex items-center gap-3">
-                            <span>Jelajahi Hewan</span>
+                            <span>{{ __('Explore Animals') }}</span>
                             <span
                                 class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
                         </a>
                         <a href="#about"
                             class="px-8 h-14 rounded-full glass-strong font-bold hover:scale-105 transition-all duration-300 flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary dark:text-secondary">play_circle</span>
-                            <span>Pelajari Lebih Lanjut</span>
+                            <span>{{ __('Learn More') }}</span>
                         </a>
                     </div>
                 </div>
@@ -291,19 +326,19 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
                     <div class="rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-xl text-center card-hover">
                         <p class="text-4xl font-black text-gradient mb-2">500+</p>
-                        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Pelanggan Puas</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">{{ __('Happy Customers') }}</p>
                     </div>
                     <div class="rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-xl text-center card-hover">
                         <p class="text-4xl font-black text-gradient mb-2">1000+</p>
-                        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Hewan Terjual</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">{{ __('Animals Sold') }}</p>
                     </div>
                     <div class="rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-xl text-center card-hover">
                         <p class="text-4xl font-black text-gradient mb-2">50+</p>
-                        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Mitra Peternakan</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">{{ __('Farm Partners') }}</p>
                     </div>
                     <div class="rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-xl text-center card-hover">
                         <p class="text-4xl font-black text-gradient mb-2">100%</p>
-                        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">Ramah Lingkungan</p>
+                        <p class="text-sm text-gray-700 dark:text-gray-300 font-semibold">{{ __('Eco Friendly') }}</p>
                     </div>
                 </div>
             </div>
@@ -328,8 +363,8 @@
                                     <span class="material-symbols-outlined text-2xl text-white">verified</span>
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold text-gray-900 dark:text-white">Bersertifikat</p>
-                                    <p class="text-xs text-gray-600 dark:text-gray-400">100% Organik</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ __('Certified') }}</p>
+                                    <p class="text-xs text-gray-600 dark:text-gray-400">{{ __('100% Organic') }}</p>
                                 </div>
                             </div>
                         </div>
@@ -339,23 +374,20 @@
                     <div class="animate-slide-up" style="animation-delay: 0.2s;">
                         <div class="inline-block mb-6">
                             <div class="glass-strong px-4 py-2 rounded-full">
-                                <p class="text-sm font-semibold text-primary dark:text-secondary">Tentang Kami</p>
+                                <p class="text-sm font-semibold text-primary dark:text-secondary">{{ __('About Us') }}</p>
                             </div>
                         </div>
 
                         <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">
-                            Mitra Terpercaya Anda dalam <span class="text-gradient">Peternakan Berkelanjutan</span>
+                            {{ __('Your Trusted Partner in') }} <span class="text-gradient">{{ __('Sustainable Livestock') }}</span>
                         </h2>
 
                         <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                            Ecommerce TSA berdedikasi untuk menyediakan ternak yang paling segar dan dibesarkan secara
-                            alami. Komitmen kami terhadap praktik peternakan ramah lingkungan memastikan bahwa hewan
-                            kami sehat, bahagia, dan dibesarkan dalam lingkungan yang berkelanjutan.
+                            {{ __('Ecommerce TSA is dedicated to providing the freshest and naturally raised livestock. Our commitment to eco-friendly farming practices ensures that our animals are healthy, happy, and raised in a sustainable environment.') }}
                         </p>
 
                         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                            Kami percaya pada pendekatan yang transparan dan etis dalam penjualan ternak, menghubungkan
-                            Anda langsung dengan peternakan terpercaya yang memiliki nilai-nilai yang sama.
+                            {{ __('We believe in a transparent and ethical approach to livestock sales, connecting you directly with trusted farms that share the same values.') }}
                         </p>
 
                         <!-- Features -->
@@ -366,7 +398,7 @@
                                     <span
                                         class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white">Ramah Lingkungan</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ __('Eco Friendly') }}</p>
                             </div>
                             <div class="flex items-center gap-3">
                                 <div
@@ -374,7 +406,7 @@
                                     <span
                                         class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white">100% Alami</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ __('100% Natural') }}</p>
                             </div>
                             <div class="flex items-center gap-3">
                                 <div
@@ -382,7 +414,7 @@
                                     <span
                                         class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white">Peternakan Bersertifikat</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ __('Certified Farms') }}</p>
                             </div>
                             <div class="flex items-center gap-3">
                                 <div
@@ -390,7 +422,7 @@
                                     <span
                                         class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white">Perdagangan Etis</p>
+                                <p class="font-semibold text-gray-900 dark:text-white">{{ __('Ethical Trade') }}</p>
                             </div>
                         </div>
                     </div>
@@ -404,15 +436,13 @@
                 <div class="text-center mb-16">
                     <div class="inline-block mb-4">
                         <div class="glass-strong px-4 py-2 rounded-full">
-                            <p class="text-sm font-semibold text-primary dark:text-secondary">Koleksi Unggulan</p>
+                            <p class="text-sm font-semibold text-primary dark:text-secondary">{{ __('Featured Collection') }}</p>
                         </div>
                     </div>
                     <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                        Ternak <span class="text-gradient">Premium</span>
+                        {{ __('Livestock') }} <span class="text-gradient">{{ __('Premium') }}</span>
                     </h2>
-                    <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                        Jelajahi koleksi hewan sehat yang dipilih dengan cermat dan dibesarkan secara alami
-                    </p>
+                        {{ __('Explore carefully selected collection of healthy, naturally raised animals') }}
                 </div>
 
                 <!-- Grid Layout tanpa scroll horizontal -->
@@ -449,19 +479,18 @@
                                 alt="Kambing" class="w-full h-full object-cover">
                             <div class="absolute top-4 left-4">
                                 <div class="glass-strong px-3 py-1 rounded-full">
-                                    <p class="text-xs font-bold text-green-600 dark:text-green-400">Tersedia</p>
+                                    <p class="text-xs font-bold text-green-600 dark:text-green-400">{{ __('Available') }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="p-6">
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Kambing Premium</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Jenis sehat, cocok untuk
-                                peternakan</p>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ __('Premium Goat') }}</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ __('Healthy breed, suitable for breeding') }}</p>
                             <div class="flex items-center justify-between">
                                 <p class="text-2xl font-black text-gradient">Rp 3.500.000</p>
                                 <button
                                     class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
-                                    Detail
+                                    {{ __('Detail') }}
                                 </button>
                             </div>
                         </div>
@@ -474,19 +503,18 @@
                                 alt="Kambing" class="w-full h-full object-cover">
                             <div class="absolute top-4 left-4">
                                 <div class="glass-strong px-3 py-1 rounded-full">
-                                    <p class="text-xs font-bold text-green-600 dark:text-green-400">Tersedia</p>
+                                    <p class="text-xs font-bold text-green-600 dark:text-green-400">{{ __('Available') }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="p-6">
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Kambing Premium</h3>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">Jenis sehat, cocok untuk
-                                peternakan</p>
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">{{ __('Premium Goat') }}</h3>
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">{{ __('Healthy breed, suitable for breeding') }}</p>
                             <div class="flex items-center justify-between">
                                 <p class="text-2xl font-black text-gradient">Rp 3.500.000</p>
                                 <button
                                     class="px-4 h-10 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-secondary font-bold hover:bg-primary hover:text-white transition-all duration-300">
-                                    Detail
+                                    {{ __('Detail') }}
                                 </button>
                             </div>
                         </div>
@@ -500,7 +528,7 @@
     <div class="text-center mt-12">
         <a href="{{ route('gallery.hewan') }}"
             class="inline-flex items-center gap-2 px-8 h-14 rounded-full glass-strong font-bold hover:scale-105 transition-all duration-300">
-            <span>Lihat Semua Hewan</span>
+            <span>{{ __('View All Animals') }}</span>
             <span class="material-symbols-outlined">arrow_forward</span>
         </a>
     </div>
@@ -513,15 +541,13 @@
             <div class="text-center mb-16">
                 <div class="inline-block mb-4">
                     <div class="glass-strong px-4 py-2 rounded-full">
-                        <p class="text-sm font-semibold text-primary dark:text-secondary">Keunggulan Kami</p>
+                        <p class="text-sm font-semibold text-primary dark:text-secondary">{{ __('Advantages') }}</p>
                     </div>
                 </div>
                 <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                    Mengapa Memilih <span class="text-gradient">Ecommerce TSA</span>
+                    {{ __('Mengapa Memilih') }} <span class="text-gradient">Ecommerce TSA</span>
                 </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    Kami menyediakan kualitas dan layanan tak tertandingi di pasar ternak
-                </p>
+                    {{ __('We provide unparalleled quality and service in the livestock market') }}
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -531,10 +557,9 @@
                         class="inline-flex items-center justify-center size-20 rounded-full bg-gradient-to-br from-green-400 to-green-600 mb-6 shadow-lg">
                         <span class="material-symbols-outlined text-4xl text-white">health_and_safety</span>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Hewan Sehat</h3>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('Healthy Animals') }}</h3>
                     <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                        Ternak kami dibesarkan dalam lingkungan alami tanpa stres, memastikan kesehatan dan
-                        kesejahteraan mereka dengan perawatan dokter hewan.
+                        {{ __('Our livestock are raised in natural, stress-free environments, ensuring their health and well-being with veterinary care.') }}
                     </p>
                 </div>
 
@@ -544,10 +569,9 @@
                         class="inline-flex items-center justify-center size-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 mb-6 shadow-lg">
                         <span class="material-symbols-outlined text-4xl text-white">verified</span>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Peternakan Bersertifikat</h3>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('Certified Farms') }}</h3>
                     <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                        Kami bermitra dengan peternakan terverifikasi yang menjunjung tinggi standar tertinggi dalam
-                        praktik peternakan yang etis dan berkelanjutan.
+                        {{ __('We partner with verified farms that uphold the highest standards in ethical and sustainable farming practices.') }}
                     </p>
                 </div>
 
@@ -557,10 +581,9 @@
                         class="inline-flex items-center justify-center size-20 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 mb-6 shadow-lg">
                         <span class="material-symbols-outlined text-4xl text-white">shopping_cart</span>
                     </div>
-                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">Pembelian Mudah</h3>
+                    <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{{ __('Easy Purchase') }}</h3>
                     <p class="text-gray-600 dark:text-gray-400 leading-relaxed">
-                        Jelajahi, pilih, dan beli ternak Anda dengan platform online kami yang sederhana dan aman dengan
-                        dukungan penuh.
+                        {{ __('Browse, select, and buy your livestock with our simple and secure online platform with full support.') }}
                     </p>
                 </div>
             </div>
@@ -575,23 +598,21 @@
                 <div>
                     <div class="inline-block mb-6">
                         <div class="glass-strong px-4 py-2 rounded-full">
-                            <p class="text-sm font-semibold text-primary dark:text-secondary">Komitmen Kami</p>
+                            <p class="text-sm font-semibold text-primary dark:text-secondary">{{ __('Our Commitment') }}</p>
                         </div>
                     </div>
 
                     <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-6">
-                        <span class="text-gradient">Transparansi</span> & Etika Lengkap
+                        <span class="text-gradient">{{ __('Transparency') }}</span> {{ __('& Complete Ethics') }}
                     </h2>
 
                     <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                        Di Ecommerce TSA, kami percaya pada transparansi lengkap dan kepatuhan pada standar legalitas
-                        tertinggi. Kami berkomitmen pada praktik etis, memastikan setiap hewan bersumber dan dijual
-                        secara bertanggung jawab.
+                        {{ __('At Ecommerce TSA, we believe in complete transparency and adherence to the highest legal standards. We are committed to ethical practices, ensuring every animal is responsibly sourced and sold.') }}
                     </p>
 
                     <a href="#contact"
                         class="inline-flex items-center gap-2 px-6 h-12 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                        <span>Lihat Sertifikasi</span>
+                        <span>{{ __('View Certification') }}</span>
                         <span class="material-symbols-outlined">arrow_forward</span>
                     </a>
                 </div>
@@ -604,7 +625,7 @@
                             <span
                                 class="material-symbols-outlined text-3xl text-primary dark:text-secondary">gavel</span>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Regulasi Penjualan</h3>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ __('Sales Regulation') }}</h3>
                         <a href="#"
                             class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Pelajari
                             lebih lanjut →</a>
@@ -616,10 +637,10 @@
                             <span
                                 class="material-symbols-outlined text-3xl text-primary dark:text-secondary">workspace_premium</span>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Jaminan Kualitas</h3>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ __('Quality Assurance') }}</h3>
                         <a href="#"
                             class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Pelajari
-                            lebih lanjut →</a>
+                            {{ __('Learn more') }} →</a>
                     </div>
 
                     <div class="glass-strong rounded-3xl p-6 text-center card-hover">
@@ -628,10 +649,10 @@
                             <span
                                 class="material-symbols-outlined text-3xl text-primary dark:text-secondary">shield</span>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Pedoman Etika</h3>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ __('Ethical Guidelines') }}</h3>
                         <a href="#"
                             class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Pelajari
-                            lebih lanjut →</a>
+                            {{ __('Learn more') }} →</a>
                     </div>
 
                     <div class="glass-strong rounded-3xl p-6 text-center card-hover">
@@ -640,11 +661,11 @@
                             <span
                                 class="material-symbols-outlined text-3xl text-primary dark:text-secondary">eco</span>
                         </div>
-                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Peternakan Ramah Lingkungan
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ __('Eco-Friendly Farming') }}
                         </h3>
                         <a href="#"
                             class="text-sm text-primary dark:text-secondary hover:underline font-semibold">Pelajari
-                            lebih lanjut →</a>
+                            {{ __('Learn more') }} →</a>
                     </div>
                 </div>
             </div>
@@ -657,11 +678,11 @@
             <div class="text-center mb-16">
                 <div class="inline-block mb-4">
                     <div class="glass-strong px-4 py-2 rounded-full">
-                        <p class="text-sm font-semibold text-primary dark:text-secondary">Testimoni</p>
+                        <p class="text-sm font-semibold text-primary dark:text-secondary">{{ __('Testimonials') }}</p>
                     </div>
                 </div>
                 <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                    Apa Kata <span class="text-gradient">Pelanggan Kami</span>
+                    {{ __('What Our') }} <span class="text-gradient">{{ __('Customers Say') }}</span>
                 </h2>
             </div>
 
@@ -676,8 +697,7 @@
                         <span class="material-symbols-outlined text-yellow-400">star</span>
                     </div>
                     <p class="text-gray-600 dark:text-gray-400 italic mb-6 leading-relaxed">
-                        "Kambing yang kami beli sangat sehat dan terawat dengan baik. Seluruh prosesnya lancar dan
-                        profesional. Sangat merekomendasikan Ecommerce TSA!"
+                        "{{ __('The goat we bought was very healthy and well-cared for. The whole process was smooth and professional. Highly recommend Ecommerce TSA!') }}"
                     </p>
                     <div class="flex items-center gap-4">
                         <div
@@ -686,7 +706,7 @@
                         </div>
                         <div>
                             <p class="font-bold text-gray-900 dark:text-white">Budi Wibowo</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Pemilik Peternakan</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Farm Owner') }}</p>
                         </div>
                     </div>
                 </div>
@@ -701,8 +721,7 @@
                         <span class="material-symbols-outlined text-yellow-400">star</span>
                     </div>
                     <p class="text-gray-600 dark:text-gray-400 italic mb-6 leading-relaxed">
-                        "Akhirnya, tempat yang peduli pada kesejahteraan hewan. Kualitas ternak mereka tidak
-                        tertandingi. Pasti akan menjadi pelanggan tetap."
+                        "{{ __('Finally, a place that cares about animal welfare. Their livestock quality is unmatched. Will definitely be a regular customer.') }}"
                     </p>
                     <div class="flex items-center gap-4">
                         <div
@@ -711,7 +730,7 @@
                         </div>
                         <div>
                             <p class="font-bold text-gray-900 dark:text-white">Ani Susanti</p>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Peternak</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('Farmer') }}</p>
                         </div>
                     </div>
                 </div>
@@ -725,16 +744,13 @@
             <div class="text-center mb-16">
                 <div class="inline-block mb-4">
                     <div class="glass-strong px-4 py-2 rounded-full">
-                        <p class="text-sm font-semibold text-primary dark:text-secondary">Hubungi Kami</p>
+                        <p class="text-sm font-semibold text-primary dark:text-secondary">{{ __('Contact Us') }}</p>
                     </div>
                 </div>
                 <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                    Kontak <span class="text-gradient">Kami</span>
+                    {{ __('Contact') }} <span class="text-gradient">{{ __('Us') }}</span>
                 </h2>
-                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    Ada pertanyaan? Kami ingin mendengar dari Anda. Kirimkan pesan dan kami akan merespons sesegera
-                    mungkin.
-                </p>
+                    {{ __('Got questions? We want to hear from you. Send us a message and we will respond as soon as possible.') }}
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -742,26 +758,23 @@
                 <div class="glass-strong rounded-3xl p-8">
                     <form class="space-y-6">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Nama
-                                Anda</label>
-                            <input type="text" placeholder="Nama Lengkap"
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">{{ __('Your Name') }}</label>
+                            <input type="text" placeholder="{{ __('Full Name') }}"
                                 class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Email
-                                Anda</label>
-                            <input type="email" placeholder="email@contoh.com"
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">{{ __('Your Email') }}</label>
+                            <input type="email" placeholder="{{ __('email@example.com') }}"
                                 class="w-full px-4 h-12 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">Pesan
-                                Anda</label>
-                            <textarea rows="5" placeholder="Beri tahu kami apa yang Anda cari..."
+                            <label class="block text-sm font-semibold text-gray-900 dark:text-white mb-2">{{ __('Your Message') }}</label>
+                            <textarea rows="5" placeholder="{{ __('Tell us what you are looking for...') }}"
                                 class="w-full px-4 py-3 rounded-xl bg-white/50 dark:bg-black/20 border-2 border-transparent focus:border-primary focus:ring-0 text-gray-900 dark:text-white placeholder:text-gray-500 dark:placeholder:text-gray-600 transition-all"></textarea>
                         </div>
                         <button type="submit"
                             class="w-full h-14 rounded-xl bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                            Kirim Pesan
+                            {{ __('Send Message') }}
                         </button>
                     </form>
                 </div>
@@ -776,7 +789,7 @@
                                     class="material-symbols-outlined text-primary dark:text-secondary">location_on</span>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Kunjungi Kami</h3>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ __('Visit Us') }}</h3>
                                 <p class="text-gray-600 dark:text-gray-400">Lampung, Indonesia</p>
                             </div>
                         </div>
@@ -789,7 +802,7 @@
                                 <span class="material-symbols-outlined text-primary dark:text-secondary">mail</span>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Email Kami</h3>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ __('Email Us') }}</h3>
                                 <p class="text-gray-600 dark:text-gray-400">kontak@ecommercetsa.com</p>
                             </div>
                         </div>
@@ -802,7 +815,7 @@
                                 <span class="material-symbols-outlined text-primary dark:text-secondary">phone</span>
                             </div>
                             <div>
-                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">Telepon Kami</h3>
+                                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2">{{ __('Call Us') }}</h3>
                                 <p class="text-gray-600 dark:text-gray-400">+62 812-3456-7890</p>
                             </div>
                         </div>
@@ -834,26 +847,21 @@
 
                 <!-- Quick Links -->
                 <div>
-                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Tautan Cepat</h4>
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ __('Quick Links') }}</h4>
                     <ul class="space-y-3">
-                        <li><a href="#about"
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Tentang
-                                Kami</a></li>
-                        <li><a href="#shop"
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Produk</a>
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('About Us') }}</a></li>
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Products') }}</a>
                         </li>
-                        <li><a href="#why"
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Keunggulan</a>
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Advantages') }}</a>
                         </li>
-                        <li><a href="#contact"
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Kontak</a>
+                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Contact') }}</a>
                         </li>
                     </ul>
                 </div>
 
                 <!-- Contact -->
                 <div>
-                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">Kontak</h4>
+                    <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ __('Contact') }}</h4>
                     <ul class="space-y-3 text-gray-600 dark:text-gray-400 text-sm">
                         <li>Lampung, Indonesia</li>
                         <li>kontak@ecommercetsa.com</li>
@@ -865,16 +873,14 @@
             <!-- Bottom Bar -->
             <div class="border-t border-white/10 pt-8">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">© 2025 Ecommerce TSA. Semua hak dilindungi.</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('© 2025 Ecommerce TSA. All rights reserved.') }}</p>
                     <div class="flex gap-6 text-sm">
                         <a href="#"
-                            class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Kebijakan
-                            Privasi</a>
+                            class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Privacy Policy') }}</a>
                         <a href="#"
-                            class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Syarat
-                            Layanan</a>
+                            class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Terms of Service') }}</a>
                         <a href="#"
-                            class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">Cookies</a>
+                            class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Cookies') }}</a>
                     </div>
                 </div>
             </div>

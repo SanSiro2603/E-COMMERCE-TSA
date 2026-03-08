@@ -122,6 +122,7 @@ Route::middleware(['auth', 'role:admin,super_admin'])
         // Settings
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+        
     });
 
 /*
@@ -229,3 +230,15 @@ Route::middleware(['auth', 'role:pembeli'])
         // Profil
         Route::get('/profil', fn () => inertia('Pembeli/Profil'))->name('profil.edit');
     });
+
+/*
+|--------------------------------------------------------------------------
+| BAHASA
+|--------------------------------------------------------------------------
+*/
+Route::get('lang/{locale}', function ($locale) {
+    if (in_array($locale, ['en', 'id'])) {
+        session()->put('locale', $locale);
+    }
+    return redirect()->back();
+})->name('lang.switch');
