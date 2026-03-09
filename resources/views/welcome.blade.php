@@ -849,13 +849,10 @@
                 <div>
                     <h4 class="text-lg font-bold text-gray-900 dark:text-white mb-4">{{ __('Quick Links') }}</h4>
                     <ul class="space-y-3">
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('About Us') }}</a></li>
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Products') }}</a>
-                        </li>
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Advantages') }}</a>
-                        </li>
-                                class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Contact') }}</a>
-                        </li>
+                        <li><a href="#about" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('About Us') }}</a></li>
+                        <li><a href="#shop" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Products') }}</a></li>
+                        <li><a href="#why" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Advantages') }}</a></li>
+                        <li><a href="#contact" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Contact') }}</a></li>
                     </ul>
                 </div>
 

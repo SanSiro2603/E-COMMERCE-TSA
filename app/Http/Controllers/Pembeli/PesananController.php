@@ -12,9 +12,16 @@ use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use App\Services\MidtransService;
 
 class PesananController extends Controller
 {
+    protected $midtrans;
+
+    public function __construct(MidtransService $midtrans)
+    {
+        $this->midtrans = $midtrans;
+    }
     public function index(Request $request)
     {
         $userId = Auth::id();
@@ -40,6 +47,30 @@ class PesananController extends Controller
             $flashMessage = $message;
 
             if (in_array($midtransStatus, ['success', 'pending'])) {
+                // Sync status ke database jika sukses/pending
+                try {
+                    $order = Order::where('order_number', $orderNumber)->first();
+                    if ($order && $order->status === 'pending') {
+                        $statusResult = $this->midtrans->checkStatus($order->order_number);
+                        if ($statusResult['success']) {
+                            $status = $statusResult['data']->transaction_status;
+                            if (in_array($status, ['capture', 'settlement'])) {
+                                $order->update([
+                                    'status' => 'paid',
+                                    'paid_at' => now()
+                                ]);
+                                
+                                // Update juga di table payments
+                                if ($order->payment) {
+                                    $order->payment->update(['transaction_status' => $status]);
+                                }
+                            }
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error("Status sync failed for order {$orderNumber}: " . $e->getMessage());
+                }
+
                 $request->merge(['status' => $midtransStatus === 'success' ? 'paid' : 'pending']);
             }
 
@@ -300,6 +331,77 @@ class PesananController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
+        }
+    }
+
+    public function removeItem($orderId, $itemId)
+    {
+        try {
+            DB::beginTransaction();
+
+            $order = Order::where('user_id', Auth::id())->findOrFail($orderId);
+
+            if ($order->status !== 'pending') {
+                return back()->with('error', 'Item hanya bisa dihapus jika pesanan belum dibayar.');
+            }
+
+            $item = $order->items()->findOrFail($itemId);
+
+            // 1. Balikkan stok
+            if ($item->product) {
+                $item->product->increment('stock', $item->quantity);
+            }
+
+            // 2. Hapus item
+            $item->delete();
+
+            // 3. Cek sisa item
+            $remainingItems = $order->items()->count();
+
+            if ($remainingItems === 0) {
+                // Jika item habis, batalkan pesanan
+                $order->update([
+                    'status' => 'cancelled',
+                    'cancelled_at' => now(),
+                ]);
+                DB::commit();
+                return redirect()->route('pembeli.pesanan.index')
+                    ->with('success', 'Pesanan dibatalkan karena semua produk dihapus.');
+            }
+
+            // 4. Hitung ulang total
+            $items = $order->items()->with('product')->get();
+            $newSubtotal = $items->sum('subtotal');
+            $weight = $items->sum(fn($i) => ($i->product->weight ?? 1000) * $i->quantity);
+            $weightKg = ceil($weight / 1000);
+
+            $address = $order->address;
+            $ongkirMap = [
+                '31' => 15000, '1' => 40000, '2' => 40000, '3' => 40000, '4' => 40000, '5' => 40000, '6' => 40000,
+                '32' => 30000, '33' => 35000, '34' => 40000, '35' => 35000, '36' => 40000, '37' => 35000, '38' => 30000, '39' => 30000,
+                '61' => 70000, '62' => 75000, '63' => 75000, '64' => 80000, '65' => 85000,
+                '71' => 70000, '72' => 75000, '73' => 75000, '74' => 80000, '75' => 80000, '76' => 75000,
+                '51' => 60000, '52' => 90000, '53' => 95000,
+                '81' => 120000, '82' => 125000, '91' => 130000, '92' => 130000
+            ];
+
+            $baseCost = $ongkirMap[$address->province_id] ?? 60000;
+            $newShippingCost = $baseCost + ($weightKg > 1 ? ($weightKg - 1) * 10000 : 0);
+            $newGrandTotal = $newSubtotal + $newShippingCost;
+
+            $order->update([
+                'subtotal'      => $newSubtotal,
+                'shipping_cost' => $newShippingCost,
+                'grand_total'   => $newGrandTotal,
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', 'Produk berhasil dihapus dari pesanan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
         }
     }
 

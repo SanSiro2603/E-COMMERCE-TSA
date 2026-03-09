@@ -68,7 +68,7 @@
                             <div class="text-sm">
                                 <p class="font-semibold text-blue-900 dark:text-blue-300">Metode Pembayaran</p>
                                 <p class="text-blue-800 dark:text-blue-400">
-                                    GoPay, ShopeePay, QRIS, Transfer Bank, Kartu Kredit, Alfamart, Indomaret
+                                 Midtrans
                                 </p>
                             </div>
                         </div>
@@ -77,7 +77,7 @@
                     {{-- Pay Button --}}
                     <button id="pay-button" class="w-full bg-green-600 hover:bg-green-700 dark:hover:bg-green-700 text-white py-4 rounded-lg font-bold text-lg transition flex items-center justify-center gap-3">
                         <span class="material-symbols-outlined text-2xl">credit_card</span>
-                        Bayar Sekarang
+                        Bayar dengan Midtrans
                     </button>
                 </div>
             </div>

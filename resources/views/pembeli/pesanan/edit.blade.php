@@ -153,9 +153,29 @@
                                     </div>
                                 </div>
 
-                                <p class="font-semibold text-gray-800 dark:text-white">
-                                    Rp {{ number_format($item->subtotal, 0, ',', '.') }}
-                                </p>
+                                <div class="flex flex-col items-end gap-2">
+                                    <p class="font-semibold text-gray-800 dark:text-white">
+                                        Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                                    </p>
+                                    
+                                    {{-- Tombol Hapus Produk --}}
+                                    @if($order->items->count() > 1)
+                                        <button type="button" 
+                                                onclick="confirmRemoveItem('{{ $item->product->name }}', '{{ route('pembeli.pesanan.removeItem', [$order->id, $item->id]) }}')"
+                                                class="text-red-500 hover:text-red-700 flex items-center gap-1 text-xs transition">
+                                            <span class="material-symbols-outlined text-sm">delete</span>
+                                            Hapus
+                                        </button>
+                                    @else
+                                        {{-- Jika sisa 1, beri tooltip/info bahwa hapus ini akan membatalkan pesanan --}}
+                                        <button type="button" 
+                                                onclick="confirmRemoveItem('{{ $item->product->name }}', '{{ route('pembeli.pesanan.removeItem', [$order->id, $item->id]) }}', true)"
+                                                class="text-red-500 hover:text-red-700 flex items-center gap-1 text-xs transition">
+                                            <span class="material-symbols-outlined text-sm">delete</span>
+                                            Hapus & Batalkan
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
                         @endforeach
                     </div>
@@ -202,6 +222,12 @@
                 </div>
             </div>
         </div>
+    </form>
+
+    {{-- Form Hapus Produk (Pindah ke luar form utama agar tidak nested) --}}
+    <form id="removeItemForm" method="POST" class="hidden">
+        @csrf
+        @method('DELETE')
     </form>
 </div>
 
@@ -269,6 +295,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function selectAddress(radio, id) {
     document.getElementById('selectedAddressId').value = id;
+}
+
+function confirmRemoveItem(productName, url, isLast = false) {
+    const message = isLast 
+        ? `Hapus "${productName}"? Ini adalah produk terakhir, pesanan akan DIBATALKAN otomatis.`
+        : `Apakah Anda yakin ingin menghapus "${productName}" dari pesanan?`;
+
+    if (confirm(message)) {
+        const form = document.getElementById('removeItemForm');
+        form.action = url;
+        form.submit();
+    }
 }
 </script>
 @endpush

@@ -247,51 +247,9 @@
     @endif
 </div>
 
-<!-- CONFETTI + POLLING + COPY -->
-@if($highlightedOrder ?? false)
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        setTimeout(() => {
-            confetti({ particleCount: 200, spread: 80, origin: { y: 0.6 } });
-        }, 500);
-    </script>
-@endif
 
-@if(request()->has('order'))
-    <script>
-        let pollCount = 0;
-        const maxPoll = 30;
-        const orderNumber = "{{ request('order') }}";
 
-        function checkPaymentStatus() {
-            if (pollCount >= maxPoll) return;
 
-            fetch("{{ route('pembeli.payment.check-status', ':orderNumber') }}".replace(':orderNumber', orderNumber), {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(r => r.json())
-            .then(data => {
-                if (data.success && ['capture', 'settlement'].includes(data.status)) {
-                    location.reload();
-                } else if (data.success && data.status === 'pending') {
-                    pollCount++;
-                    setTimeout(checkPaymentStatus, 5000);
-                } else {
-                    pollCount = maxPoll;
-                }
-            })
-            .catch(() => {
-                pollCount++;
-                setTimeout(checkPaymentStatus, 10000);
-            });
-        }
-
-        setTimeout(checkPaymentStatus, 3000);
-    </script>
-@endif
 
 <!-- COPY TO CLIPBOARD -->
 <script>

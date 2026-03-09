@@ -270,20 +270,6 @@
 
 </div>
 
-<!-- ANIMASI & CONFETTI -->
-@if($order->status === 'paid' && $order->paid_at && $order->paid_at->diffInMinutes(now()) < 2)
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <script>
-        setTimeout(() => {
-            confetti({
-                particleCount: 120,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-        }, 500);
-    </script>
-@endif
-
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const el = document.getElementById('paid-at-text');
@@ -308,6 +294,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // gunakan locale 'id-ID' agar nama bulan bahasa Indonesia
     const formatted = date.toLocaleString('id-ID', options).replace(',', '');
     el.textContent = 'Dibayar pada ' + formatted;
+
+    // AUTO REFRESH TIAP 15 DETIK UNTUK ADMIN
+    setTimeout(() => {
+        location.reload();
+    }, 15000);
 });
 </script>
 

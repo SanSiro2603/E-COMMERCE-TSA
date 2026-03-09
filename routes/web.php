@@ -204,6 +204,7 @@ Route::middleware(['auth', 'role:pembeli'])
             Route::get('/{order}', [PesananController::class, 'show'])->name('show');
             Route::get('/{order}/edit', [PesananController::class, 'edit'])->name('edit');
             Route::put('/{order}', [PesananController::class, 'update'])->name('update');
+            Route::delete('/{order}/item/{item}', [PesananController::class, 'removeItem'])->name('removeItem');
             Route::post('/{order}/cancel', [PesananController::class, 'cancel'])->name('cancel');
             Route::post('/{order}/complete', [PesananController::class, 'complete'])->name('complete');
         });
