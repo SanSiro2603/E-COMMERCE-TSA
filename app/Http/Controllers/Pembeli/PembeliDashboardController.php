@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Pembeli;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
 class PembeliDashboardController extends Controller
@@ -27,16 +28,34 @@ class PembeliDashboardController extends Controller
             ->take(3)
             ->get();
 
-        // Produk terlaris (global)
+        // Produk terlaris (untuk rekomendasi)
         $topProducts = Product::withSum('orderItems as total_sold', 'quantity')
             ->where('is_active', true)
             ->orderByDesc('total_sold')
             ->take(4)
             ->get();
 
+        // TAMBAHAN BARU: Kategori aktif
+        $categories = Category::where('is_active', true)
+            ->orderBy('name')
+            ->get();
+
+        // TAMBAHAN BARU: Semua produk (untuk section "Semua Hewan")
+        $allProducts = Product::with('category')
+            ->where('is_active', true)
+            ->latest()
+            ->get();
+
         return view('pembeli.dashboard', compact(
-            'user', 'totalOrders', 'pendingOrders', 'shippedOrders', 'completedOrders',
-            'recentOrders', 'topProducts'
+            'user', 
+            'totalOrders', 
+            'pendingOrders', 
+            'shippedOrders', 
+            'completedOrders',
+            'recentOrders', 
+            'topProducts',
+            'categories',      
+            'allProducts'      
         ));
     }
 }

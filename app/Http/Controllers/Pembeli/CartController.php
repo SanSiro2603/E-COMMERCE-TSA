@@ -104,6 +104,7 @@ class CartController extends Controller
                 'success' => true,
                 'subtotal' => number_format($cart->subtotal, 0, ',', '.'),
                 'total' => number_format($carts->sum('subtotal'), 0, ',', '.'),
+                'total_items' => $carts->sum('quantity'), // Total item quantity
                 'cart_count' => $carts->count()
             ]);
 
@@ -121,7 +122,8 @@ class CartController extends Controller
         return response()->json([
             'success' => true,
             'cart_count' => $carts->count(),
-            'total' => number_format($carts->sum('subtotal'), 0, ',', '.')
+            'total' => number_format($carts->sum('subtotal'), 0, ',', '.'),
+            'total_items' => $carts->sum('quantity')
         ]);
     }
 
