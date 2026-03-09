@@ -205,7 +205,7 @@
                             @if($order->canBeCancelled())
                                 <form action="{{ route('pembeli.pesanan.cancel', $order->id) }}" method="POST" class="inline"
                                 onsubmit="return confirm('Yakin ingin membatalkan pesanan #{{ $order->order_number }}?')">
-                                @csrf
+                                @csrf @method('PATCH')
                                 <button type="submit" 
                                         class="inline-flex items-center gap-1 px-4 py-2 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
                                     <span class="material-symbols-outlined text-base">cancel</span>

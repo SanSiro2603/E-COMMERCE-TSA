@@ -139,7 +139,7 @@ public function canBeCancelled(): bool
 
 public function canBeCompleted(): bool
 {
-    return $this->status === 'shipped' && !$this->completed_at;
+    return in_array($this->status, ['processing', 'shipped']) && !$this->completed_at;
 }
 
 // app/Models/Order.php
