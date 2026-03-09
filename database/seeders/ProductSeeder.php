@@ -26,7 +26,7 @@ class ProductSeeder extends Seeder
             ]);
         }
 
-        for ($i = 1; $i <= 100; $i++) {
+        for ($i = 1; $i <= 10; $i++) {
             $name = ucfirst($faker->words(rand(2, 4), true));
 
             Product::create([

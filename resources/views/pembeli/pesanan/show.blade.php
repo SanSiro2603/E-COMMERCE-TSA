@@ -145,8 +145,7 @@
                 </div>
             </div>
 
-            <!-- STATUS PENGIRIMAN -->
-            @if($order->shipment)
+            @if($order->tracking_number)
                 <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 p-6 rounded-xl border border-emerald-200 dark:border-emerald-700">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-emerald-600">local_shipping</span>
@@ -156,32 +155,17 @@
                         <div>
                             <p class="text-gray-600 dark:text-zinc-400">Kurir</p>
                             <p class="font-bold text-emerald-700">
-                                {{ strtoupper($order->shipment->courier) }}
-                                {{ $order->shipment->courier_service ? " ({$order->shipment->courier_service})" : '' }}
+                                {{ strtoupper($order->courier) }}
+                                {{ $order->courier_service ? " ({$order->courier_service})" : '' }}
                             </p>
                         </div>
                         <div>
                             <p class="text-gray-600 dark:text-zinc-400">No. Resi</p>
                             <p class="font-mono text-xs bg-white dark:bg-zinc-800 px-2 py-1 rounded break-all">
-                                {{ $order->shipment->tracking_number ?? 'Belum tersedia' }}
+                                {{ $order->tracking_number }}
                             </p>
                         </div>
                     </div>
-                    @if($order->shipment->history && count($order->shipment->history) > 0)
-                        <div class="mt-4 pt-4 border-t border-emerald-200 dark:border-emerald-700">
-                            <p class="font-medium text-sm mb-2">Riwayat</p>
-                            <div class="space-y-2 text-xs">
-                                @foreach($order->shipment->history as $log)
-                                    <div class="flex justify-between bg-white/70 dark:bg-zinc-800/50 p-2 rounded">
-                                        <span>{{ ucfirst($log['status'] ?? 'Update') }}@if(!empty($log['description'])): {{ $log['description'] }}@endif</span>
-                                        <span class="text-gray-500">
-                                            {{ \Carbon\Carbon::parse($log['timestamp'] ?? now())->format('d/m H:i') }}
-                                        </span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    @endif
                 </div>
             @endif
 

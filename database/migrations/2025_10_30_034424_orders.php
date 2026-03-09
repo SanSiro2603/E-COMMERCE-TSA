@@ -33,10 +33,10 @@ return new class extends Migration {
             
             // Courier Information
             $table->string('courier')->nullable(); // jne, tiki, pos
-            $table->string('courier_service')->nullable(); // REG, YES, OKE
-            $table->string('courier_service_description')->nullable(); // Layanan Regular, dll
-            $table->integer('estimated_delivery')->nullable(); // estimasi hari
-            $table->string('tracking_number')->nullable();
+            // $table->string('courier_service')->nullable(); // REG, YES, OKE
+            // $table->string('courier_service_description')->nullable(); // Layanan Regular, dll
+            // $table->integer('estimated_delivery')->nullable(); // estimasi hari
+            // $table->string('tracking_number')->nullable();
             
             // Payment
             $table->string('payment_method')->nullable();

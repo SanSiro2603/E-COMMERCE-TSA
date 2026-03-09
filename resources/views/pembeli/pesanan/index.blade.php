@@ -114,10 +114,10 @@
                                         @endif
                                         {{ $order->status_label }}
                                     </span>
-                                    @if($order->shipment?->tracking_number)
+                                    @if($order->tracking_number)
                                         <span class="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
                                             <span class="material-symbols-outlined text-sm">local_shipping</span>
-                                            {{ $order->shipment->tracking_number }}
+                                            {{ $order->tracking_number }}
                                         </span>
                                     @endif
                                 </div>

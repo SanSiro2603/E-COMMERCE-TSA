@@ -174,7 +174,7 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        $order->load(['user', 'items.product', 'payment', 'shipment']);
+        $order->load(['user', 'items.product', 'payment']);
         return view('admin.orders.show', compact('order'));
     }
 
@@ -194,25 +194,9 @@ class OrderController extends Controller
 
         $order->update([
             'status' => $request->status,
+            'courier' => $request->courier,
+            'tracking_number' => $request->tracking_number,
         ]);
-
-        // Update shipment jika status shipped
-        if ($request->status === 'shipped' && $order->shipment) {
-            $order->shipment->update([
-                'courier' => $request->courier,
-                'tracking_number' => $request->tracking_number,
-                'status' => 'shipped',
-                'shipped_at' => now(),
-            ]);
-        }
-
-        // Jika completed
-        if ($request->status === 'completed' && $order->shipment) {
-            $order->shipment->update([
-                'status' => 'delivered', 
-                'delivered_at' => now()
-            ]);
-        }
 
         // Update paid_at if status is paid or completed
         if (in_array($request->status, ['paid', 'completed']) && !$order->paid_at) {

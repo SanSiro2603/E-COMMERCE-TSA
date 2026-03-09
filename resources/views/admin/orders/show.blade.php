@@ -216,14 +216,14 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Kurir</label>
                     <input type="text" name="courier" placeholder="JNE, J&T, SiCepat..." 
-                           value="{{ old('courier', $order->shipment?->courier) }}"
+                           value="{{ old('courier', $order->courier) }}"
                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
                 </div>
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Nomor Resi</label>
                     <input type="text" name="tracking_number" placeholder="Contoh: CGK123456789" 
-                           value="{{ old('tracking_number', $order->shipment?->tracking_number) }}"
+                           value="{{ old('tracking_number', $order->tracking_number) }}"
                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
                 </div>
             </div>
@@ -239,7 +239,7 @@
     </div>
 
     <!-- Shipment Info (if shipped) -->
-    @if($order->shipment && in_array($order->status, ['shipped', 'completed']))
+    @if($order->tracking_number && in_array($order->status, ['shipped', 'completed']))
         <div class="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-500/10 dark:to-blue-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-xl p-6">
             <h3 class="text-lg font-semibold text-indigo-900 dark:text-indigo-300 mb-3 flex items-center gap-2">
                 <span class="material-symbols-outlined">local_shipping</span>
@@ -248,21 +248,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                     <span class="text-indigo-700 dark:text-indigo-400 font-medium">Kurir:</span>
-                    <span class="ml-2 text-indigo-900 dark:text-indigo-300">{{ $order->shipment->courier }}</span>
+                    <span class="ml-2 text-indigo-900 dark:text-indigo-300">{{ strtoupper($order->courier ?? '-') }}</span>
                 </div>
                 <div>
                     <span class="text-indigo-700 dark:text-indigo-400 font-medium">No. Resi:</span>
-                    <span class="ml-2 font-mono text-indigo-900 dark:text-indigo-300">{{ $order->shipment->tracking_number }}</span>
-                </div>
-                <div>
-                    <span class="text-indigo-700 dark:text-indigo-400 font-medium">Dikirim:</span>
-                    <span class="ml-2 text-indigo-900 dark:text-indigo-300">{{ $order->shipment->shipped_at?->format('d M Y, H:i') ?? '-' }}</span>
-                </div>
-                <div>
-                    <span class="text-indigo-700 dark:text-indigo-400 font-medium">Status:</span>
-                    <span class="ml-2 inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300">
-                        {{ ucfirst($order->shipment->status) }}
-                    </span>
+                    <span class="ml-2 font-mono text-indigo-900 dark:text-indigo-300">{{ $order->tracking_number }}</span>
                 </div>
             </div>
         </div>

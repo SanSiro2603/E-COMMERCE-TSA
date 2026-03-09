@@ -154,12 +154,12 @@ document.getElementById('pay-button').onclick = function(){
         },
         onPending: function(result){
             console.log('Payment pending:', result);
-            window.location.href = '{{ route("pembeli.pesanan.index") }}?status=pending&order={{ $order->order_number }}';
+            window.location.href = '{{ route("pembeli.payment.show", $order) }}?status=pending&order={{ $order->order_number }}';
         },
         onError: function(result){
             console.log('Payment error:', result);
             alert('Pembayaran gagal! Silakan coba lagi.');
-            window.location.href = '{{ route("pembeli.pesanan.index") }}?status=error&order={{ $order->order_number }}';
+            window.location.href = '{{ route("pembeli.payment.show", $order) }}?status=error&order={{ $order->order_number }}';
         },
         onClose: function(){
             console.log('Popup ditutup');

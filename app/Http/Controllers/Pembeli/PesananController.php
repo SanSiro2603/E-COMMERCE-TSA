@@ -115,8 +115,7 @@ class PesananController extends Controller
     $order = Order::with([
             'items.product.category',
             'payment',
-            'shipment',
-            'address'  // TAMBAHKAN INI!
+            'address'
         ])
         ->where('user_id', Auth::id())
         ->findOrFail($id);
