@@ -48,7 +48,9 @@
     {{-- Grafik Pendapatan --}}
     <div class="bg-zinc-800 p-6 rounded-xl shadow-sm card-hover">
         <h3 class="text-lg font-semibold mb-4 text-white">Pendapatan Harian</h3>
-        <canvas id="revenueChart" height="100"></canvas>
+        <div class="relative h-[400px] w-full">
+            <canvas id="revenueChart"></canvas>
+        </div>
     </div>
 
     {{-- Tabel Ringkas --}}
@@ -105,6 +107,7 @@
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
                 x: { ticks: { color: '#fff' }, grid: { color: 'rgba(255,255,255,0.1)' } },

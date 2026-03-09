@@ -123,7 +123,9 @@
                 </div>
             </div>
             <div class="p-6">
-                <canvas id="revenueChart" height="80"></canvas>
+                <div class="relative h-[300px] w-full">
+                    <canvas id="revenueChart"></canvas>
+                </div>
             </div>
         </div>
 
@@ -373,7 +375,7 @@
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             interaction: {
                 mode: 'index',
                 intersect: false,
