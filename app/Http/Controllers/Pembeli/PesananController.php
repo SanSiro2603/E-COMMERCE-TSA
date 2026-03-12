@@ -9,6 +9,8 @@ use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Payment;
 use App\Models\SystemSetting;
+use App\Services\BiteshipService;
+use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,10 +19,14 @@ use App\Services\MidtransService;
 class PesananController extends Controller
 {
     protected $midtrans;
+    protected $biteship;
+    protected $orderService;
 
-    public function __construct(MidtransService $midtrans)
+    public function __construct(MidtransService $midtrans, BiteshipService $biteship, OrderService $orderService)
     {
         $this->midtrans = $midtrans;
+        $this->biteship = $biteship;
+        $this->orderService = $orderService;
     }
     public function index(Request $request)
     {
@@ -36,12 +42,12 @@ class PesananController extends Controller
 
         if ($midtransStatus && $orderNumber) {
             $message = match ($midtransStatus) {
-                'success'   => "Pembayaran #{$orderNumber} BERHASIL! Produk segera kami proses.",
-                'pending'   => "Pembayaran #{$orderNumber} sedang DIPROSES. Kami akan konfirmasi secepatnya.",
-                'error'     => "Pembayaran #{$orderNumber} GAGAL. Silakan coba metode lain.",
-                'cancelled' => "Pembayaran #{$orderNumber} DIBATALKAN.",
-                default     => "Status pembayaran #{$orderNumber} diperbarui.",
-            };
+                    'success' => "Pembayaran #{$orderNumber} BERHASIL! Produk segera kami proses.",
+                    'pending' => "Pembayaran #{$orderNumber} sedang DIPROSES. Kami akan konfirmasi secepatnya.",
+                    'error' => "Pembayaran #{$orderNumber} GAGAL. Silakan coba metode lain.",
+                    'cancelled' => "Pembayaran #{$orderNumber} DIBATALKAN.",
+                    default => "Status pembayaran #{$orderNumber} diperbarui.",
+                };
 
             $flashType = in_array($midtransStatus, ['success', 'pending']) ? 'success' : 'error';
             $flashMessage = $message;
@@ -59,7 +65,7 @@ class PesananController extends Controller
                                     'status' => 'paid',
                                     'paid_at' => now()
                                 ]);
-                                
+
                                 // Update juga di table payments
                                 if ($order->payment) {
                                     $order->payment->update(['transaction_status' => $status]);
@@ -67,7 +73,8 @@ class PesananController extends Controller
                             }
                         }
                     }
-                } catch (\Exception $e) {
+                }
+                catch (\Exception $e) {
                     \Log::error("Status sync failed for order {$orderNumber}: " . $e->getMessage());
                 }
 
@@ -94,13 +101,13 @@ class PesananController extends Controller
         }
 
         $statuses = [
-            'all'        => 'Semua Pesanan',
-            'pending'    => 'Menunggu Pembayaran',
-            'paid'       => 'Sudah Dibayar',
+            'all' => 'Semua Pesanan',
+            'pending' => 'Menunggu Pembayaran',
+            'paid' => 'Sudah Dibayar',
             'processing' => 'Sedang Diproses',
-            'shipped'    => 'Dikirim',
-            'completed'  => 'Selesai',
-            'cancelled'  => 'Dibatalkan',
+            'shipped' => 'Dikirim',
+            'completed' => 'Selesai',
+            'cancelled' => 'Dibatalkan',
         ];
 
         return view('pembeli.pesanan.index', compact(
@@ -110,27 +117,25 @@ class PesananController extends Controller
         ));
     }
 
-    public function show($id)
-{
-    $order = Order::with([
+    public function show($id)    {
+        $order = Order::with([
             'items.product.category',
             'payment',
             'address'
         ])
-        ->where('user_id', Auth::id())
-        ->findOrFail($id);
+            ->where('user_id', Auth::id())
+            ->findOrFail($id);
 
-    return view('pembeli.pesanan.show', compact('order'));
-}
+        return view('pembeli.pesanan.show', compact('order'));    }
     // === CHECKOUT: PILIH ALAMAT TERSIMPAN + KURIR ===
     public function checkout()
     {
         // --- TAMBAHAN BARU ---
-    $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
-    if ($isStoreOpen !== '1') {
-        return redirect()->route('pembeli.keranjang.index')
-            ->with('error', 'Maaf, toko sedang tutup. Fitur checkout sementara dinonaktifkan.');
-    }
+        $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
+        if ($isStoreOpen !== '1') {
+            return redirect()->route('pembeli.keranjang.index')
+                ->with('error', 'Maaf, toko sedang tutup. Fitur checkout sementara dinonaktifkan.');
+        }
 
         $carts = Cart::with('product')->where('user_id', Auth::id())->get();
         if ($carts->isEmpty()) {
@@ -150,106 +155,77 @@ class PesananController extends Controller
         return view('pembeli.pesanan.checkout', compact('carts', 'subtotal', 'totalWeight', 'addresses'));
     }
 
+    // === AJAX: CEK ONGKIR BITESIP ===
+    public function checkShippingCost(Request $request)
+    {
+        $request->validate([
+            'address_id' => 'required|exists:addresses,id',
+            'courier' => 'required|string',
+            'weight' => 'required|numeric'
+        ]);
+
+        $address = Auth::user()->addresses()->findOrFail($request->address_id);
+
+        $payload = [
+            'destination_postal_code' => $address->postal_code ?? '',
+            'destination_area_id' => '',
+            'couriers' => $request->courier,
+            'weight' => $request->weight,
+            'items_value' => Cart::where('user_id', Auth::id())->get()->sum('subtotal')
+        ];
+
+        $response = $this->biteship->getRates($payload);
+
+        if (!$response['success']) {
+            return response()->json(['success' => false, 'message' => $response['message']]);
+        }
+
+        $rates = $response['pricing'] ?? [];
+        if (empty($rates)) {
+            return response()->json(['success' => false, 'message' => 'Layanan kurir tidak tersedia untuk rute ini.']);
+        }
+
+        // Ambil harga terendah dari hasil kurir yang sama jika ada beberapa jenis layanan (karena user cuma pilih kurir company di dropdown Checkout)
+        $selectedCourier = collect($rates)->sortBy('price')->first();
+
+        return response()->json([
+            'success' => true,
+            'service' => strtoupper($selectedCourier['company']) . ' ' . strtoupper($selectedCourier['type']),
+            'cost' => $selectedCourier['price'],
+            'courier_type' => $selectedCourier['type']
+        ]);
+    }
+
     // === STORE: BUAT PESANAN DARI ALAMAT TERPILIH ===
     public function store(Request $request)
     {
         // --- TAMBAHAN BARU ---
-    $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
-    if ($isStoreOpen !== '1') {
-        return redirect()->back()
-            ->with('error', 'Transaksi DITOLAK: Toko sedang tutup.');
-    }
+        $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
+        if ($isStoreOpen !== '1') {
+            return redirect()->back()
+                ->with('error', 'Transaksi DITOLAK: Toko sedang tutup.');
+        }
 
         $validated = $request->validate([
             'address_id' => 'required|exists:addresses,id',
-            'courier'    => 'required|in:jne,pos,tiki,jnt,sicepat,anteraja',
+            'courier' => 'required|in:jne,pos,tiki,jnt,sicepat,anteraja',
         ]);
 
         try {
-            DB::beginTransaction();
-
             $carts = Cart::with('product')->where('user_id', Auth::id())->get();
-            if ($carts->isEmpty()) throw new \Exception('Keranjang kosong');
+            if ($carts->isEmpty())
+                throw new \Exception('Keranjang kosong');
 
             $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
 
-            $totalAmount = $carts->sum('subtotal');
-            $weight = $carts->sum(fn($c) => ($c->product->weight ?? 1000) * $c->quantity);
-            $weightKg = ceil($weight / 1000);
-
-            // === HITUNG ONGKIR BERDASARKAN PROVINSI ===
-            $ongkirMap = [
-                '31' => 15000, // Lampung
-                '1'  => 40000, '2'  => 40000, '3'  => 40000, '4'  => 40000, '5'  => 40000, '6'  => 40000, // Jawa
-                '32' => 30000, '33' => 35000, '34' => 40000, '35' => 35000, '36' => 40000, '37' => 35000, '38' => 30000, '39' => 30000, // Sumatera
-                '61' => 70000, '62' => 75000, '63' => 75000, '64' => 80000, '65' => 85000, // Kalimantan
-                '71' => 70000, '72' => 75000, '73' => 75000, '74' => 80000, '75' => 80000, '76' => 75000, // Sulawesi
-                '51' => 60000, '52' => 90000, '53' => 95000, // Bali & NTT
-                '81' => 120000, '82' => 125000, '91' => 130000, '92' => 130000 // Maluku & Papua
-            ];
-
-            $baseCost = $ongkirMap[$address->province_id] ?? 60000;
-            $shippingCost = $baseCost + ($weightKg > 1 ? ($weightKg - 1) * 10000 : 0);
-            $grandTotal = $totalAmount + $shippingCost;
-
-
-            // 1. VALIDASI STOK EKSTRA KETAT (PENTING!)
-            // Kita lock baris database untuk mencegah Race Condition (rebutan stok)
-            foreach ($carts as $cart) {
-                $product = Product::lockForUpdate()->find($cart->product_id);
-                
-                if (!$product) {
-                    throw new \Exception("Produk tidak ditemukan.");
-                }
-
-                if ($product->stock < $cart->quantity) {
-                    throw new \Exception("Stok produk '{$product->name}' tidak mencukupi (Sisa: {$product->stock}). Silakan update keranjang.");
-                }
-            }
-
-            // 2. JIKA AMAN, BUAT ORDER
-            $order = Order::create([
-                'user_id'           => Auth::id(),
-                'order_number'      => Order::generateOrderNumber(),
-                'subtotal'          => $totalAmount,
-                'shipping_cost'     => $shippingCost,
-                'grand_total'       => $grandTotal,
-                'status'            => 'pending',
-                'address_id'        => $address->id,
-                'recipient_name'    => $address->recipient_name,
-                'recipient_phone'   => $address->recipient_phone,
-                'province'          => $address->province_name,
-                'province_id'       => $address->province_id,
-                'city'              => $address->city_type . ' ' . $address->city_name,
-                'city_id'           => $address->city_id,
-                'postal_code'       => $address->postal_code,
-                'shipping_address'  => $address->full_address,
-                'courier'           => $validated['courier'],
-            ]);
-
-            // 3. KURANGI STOK & BUAT ORDER ITEMS
-            foreach ($carts as $cart) {
-                OrderItem::create([
-                    'order_id'   => $order->id,
-                    'product_id' => $cart->product_id,
-                    'quantity'   => $cart->quantity,
-                    'price'      => $cart->product->price,
-                    'subtotal'   => $cart->subtotal,
-                ]);
-
-                // Kurangi stok (Aman karena sudah divalidasi & dilock di atas)
-                $product = Product::find($cart->product_id);
-                $product->decrement('stock', $cart->quantity);
-            }
-
-            Cart::where('user_id', Auth::id())->delete();
-            DB::commit();
+            // Delegate logic to OrderService
+            $order = $this->orderService->createOrder(Auth::id(), $carts, $address, $validated['courier']);
 
             return redirect()->route('pembeli.payment.show', $order)
                 ->with('success', 'Pesanan berhasil dibuat! Silakan bayar.');
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        }
+        catch (\Exception $e) {
             return back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
@@ -282,53 +258,20 @@ class PesananController extends Controller
 
         $validated = $request->validate([
             'address_id' => 'required|exists:addresses,id',
-            'courier'    => 'required|in:jne,pos,tiki,jnt,sicepat,anteraja',
+            'courier' => 'required|in:jne,pos,tiki,jnt,sicepat,anteraja',
         ]);
 
         try {
-            DB::beginTransaction();
-
             $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
 
-            // Hitung ulang ongkir
-            $weight = $order->items->sum(fn($i) => ($i->product->weight ?? 1000) * $i->quantity);
-            $weightKg = ceil($weight / 1000);
-
-            $ongkirMap = [
-                '31' => 15000, '1' => 40000, '2' => 40000, '3' => 40000, '4' => 40000, '5' => 40000, '6' => 40000,
-                '32' => 30000, '33' => 35000, '34' => 40000, '35' => 35000, '36' => 40000, '37' => 35000, '38' => 30000, '39' => 30000,
-                '61' => 70000, '62' => 75000, '63' => 75000, '64' => 80000, '65' => 85000,
-                '71' => 70000, '72' => 75000, '73' => 75000, '74' => 80000, '75' => 80000, '76' => 75000,
-                '51' => 60000, '52' => 90000, '53' => 95000,
-                '81' => 120000, '82' => 125000, '91' => 130000, '92' => 130000
-            ];
-
-            $baseCost = $ongkirMap[$address->province_id] ?? 60000;
-            $shippingCost = $baseCost + ($weightKg > 1 ? ($weightKg - 1) * 10000 : 0);
-            $grandTotal = $order->subtotal + $shippingCost;
-
-            $order->update([
-                'address_id'        => $address->id,
-                'recipient_name'    => $address->recipient_name,
-                'recipient_phone'   => $address->recipient_phone,
-                'province'          => $address->province_name,
-                'province_id'       => $address->province_id,
-                'city'              => $address->city_type . ' ' . $address->city_name,
-                'city_id'           => $address->city_id,
-                'postal_code'       => $address->postal_code,
-                'shipping_address'  => $address->full_address,
-                'courier'           => $validated['courier'],
-                'shipping_cost'     => $shippingCost,
-                'grand_total'       => $grandTotal,
-            ]);
-
-            DB::commit();
+            // Delegate logic to Service
+            $this->orderService->updateShippingDetails($order, $address, $validated['courier']);
 
             return redirect()->route('pembeli.pesanan.index')
                 ->with('success', 'Pesanan berhasil diperbarui!');
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        }
+        catch (\Exception $e) {
             return back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
@@ -336,8 +279,6 @@ class PesananController extends Controller
     public function removeItem($orderId, $itemId)
     {
         try {
-            DB::beginTransaction();
-
             $order = Order::where('user_id', Auth::id())->findOrFail($orderId);
 
             if ($order->status !== 'pending') {
@@ -346,60 +287,17 @@ class PesananController extends Controller
 
             $item = $order->items()->findOrFail($itemId);
 
-            // 1. Balikkan stok
-            if ($item->product) {
-                $item->product->increment('stock', $item->quantity);
-            }
+            $result = $this->orderService->removeOrderItem($order, $item);
 
-            // 2. Hapus item
-            $item->delete();
-
-            // 3. Cek sisa item
-            $remainingItems = $order->items()->count();
-
-            if ($remainingItems === 0) {
-                // Jika item habis, batalkan pesanan
-                $order->update([
-                    'status' => 'cancelled',
-                    'cancelled_at' => now(),
-                ]);
-                DB::commit();
+            if ($result === 'cancel') {
                 return redirect()->route('pembeli.pesanan.index')
                     ->with('success', 'Pesanan dibatalkan karena semua produk dihapus.');
             }
 
-            // 4. Hitung ulang total
-            $items = $order->items()->with('product')->get();
-            $newSubtotal = $items->sum('subtotal');
-            $weight = $items->sum(fn($i) => ($i->product->weight ?? 1000) * $i->quantity);
-            $weightKg = ceil($weight / 1000);
-
-            $address = $order->address;
-            $ongkirMap = [
-                '31' => 15000, '1' => 40000, '2' => 40000, '3' => 40000, '4' => 40000, '5' => 40000, '6' => 40000,
-                '32' => 30000, '33' => 35000, '34' => 40000, '35' => 35000, '36' => 40000, '37' => 35000, '38' => 30000, '39' => 30000,
-                '61' => 70000, '62' => 75000, '63' => 75000, '64' => 80000, '65' => 85000,
-                '71' => 70000, '72' => 75000, '73' => 75000, '74' => 80000, '75' => 80000, '76' => 75000,
-                '51' => 60000, '52' => 90000, '53' => 95000,
-                '81' => 120000, '82' => 125000, '91' => 130000, '92' => 130000
-            ];
-
-            $baseCost = $ongkirMap[$address->province_id] ?? 60000;
-            $newShippingCost = $baseCost + ($weightKg > 1 ? ($weightKg - 1) * 10000 : 0);
-            $newGrandTotal = $newSubtotal + $newShippingCost;
-
-            $order->update([
-                'subtotal'      => $newSubtotal,
-                'shipping_cost' => $newShippingCost,
-                'grand_total'   => $newGrandTotal,
-            ]);
-
-            DB::commit();
-
             return back()->with('success', 'Produk berhasil dihapus dari pesanan.');
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        }
+        catch (\Exception $e) {
             return back()->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
         }
     }
@@ -413,23 +311,12 @@ class PesananController extends Controller
                 return back()->with('error', 'Pesanan tidak dapat dibatalkan karena sudah diproses atau dikirim.');
             }
 
-            DB::transaction(function () use ($order) {
-                foreach ($order->items as $item) {
-                    if ($item->product) {
-                        $item->product->increment('stock', $item->quantity);
-                    }
-                }
-
-                $order->update([
-                    'status' => 'cancelled',
-                    'cancelled_at' => now(),
-                ]);
-            });
+            $this->orderService->cancelOrder($order);
 
             return back()->with('success', "Pesanan #{$order->order_number} berhasil dibatalkan. Stok produk telah dikembalikan.");
 
-        } catch (\Exception $e) {
-            DB::rollBack();
+        }
+        catch (\Exception $e) {
             \Log::error('Gagal batalkan pesanan ID ' . $id, [
                 'user_id' => Auth::id(),
                 'error' => $e->getMessage(),
@@ -449,14 +336,32 @@ class PesananController extends Controller
             }
 
             $order->update([
-                'status'   => 'completed',
-                'paid_at'  => $order->paid_at ?? now(),
+                'status' => 'completed',
+                'paid_at' => $order->paid_at ?? now(),
             ]);
 
             return back()->with('success', 'Pesanan telah diselesaikan. Terima kasih!');
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return back()->with('error', 'Gagal menyelesaikan pesanan: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Tracking pengiriman Biteship untuk pembeli (AJAX)
+     */
+    public function trackBiteship(Order $order)
+    {
+        // Pastikan hanya pemilik pesanan yang bisa akses
+        if ($order->user_id !== Auth::id()) {
+            return response()->json(['success' => false, 'message' => 'Tidak diizinkan.'], 403);
+        }
+
+        if (!$order->biteship_order_id) {
+            return response()->json(['success' => false, 'message' => 'Pengiriman belum dibuat.']);
+        }
+
+        return response()->json($this->biteship->trackOrder($order->biteship_order_id));
     }
 }

@@ -30,17 +30,24 @@ class Order extends Model
         'courier_service_description',
         'estimated_delivery',
         'tracking_number',
+        'biteship_order_id',
         'payment_method',
         'paid_at',
+        'shipped_at',
+        'cancelled_at',
+        'completed_at',
         'notes',
         'address_id',
     ];
 
     protected $casts = [
-        'subtotal' => 'decimal:2',
-        'shipping_cost' => 'decimal:2',
-        'grand_total' => 'decimal:2',
-        'paid_at' => 'datetime',
+        'subtotal'     => 'decimal:2',
+        'shipping_cost'=> 'decimal:2',
+        'grand_total'  => 'decimal:2',
+        'paid_at'      => 'datetime',
+        'shipped_at'   => 'datetime',
+        'cancelled_at' => 'datetime',
+        'completed_at' => 'datetime',
     ];
 
     // === RELATIONSHIPS ===

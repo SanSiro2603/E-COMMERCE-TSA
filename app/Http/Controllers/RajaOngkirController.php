@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
+
 
 class RajaOngkirController extends Controller
 {
@@ -13,38 +13,38 @@ class RajaOngkirController extends Controller
      * (jika nama ada di list ini → otomatis type = Kota)
      */
     private $cityList = [
-        "BANDA ACEH","SABANG","LANGSA","LHOKSEUMAWE","SUBULUSSALAM",
-        "MEDAN","PEMATANGSIANTAR","SIBOLGA","TANJUNGBALAI","BINJAI",
-        "PADANGSIDIMPUAN","GUNUNGSITOLI",
-        "PADANG","SOLOK","SAWAHLUNTO","PADANG PANJANG","BUKITTINGGI","PAYAKUMBUH","PARIAMAN",
-        "PEKANBARU","DUMAI",
-        "JAMBI","SUNGAI PENÙH",
-        "PALEMBANG","PRABUMULIH","PAGAR ALAM","LUBUKLINGGAU",
+        "BANDA ACEH", "SABANG", "LANGSA", "LHOKSEUMAWE", "SUBULUSSALAM",
+        "MEDAN", "PEMATANGSIANTAR", "SIBOLGA", "TANJUNGBALAI", "BINJAI",
+        "PADANGSIDIMPUAN", "GUNUNGSITOLI",
+        "PADANG", "SOLOK", "SAWAHLUNTO", "PADANG PANJANG", "BUKITTINGGI", "PAYAKUMBUH", "PARIAMAN",
+        "PEKANBARU", "DUMAI",
+        "JAMBI", "SUNGAI PENÙH",
+        "PALEMBANG", "PRABUMULIH", "PAGAR ALAM", "LUBUKLINGGAU",
         "BENGKULU",
-        "BANDAR LAMPUNG","METRO",
+        "BANDAR LAMPUNG", "METRO",
         "PANGKAL PINANG",
-        "TANJUNG PINANG","BATAM",
-        "JAKARTA","BOGOR","DEPOK","TANGERANG","TANGERANG SELATAN","BEKASI",
-        "BANDUNG","CIMAHI","CIREBON","BANJAR",
-        "SEMARANG","SURAKARTA","MAGELANG","PEKALONGAN","SALATIGA","TEGAL",
+        "TANJUNG PINANG", "BATAM",
+        "JAKARTA", "BOGOR", "DEPOK", "TANGERANG", "TANGERANG SELATAN", "BEKASI",
+        "BANDUNG", "CIMAHI", "CIREBON", "BANJAR",
+        "SEMARANG", "SURAKARTA", "MAGELANG", "PEKALONGAN", "SALATIGA", "TEGAL",
         "YOGYAKARTA",
-        "SURABAYA","BATU","MADIUN","MOJOKERTO","PASURUAN","PROBOLINGGO","KEDIRI","BLITAR","MALANG",
+        "SURABAYA", "BATU", "MADIUN", "MOJOKERTO", "PASURUAN", "PROBOLINGGO", "KEDIRI", "BLITAR", "MALANG",
         "DENPASAR",
-        "MATARAM","BIMA",
+        "MATARAM", "BIMA",
         "KUPANG",
-        "PONTIANAK","SINGKAWANG",
-        "BANJARMASIN","BANJARBARU",
+        "PONTIANAK", "SINGKAWANG",
+        "BANJARMASIN", "BANJARBARU",
         "PALANGKA RAYA",
-        "SAMARINDA","BALIKPAPAN","BONTANG",
+        "SAMARINDA", "BALIKPAPAN", "BONTANG",
         "TARAKAN",
-        "MANADO","BITUNG","TOMOHON","KOTAMOBAGU",
-        "PALU","PARIGI MOUTONG",
-        "MAKASSAR","PALOPO","PAREPARE",
-        "KENDARI","BAU-BAU",
+        "MANADO", "BITUNG", "TOMOHON", "KOTAMOBAGU",
+        "PALU", "PARIGI MOUTONG",
+        "MAKASSAR", "PALOPO", "PAREPARE",
+        "KENDARI", "BAU-BAU",
         "GORONTALO",
-        "AMBON","TUAL",
-        "TERNATE","TIDORE KEPULAUAN",
-        "JAYAPURA","MERAUKE","SORONG",
+        "AMBON", "TUAL",
+        "TERNATE", "TIDORE KEPULAUAN",
+        "JAYAPURA", "MERAUKE", "SORONG",
     ];
 
     /**
@@ -91,14 +91,15 @@ class RajaOngkirController extends Controller
 
             $provinces = array_map(function ($p) {
                 return [
-                    'province_id' => $p['province_id'] ?? $p['id'],
-                    'name'        => $p['province'] ?? $p['name'],
+                'province_id' => $p['province_id'] ?? $p['id'],
+                'name' => $p['province'] ?? $p['name'],
                 ];
             }, $raw);
 
             return response()->json($provinces);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return response()->json(['error' => 'Server error'], 500);
         }
     }
@@ -152,9 +153,11 @@ class RajaOngkirController extends Controller
 
                     if (in_array($name, $this->jakartaCities)) {
                         $type = "Kota"; // Kota Administrasi
-                    } elseif ($name == "KEPULAUAN SERIBU") {
+                    }
+                    elseif ($name == "KEPULAUAN SERIBU") {
                         $type = "Kabupaten";
-                    } else {
+                    }
+                    else {
                         $type = "Kota";
                     }
                 }
@@ -169,15 +172,16 @@ class RajaOngkirController extends Controller
                 }
 
                 return [
-                    'city_id'   => $c['city_id'] ?? $c['id'],
-                    'city_name' => ucwords(strtolower($name)),
-                    'type'      => $type
+                'city_id' => $c['city_id'] ?? $c['id'],
+                'city_name' => ucwords(strtolower($name)),
+                'type' => $type
                 ];
             }, $raw);
 
             return response()->json($cities);
 
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return response()->json(['error' => 'Server error'], 500);
         }
     }

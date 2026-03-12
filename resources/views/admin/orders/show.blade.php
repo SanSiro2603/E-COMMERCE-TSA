@@ -191,69 +191,67 @@
         </div>
     </div>
 
-    <!-- Update Status -->
-    <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6">
-        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-soft-green">sync</span>
-            Update Status Pesanan
-        </h3>
-        <form action="{{ route('admin.orders.updateStatus', $order) }}" method="POST" class="space-y-4">
-            @csrf @method('PATCH')
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Status</label>
-                    <select name="status" required 
-                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
-                        <option value="pending" {{ old('status', $order->status) == 'pending' ? 'selected' : '' }}>Menunggu Pembayaran</option>
-                        <option value="paid" {{ old('status', $order->status) == 'paid' ? 'selected' : '' }}>Sudah Dibayar</option>
-                        <option value="processing" {{ old('status', $order->status) == 'processing' ? 'selected' : '' }}>Diproses</option>
-                        <option value="shipped" {{ old('status', $order->status) == 'shipped' ? 'selected' : '' }}>Dikirim</option>
-                        <option value="completed" {{ old('status', $order->status) == 'completed' ? 'selected' : '' }}>Selesai</option>
-                        <option value="cancelled" {{ old('status', $order->status) == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
-                    </select>
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Kurir</label>
-                    <input type="text" name="courier" placeholder="JNE, J&T, SiCepat..." 
-                           value="{{ old('courier', $order->courier) }}"
-                           class="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
-                </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Nomor Resi</label>
-                    <input type="text" name="tracking_number" placeholder="Contoh: CGK123456789" 
-                           value="{{ old('tracking_number', $order->tracking_number) }}"
-                           class="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
-                </div>
-            </div>
+    {{-- ===== BITESHIP: BUAT PENGIRIMAN ===== --}}
+    @if(in_array($order->status, ['paid', 'processing']) && !$order->biteship_order_id)
+        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-6">
+            <h3 class="text-lg font-semibold text-emerald-900 dark:text-emerald-300 mb-3 flex items-center gap-2">
+                <span class="material-symbols-outlined">local_shipping</span>
+                Kirim via Biteship
+            </h3>
+            <p class="text-sm text-emerald-700 dark:text-emerald-400 mb-4">
+                Buat order pengiriman ke Biteship Sandbox. Sistem akan otomatis mengubah status pesanan menjadi <strong>Dikirim</strong> dan menyimpan nomor resi dari kurir.
+            </p>
+            <form action="{{ route('admin.orders.biteship.create', $order) }}" method="POST"
+                  onsubmit="return confirm('Yakin ingin membuat order pengiriman Biteship untuk pesanan #{{ $order->order_number }}?')">
+                @csrf
+                <button type="submit"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium rounded-lg shadow transition-all">
+                    <span class="material-symbols-outlined text-lg">send</span>
+                    Buat Pengiriman Biteship
+                </button>
+            </form>
+        </div>
+    @endif
 
-            <div class="flex justify-end">
-                <button type="submit" 
-                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-soft-green to-primary text-white font-medium rounded-lg hover:shadow-lg transition-all">
-                    <span class="material-symbols-outlined text-lg">save</span>
-                    Update Status
+    {{-- ===== BITESHIP: TRACKING INFO ===== --}}
+    @if($order->biteship_order_id)
+        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-indigo-200 dark:border-indigo-500/30 shadow-sm p-6" id="biteship-tracking-card">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                    <span class="material-symbols-outlined text-indigo-500">local_shipping</span>
+                    Tracking Pengiriman Biteship
+                </h3>
+                <button onclick="refreshTracking()" id="refresh-btn"
+                        class="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-indigo-600 dark:text-indigo-400 border border-indigo-300 dark:border-indigo-500/40 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition">
+                    <span class="material-symbols-outlined text-base">refresh</span>
+                    Refresh
                 </button>
             </div>
-        </form>
-    </div>
 
-    <!-- Shipment Info (if shipped) -->
-    @if($order->tracking_number && in_array($order->status, ['shipped', 'completed']))
-        <div class="bg-gradient-to-r from-indigo-50 to-blue-50 dark:from-indigo-500/10 dark:to-blue-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-xl p-6">
-            <h3 class="text-lg font-semibold text-indigo-900 dark:text-indigo-300 mb-3 flex items-center gap-2">
-                <span class="material-symbols-outlined">local_shipping</span>
-                Informasi Pengiriman
-            </h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                    <span class="text-indigo-700 dark:text-indigo-400 font-medium">Kurir:</span>
-                    <span class="ml-2 text-indigo-900 dark:text-indigo-300">{{ strtoupper($order->courier ?? '-') }}</span>
+            {{-- Info Dasar --}}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
+                <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-3">
+                    <p class="text-gray-500 dark:text-zinc-400 text-xs mb-1">ID Biteship</p>
+                    <p class="font-mono text-xs text-gray-800 dark:text-zinc-200 break-all">{{ $order->biteship_order_id }}</p>
                 </div>
-                <div>
-                    <span class="text-indigo-700 dark:text-indigo-400 font-medium">No. Resi:</span>
-                    <span class="ml-2 font-mono text-indigo-900 dark:text-indigo-300">{{ $order->tracking_number }}</span>
+                <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-3">
+                    <p class="text-gray-500 dark:text-zinc-400 text-xs mb-1">No. Resi</p>
+                    <p class="font-mono font-bold text-indigo-600 dark:text-indigo-400">{{ $order->tracking_number ?? '-' }}</p>
                 </div>
+                <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-3">
+                    <p class="text-gray-500 dark:text-zinc-400 text-xs mb-1">Kurir</p>
+                    <p class="font-bold text-gray-800 dark:text-zinc-200">{{ strtoupper($order->courier ?? '-') }} {{ $order->courier_service ? '(' . strtoupper($order->courier_service) . ')' : '' }}</p>
+                </div>
+            </div>
+
+            {{-- Timeline Tracking --}}
+            <div id="tracking-timeline" class="mt-4">
+                <p class="text-sm text-gray-500 dark:text-zinc-400 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
+                    Memuat data tracking...
+                </p>
             </div>
         </div>
     @endif
@@ -263,36 +261,104 @@
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     const el = document.getElementById('paid-at-text');
-    if (!el) return;
-
-    // ambil ISO string dengan offset dari data attribute
-    const iso = el.dataset.time;
-    if (!iso) return;
-
-    const date = new Date(iso); // parsed correctly thanks to ISO+offset
-
-    // Format: 07 Januari 2025, 16:22
-    const options = {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    };
-
-    // gunakan locale 'id-ID' agar nama bulan bahasa Indonesia
-    const formatted = date.toLocaleString('id-ID', options).replace(',', '');
-    el.textContent = 'Dibayar pada ' + formatted;
+    if (el) {
+        const iso = el.dataset.time;
+        if (iso) {
+            const date = new Date(iso);
+            const formatted = date.toLocaleString('id-ID', {
+                day: '2-digit', month: 'long', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: false
+            }).replace(',', '');
+            el.textContent = 'Dibayar pada ' + formatted;
+        }
+    }
 
     // AUTO REFRESH TIAP 15 DETIK UNTUK ADMIN
-    setTimeout(() => {
-        location.reload();
-    }, 15000);
+    setTimeout(() => { location.reload(); }, 15000);
+
+    @if($order->biteship_order_id)
+        loadTracking();
+    @endif
 });
+
+function loadTracking() {
+    const url = '{{ route("admin.orders.biteship.track", $order) }}';
+    fetch(url)
+        .then(r => r.json())
+        .then(data => renderTracking(data))
+        .catch(e => {
+            document.getElementById('tracking-timeline').innerHTML =
+                '<p class="text-sm text-red-500">Gagal memuat data tracking. Coba refresh.</p>';
+        });
+}
+
+function refreshTracking() {
+    const btn = document.getElementById('refresh-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="material-symbols-outlined text-base animate-spin">progress_activity</span> Memuat...';
+    loadTracking();
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="material-symbols-outlined text-base">refresh</span> Refresh';
+    }, 2000);
+}
+
+function renderTracking(data) {
+    const el = document.getElementById('tracking-timeline');
+    if (!data.success) {
+        el.innerHTML = `<p class="text-sm text-red-500 dark:text-red-400">⚠️ ${data.message ?? 'Gagal memuat tracking.'}</p>`;
+        return;
+    }
+
+    const statusMap = {
+        'confirmed': 'Pesanan Dikonfirmasi',
+        'allocated': 'Kurir Dialokasikan',
+        'picking_up': 'Kurir Menuju Pengirim',
+        'picked': 'Paket Diambil Kurir',
+        'dropping_off': 'Dalam Perjalanan',
+        'return_in_transit': 'Paket Dikembalikan',
+        'delivered': 'Paket Terkirim',
+        'rejected': 'Ditolak Penerima',
+        'cancelled': 'Dibatalkan',
+        'on_hold': 'Ditahan',
+    };
+
+    const history = data.history ?? [];
+    const courierStatus = data.courier_status ?? data.status ?? '-';
+
+    let html = `
+        <div class="flex items-center gap-2 mb-3">
+            <span class="inline-flex items-center gap-1 px-3 py-1 text-xs font-semibold rounded-full bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300">
+                ${statusMap[courierStatus] ?? courierStatus}
+            </span>
+        </div>
+    `;
+
+    if (history.length > 0) {
+        html += '<div class="space-y-3 mt-2">';
+        history.slice().reverse().forEach((h, i) => {
+            const isFirst = i === 0;
+            html += `
+                <div class="flex gap-3 items-start">
+                    <div class="flex flex-col items-center">
+                        <div class="w-3 h-3 rounded-full mt-1 ${isFirst ? 'bg-indigo-500' : 'bg-gray-300 dark:bg-zinc-600'}"></div>
+                        ${i < history.length - 1 ? '<div class="w-0.5 h-full bg-gray-200 dark:bg-zinc-700 mt-1 min-h-4"></div>' : ''}
+                    </div>
+                    <div class="pb-3">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">${h.description ?? h.status}</p>
+                        ${h.created_at ? `<p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">${new Date(h.created_at).toLocaleString('id-ID')}</p>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        html += '</div>';
+    } else {
+        html += '<p class="text-sm text-gray-500 dark:text-zinc-400">Riwayat tracking belum tersedia dari kurir.</p>';
+    }
+
+    el.innerHTML = html;
+}
 </script>
-
-
 
 <style>
     @keyframes fade-in {

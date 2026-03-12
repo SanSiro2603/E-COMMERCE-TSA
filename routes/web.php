@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\BiteshipController;
 
 // =========================
 // PEMBELI
@@ -110,8 +111,12 @@ Route::middleware(['auth', 'role:admin,super_admin'])
         // Pesanan
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
-        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
-            ->name('orders.updateStatus');
+
+        // Biteship — Kirim & Lacak Pengiriman
+        Route::post('/orders/{order}/biteship/create', [BiteshipController::class, 'createShipment'])
+            ->name('orders.biteship.create');
+        Route::get('/orders/{order}/biteship/track', [BiteshipController::class, 'trackShipment'])
+            ->name('orders.biteship.track');
 
         // Laporan
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
@@ -200,6 +205,7 @@ Route::middleware(['auth', 'role:pembeli'])
         Route::prefix('pesanan')->name('pesanan.')->group(function () {
             Route::get('/', [PesananController::class, 'index'])->name('index');
             Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
+            Route::post('/checkout/shipping-cost', [PesananController::class, 'checkShippingCost'])->name('checkout.shipping_cost');
             Route::post('/store', [PesananController::class, 'store'])->name('store');
             Route::get('/{order}', [PesananController::class, 'show'])->name('show');
             Route::get('/{order}/edit', [PesananController::class, 'edit'])->name('edit');
@@ -207,6 +213,7 @@ Route::middleware(['auth', 'role:pembeli'])
             Route::delete('/{order}/item/{item}', [PesananController::class, 'removeItem'])->name('removeItem');
             Route::patch('/{order}/cancel', [PesananController::class, 'cancel'])->name('cancel');
             Route::patch('/{order}/complete', [PesananController::class, 'complete'])->name('complete');
+            Route::get('/{order}/biteship/track', [PesananController::class, 'trackBiteship'])->name('biteship.track');
         });
 
         // Pembayaran
@@ -229,7 +236,8 @@ Route::middleware(['auth', 'role:pembeli'])
             ->name('alamat.default');
 
         // Profil
-        Route::get('/profil', fn () => inertia('Pembeli/Profil'))->name('profil.edit');
+        Route::get('/profile', [App\Http\Controllers\Pembeli\ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [App\Http\Controllers\Pembeli\ProfileController::class, 'update'])->name('profile.update');  
     });
 
 /*
