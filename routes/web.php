@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\DashboardController;
 
 // =========================
@@ -32,6 +33,7 @@ use App\Http\Controllers\Pembeli\CartController;
 use App\Http\Controllers\Pembeli\PesananController;
 use App\Http\Controllers\Pembeli\PaymentController;
 use App\Http\Controllers\Pembeli\AddressController;
+use App\Http\Controllers\Pembeli\ProfileController;
 
 // =========================
 // LAINNYA
@@ -236,8 +238,7 @@ Route::middleware(['auth', 'role:pembeli'])
             ->name('alamat.default');
 
         // Profil
-        Route::get('/profile', [App\Http\Controllers\Pembeli\ProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [App\Http\Controllers\Pembeli\ProfileController::class, 'update'])->name('profile.update');  
+        Route::get('/profil', fn () => inertia('Pembeli/Profil'))->name('profil.edit');
     });
 
 /*

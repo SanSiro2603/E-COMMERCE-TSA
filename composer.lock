@@ -4,31 +4,25 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f1dade11b2533f12d9b153f81ef6e529",
+    "content-hash": "4d0493fef4855361d403f4b59b9fcc56",
     "packages": [
         {
             "name": "anhskohbo/no-captcha",
-            "version": "3.6.0",
+            "version": "3.7.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/anhskohbo/no-captcha.git",
-                "reference": "6f129419a7f0d0a1ed9849fdaaed34e6d83a03cc"
+                "reference": "87666572f0dbe1e3380a2e9ae7574bf3a2d0804e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/anhskohbo/no-captcha/zipball/6f129419a7f0d0a1ed9849fdaaed34e6d83a03cc",
-                "reference": "6f129419a7f0d0a1ed9849fdaaed34e6d83a03cc",
-                "shasum": "",
-                "mirrors": [
-                    {
-                        "url": "https://mirrors.aliyun.com/composer/dists/%package%/%reference%.%type%",
-                        "preferred": true
-                    }
-                ]
+                "url": "https://api.github.com/repos/anhskohbo/no-captcha/zipball/87666572f0dbe1e3380a2e9ae7574bf3a2d0804e",
+                "reference": "87666572f0dbe1e3380a2e9ae7574bf3a2d0804e",
+                "shasum": ""
             },
             "require": {
                 "guzzlehttp/guzzle": "^6.2|^7.0",
-                "illuminate/support": "^5.0|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0",
+                "illuminate/support": "^5.0|^6.0|^7.0|^8.0|^9.0|^10.0|^11.0|^12.0",
                 "php": ">=5.5.5"
             },
             "require-dev": {
@@ -72,9 +66,9 @@
             ],
             "support": {
                 "issues": "https://github.com/anhskohbo/no-captcha/issues",
-                "source": "https://github.com/anhskohbo/no-captcha/tree/3.6.0"
+                "source": "https://github.com/anhskohbo/no-captcha/tree/3.7.0"
             },
-            "time": "2024-03-13T02:22:17+00:00"
+            "time": "2025-02-25T18:53:34+00:00"
         },
         {
             "name": "barryvdh/laravel-dompdf",
@@ -1648,6 +1642,76 @@
                 }
             ],
             "time": "2025-08-22T14:27:06+00:00"
+        },
+        {
+            "name": "inertiajs/inertia-laravel",
+            "version": "v2.0.21",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/inertiajs/inertia-laravel.git",
+                "reference": "fabf202a29023de5f2d59f1474271fa35f84f1d4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/inertiajs/inertia-laravel/zipball/fabf202a29023de5f2d59f1474271fa35f84f1d4",
+                "reference": "fabf202a29023de5f2d59f1474271fa35f84f1d4",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "laravel/framework": "^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.1.0",
+                "symfony/console": "^6.2|^7.0|^8.0"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "^7.2",
+                "larastan/larastan": "^3.0",
+                "laravel/pint": "^1.16",
+                "mockery/mockery": "^1.3.3",
+                "orchestra/testbench": "^8.0|^9.2|^10.0|^11.0",
+                "phpunit/phpunit": "^10.4|^11.5|^12.0",
+                "roave/security-advisories": "dev-master"
+            },
+            "suggest": {
+                "ext-pcntl": "Recommended when running the Inertia SSR server via the `inertia:start-ssr` artisan command."
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Inertia\\ServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "./helpers.php"
+                ],
+                "psr-4": {
+                    "Inertia\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jonathan Reinink",
+                    "email": "jonathan@reinink.ca",
+                    "homepage": "https://reinink.ca"
+                }
+            ],
+            "description": "The Laravel adapter for Inertia.js.",
+            "keywords": [
+                "inertia",
+                "laravel"
+            ],
+            "support": {
+                "issues": "https://github.com/inertiajs/inertia-laravel/issues",
+                "source": "https://github.com/inertiajs/inertia-laravel/tree/v2.0.21"
+            },
+            "time": "2026-02-24T20:21:28+00:00"
         },
         {
             "name": "laravel/framework",
