@@ -9,12 +9,14 @@ use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Payment;
 use App\Models\SystemSetting;
-use App\Services\BiteshipService;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Services\MidtransService;
+use App\Services\BiteshipService;
 
 class PesananController extends Controller
 {
@@ -155,45 +157,70 @@ class PesananController extends Controller
         return view('pembeli.pesanan.checkout', compact('carts', 'subtotal', 'totalWeight', 'addresses'));
     }
 
-    // === AJAX: CEK ONGKIR BITESIP ===
+    // === AJAX: CEK ONGKIR BITESHIP ===
     public function checkShippingCost(Request $request)
     {
         $request->validate([
             'address_id' => 'required|exists:addresses,id',
-            'courier' => 'required|string',
-            'weight' => 'required|numeric'
+            'courier'    => 'required|string',
+            'weight'     => 'required|numeric|min:1',
         ]);
 
         $address = Auth::user()->addresses()->findOrFail($request->address_id);
 
-        $payload = [
-            'destination_postal_code' => $address->postal_code ?? '',
-            'destination_area_id' => '',
-            'couriers' => $request->courier,
-            'weight' => $request->weight,
-            'items_value' => Cart::where('user_id', Auth::id())->get()->sum('subtotal')
-        ];
-
-        $response = $this->biteship->getRates($payload);
-
-        if (!$response['success']) {
-            return response()->json(['success' => false, 'message' => $response['message']]);
+        if (!$address->postal_code) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Alamat tidak memiliki kode pos yang valid. Silakan perbarui alamat Anda.'
+            ], 422);
         }
 
-        $rates = $response['pricing'] ?? [];
-        if (empty($rates)) {
-            return response()->json(['success' => false, 'message' => 'Layanan kurir tidak tersedia untuk rute ini.']);
+        try {
+            // Hitung estimasi nilai barang (opsional untuk asuransi, kita pakai default atau subtotal keranjang)
+            $itemsValue = Cart::where('user_id', Auth::id())->sum('subtotal');
+            if ($itemsValue <= 0) {
+                // Jika dari halaman edit (keranjang kosong), estimasi saja 100000
+                $itemsValue = 100000;
+            }
+
+            $payload = [
+                'destination_postal_code' => $address->postal_code,
+                'couriers'                => strtolower($request->courier), // Pastikan lowercase
+                'weight'                  => (int) $request->weight,
+                'items_value'             => $itemsValue,
+            ];
+
+            $response = $this->biteship->getRates($payload);
+
+            if (!$response['success']) {
+                return response()->json(['success' => false, 'message' => $response['message']]);
+            }
+
+            $services = [];
+            foreach ($response['pricing'] as $pricing) {
+                $services[] = [
+                    'courier'      => strtolower($pricing['company'] ?? ''),
+                    'courier_name' => strtoupper($pricing['company'] ?? ''),
+                    'service'      => $pricing['type'] ?? 'REG',
+                    'description'  => $pricing['description'] ?? '',
+                    'price'        => (int) ($pricing['price'] ?? 0),
+                    'etd'          => $pricing['duration'] ?? '-',
+                ];
+            }
+
+            if (empty($services)) {
+                return response()->json(['success' => false, 'message' => 'Tidak ada layanan kurir tersedia untuk rute ini.']);
+            }
+
+            // Urutkan dari harga termurah
+            usort($services, fn($a, $b) => $a['price'] - $b['price']);
+
+            return response()->json(['success' => true, 'services' => $services]);
+
+        } catch (\Exception $e) {
+            Log::error('Biteship checkShippingCost exception: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Server error: ' . $e->getMessage()]);
         }
-
-        // Ambil harga terendah dari hasil kurir yang sama jika ada beberapa jenis layanan (karena user cuma pilih kurir company di dropdown Checkout)
-        $selectedCourier = collect($rates)->sortBy('price')->first();
-
-        return response()->json([
-            'success' => true,
-            'service' => strtoupper($selectedCourier['company']) . ' ' . strtoupper($selectedCourier['type']),
-            'cost' => $selectedCourier['price'],
-            'courier_type' => $selectedCourier['type']
-        ]);
     }
 
     // === STORE: BUAT PESANAN DARI ALAMAT TERPILIH ===
@@ -207,8 +234,10 @@ class PesananController extends Controller
         }
 
         $validated = $request->validate([
-            'address_id' => 'required|exists:addresses,id',
-            'courier' => 'required|in:jne,pos,tiki,jnt,sicepat,anteraja',
+            'address_id'      => 'required|exists:addresses,id',
+            'courier'         => 'required|string',
+            'courier_service' => 'required|string',
+            'shipping_cost'   => 'required|numeric|min:0',
         ]);
 
         try {
@@ -218,8 +247,15 @@ class PesananController extends Controller
 
             $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
 
-            // Delegate logic to OrderService
-            $order = $this->orderService->createOrder(Auth::id(), $carts, $address, $validated['courier']);
+            // Delegate logic to OrderService — kirim shipping_cost dari hasil RajaOngkir
+            $order = $this->orderService->createOrder(
+                Auth::id(),
+                $carts,
+                $address,
+                $validated['courier'],
+                $validated['courier_service'],
+                (int) $validated['shipping_cost']
+            );
 
             return redirect()->route('pembeli.payment.show', $order)
                 ->with('success', 'Pesanan berhasil dibuat! Silakan bayar.');
@@ -257,15 +293,23 @@ class PesananController extends Controller
         }
 
         $validated = $request->validate([
-            'address_id' => 'required|exists:addresses,id',
-            'courier' => 'required|in:jne,pos,tiki,jnt,sicepat,anteraja',
+            'address_id'      => 'required|exists:addresses,id',
+            'courier'         => 'required|string',
+            'courier_service' => 'required|string',
+            'shipping_cost'   => 'required|numeric|min:0',
         ]);
 
         try {
             $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
 
-            // Delegate logic to Service
-            $this->orderService->updateShippingDetails($order, $address, $validated['courier']);
+            // Delegate logic to Service — kirim shipping_cost dari hasil RajaOngkir
+            $this->orderService->updateShippingDetails(
+                $order,
+                $address,
+                $validated['courier'],
+                $validated['courier_service'],
+                (int) $validated['shipping_cost']
+            );
 
             return redirect()->route('pembeli.pesanan.index')
                 ->with('success', 'Pesanan berhasil diperbarui!');

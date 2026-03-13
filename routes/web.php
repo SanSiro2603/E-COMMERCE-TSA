@@ -239,13 +239,12 @@ Route::middleware(['auth', 'role:pembeli'])
 
         // Profil
 
-        Route::get('/profile', [App\Http\Controllers\Pembeli\ProfileController::class, 'edit'])->name('profile.edit');
-        Route::put('/profile', [App\Http\Controllers\Pembeli\ProfileController::class, 'update'])->name('profile.update');  
+   
 
-        Route::get('/profil', [ProfileController::class,'show'])->name('profile.edit');
-        Route::get('/profil/alamat', [ProfileController::class,'address'])->name('profile.address');
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::get('/profil', [ProfileController::class,'show'])->name('profile.show');
         Route::get('/profil/ganti-password', [ProfileController::class,'changePassword'])->name('profile.change-password');
-
     });
 
 /*

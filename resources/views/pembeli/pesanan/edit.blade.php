@@ -26,6 +26,12 @@
         @csrf
         @method('PUT')
 
+        {{-- HIDDEN INPUTS --}}
+        <input type="hidden" name="address_id"      id="selectedAddressId"    value="{{ old('address_id', $order->address_id) }}">
+        <input type="hidden" name="courier"          id="hiddenCourier"        value="{{ old('courier', $order->courier) }}">
+        <input type="hidden" name="courier_service"  id="hiddenCourierService" value="{{ old('courier_service', $order->courier_service) }}">
+        <input type="hidden" name="shipping_cost"    id="hiddenShippingCost"   value="{{ old('shipping_cost', $order->shipping_cost) }}">
+
         <div class="grid md:grid-cols-3 gap-6">
             <!-- ==================== KIRI ==================== -->
             <div class="md:col-span-2 space-y-6">
@@ -56,10 +62,9 @@
                             @foreach($addresses as $addr)
                                 <label class="flex items-start p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-700 transition
                                            {{ $order->address_id == $addr->id ? 'border-soft-green ring-2 ring-soft-green' : 'border-gray-300 dark:border-zinc-600' }}">
-                                    <input type="radio" name="address_id" value="{{ $addr->id }}"
+                                    <input type="radio" name="address_radio" value="{{ $addr->id }}"
                                            class="mt-1 text-soft-green focus:ring-soft-green"
-                                           {{ $order->address_id == $addr->id ? 'checked' : '' }}
-                                           onchange="selectAddress(this, {{ $addr->id }})">
+                                           {{ $order->address_id == $addr->id ? 'checked' : '' }}>
                                     <div class="ml-3 flex-1">
                                         <div class="flex justify-between items-center">
                                             <span class="font-medium text-gray-900 dark:text-white">{{ $addr->label }}</span>
@@ -91,16 +96,19 @@
                         Kurir Pengiriman
                     </h2>
 
-                    <select name="courier" id="courier" required
+                    <select id="courierSelect"
                             class="w-full p-3 border border-gray-300 dark:border-zinc-600 rounded-lg 
                                    focus:ring-2 focus:ring-soft-green focus:border-soft-green dark:bg-zinc-700 dark:text-white">
                         <option value="">Pilih Kurir</option>
-                        <option value="jne" {{ $order->courier == 'jne' ? 'selected' : '' }}>JNE</option>
-                        <option value="pos" {{ $order->courier == 'pos' ? 'selected' : '' }}>POS Indonesia</option>
-                        <option value="tiki" {{ $order->courier == 'tiki' ? 'selected' : '' }}>TIKI</option>
-                        <option value="jnt" {{ $order->courier == 'jnt' ? 'selected' : '' }}>J&T Express</option>
-                        <option value="sicepat" {{ $order->courier == 'sicepat' ? 'selected' : '' }}>SiCepat</option>
-                        <option value="anteraja" {{ $order->courier == 'anteraja' ? 'selected' : '' }}>AnterAja</option>
+                        <option value="jne" {{ old('courier', $order->courier) == 'jne' ? 'selected' : '' }}>JNE</option>
+                        <option value="pos" {{ old('courier', $order->courier) == 'pos' ? 'selected' : '' }}>POS Indonesia</option>
+                        <option value="tiki" {{ old('courier', $order->courier) == 'tiki' ? 'selected' : '' }}>TIKI</option>
+                        <option value="jnt" {{ old('courier', $order->courier) == 'jnt' ? 'selected' : '' }}>J&T Express</option>
+                        <option value="sicepat" {{ old('courier', $order->courier) == 'sicepat' ? 'selected' : '' }}>SiCepat</option>
+                        <option value="anteraja" {{ old('courier', $order->courier) == 'anteraja' ? 'selected' : '' }}>AnterAja</option>
+                        <option value="ninja" {{ old('courier', $order->courier) == 'ninja' ? 'selected' : '' }}>Ninja Express</option>
+                        <option value="sap" {{ old('courier', $order->courier) == 'sap' ? 'selected' : '' }}>SAP Express</option>
+                        <option value="lion" {{ old('courier', $order->courier) == 'lion' ? 'selected' : '' }}>Lion Parcel</option>
                     </select>
 
                     <div id="shippingLoading" class="hidden mt-4 bg-blue-50 dark:bg-blue-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4 flex items-center gap-2">
@@ -108,7 +116,15 @@
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.3 0 0 5.3 0 12h4z"></path>
                         </svg>
-                        <span class="text-blue-700 dark:text-blue-300 font-medium">Menghitung ongkir...</span>
+                        <span class="text-blue-700 dark:text-blue-300 font-medium">Menghitung ongkir dari Biteship...</span>
+                    </div>
+
+                    {{-- Error --}}
+                    <div id="shippingError" class="hidden mt-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg p-4 text-red-700 dark:text-red-300 text-sm"></div>
+
+                    {{-- Daftar Layanan --}}
+                    <div id="serviceList" class="hidden mt-4 space-y-2">
+                        <p class="text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Pilih Layanan Pengiriman:</p>
                     </div>
 
                     <div id="shippingResult" class="hidden mt-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg p-4">
@@ -235,67 +251,159 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const courier = document.getElementById('courier');
-    const submitBtn = document.getElementById('submitBtn');
-    const loading = document.getElementById('shippingLoading');
-    const result = document.getElementById('shippingResult');
-    const serviceName = document.getElementById('serviceName');
-    const etd = document.getElementById('etd');
-    const costDisplay = document.getElementById('costDisplay');
-    const summaryCost = document.getElementById('summaryCost');
-    const grandTotal = document.getElementById('grandTotal');
-    const subtotal = {{ $order->subtotal }};
-    const totalWeight = {{ $order->items->sum(fn($i) => $i->product->weight * $i->quantity) }};
-    const addresses = @json($addresses->keyBy('id'));
-    const ongkirMap = {
-        '31': 15000, '1': 40000, '2': 40000, '3': 40000, '4': 40000, '5': 40000,
-        '32': 30000, '33': 35000, '34': 40000, '35': 35000, '36': 40000,
-        '61': 70000, '62': 75000, '63': 75000, '64': 80000,
-        '71': 70000, '72': 75000, '73': 75000, '74': 80000,
-        '51': 60000, '52': 90000, '53': 95000, '81': 120000, '91': 130000
-    };
+    const courierSelect        = document.getElementById('courierSelect');
+    const submitBtn            = document.getElementById('submitBtn');
+    const loading              = document.getElementById('shippingLoading');
+    const errorBox             = document.getElementById('shippingError');
+    const serviceListDiv       = document.getElementById('serviceList');
+    const resultDiv            = document.getElementById('shippingResult');
+    const serviceNameEl        = document.getElementById('serviceName');
+    const etdEl                = document.getElementById('etd');
+    const costDisplayEl        = document.getElementById('costDisplay');
+    const summaryCostEl        = document.getElementById('summaryCost');
+    const grandTotalEl         = document.getElementById('grandTotal');
+    const hiddenCourier        = document.getElementById('hiddenCourier');
+    const hiddenCourierService = document.getElementById('hiddenCourierService');
+    const hiddenShippingCost   = document.getElementById('hiddenShippingCost');
+    const hiddenAddressId      = document.getElementById('selectedAddressId');
 
-    function formatRupiah(n) { return 'Rp ' + parseInt(n).toLocaleString('id-ID'); }
+    const subtotal    = {{ $order->subtotal }};
+    const totalWeight = {{ $order->items->sum(fn($i) => ($i->product->weight ?? 1000) * $i->quantity) }};
 
-    function calculateShipping() {
-        const selectedId = document.querySelector('input[name="address_id"]:checked')?.value;
-        if (!selectedId || !courier.value) return;
-        const addr = addresses[selectedId];
-        if (!addr) return;
-
-        loading.classList.remove('hidden');
-        result.classList.add('hidden');
-        submitBtn.disabled = true;
-
-        setTimeout(() => {
-            const weightKg = Math.ceil(totalWeight / 1000);
-            const baseCost = ongkirMap[addr.province_id] || 60000;
-            const totalCost = baseCost + (weightKg > 1 ? (weightKg - 1) * 10000 : 0);
-
-            serviceName.textContent = `${courier.value.toUpperCase()} REG`;
-            etd.textContent = 'Estimasi 2-3 hari';
-            costDisplay.textContent = formatRupiah(totalCost);
-            summaryCost.textContent = formatRupiah(totalCost);
-            grandTotal.textContent = formatRupiah(subtotal + totalCost);
-
-            loading.classList.add('hidden');
-            result.classList.remove('hidden');
-            submitBtn.disabled = false;
-        }, 600);
+    function formatRupiah(n) {
+        return 'Rp ' + parseInt(n).toLocaleString('id-ID');
     }
 
-    document.querySelectorAll('input[name="address_id"]').forEach(radio => {
-        radio.addEventListener('change', calculateShipping);
+    function resetShipping() {
+        serviceListDiv.classList.add('hidden');
+        serviceListDiv.innerHTML = '<p class="text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Pilih Layanan Pengiriman:</p>';
+        resultDiv.classList.add('hidden');
+        errorBox.classList.add('hidden');
+        hiddenShippingCost.value   = 0;
+        hiddenCourierService.value = '';
+        hiddenCourier.value        = '';
+        summaryCostEl.textContent  = 'Pilih alamat & kurir';
+        grandTotalEl.textContent   = formatRupiah(subtotal);
+        if (submitBtn) submitBtn.disabled = true;
+    }
+
+    function selectService(svc) {
+        hiddenCourier.value        = svc.courier;
+        hiddenCourierService.value = svc.service;
+        hiddenShippingCost.value   = svc.price;
+
+        const label = `${svc.courier_name} ${svc.service}` + (svc.description ? ` – ${svc.description}` : '');
+        serviceNameEl.textContent = label;
+        etdEl.textContent         = svc.etd && svc.etd !== '-' ? `Estimasi ${svc.etd} hari` : '';
+        costDisplayEl.textContent = formatRupiah(svc.price);
+        summaryCostEl.textContent = formatRupiah(svc.price);
+        grandTotalEl.textContent  = formatRupiah(subtotal + svc.price);
+
+        resultDiv.classList.remove('hidden');
+        if (submitBtn) submitBtn.disabled = false;
+    }
+
+    function renderServices(services) {
+        serviceListDiv.innerHTML = '<p class="text-sm font-medium text-gray-700 dark:text-zinc-300 mb-2">Pilih Layanan Pengiriman:</p>';
+
+        services.forEach(svc => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = [
+                'w-full text-left p-3 border rounded-lg transition flex justify-between items-start gap-2',
+                'border-gray-200 dark:border-zinc-600',
+                'hover:border-soft-green hover:bg-green-50 dark:hover:bg-green-900/20',
+                'service-btn'
+            ].join(' ');
+
+            btn.innerHTML = `
+                <div>
+                    <span class="font-semibold text-gray-800 dark:text-white">${svc.courier_name} ${svc.service}</span>
+                    ${svc.description ? `<span class="ml-1 text-xs text-gray-500 dark:text-zinc-400">${svc.description}</span>` : ''}
+                    ${svc.etd && svc.etd !== '-' ? `<p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Estimasi ${svc.etd} hari</p>` : ''}
+                </div>
+                <span class="font-bold text-soft-green whitespace-nowrap">${formatRupiah(svc.price)}</span>
+            `;
+
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.service-btn').forEach(b => {
+                    b.classList.remove('border-soft-green', 'ring-2', 'ring-soft-green', 'bg-green-50');
+                });
+                btn.classList.add('border-soft-green', 'ring-2', 'ring-soft-green', 'bg-green-50');
+                selectService(svc);
+            });
+
+            serviceListDiv.appendChild(btn);
+        });
+
+        serviceListDiv.classList.remove('hidden');
+    }
+
+    function fetchShippingCost() {
+        // Find which radio is checked
+        const addressRadio = document.querySelector('input[name="address_radio"]:checked');
+        const courier = courierSelect.value;
+
+        resetShipping();
+        if (!addressRadio || !courier) return;
+
+        const addressId = addressRadio.value;
+        hiddenAddressId.value = addressId;
+
+        loading.classList.remove('hidden');
+
+        fetch('{{ route("pembeli.pesanan.checkout.shipping_cost") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
+            },
+            body: JSON.stringify({
+                address_id: addressId,
+                courier: courier,
+                weight: totalWeight,
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            loading.classList.add('hidden');
+            if (!data.success) {
+                errorBox.textContent = data.message || 'Gagal mendapatkan ongkir.';
+                errorBox.classList.remove('hidden');
+                return;
+            }
+            renderServices(data.services);
+        })
+        .catch(() => {
+            loading.classList.add('hidden');
+            errorBox.textContent = 'Terjadi kesalahan jaringan. Silakan coba lagi.';
+            errorBox.classList.remove('hidden');
+        });
+    }
+
+    // Bind event listeners
+    document.querySelectorAll('input[name="address_radio"]').forEach(r => {
+        r.addEventListener('change', () => {
+            document.querySelectorAll('label').forEach(label => {
+                label.classList.remove('border-soft-green', 'ring-2', 'ring-soft-green');
+            });
+            r.closest('label').classList.add('border-soft-green', 'ring-2', 'ring-soft-green');
+            
+            hiddenAddressId.value = r.value;
+            fetchShippingCost();
+        });
     });
-    courier.addEventListener('change', calculateShipping);
 
-    // Auto trigger jika kurir sudah dipilih
-    if (courier.value) calculateShipping();
+    courierSelect.addEventListener('change', fetchShippingCost);
+
+    // Initial trigger if previously selected
+    const prevCourier = hiddenCourier.value;
+    if (prevCourier) {
+        courierSelect.value = prevCourier;
+        fetchShippingCost();
+    }
 });
-
-function selectAddress(radio, id) {
-    document.getElementById('selectedAddressId').value = id;
-}
 
 function confirmRemoveItem(productName, url, isLast = false) {
     const message = isLast 

@@ -50,16 +50,7 @@
                     </p>
 
                     <div class="mt-6 pt-6 border-t border-gray-200 dark:border-zinc-700">
-                        <a href="{{ route('logout') }}"
-                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                            class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 font-medium flex items-center justify-center gap-2">
-                            <span class="material-symbols-outlined">logout</span>
-                            Keluar
-                        </a>
-
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
-                            @csrf
-                        </form>
+        
                     </div>
                 </div>
 
@@ -72,12 +63,7 @@
                             Profil
                         </a>
 
-                        <a href="{{ route('pembeli.profile.address') }}"
-                            class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition">
-                            <span class="material-symbols-outlined">location_on</span>
-                            Alamat Pengiriman
-                        </a>
-
+                    
                         <a href="{{ route('pembeli.pesanan.index') }}"
                             class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition">
                             <span class="material-symbols-outlined">receipt_long</span>
@@ -187,11 +173,7 @@
                     <span class="material-symbols-outlined text-2xl">person</span>
                     <span class="text-xs mt-1">Profil</span>
                 </a>
-                <a href="{{ route('pembeli.profile.address') }}"
-                    class="text-gray-600 dark:text-zinc-400 flex flex-col items-center">
-                    <span class="material-symbols-outlined text-2xl">location_on</span>
-                    <span class="text-xs mt-1">Alamat</span>
-                </a>
+               
                 <a href="{{ route('pembeli.pesanan.index') }}"
                     class="text-gray-600 dark:text-zinc-400 flex flex-col items-center">
                     <span class="material-symbols-outlined text-2xl">receipt_long</span>
