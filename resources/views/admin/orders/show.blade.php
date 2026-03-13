@@ -345,7 +345,7 @@ function renderTracking(data) {
                         ${i < history.length - 1 ? '<div class="w-0.5 h-full bg-gray-200 dark:bg-zinc-700 mt-1 min-h-4"></div>' : ''}
                     </div>
                     <div class="pb-3">
-                        <p class="text-sm font-medium text-gray-900 dark:text-white">${h.description ?? h.status}</p>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">${translateBiteshipNote(h.description ?? h.status)}</p>
                         ${h.created_at ? `<p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">${new Date(h.created_at).toLocaleString('id-ID')}</p>` : ''}
                     </div>
                 </div>
@@ -357,6 +357,29 @@ function renderTracking(data) {
     }
 
     el.innerHTML = html;
+}
+
+function translateBiteshipNote(text) {
+    if (!text) return '-';
+    let t = text;
+    t = t.replace(/Courier order is confirmed/gi, 'Pesanan kurir telah dikonfirmasi');
+    t = t.replace(/has been notified to pick up/gi, 'telah diinformasikan untuk penjemputan');
+    t = t.replace(/Pickup Number/gi, 'Nomor Penjemputan');
+    t = t.replace(/Shipment has been allocated to courier/gi, 'Pengiriman telah dialokasikan ke kurir');
+    t = t.replace(/Courier is on the way to pick up the shipment/gi, 'Kurir dalam perjalanan untuk mengambil paket');
+    t = t.replace(/Courier is on the way to pick up location/gi, 'Kurir dalam perjalanan menuju lokasi penjemputan'); // SAP
+    t = t.replace(/Item has been picked by courier/gi, 'Paket telah diambil oleh kurir'); // SAP
+    t = t.replace(/Courier is allocated and ready to pick up/gi, 'Kurir telah disiapkan dan siap menjemput paket'); // SAP
+    t = t.replace(/Courier is dropping off item to destination/gi, 'Kurir sedang dalam perjalanan mengirimkan paket ke tujuan'); // SAP
+    t = t.replace(/Shipment has been picked up/gi, 'Paket telah diambil oleh kurir');
+    t = t.replace(/Shipment is being delivered/gi, 'Paket sedang dalam proses pengangkutan');
+    t = t.replace(/Shipment has been dropped off by courier/gi, 'Paket telah diserahkan ke agen\/hub');
+    t = t.replace(/Shipment has been delivered/gi, 'Paket telah berhasil terkirim');
+    t = t.replace(/Shipment has been cancelled/gi, 'Pengiriman dibatalkan');
+    t = t.replace(/Shipment is returned/gi, 'Paket dikembalikan ke pengirim');
+    t = t.replace(/return_in_transit/gi, 'Dikembalikan di perjalanan');
+    t = t.replace(/on_hold/gi, 'Ditahan (On Hold)');
+    return t;
 }
 </script>
 
