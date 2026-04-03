@@ -21,6 +21,8 @@ class User extends Authenticatable
         'google_id',
         'google2fa_secret',
         'is_active',
+        'gender',
+        'birth_date',
     ];
 
     protected $hidden = [
@@ -51,8 +53,8 @@ class User extends Authenticatable
         return $this->carts()->count();
     }
     public function addresses()
-{
-    return $this->hasMany(\App\Models\Address::class, 'user_id');
-}
+    {
+        return $this->hasMany(\App\Models\Address::class, 'user_id');
+    }
 
 }
