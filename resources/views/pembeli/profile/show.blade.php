@@ -28,8 +28,10 @@
                 {{-- Profile Card --}}
                 <div class="bg-white dark:bg-zinc-900 rounded-xl shadow p-6 text-center">
                     <div class="relative inline-block">
-                        <img src="{{ $user->avatar_url ?? asset('images/default-avatar.png') }}" alt="{{ $user->name }}"
-                            class="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-zinc-800 shadow-lg mx-auto">
+                       <img 
+                            src="{{ $user->profile_photo ? asset('storage/'.$user->profile_photo) : asset('images/default-avatar.png') }}"
+                            class="w-32 h-32 rounded-full object-cover border-4 border-white dark:border-zinc-800 shadow-lg mx-auto"
+>
 
                         @if ($user->is_verified)
                             <span
@@ -57,7 +59,7 @@
                 {{-- Navigation Menu --}}
                 <div class="bg-white dark:bg-zinc-900 rounded-xl shadow p-4 hidden md:block">
                     <nav class="space-y-1">
-                        <a href="{{ route('pembeli.profile.edit') }}"
+                        <a href="{{ route('pembeli.profile.show') }}"
                             class="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/10 text-primary font-medium">
                             <span class="material-symbols-outlined">person</span>
                             Profil
@@ -169,7 +171,7 @@
         class="fixed bottom-0 left-0 right-0 bg-white dark:bg-zinc-900 border-t border-gray-200 dark:border-zinc-700 md:hidden z-50">
         <div class="max-w-6xl mx-auto px-4">
             <div class="flex justify-around py-3">
-                <a href="{{ route('pembeli.profile.edit') }}" class="text-primary flex flex-col items-center">
+                <a href="{{ route('pembeli.profile.show') }}" class="text-primary flex flex-col items-center">
                     <span class="material-symbols-outlined text-2xl">person</span>
                     <span class="text-xs mt-1">Profil</span>
                 </a>

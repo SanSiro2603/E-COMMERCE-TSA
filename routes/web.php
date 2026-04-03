@@ -238,13 +238,21 @@ Route::middleware(['auth', 'role:pembeli'])
             ->name('alamat.default');
 
         // Profil
+        // halaman profil (lihat data)
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
 
-   
+        // halaman edit
+        Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
 
-        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        // update data
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::get('/profil', [ProfileController::class,'show'])->name('profile.show');
-        Route::get('/profil/ganti-password', [ProfileController::class,'changePassword'])->name('profile.change-password');
+
+        // ganti password
+        Route::get('/profile/change-password', [ProfileController::class,'changePassword'])->name('profile.change-password');
+        Route::put('/profil/ganti-password', [ProfileController::class, 'updatePassword'])
+               ->name('profile.update-password');
+                
+        
     });
 
 /*

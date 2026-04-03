@@ -153,6 +153,7 @@
                 </a>
 
                 <!-- Profile Dropdown -->
+                @auth
                 <div class="relative" x-data="{ open: false }">
                     <button @click="open = !open" class="flex items-center gap-3 pl-2 border-l border-gray-200 dark:border-primary/20">
                         <div class="hidden lg:block text-right">
@@ -166,6 +167,7 @@
                                 class="w-full h-full object-cover">
                         </div>
                     </button>
+                @endauth
 
                     <!-- Dropdown Menu -->
                     <div x-show="open" @click.away="open = false" x-transition
@@ -176,7 +178,7 @@
                             <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{{ auth()->user()->email }}</p>
                         </div>
 
-                        <a href="{{ route('pembeli.profile.edit') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-[#0d1b13] dark:text-white hover:bg-primary/10">
+                        <a href="{{ route('pembeli.profile.show') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-[#0d1b13] dark:text-white hover:bg-primary/10">
                             <span class="material-symbols-outlined text-lg">person</span>
                             Profil Saya
                         </a>
@@ -225,7 +227,7 @@
                         ['icon' => 'inventory_2', 'label' => 'Produk', 'route' => 'pembeli.produk.index'],
                         ['icon' => 'receipt_long', 'label' => 'Pesanan', 'route' => 'pembeli.pesanan.index'],
                         ['icon' => 'location_on', 'label' => 'Alamat', 'route' => 'pembeli.alamat.index'],
-                        ['icon' => 'person', 'label' => 'Profil', 'route' => 'pembeli.profile.edit'],
+                        ['icon' => 'person', 'label' => 'Profil', 'route' => 'pembeli.profile.show'],
                     ];
                 @endphp
                 
@@ -273,7 +275,7 @@
                     <li><a href="{{ route('pembeli.dashboard') }}" class="hover:text-primary transition-colors">Beranda</a></li>
                     <li><a href="{{ route('pembeli.produk.index') }}" class="hover:text-primary transition-colors">Katalog</a></li>
                     <li><a href="{{ route('pembeli.pesanan.index') }}" class="hover:text-primary transition-colors">Pesanan</a></li>
-                    <li><a href="{{ route('pembeli.profile.edit') }}" class="hover:text-primary transition-colors">Profil</a></li>
+                    <li><a href="{{ route('pembeli.profile.show') }}" class="hover:text-primary transition-colors">Profil</a></li>
                 </ul>
             </div>
 

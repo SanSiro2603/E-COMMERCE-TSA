@@ -68,7 +68,8 @@ class ProductController extends Controller
             $html = $this->renderTableRows($products);
             
             // Render pagination HTML
-            $pagination = $products->appends($request->only(['search', 'category']))->links()->render();
+            /** @var \Illuminate\Pagination\LengthAwarePaginator $products */
+            $pagination = $products->appends($request->only(['search', 'category']))->links();
             
             return response()->json([
                 'html' => $html,
@@ -130,7 +131,7 @@ class ProductController extends Controller
             $categoryName = $product->category ? e($product->category->name) : 'Tanpa Kategori';
             
             // Description
-            $description = \Str::limit($product->description, 50);
+            $description = Str::limit($product->description, 50);
             
             $html .= '
                 <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors" data-product-id="' . $product->id . '">
