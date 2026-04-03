@@ -62,19 +62,27 @@ Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallb
 | AUTH GUEST
 |--------------------------------------------------------------------------
 */
+use App\Http\Controllers\Auth\TwoFactorController;
+
+Route::middleware('auth')->group(function () {
+    Route::get('/2fa', [TwoFactorController::class, 'index'])->name('2fa.index');
+    Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify');
+});
+
 Route::middleware('guest')->group(function () {
 
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 
     Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [RegisterController::class, 'register']);
+    Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
 
     Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
     Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email');
+        ->name('password.email')
+        ->middleware('throttle:5,1');
 
     Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
         ->name('password.reset');
@@ -97,7 +105,7 @@ Route::post('/logout', [LoginController::class, 'logout'])
 | ADMIN ROUTES (ADMIN & SUPER ADMIN 🔒)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:admin,super_admin'])
+Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
     ->prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -137,7 +145,7 @@ Route::middleware(['auth', 'role:admin,super_admin'])
 | SUPER ADMIN ROUTES (KHUSUS SUPER ADMIN 🔒)
 |--------------------------------------------------------------------------
 */
-Route::middleware(['auth', 'role:super_admin'])
+Route::middleware(['auth', 'role:super_admin', '2fa'])
     ->prefix('superadmin')
     ->name('superadmin.')
     ->group(function () {
@@ -148,6 +156,18 @@ Route::middleware(['auth', 'role:super_admin'])
         )->name('dashboard');
 
         // Manajemen Admin
+        Route::patch('admins/{admin}/toggle-active', 
+            [App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'toggleActive']
+        )->name('admins.toggle-active');
+        
+        Route::patch('admins/{admin}/reset-2fa', 
+            [App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'resetTwoFactor']
+        )->name('admins.reset-2fa');
+
+        Route::patch('admins/{admin}/reset-password', 
+            [App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'resetPassword']
+        )->name('admins.reset-password');
+
         Route::resource('admins',
             App\Http\Controllers\SuperAdmin\AdminManagementController::class
         );

@@ -319,45 +319,25 @@ function addToCart(productId) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            currentStock = data.new_stock;
-
-            // Update stok di teks
-            if (stockEl) {
-                stockEl.textContent = currentStock > 0 ? currentStock : 'Habis';
-                stockEl.className = 'font-semibold ';
-                if (currentStock > 5) {
-                    stockEl.classList.add('text-green-600', 'dark:text-green-400');
-                } else if (currentStock > 0) {
-                    stockEl.classList.add('text-yellow-600', 'dark:text-yellow-400');
-                } else {
-                    stockEl.classList.add('text-red-600', 'dark:text-red-400');
-                }
+            // Update cart count UI using global function if exists
+            if (typeof window.updateCartCount === 'function' && data.cart_count !== undefined) {
+                window.updateCartCount(data.cart_count);
             }
 
-            // Update label di gambar
-            imageLabel.innerHTML = '';
-            if (currentStock > 0 && currentStock <= 5) {
-                imageLabel.innerHTML = `<div class="absolute top-3 right-3 px-3 py-1 bg-yellow-500 text-white text-xs font-bold rounded-full shadow-md">Stok ${currentStock}</div>`;
-            } else if (currentStock === 0) {
-                imageLabel.innerHTML = `<div class="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span class="bg-red-600 text-white px-3 py-1 rounded-full font-semibold text-sm">Stok Habis</span>
-                </div>`;
+            // Notify user
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: `${qty} produk ditambahkan ke keranjang!`,
+                    toast: true,
+                    position: 'top-end',
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            } else {
+                alert(`${qty} produk ditambahkan ke keranjang!`);
             }
-
-            // Update input max
-            inputQty.max = currentStock;
-            if (parseInt(inputQty.value) > currentStock && currentStock > 0) {
-                inputQty.value = currentStock;
-            }
-
-            // Nonaktifkan tombol jika habis
-            if (currentStock === 0) {
-                addBtn.disabled = true;
-                addBtn.innerHTML = '<span class="material-symbols-outlined">block</span> Stok Habis';
-                addBtn.className = 'px-4 py-3 bg-gray-200 dark:bg-zinc-800 text-gray-400 dark:text-zinc-500 rounded-lg cursor-not-allowed';
-            }
-
-            alert(`${qty} produk ditambahkan ke keranjang!`);
         } else {
             alert(data.message || 'Gagal menambahkan ke keranjang');
         }

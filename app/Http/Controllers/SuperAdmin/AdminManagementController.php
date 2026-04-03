@@ -129,4 +129,44 @@ class AdminManagementController extends Controller
         return redirect()->route('superadmin.admins.index')
             ->with('success', 'Admin berhasil dihapus!');
     }
+
+    public function toggleActive(User $admin)
+    {
+        if ($admin->role !== 'admin') {
+            abort(404);
+        }
+
+        $admin->update(['is_active' => !$admin->is_active]);
+
+        $status = $admin->is_active ? 'diaktifkan' : 'dinonaktifkan';
+        return back()->with('success', "Akun admin berhasil {$status}.");
+    }
+
+    public function resetTwoFactor(User $admin)
+    {
+        if ($admin->role !== 'admin') {
+            abort(404);
+        }
+
+        $admin->update(['google2fa_secret' => null]);
+
+        return back()->with('success', '2FA untuk admin ini berhasil di-reset. Mereka akan diminta mengatur ulang pada saat login berikutnya.');
+    }
+    
+    public function resetPassword(Request $request, User $admin)
+    {
+        if ($admin->role !== 'admin') {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $admin->update([
+            'password' => Hash::make($validated['password'])
+        ]);
+
+        return back()->with('success', 'Password admin berhasil di-reset.');
+    }
 }

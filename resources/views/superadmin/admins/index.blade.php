@@ -53,6 +53,7 @@
                     <tr>
                         <th class="px-6 py-3 text-left text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Admin</th>
                         <th class="px-6 py-3 text-left text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Kontak</th>
+                        <th class="px-6 py-3 text-center text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-3 text-center text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Pesanan Ditangani</th>
                         <th class="px-6 py-3 text-left text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Terdaftar</th>
                         <th class="px-6 py-3 text-center text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Aksi</th>
@@ -92,6 +93,13 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-center">
+                            @if($admin->is_active)
+                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Aktif</span>
+                            @else
+                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">Nonaktif</span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4 text-center">
                             <span class="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 rounded-full text-xs font-semibold">
                                 <span class="material-symbols-outlined text-[14px]">shopping_cart</span>
                                 {{ number_format($admin->orders_handled ?? 0) }}
@@ -113,6 +121,15 @@
                                    title="Edit">
                                     <span class="material-symbols-outlined text-[18px]">edit</span>
                                 </a>
+                                <form action="{{ route('superadmin.admins.toggle-active', $admin) }}" method="POST" class="inline-block m-0 p-0">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit" 
+                                            class="p-2 {{ $admin->is_active ? 'text-red-500 hover:bg-red-50' : 'text-green-500 hover:bg-green-50' }} rounded-lg transition-colors"
+                                            title="{{ $admin->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                        <span class="material-symbols-outlined text-[18px]">{{ $admin->is_active ? 'block' : 'check_circle' }}</span>
+                                    </button>
+                                </form>
                                 <button onclick="confirmDelete({{ $admin->id }})" 
                                         class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
                                         title="Hapus">

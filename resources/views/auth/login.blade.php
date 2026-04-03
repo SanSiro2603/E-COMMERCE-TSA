@@ -196,12 +196,12 @@
 
             <!-- reCAPTCHA -->
             <!-- reCAPTCHA -->
-            {{-- <div class="captcha-wrapper">
+            <div class="captcha-wrapper">
                 {!! NoCaptcha::display() !!}
             </div>
             @error('g-recaptcha-response')
                 <p class="text-red-500 text-[11px] mt-1 text-left">{{ $message }}</p>
-            @enderror --}}
+            @enderror
 
             <!-- Login Button -->
             <button type="submit"
