@@ -20,8 +20,8 @@ class SuperAdminDashboardController extends Controller
         $dateTo        = $request->input('date_to', now()->format('Y-m-d'));
         $province      = $request->input('province');
         $categoryId    = $request->input('category_id');
-        $paymentMethod = $request->input('payment_method'); // Midtrans payment_type
-        $paymentStatus = $request->input('payment_status'); // orders.status
+        $paymentMethod = $request->input('payment_method');
+        $paymentStatus = $request->input('payment_status');
 
         // =============================================
         // CLOSURE FILTER — dipakai di semua query Eloquent
@@ -33,7 +33,6 @@ class SuperAdminDashboardController extends Controller
             ]);
             if ($province)      $q->where('orders.province', $province);
             if ($paymentStatus) $q->where('orders.status', $paymentStatus);
-            // FIX: payment_method ada di tabel payments (Midtrans menyimpan sebagai payment_type)
             if ($paymentMethod) {
                 $q->whereHas('payment', fn($p) => $p->where('payment_type', $paymentMethod));
             }
@@ -113,8 +112,7 @@ class SuperAdminDashboardController extends Controller
             ->get();
 
         // =============================================
-        // TOP 5 KATEGORI — Pie Chart + Persentase
-        // FIX: join langsung ke tabel categories (bukan via relasi Eloquent)
+        // TOP 5 KATEGORI — Pie Chart
         // =============================================
         $topCategories = DB::table('order_items')
             ->join('orders',     'order_items.order_id',   '=', 'orders.id')
@@ -153,8 +151,7 @@ class SuperAdminDashboardController extends Controller
             ->get();
 
         // =============================================
-        // METODE PEMBAYARAN — Bar Horizontal
-        // FIX: baca dari tabel payments.payment_type (Midtrans)
+        // METODE PEMBAYARAN — Pie Chart
         // =============================================
         $paymentMethods = DB::table('payments')
             ->join('orders', 'payments.order_id', '=', 'orders.id')
@@ -180,7 +177,7 @@ class SuperAdminDashboardController extends Controller
             ]);
 
         // =============================================
-        // STATUS PEMBAYARAN — Donut Chart + Persentase
+        // STATUS PESANAN — Donut Chart
         // =============================================
         $paymentStatuses = Order::query()
             ->tap($applyBase)
@@ -194,12 +191,111 @@ class SuperAdminDashboardController extends Controller
             ]);
 
         // =============================================
+        // KATEGORI PER PROVINSI — Grouped Bar Horizontal
+        // Top 5 provinsi × top 5 kategori
+        // =============================================
+        $top5ProvinceNames = $topProvinces->pluck('province');
+
+        $cpRaw = collect();
+        if ($top5ProvinceNames->isNotEmpty()) {
+            $cpRaw = DB::table('order_items')
+                ->join('orders',     'order_items.order_id',   '=', 'orders.id')
+                ->join('products',   'order_items.product_id', '=', 'products.id')
+                ->join('categories', 'products.category_id',   '=', 'categories.id')
+                ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                ->whereIn('orders.status', ['paid', 'processing', 'shipped', 'completed'])
+                ->whereNull('orders.deleted_at')
+                ->whereIn('orders.province', $top5ProvinceNames)
+                ->when($paymentMethod, fn($q) => $q->whereIn('orders.id',
+                    DB::table('payments')->select('order_id')->where('payment_type', $paymentMethod)
+                ))
+                ->when($categoryId, fn($q) => $q->where('products.category_id', $categoryId))
+                ->select(
+                    'orders.province',
+                    'categories.name as category_name',
+                    DB::raw('SUM(order_items.quantity) as total_sold')
+                )
+                ->groupBy('orders.province', 'categories.name')
+                ->orderByDesc('total_sold')
+                ->get();
+        }
+
+        // Top 5 kategori dari data cross-province
+        $top5CatNames = $cpRaw->groupBy('category_name')
+            ->map(fn($rows) => $rows->sum('total_sold'))
+            ->sortDesc()
+            ->take(5)
+            ->keys();
+
+        // $cpProvince: list provinsi untuk sumbu Y chart
+        $cpProvince = $top5ProvinceNames;
+
+        // $cpDatasets: array dataset per kategori untuk Chart.js
+        $palette = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
+        $cpDatasets = $top5CatNames->values()->map(function ($catName, $i) use ($cpRaw, $top5ProvinceNames, $palette) {
+            $data = $top5ProvinceNames->map(function ($prov) use ($cpRaw, $catName) {
+                $row = $cpRaw->first(fn($r) => $r->province === $prov && $r->category_name === $catName);
+                return $row ? (int) $row->total_sold : 0;
+            })->values();
+
+            return [
+                'label'           => $catName,
+                'data'            => $data,
+                'backgroundColor' => $palette[$i] ?? '#9ca3af',
+                'borderRadius'    => 4,
+                'borderSkipped'   => false,
+            ];
+        });
+
+        // =============================================
+        // JAM TERSIBUK — Bar Chart (24 jam)
+        // =============================================
+        $hourRaw = Order::query()
+            ->tap($applyBase)
+            ->selectRaw('HOUR(orders.created_at) as hour, COUNT(*) as total')
+            ->groupBy('hour')
+            ->pluck('total', 'hour');
+
+        // Buat array lengkap 0–23 jam
+        $hourLabels = collect();
+        $hourData   = collect();
+        for ($h = 0; $h < 24; $h++) {
+            $hourLabels->push(str_pad($h, 2, '0', STR_PAD_LEFT) . ':00');
+            $hourData->push((int) $hourRaw->get($h, 0));
+        }
+
+        // =============================================
+        // REPEAT vs NEW CUSTOMER
+        // =============================================
+        // User yang pernah order SEBELUM periode ini = repeat customer
+        $allBuyerIds = Order::query()
+            ->tap($applyBase)
+            ->whereNotNull('user_id')
+            ->distinct()
+            ->pluck('user_id');
+
+        $repeatCustomers = 0;
+        $newCustomers    = 0;
+
+        if ($allBuyerIds->isNotEmpty()) {
+            // Cek apakah user pernah order sebelum dateFrom
+            $repeatIds = Order::whereIn('user_id', $allBuyerIds)
+                ->where('created_at', '<', $dateFrom . ' 00:00:00')
+                ->whereNull('deleted_at')
+                ->distinct()
+                ->pluck('user_id');
+
+            $repeatCustomers = $repeatIds->count();
+            $newCustomers    = $allBuyerIds->count() - $repeatCustomers;
+        }
+
+        // =============================================
         // TABEL PENJUALAN — Paginasi 15
         // =============================================
         $salesTable = Order::with(['items.product.category', 'payment'])
             ->tap($applyBase)
             ->latest('orders.created_at')
-            ->paginate(15)
+            ->paginate(5)
             ->withQueryString();
 
         // =============================================
@@ -216,7 +312,6 @@ class SuperAdminDashboardController extends Controller
             ->orderBy('name')
             ->get(['id', 'name']);
 
-        // Sesuai Midtrans payment_type
         $paymentMethodOptions = [
             'bank_transfer' => 'Transfer Bank (VA)',
             'echannel'      => 'Mandiri E-Channel',
@@ -244,6 +339,9 @@ class SuperAdminDashboardController extends Controller
             'chartDates', 'chartRevenues',
             'topProducts', 'topCategories', 'topProvinces',
             'paymentMethods', 'paymentStatuses',
+            'cpProvince', 'cpDatasets',
+            'hourLabels', 'hourData',
+            'repeatCustomers', 'newCustomers',
             'salesTable',
             'provinceOptions', 'categoryOptions',
             'paymentMethodOptions', 'paymentStatusOptions'
