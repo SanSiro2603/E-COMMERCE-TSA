@@ -1,4 +1,4 @@
-<form action="{{ $action }}" method="POST">
+<form action="{{ $action }}" method="POST" enctype="multipart/form-data">
     @csrf
     @if(isset($category)) @method('PUT') @endif
 
@@ -54,6 +54,56 @@
             @enderror
         </div>
 
+        <!-- Gambar Kategori -->
+        <div>
+            <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Gambar Kategori <span class="text-gray-400 text-xs">(Opsional, maks. 2MB)</span>
+            </label>
+
+            <!-- Preview Area -->
+            <div id="image-preview-container" class="mb-3 {{ isset($category) && $category->image ? '' : 'hidden' }}">
+                <div class="relative inline-block">
+                    <img id="image-preview" 
+                         src="{{ isset($category) && $category->image ? Storage::url($category->image) : '' }}" 
+                         alt="Preview" 
+                         class="w-32 h-32 object-cover rounded-xl border-2 border-soft-green shadow-md">
+                    <button type="button" 
+                            id="remove-preview-btn"
+                            onclick="removeImage()"
+                            class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center shadow-md transition-colors">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                </div>
+                <p id="preview-filename" class="text-xs text-gray-500 dark:text-zinc-400 mt-1"></p>
+            </div>
+
+            <!-- Hidden input untuk flag hapus gambar -->
+            <input type="hidden" name="remove_image" id="remove_image" value="0">
+
+            <!-- Upload Box -->
+            <div id="upload-box"
+                 class="{{ isset($category) && $category->image ? 'hidden' : '' }} border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-xl p-6 text-center hover:border-soft-green dark:hover:border-soft-green transition-colors cursor-pointer"
+                 onclick="document.getElementById('image-input').click()">
+                <span class="material-symbols-outlined text-4xl text-gray-400 dark:text-zinc-500 mb-2 block">add_photo_alternate</span>
+                <p class="text-sm font-medium text-gray-700 dark:text-zinc-300">Klik untuk upload gambar</p>
+                <p class="text-xs text-gray-500 dark:text-zinc-500 mt-1">PNG, JPG, WEBP — Maks 2MB</p>
+            </div>
+
+            <input type="file" 
+                   id="image-input"
+                   name="image" 
+                   accept="image/jpeg,image/png,image/jpg,image/webp"
+                   class="hidden"
+                   onchange="previewImage(event)">
+
+            @error('image')
+                <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
+                    <span class="material-symbols-outlined text-sm">error</span>
+                    <span>{{ $message }}</span>
+                </div>
+            @enderror
+        </div>
+
         <!-- Status Aktif -->
         <div class="flex items-start gap-3 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-200 dark:border-zinc-700">
             <input type="checkbox" 
@@ -85,19 +135,43 @@
 </form>
 
 <style>
-    /* Custom checkbox styling */
     input[type="checkbox"]:checked {
         background-color: #7BB661;
         border-color: #7BB661;
     }
-
-    /* Simple fade in animation for alerts */
     .animate-fade {
         animation: fadeIn 0.3s ease-in-out;
     }
-
     @keyframes fadeIn {
         from { opacity: 0; transform: translateY(-5px); }
         to { opacity: 1; transform: translateY(0); }
     }
 </style>
+
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('image-preview').src = e.target.result;
+            document.getElementById('preview-filename').textContent = file.name;
+            document.getElementById('image-preview-container').classList.remove('hidden');
+            document.getElementById('upload-box').classList.add('hidden');
+            document.getElementById('remove_image').value = '0';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function removeImage() {
+        // Reset input file
+        document.getElementById('image-input').value = '';
+        document.getElementById('image-preview').src = '';
+        document.getElementById('preview-filename').textContent = '';
+        document.getElementById('image-preview-container').classList.add('hidden');
+        document.getElementById('upload-box').classList.remove('hidden');
+        // Flag ke server supaya gambar lama dihapus
+        document.getElementById('remove_image').value = '1';
+    }
+</script>

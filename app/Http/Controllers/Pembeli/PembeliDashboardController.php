@@ -37,6 +37,10 @@ class PembeliDashboardController extends Controller
 
         // TAMBAHAN BARU: Kategori aktif
         $categories = Category::where('is_active', true)
+            ->whereNotNull('image')
+            ->whereHas('products', function ($query) {
+                $query->where('is_active', true);
+            })
             ->orderBy('name')
             ->get();
 

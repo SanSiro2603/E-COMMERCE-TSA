@@ -52,61 +52,30 @@
         </a>
     </div>
     
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        {{-- Sapi --}}
-        <a href="{{ route('pembeli.produk.index') }}?search=sapi" 
-           class="group cursor-pointer bg-white dark:bg-background-dark border border-[#cfe7d9] dark:border-primary/20 p-4 rounded-xl flex flex-col items-center transition-all hover:shadow-xl hover:shadow-primary/10 hover:border-primary">
-            <div class="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <span class="material-symbols-outlined text-4xl text-primary">pets</span>
-            </div>
-            <span class="font-bold text-sm text-[#0d1b13] dark:text-white">Sapi</span>
-        </a>
+    @if($categories->count() > 0)
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            @foreach($categories as $category)
+                <a href="{{ route('pembeli.produk.index') }}?category={{ $category->id }}" 
+                   class="group cursor-pointer bg-white dark:bg-background-dark border border-[#cfe7d9] dark:border-primary/20 p-4 rounded-xl flex flex-col items-center transition-all hover:shadow-xl hover:shadow-primary/10 hover:border-primary">
+                    
+                    
+<!-- Gambar Kategori -->
+<div class="size-16 rounded-full overflow-hidden mb-3 group-hover:scale-110 transition-transform">
+    <img src="{{ Storage::url($category->image) }}" 
+         alt="{{ $category->name }}"
+         class="w-full h-full object-cover">
+</div>
 
-        {{-- Kambing --}}
-        <a href="{{ route('pembeli.produk.index') }}?search=kambing" 
-           class="group cursor-pointer bg-white dark:bg-background-dark border border-[#cfe7d9] dark:border-primary/20 p-4 rounded-xl flex flex-col items-center transition-all hover:shadow-xl hover:shadow-primary/10 hover:border-primary">
-            <div class="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <span class="material-symbols-outlined text-4xl text-primary">cruelty_free</span>
-            </div>
-            <span class="font-bold text-sm text-[#0d1b13] dark:text-white">Kambing</span>
-        </a>
-
-        {{-- Domba --}}
-        <a href="{{ route('pembeli.produk.index') }}?search=domba" 
-           class="group cursor-pointer bg-white dark:bg-background-dark border border-[#cfe7d9] dark:border-primary/20 p-4 rounded-xl flex flex-col items-center transition-all hover:shadow-xl hover:shadow-primary/10 hover:border-primary">
-            <div class="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <span class="material-symbols-outlined text-4xl text-primary">eco</span>
-            </div>
-            <span class="font-bold text-sm text-[#0d1b13] dark:text-white">Domba</span>
-        </a>
-
-        {{-- Ayam --}}
-        <a href="{{ route('pembeli.produk.index') }}?search=ayam" 
-           class="group cursor-pointer bg-white dark:bg-background-dark border border-[#cfe7d9] dark:border-primary/20 p-4 rounded-xl flex flex-col items-center transition-all hover:shadow-xl hover:shadow-primary/10 hover:border-primary">
-            <div class="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <span class="material-symbols-outlined text-4xl text-primary">flutter_dash</span>
-            </div>
-            <span class="font-bold text-sm text-[#0d1b13] dark:text-white">Ayam</span>
-        </a>
-
-        {{-- Bebek --}}
-        <a href="{{ route('pembeli.produk.index') }}?search=bebek" 
-           class="group cursor-pointer bg-white dark:bg-background-dark border border-[#cfe7d9] dark:border-primary/20 p-4 rounded-xl flex flex-col items-center transition-all hover:shadow-xl hover:shadow-primary/10 hover:border-primary">
-            <div class="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <span class="material-symbols-outlined text-4xl text-primary">pest_control_rodent</span>
-            </div>
-            <span class="font-bold text-sm text-[#0d1b13] dark:text-white">Bebek</span>
-        </a>
-
-        {{-- Pakan & Alkes --}}
-        <a href="{{ route('pembeli.produk.index') }}?search=pakan" 
-           class="group cursor-pointer bg-white dark:bg-background-dark border border-[#cfe7d9] dark:border-primary/20 p-4 rounded-xl flex flex-col items-center transition-all hover:shadow-xl hover:shadow-primary/10 hover:border-primary">
-            <div class="size-16 rounded-full bg-primary/10 flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-                <span class="material-symbols-outlined text-4xl text-primary">medical_services</span>
-            </div>
-            <span class="font-bold text-sm text-[#0d1b13] dark:text-white">Alat & Pakan</span>
-        </a>
-    </div>
+                    <span class="font-bold text-sm text-[#0d1b13] dark:text-white text-center">{{ $category->name }}</span>
+                </a>
+            @endforeach
+        </div>
+    @else
+        <div class="text-center py-10 bg-white dark:bg-background-dark rounded-xl border border-[#cfe7d9] dark:border-primary/20">
+            <span class="material-symbols-outlined text-gray-300 text-5xl mb-2 block">category</span>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Belum ada kategori tersedia</p>
+        </div>
+    @endif
 </section>
 
 <!-- Rekomendasi Hewan -->

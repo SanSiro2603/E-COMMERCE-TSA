@@ -16,7 +16,13 @@ class ProdukController extends Controller
     public function index(Request $request)
     {
         // Get all categories for filter (disesuaikan dengan model Anda)
-        $categories = Category::where('is_active', true)->orderBy('name')->get();
+        $categories = Category::where('is_active', true)
+            ->whereNotNull('image')
+            ->whereHas('products', function ($query) {
+                $query->where('is_active', true);
+            })
+            ->orderBy('name')
+            ->get();
         
         // Start query (disesuaikan dengan field di database Anda)
         $query = Product::with('category')
