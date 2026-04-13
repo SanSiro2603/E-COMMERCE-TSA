@@ -29,9 +29,11 @@ class PembeliDashboardController extends Controller
             ->get();
 
         // Produk terlaris (untuk rekomendasi)
-        $topProducts = Product::withSum('orderItems as total_sold', 'quantity')
+        $topProducts = Product::with('category')
             ->where('is_active', true)
-            ->orderByDesc('total_sold')
+            ->where('is_featured', true)
+->latest()
+            
             ->take(4)
             ->get();
 

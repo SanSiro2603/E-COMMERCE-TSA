@@ -209,11 +209,13 @@ class ProductController extends Controller
             'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Multiple images
             'health_certificate' => 'nullable|mimes:pdf|max:5120',
             'available_from' => 'nullable|date',
-            'is_active' => 'required|boolean',
+            'is_active'   => 'required|boolean',
+            'is_featured' => 'nullable|boolean',
         ]);
 
         $data = $request->all();
         $data['slug'] = Str::slug($request->name);
+        $data['is_featured'] = $request->boolean('is_featured');
 
         // Handle multiple images untuk gallery
         $imagesPaths = [];
@@ -267,11 +269,13 @@ class ProductController extends Controller
             'health_certificate' => 'nullable|mimes:pdf|max:5120',
             'available_from' => 'nullable|date',
             'is_active' => 'required|boolean',
+            'is_featured'  => 'nullable|boolean',
             'remove_images' => 'nullable|array', // Array of images to remove
         ]);
 
         $data = $request->all();
         $data['slug'] = Str::slug($request->name);
+        $data['is_featured'] = $request->boolean('is_featured');
 
         // Get existing images
         $existingImages = $product->images ?? [];

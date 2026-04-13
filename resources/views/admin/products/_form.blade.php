@@ -178,50 +178,70 @@
         </div>
 
         <!-- Ketersediaan & Status Section -->
-        <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
+        < class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
             <h3 class="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <span class="material-symbols-outlined text-soft-green">schedule</span>
                 Ketersediaan & Status
             </h3>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Tersedia Dari -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                        Tersedia Dari <span class="text-gray-400 text-xs">(Opsional)</span>
-                    </label>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 text-xl">calendar_month</span>
-                        <input type="date" 
-                               name="available_from" 
-                               value="{{ old('available_from', $product->available_from ?? '') }}"
-                               class="block w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
-                    </div>
-                    @error('available_from')
-                        <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
-                            <span class="material-symbols-outlined text-sm">error</span>
-                            <span>{{ $message }}</span>
-                        </div>
-                    @enderror
-                </div>
-
-                <!-- Status Aktif -->
-                <div class="flex items-center">
-                    <div class="flex items-start gap-3 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-200 dark:border-zinc-700 w-full">
-                        <input type="checkbox" 
-                               name="is_active" 
-                               id="is_active"
-                               value="1"
-                               {{ old('is_active', $product->is_active ?? true) ? 'checked' : '' }}
-                               class="w-4 h-4 mt-0.5 text-soft-green bg-white dark:bg-zinc-700 border-gray-300 dark:border-zinc-600 rounded focus:ring-2 focus:ring-soft-green transition-colors">
-                        <label for="is_active" class="flex-1 cursor-pointer">
-                            <span class="block text-sm font-medium text-gray-900 dark:text-white">Aktif</span>
-                            <span class="block text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Produk akan ditampilkan di toko</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Tersedia Dari -->
+    <div>
+        <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+            Tersedia Dari <span class="text-gray-400 text-xs">(Opsional)</span>
+        </label>
+        <div class="relative">
+            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 text-xl">calendar_month</span>
+            <input type="date" 
+                   name="available_from" 
+                   value="{{ old('available_from', $product->available_from ?? '') }}"
+                   class="block w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
         </div>
+        @error('available_from')
+            <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
+                <span class="material-symbols-outlined text-sm">error</span>
+                <span>{{ $message }}</span>
+            </div>
+        @enderror
+    </div>
+
+    <!-- Status Aktif -->
+    <div class="flex items-center">
+        <div class="flex items-start gap-3 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg border border-gray-200 dark:border-zinc-700 w-full">
+            <input type="checkbox" 
+                   name="is_active" 
+                   id="is_active"
+                   value="1"
+                   {{ old('is_active', $product->is_active ?? true) ? 'checked' : '' }}
+                   class="w-4 h-4 mt-0.5 text-soft-green bg-white dark:bg-zinc-700 border-gray-300 dark:border-zinc-600 rounded focus:ring-2 focus:ring-soft-green transition-colors">
+            <label for="is_active" class="flex-1 cursor-pointer">
+                <span class="block text-sm font-medium text-gray-900 dark:text-white">Aktif</span>
+                <span class="block text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Produk ditampilkan di toko</span>
+            </label>
+        </div>
+    </div>
+
+
+    <!-- Rekomendasi -->
+    <div class="flex items-center">
+        <div class="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-500/10 rounded-lg border border-yellow-200 dark:border-yellow-500/30 w-full">
+            <input type="checkbox" 
+                   name="is_featured" 
+                   id="is_featured"
+                   value="1"
+                   {{ old('is_featured', $product->is_featured ?? false) ? 'checked' : '' }}
+                   class="w-4 h-4 mt-0.5 text-soft-green bg-white dark:bg-zinc-700 border-gray-300 dark:border-zinc-600 rounded focus:ring-2 focus:ring-soft-green transition-colors">
+            <label for="is_featured" class="flex-1 cursor-pointer">
+                <span class="block text-sm font-medium text-gray-900 dark:text-white flex items-center gap-1">
+                    <span class="material-symbols-outlined text-yellow-500 text-base">star</span>
+                    Rekomendasi
+                </span>
+                <span class="block text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Tampil di "Rekomendasi Hewan" dashboard pembeli</span>
+            </label>
+        </div>
+    </div>
+</div>
+
 
         <!-- GALERI GAMBAR Section -->
         <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
