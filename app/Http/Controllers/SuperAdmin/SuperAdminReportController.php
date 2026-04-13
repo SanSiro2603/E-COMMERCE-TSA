@@ -5,8 +5,7 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\User;
-use App\Models\Product;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
@@ -16,153 +15,149 @@ class SuperAdminReportController extends Controller
 {
     public function index(Request $request)
     {
-        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
-        $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $startDate     = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate       = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $province      = $request->input('province');
+        $categoryId    = $request->input('category_id');
+        $paymentMethod = $request->input('payment_method');
+        $status        = $request->input('status');
 
-        // Data pesanan
-        $orders = Order::whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'completed')
-            ->with(['user', 'items.product'])
-            ->latest()
-            ->paginate(15);
+        // =====================
+        // QUERY DASAR
+        // =====================
+        $baseQuery = Order::with(['items.product.category', 'payment'])
+            ->whereBetween('created_at', [
+                $startDate . ' 00:00:00',
+                $endDate   . ' 23:59:59',
+            ]);
 
-        // === STATISTIK LENGKAP ===
+        if ($province)      $baseQuery->where('province', $province);
+        if ($status)        $baseQuery->where('status', $status);
+        if ($paymentMethod) $baseQuery->whereHas('payment', fn($q) => $q->where('payment_type', $paymentMethod));
+        if ($categoryId)    $baseQuery->whereHas('items.product', fn($q) => $q->where('category_id', $categoryId));
+
+        // Ambil semua data untuk statistik (tanpa pagination)
+        $allOrders = (clone $baseQuery)->get();
+
+        // =====================
+        // STATISTIK — Total = Subtotal + Ongkir
+        // =====================
         $stats = [
-            'total_revenue' => Order::whereBetween('created_at', [$startDate, $endDate])
-                ->where('status', 'completed')
-                ->sum('grand_total'),
-            
-            'total_orders' => Order::whereBetween('created_at', [$startDate, $endDate])
-                ->where('status', 'completed')
-                ->count(),
-            
-            'avg_order_value' => Order::whereBetween('created_at', [$startDate, $endDate])
-                ->where('status', 'completed')
-                ->avg('grand_total'),
-            
-            'total_customers' => Order::whereBetween('created_at', [$startDate, $endDate])
-                ->where('status', 'completed')
-                ->distinct('user_id')
-                ->count('user_id'),
-            
-            // ✅ FIX: Tambahkan prefix table untuk menghindari ambiguitas
-            'total_items_sold' => Order::whereBetween('orders.created_at', [$startDate, $endDate])
-                ->where('orders.status', 'completed')
-                ->join('order_items', 'orders.id', '=', 'order_items.order_id')
-                ->sum('order_items.quantity'),
+            'total_revenue'    => $allOrders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)),
+            'total_orders'     => $allOrders->count(),
+            'total_items_sold' => $allOrders->sum(fn($o) => $o->items->sum('quantity')),
+            'avg_order_value'  => $allOrders->count() > 0
+                ? round($allOrders->avg(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)), 0)
+                : 0,
         ];
 
-        // Grafik pendapatan harian
-        $dailyRevenue = Order::whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'completed')
-            ->selectRaw('DATE(created_at) as date, SUM(grand_total) as total, COUNT(*) as orders_count')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->get();
+        // =====================
+        // TABEL (dengan pagination)
+        // =====================
+        $orders = (clone $baseQuery)->latest()->paginate(5)->withQueryString();
 
-        $dates = [];
-        $revenues = [];
-        $orderCounts = [];
-        
-        $current = \Carbon\Carbon::parse($startDate);
-        $end = \Carbon\Carbon::parse($endDate);
+        // =====================
+        // DROPDOWN OPTIONS
+        // =====================
+        $provinceOptions = Order::whereNotNull('province')
+            ->where('province', '!=', '')
+            ->whereNull('deleted_at')
+            ->distinct()
+            ->orderBy('province')
+            ->pluck('province');
 
-        while ($current <= $end) {
-            $date = $current->format('Y-m-d');
-            $dayData = $dailyRevenue->firstWhere('date', $date);
-            
-            $dates[] = $current->format('d M');
-            $revenues[] = $dayData->total ?? 0;
-            $orderCounts[] = $dayData->orders_count ?? 0;
-            
-            $current->addDay();
-        }
+        $categoryOptions = Category::where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
-        // Top 10 produk terlaris
-        $topProducts = Product::whereHas('orderItems.order', function($q) use ($startDate, $endDate) {
-                $q->whereBetween('created_at', [$startDate, $endDate])
-                  ->where('status', 'completed');
-            })
-            ->withSum(['orderItems as total_sold' => function($q) use ($startDate, $endDate) {
-                $q->whereHas('order', function($q) use ($startDate, $endDate) {
-                    $q->whereBetween('created_at', [$startDate, $endDate])
-                      ->where('status', 'completed');
-                });
-            }], 'quantity')
-            ->withSum(['orderItems as total_revenue' => function($q) use ($startDate, $endDate) {
-                $q->whereHas('order', function($q) use ($startDate, $endDate) {
-                    $q->whereBetween('created_at', [$startDate, $endDate])
-                      ->where('status', 'completed');
-                });
-            }], 'subtotal')
-            ->orderByDesc('total_sold')
-            ->limit(10)
-            ->get();
+        $paymentMethodOptions = [
+            'bank_transfer' => 'Transfer Bank (VA)',
+            'echannel'      => 'Mandiri E-Channel',
+            'cstore'        => 'Minimarket',
+            'gopay'         => 'GoPay',
+            'qris'          => 'QRIS',
+            'shopeepay'     => 'ShopeePay',
+            'credit_card'   => 'Kartu Kredit',
+        ];
 
-        // Top 10 pelanggan
-        $topCustomers = User::where('role', 'pembeli')
-            ->whereHas('orders', function($q) use ($startDate, $endDate) {
-                $q->whereBetween('created_at', [$startDate, $endDate])
-                  ->where('status', 'completed');
-            })
-            ->withCount(['orders as orders_count' => function($q) use ($startDate, $endDate) {
-                $q->whereBetween('created_at', [$startDate, $endDate])
-                  ->where('status', 'completed');
-            }])
-            ->withSum(['orders as total_spent' => function($q) use ($startDate, $endDate) {
-                $q->whereBetween('created_at', [$startDate, $endDate])
-                  ->where('status', 'completed');
-            }], 'grand_total')
-            ->orderByDesc('total_spent')
-            ->limit(10)
-            ->get();
+        $statusOptions = [
+            'pending'    => 'Menunggu Pembayaran',
+            'paid'       => 'Sudah Dibayar',
+            'processing' => 'Diproses',
+            'shipped'    => 'Dikirim',
+            'completed'  => 'Selesai',
+            'cancelled'  => 'Dibatalkan',
+        ];
 
         return view('superadmin.reports.index', compact(
-            'orders',
-            'stats',
-            'startDate',
-            'endDate',
-            'dates',
-            'revenues',
-            'orderCounts',
-            'topProducts',
-            'topCustomers'
+            'orders', 'stats',
+            'startDate', 'endDate',
+            'province', 'categoryId', 'paymentMethod', 'status',
+            'provinceOptions', 'categoryOptions',
+            'paymentMethodOptions', 'statusOptions'
         ));
     }
 
     public function exportPdf(Request $request)
     {
-        $startDate = $request->start_date;
-        $endDate = $request->end_date;
+        $startDate     = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate       = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $province      = $request->input('province');
+        $categoryId    = $request->input('category_id');
+        $paymentMethod = $request->input('payment_method');
+        $status        = $request->input('status');
 
-        $orders = Order::whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'completed')
-            ->with(['user', 'items.product'])
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $query = Order::with(['items.product.category', 'payment'])
+            ->whereBetween('created_at', [
+                $startDate . ' 00:00:00',
+                $endDate   . ' 23:59:59',
+            ])
+            ->orderBy('created_at', 'asc');
+
+        if ($province)      $query->where('province', $province);
+        if ($status)        $query->where('status', $status);
+        if ($paymentMethod) $query->whereHas('payment', fn($q) => $q->where('payment_type', $paymentMethod));
+        if ($categoryId)    $query->whereHas('items.product', fn($q) => $q->where('category_id', $categoryId));
+
+        $orders = $query->get();
 
         $stats = [
-            'total_revenue' => $orders->sum('grand_total'),
-            'total_orders' => $orders->count(),
-            'avg_order_value' => $orders->avg('grand_total'),
-            'total_items_sold' => $orders->sum(function($order) {
-                return $order->items->sum('quantity');
-            }),
+            'total_revenue'    => $orders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)),
+            'total_orders'     => $orders->count(),
+            'total_items_sold' => $orders->sum(fn($o) => $o->items->sum('quantity')),
+            'avg_order_value'  => $orders->count() > 0
+                ? round($orders->avg(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)), 0)
+                : 0,
         ];
 
-        $pdf = Pdf::loadView('superadmin.reports.pdf', compact('orders', 'stats', 'startDate', 'endDate'))
-            ->setPaper('a4', 'landscape');
+        $activeFilters = array_filter([
+            'Provinsi'          => $province,
+            'Kategori'          => $categoryId ? Category::find($categoryId)?->name : null,
+            'Metode Pembayaran' => $paymentMethod,
+            'Status'            => $status,
+        ]);
 
-        return $pdf->download('laporan-super-admin-' . $startDate . '-sd-' . $endDate . '.pdf');
+        $pdf = Pdf::loadView('superadmin.reports.pdf', compact(
+            'orders', 'stats', 'startDate', 'endDate', 'activeFilters'
+        ))->setPaper('a4', 'landscape');
+
+        return $pdf->download('laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.pdf');
     }
 
     public function exportExcel(Request $request)
     {
-        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
-        $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $startDate     = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate       = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $province      = $request->input('province');
+        $categoryId    = $request->input('category_id');
+        $paymentMethod = $request->input('payment_method');
+        $status        = $request->input('status');
 
-        $fileName = 'laporan-super-admin-' . $startDate . '-sd-' . $endDate . '.xlsx';
+        $fileName = 'laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.xlsx';
 
-        return Excel::download(new SuperAdminReportExport($startDate, $endDate), $fileName);
+        return Excel::download(
+            new SuperAdminReportExport($startDate, $endDate, $province, $categoryId, $paymentMethod, $status),
+            $fileName
+        );
     }
 }
