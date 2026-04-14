@@ -24,6 +24,13 @@ class SuperAdminDashboardController extends Controller
         $paymentStatus = $request->input('payment_status');
 
         // =============================================
+        // STATUS YANG DIHITUNG SEBAGAI TRANSAKSI VALID
+        // pending  = belum bayar → TIDAK dihitung
+        // cancelled = dibatalkan → TIDAK dihitung
+        // =============================================
+        $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
+
+        // =============================================
         // CLOSURE FILTER — dipakai di semua query Eloquent
         // =============================================
         $applyBase = function ($q) use ($dateFrom, $dateTo, $province, $categoryId, $paymentMethod, $paymentStatus) {
@@ -46,28 +53,39 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $baseQ = Order::query()->tap($applyBase);
 
+        // Total Pendapatan: hanya status valid (paid, processing, shipped, completed)
         $totalRevenue = (clone $baseQ)
-            ->whereIn('status', ['paid', 'processing', 'shipped', 'completed'])
+            ->whereIn('status', $validStatuses)
             ->sum('grand_total');
 
-        $totalTransactions = (clone $baseQ)->count();
+        // Total Transaksi: hanya status valid — TIDAK termasuk pending & cancelled
+        $totalTransactions = (clone $baseQ)
+            ->whereIn('status', $validStatuses)
+            ->count();
 
+        // Produk Terjual: hanya dari order berstatus valid
         $totalProductsSold = (clone $baseQ)
+            ->whereIn('status', $validStatuses)
             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
             ->sum('order_items.quantity');
 
+        // Rata-rata nilai transaksi: dihitung dari transaksi valid saja
         $avgTransactionValue = $totalTransactions > 0
             ? round($totalRevenue / $totalTransactions, 0)
             : 0;
 
-        $totalBuyers = (clone $baseQ)->distinct('user_id')->count('user_id');
+        // Pelanggan Aktif: distinct user yang punya transaksi valid
+        $totalBuyers = (clone $baseQ)
+            ->whereIn('status', $validStatuses)
+            ->distinct('user_id')
+            ->count('user_id');
 
         // =============================================
         // GRAFIK PENDAPATAN HARIAN
         // =============================================
         $revenueByDate = Order::query()
             ->tap($applyBase)
-            ->whereIn('status', ['paid', 'processing', 'shipped', 'completed'])
+            ->whereIn('status', $validStatuses)
             ->selectRaw('DATE(orders.created_at) as date, SUM(grand_total) as total')
             ->groupBy('date')
             ->orderBy('date')
@@ -92,7 +110,7 @@ class SuperAdminDashboardController extends Controller
             ->join('orders',   'order_items.order_id',   '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-            ->whereIn('orders.status', ['paid', 'processing', 'shipped', 'completed'])
+            ->whereIn('orders.status', $validStatuses)
             ->whereNull('orders.deleted_at')
             ->when($province,      fn($q) => $q->where('orders.province', $province))
             ->when($paymentStatus, fn($q) => $q->where('orders.status', $paymentStatus))
@@ -119,7 +137,7 @@ class SuperAdminDashboardController extends Controller
             ->join('products',   'order_items.product_id', '=', 'products.id')
             ->join('categories', 'products.category_id',   '=', 'categories.id')
             ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-            ->whereIn('orders.status', ['paid', 'processing', 'shipped', 'completed'])
+            ->whereIn('orders.status', $validStatuses)
             ->whereNull('orders.deleted_at')
             ->when($province,      fn($q) => $q->where('orders.province', $province))
             ->when($paymentStatus, fn($q) => $q->where('orders.status', $paymentStatus))
@@ -142,6 +160,7 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $topProvinces = Order::query()
             ->tap($applyBase)
+            ->whereIn('status', $validStatuses)
             ->whereNotNull('province')
             ->where('province', '!=', '')
             ->select('province', DB::raw('COUNT(*) as total_orders'), DB::raw('SUM(grand_total) as total_revenue'))
@@ -158,6 +177,7 @@ class SuperAdminDashboardController extends Controller
             ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->whereNull('orders.deleted_at')
             ->whereNotNull('payments.payment_type')
+            ->whereIn('orders.status', $validStatuses)
             ->when($province,      fn($q) => $q->where('orders.province', $province))
             ->when($paymentStatus, fn($q) => $q->where('orders.status', $paymentStatus))
             ->when($categoryId,    fn($q) => $q->whereIn('orders.id',
@@ -178,6 +198,8 @@ class SuperAdminDashboardController extends Controller
 
         // =============================================
         // STATUS PESANAN — Donut Chart
+        // Sengaja TIDAK difilter $validStatuses agar semua status tampil di chart
+        // supaya admin bisa melihat distribusi lengkap termasuk pending & cancelled
         // =============================================
         $paymentStatuses = Order::query()
             ->tap($applyBase)
@@ -203,7 +225,7 @@ class SuperAdminDashboardController extends Controller
                 ->join('products',   'order_items.product_id', '=', 'products.id')
                 ->join('categories', 'products.category_id',   '=', 'categories.id')
                 ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
-                ->whereIn('orders.status', ['paid', 'processing', 'shipped', 'completed'])
+                ->whereIn('orders.status', $validStatuses)
                 ->whereNull('orders.deleted_at')
                 ->whereIn('orders.province', $top5ProvinceNames)
                 ->when($paymentMethod, fn($q) => $q->whereIn('orders.id',
@@ -249,9 +271,11 @@ class SuperAdminDashboardController extends Controller
 
         // =============================================
         // JAM TERSIBUK — Bar Chart (24 jam)
+        // Hanya dari transaksi valid
         // =============================================
         $hourRaw = Order::query()
             ->tap($applyBase)
+            ->whereIn('status', $validStatuses)
             ->selectRaw('HOUR(orders.created_at) as hour, COUNT(*) as total')
             ->groupBy('hour')
             ->pluck('total', 'hour');
@@ -266,10 +290,11 @@ class SuperAdminDashboardController extends Controller
 
         // =============================================
         // REPEAT vs NEW CUSTOMER
+        // Hanya dari transaksi valid
         // =============================================
-        // User yang pernah order SEBELUM periode ini = repeat customer
         $allBuyerIds = Order::query()
             ->tap($applyBase)
+            ->whereIn('status', $validStatuses)
             ->whereNotNull('user_id')
             ->distinct()
             ->pluck('user_id');
@@ -278,8 +303,9 @@ class SuperAdminDashboardController extends Controller
         $newCustomers    = 0;
 
         if ($allBuyerIds->isNotEmpty()) {
-            // Cek apakah user pernah order sebelum dateFrom
+            // Cek apakah user pernah order (valid) sebelum dateFrom
             $repeatIds = Order::whereIn('user_id', $allBuyerIds)
+                ->whereIn('status', $validStatuses)
                 ->where('created_at', '<', $dateFrom . ' 00:00:00')
                 ->whereNull('deleted_at')
                 ->distinct()
@@ -290,7 +316,8 @@ class SuperAdminDashboardController extends Controller
         }
 
         // =============================================
-        // TABEL PENJUALAN — Paginasi 15
+        // TABEL PENJUALAN — Paginasi 5
+        // Menampilkan SEMUA status agar admin bisa monitor pending & cancelled
         // =============================================
         $salesTable = Order::with(['items.product.category', 'payment'])
             ->tap($applyBase)

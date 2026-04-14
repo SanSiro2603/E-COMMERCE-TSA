@@ -20,6 +20,9 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
     protected $status;
     protected $orders;
 
+    // Status yang dianggap valid untuk dihitung di statistik
+    protected array $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
+
     public function __construct($startDate, $endDate, $status = null)
     {
         $this->startDate = $startDate;
@@ -142,13 +145,17 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
 
                 // =====================
                 // RINGKASAN STATISTIK
+                // Selalu hanya hitung status valid, tidak peduli filter status apapun
+                // pending & cancelled tidak pernah dihitung di statistik
                 // =====================
                 $statsLabelRow = $infoRow + 1;
                 $statsValueRow = $infoRow + 2;
 
-                $totalRevenue   = $this->orders->sum('grand_total');
-                $totalOrders    = $this->orders->count();
-                $totalItemsSold = $this->orders->sum(fn($o) => $o->items->sum('quantity'));
+                $statsOrders = $this->orders->filter(fn($o) => in_array($o->status, $this->validStatuses));
+
+                $totalRevenue   = $statsOrders->sum('grand_total');
+                $totalOrders    = $statsOrders->count();
+                $totalItemsSold = $statsOrders->sum(fn($o) => $o->items->sum('quantity'));
                 $avgOrderValue  = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 0) : 0;
 
                 // 4 blok statistik span A-M
@@ -215,6 +222,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
 
                 // =====================
                 // ISI DATA
+                // Tabel tetap menampilkan SEMUA pesanan sesuai filter user
                 // =====================
                 $dataStartRow = $headerRow + 1;
                 $currentRow   = $dataStartRow;
@@ -235,7 +243,12 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                         ->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')
                         ->implode(', ');
                     $qty = $order->items->sum('quantity');
-                    $grandTotal += $order->grand_total ?? 0;
+
+                    // Grand total di baris TOTAL selalu hanya dari status valid
+                    // pending & cancelled tidak pernah dihitung
+                    if (in_array($order->status, $this->validStatuses)) {
+                        $grandTotal += $order->grand_total ?? 0;
+                    }
 
                     $sheet->setCellValue('A' . $currentRow, $no++);
                     $sheet->setCellValue('B' . $currentRow, $order->order_number ?? '-');

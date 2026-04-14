@@ -6,9 +6,8 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Success/Error Alerts -->
     @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4 animate-fade-in">
+        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4 animate-fade-in" data-auto-dismiss>
             <div class="flex items-start gap-3">
                 <div class="flex-shrink-0">
                     <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
@@ -26,7 +25,7 @@
     @endif
 
     @if(session('error'))
-        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-fade-in">
+        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-fade-in" data-auto-dismiss>
             <div class="flex items-start gap-3">
                 <div class="flex-shrink-0">
                     <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">error</span>
@@ -58,8 +57,9 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
-    <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
+    <!-- Stats Cards — 7 kolom (tambah Dibatalkan) -->
+    <div class="grid grid-cols-2 lg:grid-cols-7 gap-4">
+
         <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="all">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
@@ -75,7 +75,7 @@
         <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="pending">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-yellow-600 dark:text-yellow-400 uppercase font-medium">Pending</span>
+                    <span class="text-xs text-yellow-600 dark:text-yellow-400 uppercase font-medium">Menunggu</span>
                     <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-500/10 rounded-lg flex items-center justify-center">
                         <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-lg">hourglass_top</span>
                     </div>
@@ -87,7 +87,7 @@
         <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="paid">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-blue-600 dark:text-blue-400 uppercase font-medium">Paid</span>
+                    <span class="text-xs text-blue-600 dark:text-blue-400 uppercase font-medium">Dibayar</span>
                     <div class="w-8 h-8 bg-blue-100 dark:bg-blue-500/10 rounded-lg flex items-center justify-center">
                         <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-lg">payments</span>
                     </div>
@@ -99,7 +99,7 @@
         <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="processing">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-purple-600 dark:text-purple-400 uppercase font-medium">Processing</span>
+                    <span class="text-xs text-purple-600 dark:text-purple-400 uppercase font-medium">Diproses</span>
                     <div class="w-8 h-8 bg-purple-100 dark:bg-purple-500/10 rounded-lg flex items-center justify-center">
                         <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-lg">inventory</span>
                     </div>
@@ -111,7 +111,7 @@
         <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="shipped">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-indigo-600 dark:text-indigo-400 uppercase font-medium">Shipped</span>
+                    <span class="text-xs text-indigo-600 dark:text-indigo-400 uppercase font-medium">Dikirim</span>
                     <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-500/10 rounded-lg flex items-center justify-center">
                         <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-lg">local_shipping</span>
                     </div>
@@ -123,7 +123,7 @@
         <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="completed">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-green-600 dark:text-green-400 uppercase font-medium">Completed</span>
+                    <span class="text-xs text-green-600 dark:text-green-400 uppercase font-medium">Selesai</span>
                     <div class="w-8 h-8 bg-green-100 dark:bg-green-500/10 rounded-lg flex items-center justify-center">
                         <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-lg">check_circle</span>
                     </div>
@@ -131,12 +131,25 @@
                 <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $stats['completed'] }}</p>
             </div>
         </div>
+
+        {{-- ✅ BARU: Kartu Dibatalkan --}}
+        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="cancelled">
+            <div class="flex flex-col">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs text-red-600 dark:text-red-400 uppercase font-medium">Dibatalkan</span>
+                    <div class="w-8 h-8 bg-red-100 dark:bg-red-500/10 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-lg">cancel</span>
+                    </div>
+                </div>
+                <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $stats['cancelled'] }}</p>
+            </div>
+        </div>
+
     </div>
 
     <!-- Filter & Search Card -->
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-4">
         <form method="GET" class="flex flex-col md:flex-row gap-3">
-            <!-- Search Input -->
             <div class="flex-1">
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">search</span>
@@ -148,7 +161,6 @@
                 </div>
             </div>
 
-            <!-- Status Filter -->
             <div class="w-full md:w-48">
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">filter_list</span>
@@ -161,14 +173,12 @@
                 </div>
             </div>
 
-            <!-- Filter Button -->
             <button type="submit"
                     class="flex items-center justify-center gap-2 px-6 py-2.5 bg-soft-green hover:bg-primary text-white font-medium rounded-lg transition-colors">
                 <span class="material-symbols-outlined text-lg">search</span>
                 Filter
             </button>
 
-            <!-- Reset Button -->
             @if(request('search') || (request('status') && request('status') != 'all'))
                 <a href="{{ route('admin.orders.index') }}"
                    class="flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 font-medium rounded-lg transition-colors">
@@ -183,13 +193,14 @@
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
+                {{-- ✅ DIPERBAIKI: Susunan kolom baru --}}
                 <thead class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">No. Pesanan</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Tanggal</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Pembeli</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Total</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Tanggal</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -198,8 +209,10 @@
                         @php
                             $isNewPaid = $order->status === 'paid' && $order->paid_at && $order->paid_at->diffInMinutes(now()) < 2;
                         @endphp
+                        {{-- ✅ DIPERBAIKI: Susunan kolom baru: No. Pesanan | Tanggal | Pembeli | Total | Status | Aksi --}}
                         <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-all {{ $isNewPaid ? 'ring-2 ring-green-400 ring-opacity-50 animate-pulse' : '' }}">
-                            <!-- Order Number -->
+
+                            <!-- No. Pesanan -->
                             <td class="px-6 py-4">
                                 <a href="{{ route('admin.orders.show', $order) }}"
                                    class="text-sm font-semibold text-soft-green hover:text-primary transition-colors">
@@ -210,7 +223,13 @@
                                 @endif
                             </td>
 
-                            <!-- Buyer -->
+                            <!-- Tanggal -->
+                            <td class="px-6 py-4">
+                                <p class="text-sm text-gray-900 dark:text-white">{{ $order->created_at->format('d M Y') }}</p>
+                                <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->created_at->format('H:i') }}</p>
+                            </td>
+
+                            <!-- Pembeli -->
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -249,17 +268,11 @@
                                             @case('completed') bg-green-500 @break
                                             @case('cancelled') bg-red-500 @break
                                         @endswitch"></span>
-                                    {{ ucfirst(str_replace('_', ' ', $order->status)) }}
+                                    {{ $order->status_label }}
                                 </span>
                             </td>
 
-                            <!-- Date -->
-                            <td class="px-6 py-4">
-                                <p class="text-sm text-gray-900 dark:text-white">{{ $order->created_at->format('d M Y') }}</p>
-                                <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->created_at->format('H:i') }}</p>
-                            </td>
-
-                            <!-- Actions -->
+                            <!-- Aksi -->
                             <td class="px-6 py-4 text-center">
                                 <a href="{{ route('admin.orders.show', $order) }}"
                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-xs font-medium transition-colors">
@@ -283,7 +296,6 @@
             </table>
         </div>
 
-        <!-- Pagination -->
         @if($orders->hasPages())
             <div class="px-6 py-4 border-t border-gray-200 dark:border-zinc-800 flex items-center justify-between">
                 <p class="text-sm text-gray-500 dark:text-zinc-400">
@@ -303,4 +315,18 @@
     }
     .animate-fade-in { animation: fade-in 0.3s ease-out; }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-auto-dismiss]').forEach(el => {
+        setTimeout(() => {
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-8px)';
+            setTimeout(() => el.remove(), 500);
+        }, 4000);
+    });
+});
+</script>
+
 @endsection

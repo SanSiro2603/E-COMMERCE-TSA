@@ -132,12 +132,20 @@
             </tr>
         </thead>
         <tbody>
-            @php $grandTotal = 0; @endphp
+            @php
+                $grandTotal    = 0;
+                $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
+            @endphp
             @foreach($orders as $index => $order)
             @php
-                $products   = $order->items->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')->implode(', ');
-                $qty        = $order->items->sum('quantity');
-                $grandTotal += $order->grand_total ?? 0;
+                $products = $order->items->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')->implode(', ');
+                $qty      = $order->items->sum('quantity');
+
+                // Grand total di tfoot selalu hanya dari status valid
+                // pending & cancelled tidak pernah dihitung
+                if (in_array($order->status, $validStatuses)) {
+                    $grandTotal += $order->grand_total ?? 0;
+                }
 
                 $statusLabels = [
                     'pending'    => 'Menunggu',

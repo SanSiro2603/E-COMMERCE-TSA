@@ -120,6 +120,7 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
         // Pesanan
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
         // Biteship
         Route::post('/orders/{order}/biteship/create', [BiteshipController::class, 'createShipment'])
