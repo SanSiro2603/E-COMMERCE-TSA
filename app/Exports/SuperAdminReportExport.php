@@ -210,10 +210,10 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('C' . $currentRow, $order->created_at->format('d/m/Y H:i'));
                     $sheet->setCellValue('D' . $currentRow, $order->user->name ?? '-');
                     $sheet->setCellValue('E' . $currentRow, $order->user->email ?? '-');
-                    $sheet->setCellValue('F' . $currentRow, $order->province ?? '-');
-                    $sheet->setCellValue('G' . $currentRow, $order->city ?? '-');
-                    $sheet->setCellValue('H' . $currentRow, $order->address?->full_address ?? $order->shipping_address ?? '-');
-                    $sheet->setCellValue('I' . $currentRow, $order->recipient_phone ?? '-');
+                    $sheet->setCellValue('F' . $currentRow, $order->address?->province_name ?? '-');
+                    $sheet->setCellValue('G' . $currentRow, ($order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-'));
+                    $sheet->setCellValue('H' . $currentRow, $order->address?->full_address ?? '-');
+                    $sheet->setCellValue('I' . $currentRow, $order->address?->recipient_phone ?? '-');
                     $sheet->setCellValue('J' . $currentRow, $productNames);
                     $sheet->setCellValue('K' . $currentRow, $totalItems);
                     $sheet->setCellValue('L' . $currentRow, 'Rp ' . number_format($order->subtotal ?? 0, 0, ',', '.'));

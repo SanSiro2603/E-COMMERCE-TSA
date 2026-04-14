@@ -175,11 +175,11 @@
                             <td class="text-center">{{ $no++ }}</td>
                             <td>{{ $order->order_number }}</td>
                             <td class="text-center">{{ $order->created_at->format('d/m/Y') }}</td>
-                            <td>{{ $order->recipient_name }}</td>
-                            <td>{{ $order->province }}</td>
-                            <td>{{ $order->city }}</td>
-                            <td class="col-address">{{ $order->address?->full_address ?? $order->shipping_address ?? '-' }}</td>
-                            <td class="text-center">{{ $order->recipient_phone }}</td>
+                            <td>{{ $order->address?->recipient_name ?? $order->user->name }}</td>
+                            <td>{{ $order->address?->province_name ?? '-' }}</td>
+                            <td>{{ $order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-' }}</td>
+                            <td class="col-address">{{ $order->address?->full_address ?? '-' }}</td>
+                            <td class="text-center">{{ $order->address?->recipient_phone ?? '-' }}</td>
                             <td class="col-product">
                                 @foreach($order->items as $item)
                                     • {{ $item->product->name }} ({{ $item->quantity }}x)<br>

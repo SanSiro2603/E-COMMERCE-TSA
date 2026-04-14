@@ -154,7 +154,9 @@ class PesananController extends Controller
         $subtotal = $carts->sum('subtotal');
         $totalWeight = $carts->sum(fn($c) => ($c->product->weight ?? 1000) * $c->quantity);
 
-        return view('pembeli.pesanan.checkout', compact('carts', 'subtotal', 'totalWeight', 'addresses'));
+        $shoppingEnabled = $isStoreOpen === '1';
+
+        return view('pembeli.pesanan.checkout', compact('carts', 'subtotal', 'totalWeight', 'addresses', 'shoppingEnabled'));
     }
 
     // === AJAX: CEK ONGKIR BITESHIP ===

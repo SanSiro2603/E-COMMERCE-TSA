@@ -185,11 +185,11 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('A' . $currentRow, $no++);
                     $sheet->setCellValue('B' . $currentRow, $order->order_number);
                     $sheet->setCellValue('C' . $currentRow, $order->created_at->format('d/m/Y'));
-                    $sheet->setCellValue('D' . $currentRow, $order->recipient_name ?? $order->user->name);
-                    $sheet->setCellValue('E' . $currentRow, $order->province ?? '-');
-                    $sheet->setCellValue('F' . $currentRow, $order->city ?? '-');
-                    $sheet->setCellValue('G' . $currentRow, $order->address?->full_address ?? $order->shipping_address ?? '-');
-                    $sheet->setCellValue('H' . $currentRow, $order->recipient_phone ?? '-');
+                    $sheet->setCellValue('D' . $currentRow, $order->address?->recipient_name ?? $order->user->name);
+                    $sheet->setCellValue('E' . $currentRow, $order->address?->province_name ?? '-');
+                    $sheet->setCellValue('F' . $currentRow, ($order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-'));
+                    $sheet->setCellValue('G' . $currentRow, $order->address?->full_address ?? '-');
+                    $sheet->setCellValue('H' . $currentRow, $order->address?->recipient_phone ?? '-');
                     $sheet->setCellValue('I' . $currentRow, $productNames);
                     $sheet->setCellValue('J' . $currentRow, $totalItems);
 

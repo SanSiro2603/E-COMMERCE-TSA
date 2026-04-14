@@ -68,28 +68,21 @@
 
                 @php
                     $addr = $order->address;
-
-                    $name     = $addr?->recipient_name     ?? $order->recipient_name;
-                    $phone    = $addr?->recipient_phone    ?? $order->recipient_phone;
-                    $address  = $addr?->full_address       ?? $order->shipping_address;
-                    $city     = $addr ? ($addr->city_type . ' ' . $addr->city_name) : $order->city;
-                    $province = $addr?->province_name      ?? $order->province;
-                    $postal   = $addr?->postal_code        ?? $order->postal_code;
                 @endphp
 
-                @if($name && $address)
+                @if($addr)
                     <div class="space-y-2 text-sm text-gray-700 dark:text-zinc-300">
                         <p class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-gray-500 text-lg">person</span>
-                            <strong>{{ $name }}</strong>
-                            <span class="text-gray-500">({{ $phone }})</span>
+                            <strong>{{ $addr->recipient_name }}</strong>
+                            <span class="text-gray-500">({{ $addr->recipient_phone }})</span>
                         </p>
                         <p class="flex items-start gap-2">
                             <span class="material-symbols-outlined text-gray-500 text-lg mt-0.5">home</span>
                             <span>
-                                {{ $address }}<br>
-                                <strong>{{ $city }}</strong>, {{ $province }}
-                                @if($postal) <span class="text-gray-500">• {{ $postal }}</span> @endif
+                                {{ $addr->full_address }}<br>
+                                <strong>{{ $addr->city_type }} {{ $addr->city_name }}</strong>, {{ $addr->province_name }}
+                                @if($addr->postal_code) <span class="text-gray-500">• {{ $addr->postal_code }}</span> @endif
                             </span>
                         </p>
                         <p class="flex items-center gap-2">
