@@ -16,7 +16,7 @@
                 Dibuat pada {{ $order->created_at->format('d M Y, H:i') }}
             </p>
         </div>
-        <a href="{{ route('admin.orders.index') }}" 
+        <a href="{{ route('admin.orders.index') }}"
            class="inline-flex items-center gap-2 text-soft-green hover:text-primary text-sm font-medium transition-colors">
             <span class="material-symbols-outlined text-lg">arrow_back</span>
             Kembali
@@ -32,7 +32,7 @@
                     <h3 class="text-sm font-semibold text-green-900 dark:text-green-300">Berhasil!</h3>
                     <p class="text-sm text-green-800 dark:text-green-400 mt-1">{{ session('success') }}</p>
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()" 
+                <button onclick="this.parentElement.parentElement.remove()"
                         class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -48,7 +48,7 @@
                     <h3 class="text-sm font-semibold text-red-900 dark:text-red-300">Gagal!</h3>
                     <p class="text-sm text-red-800 dark:text-red-400 mt-1">{{ session('error') }}</p>
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()" 
+                <button onclick="this.parentElement.parentElement.remove()"
                         class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -68,7 +68,7 @@
                         @endforeach
                     </ul>
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()" 
+                <button onclick="this.parentElement.parentElement.remove()"
                         class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -105,7 +105,7 @@
                     <span class="text-gray-600 dark:text-zinc-400 block mb-1">Alamat Pengiriman</span>
                     <p class="font-medium text-gray-900 dark:text-white text-sm">
                         {{ $order->shipping_address }}<br>
-                        {{ $order->city }}, {{ $order->province }} {{ $order->postal_code ? ' - ' . $order->postal_code : '' }}
+                        {{ $order->city }}, {{ $order->province }}{{ $order->postal_code ? ' - ' . $order->postal_code : '' }}
                     </p>
                 </div>
             </div>
@@ -144,13 +144,12 @@
                         {{ $order->status_label ?? ucfirst(str_replace('_', ' ', $order->status)) }}
                     </span>
 
-                   @if($order->paid_at)
-    <p class="text-xs text-gray-500 dark:text-zinc-400 mt-2" 
-       id="paid-at-text"
-       data-time="{{ $order->paid_at->setTimezone(config('app.timezone'))->toIso8601String() }}">
-    </p>
-@endif
-
+                    @if($order->paid_at)
+                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-2"
+                           id="paid-at-text"
+                           data-time="{{ $order->paid_at->setTimezone(config('app.timezone'))->toIso8601String() }}">
+                        </p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -190,8 +189,6 @@
             @endforeach
         </div>
     </div>
-
-
 
     {{-- ===== BITESHIP: BUAT PENGIRIMAN ===== --}}
     @if(in_array($order->status, ['paid', 'processing']) && !$order->biteship_order_id)
@@ -260,6 +257,7 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    // Format waktu pembayaran
     const el = document.getElementById('paid-at-text');
     if (el) {
         const iso = el.dataset.time;
@@ -273,8 +271,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // AUTO REFRESH TIAP 15 DETIK UNTUK ADMIN
-    setTimeout(() => { location.reload(); }, 15000);
+    // Auto refresh DIHAPUS — gunakan tombol Refresh manual di tracking Biteship
+    // (setTimeout location.reload dihilangkan untuk meringankan sistem)
 
     @if($order->biteship_order_id)
         loadTracking();
@@ -311,19 +309,19 @@ function renderTracking(data) {
     }
 
     const statusMap = {
-        'confirmed': 'Pesanan Dikonfirmasi',
-        'allocated': 'Kurir Dialokasikan',
-        'picking_up': 'Kurir Menuju Pengirim',
-        'picked': 'Paket Diambil Kurir',
-        'dropping_off': 'Dalam Perjalanan',
-        'return_in_transit': 'Paket Dikembalikan',
-        'delivered': 'Paket Terkirim',
-        'rejected': 'Ditolak Penerima',
-        'cancelled': 'Dibatalkan',
-        'on_hold': 'Ditahan',
+        'confirmed':        'Pesanan Dikonfirmasi',
+        'allocated':        'Kurir Dialokasikan',
+        'picking_up':       'Kurir Menuju Pengirim',
+        'picked':           'Paket Diambil Kurir',
+        'dropping_off':     'Dalam Perjalanan',
+        'return_in_transit':'Paket Dikembalikan',
+        'delivered':        'Paket Terkirim',
+        'rejected':         'Ditolak Penerima',
+        'cancelled':        'Dibatalkan',
+        'on_hold':          'Ditahan',
     };
 
-    const history = data.history ?? [];
+    const history      = data.history ?? [];
     const courierStatus = data.courier_status ?? data.status ?? '-';
 
     let html = `
@@ -367,10 +365,10 @@ function translateBiteshipNote(text) {
     t = t.replace(/Pickup Number/gi, 'Nomor Penjemputan');
     t = t.replace(/Shipment has been allocated to courier/gi, 'Pengiriman telah dialokasikan ke kurir');
     t = t.replace(/Courier is on the way to pick up the shipment/gi, 'Kurir dalam perjalanan untuk mengambil paket');
-    t = t.replace(/Courier is on the way to pick up location/gi, 'Kurir dalam perjalanan menuju lokasi penjemputan'); // SAP
-    t = t.replace(/Item has been picked by courier/gi, 'Paket telah diambil oleh kurir'); // SAP
-    t = t.replace(/Courier is allocated and ready to pick up/gi, 'Kurir telah disiapkan dan siap menjemput paket'); // SAP
-    t = t.replace(/Courier is dropping off item to destination/gi, 'Kurir sedang dalam perjalanan mengirimkan paket ke tujuan'); // SAP
+    t = t.replace(/Courier is on the way to pick up location/gi, 'Kurir dalam perjalanan menuju lokasi penjemputan');
+    t = t.replace(/Item has been picked by courier/gi, 'Paket telah diambil oleh kurir');
+    t = t.replace(/Courier is allocated and ready to pick up/gi, 'Kurir telah disiapkan dan siap menjemput paket');
+    t = t.replace(/Courier is dropping off item to destination/gi, 'Kurir sedang dalam perjalanan mengirimkan paket ke tujuan');
     t = t.replace(/Shipment has been picked up/gi, 'Paket telah diambil oleh kurir');
     t = t.replace(/Shipment is being delivered/gi, 'Paket sedang dalam proses pengangkutan');
     t = t.replace(/Shipment has been dropped off by courier/gi, 'Paket telah diserahkan ke agen\/hub');

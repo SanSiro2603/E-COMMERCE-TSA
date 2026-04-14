@@ -17,7 +17,7 @@
                     <h3 class="text-sm font-semibold text-green-900 dark:text-green-300">Berhasil!</h3>
                     <p class="text-sm text-green-800 dark:text-green-400 mt-1">{{ session('success') }}</p>
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()" 
+                <button onclick="this.parentElement.parentElement.remove()"
                         class="flex-shrink-0 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -35,7 +35,7 @@
                     <h3 class="text-sm font-semibold text-red-900 dark:text-red-300">Gagal!</h3>
                     <p class="text-sm text-red-800 dark:text-red-400 mt-1">{{ session('error') }}</p>
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()" 
+                <button onclick="this.parentElement.parentElement.remove()"
                         class="flex-shrink-0 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors">
                     <span class="material-symbols-outlined">close</span>
                 </button>
@@ -68,7 +68,7 @@
                         <span class="material-symbols-outlined text-gray-600 dark:text-gray-400 text-lg">shopping_bag</span>
                     </div>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $orders->total() }}</p>
+                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['all'] }}</p>
             </div>
         </div>
 
@@ -80,7 +80,7 @@
                         <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-lg">hourglass_top</span>
                     </div>
                 </div>
-                <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $orders->where('status', 'pending')->count() }}</p>
+                <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $stats['pending'] }}</p>
             </div>
         </div>
 
@@ -92,7 +92,7 @@
                         <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-lg">payments</span>
                     </div>
                 </div>
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $orders->where('status', 'paid')->count() }}</p>
+                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['paid'] }}</p>
             </div>
         </div>
 
@@ -104,7 +104,7 @@
                         <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-lg">inventory</span>
                     </div>
                 </div>
-                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $orders->where('status', 'processing')->count() }}</p>
+                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $stats['processing'] }}</p>
             </div>
         </div>
 
@@ -116,7 +116,7 @@
                         <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-lg">local_shipping</span>
                     </div>
                 </div>
-                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ $orders->where('status', 'shipped')->count() }}</p>
+                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ $stats['shipped'] }}</p>
             </div>
         </div>
 
@@ -128,7 +128,7 @@
                         <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-lg">check_circle</span>
                     </div>
                 </div>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $orders->where('status', 'completed')->count() }}</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $stats['completed'] }}</p>
             </div>
         </div>
     </div>
@@ -140,9 +140,9 @@
             <div class="flex-1">
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">search</span>
-                    <input type="text" 
-                           name="search" 
-                           value="{{ request('search') }}" 
+                    <input type="text"
+                           name="search"
+                           value="{{ request('search') }}"
                            placeholder="Cari nomor pesanan / nama pembeli..."
                            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
                 </div>
@@ -152,7 +152,7 @@
             <div class="w-full md:w-48">
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">filter_list</span>
-                    <select name="status" 
+                    <select name="status"
                             class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors appearance-none">
                         @foreach($statuses as $value => $label)
                             <option value="{{ $value }}" {{ request('status', 'all') == $value ? 'selected' : '' }}>{{ $label }}</option>
@@ -162,15 +162,15 @@
             </div>
 
             <!-- Filter Button -->
-            <button type="submit" 
+            <button type="submit"
                     class="flex items-center justify-center gap-2 px-6 py-2.5 bg-soft-green hover:bg-primary text-white font-medium rounded-lg transition-colors">
                 <span class="material-symbols-outlined text-lg">search</span>
                 Filter
             </button>
 
             <!-- Reset Button -->
-            @if(request('search') || request('status') != 'all')
-                <a href="{{ route('admin.orders.index') }}" 
+            @if(request('search') || (request('status') && request('status') != 'all'))
+                <a href="{{ route('admin.orders.index') }}"
                    class="flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 text-gray-700 dark:text-zinc-300 font-medium rounded-lg transition-colors">
                     <span class="material-symbols-outlined text-lg">close</span>
                     Reset
@@ -201,7 +201,7 @@
                         <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-all {{ $isNewPaid ? 'ring-2 ring-green-400 ring-opacity-50 animate-pulse' : '' }}">
                             <!-- Order Number -->
                             <td class="px-6 py-4">
-                                <a href="{{ route('admin.orders.show', $order) }}" 
+                                <a href="{{ route('admin.orders.show', $order) }}"
                                    class="text-sm font-semibold text-soft-green hover:text-primary transition-colors">
                                     #{{ $order->order_number }}
                                 </a>
@@ -261,7 +261,7 @@
 
                             <!-- Actions -->
                             <td class="px-6 py-4 text-center">
-                                <a href="{{ route('admin.orders.show', $order) }}" 
+                                <a href="{{ route('admin.orders.show', $order) }}"
                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-xs font-medium transition-colors">
                                     <span class="material-symbols-outlined text-base">visibility</span>
                                     Detail
@@ -285,15 +285,16 @@
 
         <!-- Pagination -->
         @if($orders->hasPages())
-            <div class="px-6 py-4 border-t border-gray-200 dark:border-zinc-800">
+            <div class="px-6 py-4 border-t border-gray-200 dark:border-zinc-800 flex items-center justify-between">
+                <p class="text-sm text-gray-500 dark:text-zinc-400">
+                    Menampilkan {{ $orders->firstItem() }}–{{ $orders->lastItem() }} dari {{ $orders->total() }} pesanan
+                </p>
                 {{ $orders->appends(request()->query())->links() }}
             </div>
         @endif
     </div>
 
 </div>
-
-</script>
 
 <style>
     @keyframes fade-in {

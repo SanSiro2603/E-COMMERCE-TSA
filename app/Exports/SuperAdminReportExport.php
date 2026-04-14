@@ -17,28 +17,43 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
 {
     protected $startDate;
     protected $endDate;
-    protected $totalRevenue;
-    protected $totalOrders;
-    protected $totalItemsSold;
+    protected $province;
+    protected $categoryId;
+    protected $paymentMethod;
+    protected $status;
     protected $orders;
 
-    public function __construct($startDate, $endDate)
-    {
-        $this->startDate = $startDate;
-        $this->endDate   = $endDate;
+    public function __construct(
+        $startDate,
+        $endDate,
+        $province      = null,
+        $categoryId    = null,
+        $paymentMethod = null,
+        $status        = null
+    ) {
+        $this->startDate     = $startDate;
+        $this->endDate       = $endDate;
+        $this->province      = $province;
+        $this->categoryId    = $categoryId;
+        $this->paymentMethod = $paymentMethod;
+        $this->status        = $status;
     }
 
     public function collection()
     {
-        $this->orders = Order::whereBetween('created_at', [$this->startDate, $this->endDate])
-            ->where('status', 'completed')
-            ->with(['user', 'items.product', 'address'])
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $query = Order::with(['items.product.category', 'payment'])
+            ->whereBetween('created_at', [
+                $this->startDate . ' 00:00:00',
+                $this->endDate   . ' 23:59:59',
+            ])
+            ->orderBy('created_at', 'asc');
 
-        $this->totalRevenue    = $this->orders->sum('grand_total');
-        $this->totalOrders     = $this->orders->count();
-        $this->totalItemsSold  = $this->orders->sum(fn($order) => $order->items->sum('quantity'));
+        if ($this->province)      $query->where('province', $this->province);
+        if ($this->status)        $query->where('status', $this->status);
+        if ($this->paymentMethod) $query->whereHas('payment', fn($q) => $q->where('payment_type', $this->paymentMethod));
+        if ($this->categoryId)    $query->whereHas('items.product', fn($q) => $q->where('category_id', $this->categoryId));
+
+        $this->orders = $query->get();
 
         return collect([]);
     }
@@ -46,10 +61,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
     public function drawings()
     {
         $logoPath = public_path('images/logo.png');
-
-        if (!file_exists($logoPath)) {
-            return [];
-        }
+        if (!file_exists($logoPath)) return [];
 
         $drawing = new Drawing();
         $drawing->setName('Logo');
@@ -72,52 +84,43 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 // =====================
                 // KOP SURAT
                 // =====================
-                $sheet->mergeCells('B1:P2');
+                $sheet->mergeCells('B1:L2');
                 $sheet->setCellValue('B1', 'E-COMMERCE TSA');
                 $sheet->getStyle('B1')->applyFromArray([
-                    'font' => ['bold' => true, 'size' => 18],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => Alignment::VERTICAL_CENTER,
-                    ],
+                    'font'      => ['bold' => true, 'size' => 18],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
                 ]);
 
-                $sheet->mergeCells('B3:P3');
+                $sheet->mergeCells('B3:L3');
                 $sheet->setCellValue('B3', 'Jl. Raya Nasional 12 No. 45 - Bandar Lampung');
                 $sheet->getStyle('B3')->applyFromArray([
-                    'font' => ['size' => 11],
+                    'font'      => ['size' => 10],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                $sheet->mergeCells('B4:P4');
+                $sheet->mergeCells('B4:L4');
                 $sheet->setCellValue('B4', 'Email: admin@ecommerce-tsa.com | Telp: 0822-1234-5678');
                 $sheet->getStyle('B4')->applyFromArray([
-                    'font' => ['size' => 11],
+                    'font'      => ['size' => 10],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                // Garis pemisah kop
-                $sheet->mergeCells('A5:P5');
-                $sheet->getStyle('A5:P5')->applyFromArray([
-                    'borders' => [
-                        'bottom' => [
-                            'borderStyle' => Border::BORDER_THICK,
-                            'color'       => ['rgb' => '000000'],
-                        ],
-                    ],
+                $sheet->mergeCells('A5:L5');
+                $sheet->getStyle('A5:L5')->applyFromArray([
+                    'borders' => ['bottom' => ['borderStyle' => Border::BORDER_THICK, 'color' => ['rgb' => '000000']]],
                 ]);
 
                 // =====================
-                // JUDUL LAPORAN
+                // JUDUL
                 // =====================
-                $sheet->mergeCells('A7:P7');
-                $sheet->setCellValue('A7', 'LAPORAN SUPER ADMIN');
+                $sheet->mergeCells('A7:L7');
+                $sheet->setCellValue('A7', 'LAPORAN PENJUALAN');
                 $sheet->getStyle('A7')->applyFromArray([
-                    'font'      => ['bold' => true, 'size' => 16],
+                    'font'      => ['bold' => true, 'size' => 15],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                $sheet->mergeCells('A8:P8');
+                $sheet->mergeCells('A8:L8');
                 $sheet->setCellValue('A8',
                     'Periode: ' .
                     \Carbon\Carbon::parse($this->startDate)->format('d M Y') .
@@ -128,82 +131,143 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
+                // Filter aktif
+                $currentRow = 9;
+                $filterParts = [];
+                if ($this->province)      $filterParts[] = 'Provinsi: ' . $this->province;
+                if ($this->categoryId)    $filterParts[] = 'Kategori ID: ' . $this->categoryId;
+                if ($this->paymentMethod) $filterParts[] = 'Metode: ' . $this->paymentMethod;
+                if ($this->status)        $filterParts[] = 'Status: ' . $this->status;
+
+                if (!empty($filterParts)) {
+                    $sheet->mergeCells('A9:L9');
+                    $sheet->setCellValue('A9', 'Filter: ' . implode('  |  ', $filterParts));
+                    $sheet->getStyle('A9')->applyFromArray([
+                        'font'      => ['italic' => true, 'size' => 9, 'color' => ['rgb' => '555555']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    ]);
+                    $currentRow = 10;
+                }
+
                 // =====================
                 // RINGKASAN STATISTIK
                 // =====================
-                $sheet->mergeCells('A9:P9');
-                $sheet->setCellValue('A9',
-                    'Total Pendapatan: Rp ' . number_format($this->totalRevenue, 0, ',', '.') .
-                    '   |   Total Pesanan: ' . $this->totalOrders .
-                    '   |   Total Item Terjual: ' . $this->totalItemsSold
-                );
-                $sheet->getStyle('A9')->applyFromArray([
-                    'font'      => ['bold' => true, 'size' => 11],
+                $statsStartRow = $currentRow + 1;
+
+                // Hitung statistik — Total = Subtotal + Ongkir
+                $totalRevenue   = $this->orders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0));
+                $totalOrders    = $this->orders->count();
+                $totalItemsSold = $this->orders->sum(fn($o) => $o->items->sum('quantity'));
+                $avgOrderValue  = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 0) : 0;
+
+                // Baris label statistik
+                $statsLabelRow = $statsStartRow;
+                $statsValueRow = $statsStartRow + 1;
+
+                $statsData = [
+                    'A' => ['label' => 'Total Pendapatan',    'value' => 'Rp ' . number_format($totalRevenue, 0, ',', '.')],
+                    'D' => ['label' => 'Total Pesanan',       'value' => number_format($totalOrders)],
+                    'G' => ['label' => 'Total Item Terjual',  'value' => number_format($totalItemsSold)],
+                    'J' => ['label' => 'Rata-rata Pesanan',   'value' => 'Rp ' . number_format($avgOrderValue, 0, ',', '.')],
+                ];
+
+                foreach ($statsData as $col => $data) {
+                    $endCol = chr(ord($col) + 2); // span 3 kolom
+                    $sheet->mergeCells($col . $statsLabelRow . ':' . $endCol . $statsLabelRow);
+                    $sheet->mergeCells($col . $statsValueRow . ':' . $endCol . $statsValueRow);
+                    $sheet->setCellValue($col . $statsLabelRow, $data['label']);
+                    $sheet->setCellValue($col . $statsValueRow, $data['value']);
+                }
+
+                // Style label
+                $sheet->getStyle('A' . $statsLabelRow . ':L' . $statsLabelRow)->applyFromArray([
+                    'font'      => ['size' => 9, 'color' => ['rgb' => '555555']],
+                    'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'b7dbc8']]],
                 ]);
 
+                // Style nilai
+                $sheet->getStyle('A' . $statsValueRow . ':L' . $statsValueRow)->applyFromArray([
+                    'font'      => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '2D6A4F']],
+                    'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                    'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'b7dbc8']]],
+                ]);
+                $sheet->getRowDimension($statsValueRow)->setRowHeight(20);
+
                 // =====================
-                // HEADER TABEL (baris 11)
+                // HEADER TABEL
                 // =====================
-                $headerRow = 11;
+                $headerRow = $statsValueRow + 2;
+
                 $headers = [
                     'A' => 'No.',
                     'B' => 'No. Pesanan',
                     'C' => 'Tanggal',
-                    'D' => 'Nama Pembeli',
-                    'E' => 'Email Pembeli',
-                    'F' => 'Provinsi',
-                    'G' => 'Kota/Kabupaten',
-                    'H' => 'Alamat Lengkap',
-                    'I' => 'No. Telp',
-                    'J' => 'Nama Produk',
-                    'K' => 'Jumlah Item',
-                    'L' => 'Subtotal',
-                    'M' => 'Ongkos Kirim',
-                    'N' => 'Total',
-                    'O' => 'Metode Pembayaran',
-                    'P' => 'Status Pembayaran',
+                    'D' => 'Provinsi',
+                    'E' => 'Kategori',
+                    'F' => 'Produk',
+                    'G' => 'Qty',
+                    'H' => 'Subtotal',
+                    'I' => 'Ongkir',
+                    'J' => 'Total',
+                    'K' => 'Metode Bayar',
+                    'L' => 'Status',
                 ];
 
                 foreach ($headers as $col => $label) {
                     $sheet->setCellValue($col . $headerRow, $label);
                 }
 
-                $sheet->getStyle('A' . $headerRow . ':P' . $headerRow)->applyFromArray([
-                    'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
-                    'fill' => [
-                        'fillType'   => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => '2D6A4F'],
-                    ],
-                    'alignment' => [
-                        'horizontal' => Alignment::HORIZONTAL_CENTER,
-                        'vertical'   => Alignment::VERTICAL_CENTER,
-                    ],
-                    'borders' => [
-                        'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                    ],
+                $sheet->getStyle('A' . $headerRow . ':L' . $headerRow)->applyFromArray([
+                    'font'      => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                    'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '2D6A4F']],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                    'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 ]);
+                $sheet->getRowDimension($headerRow)->setRowHeight(22);
 
                 // =====================
                 // ISI DATA
                 // =====================
-                $currentRow = 12;
-                $no         = 1;
+                $dataStartRow = $headerRow + 1;
+                $currentRow   = $dataStartRow;
+                $no           = 1;
+                $grandTotal   = 0;
 
                 foreach ($this->orders as $order) {
-                    $productNames = $order->items
-                        ->map(fn($item) => ($item->product->name ?? '-') . ' (x' . $item->quantity . ')')
+                    $categories = $order->items
+                        ->map(fn($item) => $item->product?->category?->name)
+                        ->filter()->unique()->implode(', ') ?: '-';
+
+                    $products = $order->items
+                        ->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')
                         ->implode(', ');
 
-                    $totalItems = $order->items->sum('quantity');
+                    $qty   = $order->items->sum('quantity');
+                    $total = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
+                    $grandTotal += $total;
 
-                    $paymentMethod = $order->payment_method ?? '-';
-                    if (stripos($paymentMethod, 'cod') !== false)      $paymentMethod = 'COD (Cash on Delivery)';
-                    elseif (stripos($paymentMethod, 'transfer') !== false) $paymentMethod = 'Transfer Bank';
-                    elseif (stripos($paymentMethod, 'wallet') !== false)   $paymentMethod = 'E-Wallet';
+                    $paymentLabel = match($order->payment?->payment_type ?? '') {
+                        'bank_transfer' => 'Transfer Bank',
+                        'echannel'      => 'Mandiri E-Channel',
+                        'cstore'        => 'Minimarket',
+                        'gopay'         => 'GoPay',
+                        'qris'          => 'QRIS',
+                        'shopeepay'     => 'ShopeePay',
+                        'credit_card'   => 'Kartu Kredit',
+                        default         => ucfirst(str_replace('_', ' ', $order->payment?->payment_type ?? '-')),
+                    };
 
-                    $paymentStatus = $order->payment_status ?? '-';
-                    if ($paymentStatus === 'paid') $paymentStatus = 'Lunas';
+                    $statusLabels = [
+                        'pending'    => 'Menunggu',
+                        'paid'       => 'Dibayar',
+                        'processing' => 'Diproses',
+                        'shipped'    => 'Dikirim',
+                        'completed'  => 'Selesai',
+                        'cancelled'  => 'Dibatalkan',
+                    ];
 
                     $sheet->setCellValue('A' . $currentRow, $no++);
                     $sheet->setCellValue('B' . $currentRow, $order->order_number ?? '-');
@@ -222,13 +286,10 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('O' . $currentRow, $paymentMethod);
                     $sheet->setCellValue('P' . $currentRow, $paymentStatus);
 
-                    // Zebra stripe (baris genap sedikit berbeda warna)
+                    // Zebra stripe
                     if ($no % 2 === 0) {
-                        $sheet->getStyle('A' . $currentRow . ':P' . $currentRow)->applyFromArray([
-                            'fill' => [
-                                'fillType'   => Fill::FILL_SOLID,
-                                'startColor' => ['rgb' => 'F0F7F4'],
-                            ],
+                        $sheet->getStyle('A' . $currentRow . ':L' . $currentRow)->applyFromArray([
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
                         ]);
                     }
 
@@ -236,18 +297,36 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 }
 
                 // =====================
-                // BORDER SELURUH DATA
+                // BORDER DATA
                 // =====================
                 $lastDataRow = $currentRow - 1;
-
-                if ($lastDataRow >= 12) {
-                    $sheet->getStyle('A12:P' . $lastDataRow)->applyFromArray([
-                        'borders' => [
-                            'allBorders' => ['borderStyle' => Border::BORDER_THIN],
-                        ],
+                if ($lastDataRow >= $dataStartRow) {
+                    $sheet->getStyle('A' . $dataStartRow . ':L' . $lastDataRow)->applyFromArray([
+                        'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                         'alignment' => ['vertical' => Alignment::VERTICAL_CENTER],
                     ]);
                 }
+
+                // =====================
+                // BARIS TOTAL
+                // =====================
+                $totalRow = $lastDataRow + 1;
+                $sheet->mergeCells('A' . $totalRow . ':I' . $totalRow);
+                $sheet->setCellValue('A' . $totalRow, 'TOTAL PENDAPATAN');
+                $sheet->setCellValue('J' . $totalRow, 'Rp ' . number_format($grandTotal, 0, ',', '.'));
+                $sheet->getStyle('A' . $totalRow . ':L' . $totalRow)->applyFromArray([
+                    'font' => ['bold' => true, 'size' => 10],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'D8F3DC']],
+                    'borders' => [
+                        'top'    => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '2D6A4F']],
+                        'bottom' => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '2D6A4F']],
+                    ],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                ]);
+                $sheet->getStyle('J' . $totalRow)->applyFromArray([
+                    'font'      => ['bold' => true, 'color' => ['rgb' => '2D6A4F'], 'size' => 11],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
+                ]);
 
                 // =====================
                 // LEBAR KOLOM
@@ -255,37 +334,30 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 $sheet->getColumnDimension('A')->setWidth(5);
                 $sheet->getColumnDimension('B')->setWidth(20);
                 $sheet->getColumnDimension('C')->setWidth(18);
-                $sheet->getColumnDimension('D')->setWidth(22);
-                $sheet->getColumnDimension('E')->setWidth(28);
-                $sheet->getColumnDimension('F')->setWidth(20);
-                $sheet->getColumnDimension('G')->setWidth(22);
-                $sheet->getColumnDimension('H')->setWidth(35);
-                $sheet->getColumnDimension('I')->setWidth(18);
-                $sheet->getColumnDimension('J')->setWidth(40);
-                $sheet->getColumnDimension('K')->setWidth(14);
-                $sheet->getColumnDimension('L')->setWidth(18);
-                $sheet->getColumnDimension('M')->setWidth(16);
-                $sheet->getColumnDimension('N')->setWidth(18);
-                $sheet->getColumnDimension('O')->setWidth(24);
-                $sheet->getColumnDimension('P')->setWidth(20);
+                $sheet->getColumnDimension('D')->setWidth(20);
+                $sheet->getColumnDimension('E')->setWidth(18);
+                $sheet->getColumnDimension('F')->setWidth(40);
+                $sheet->getColumnDimension('G')->setWidth(7);
+                $sheet->getColumnDimension('H')->setWidth(18);
+                $sheet->getColumnDimension('I')->setWidth(16);
+                $sheet->getColumnDimension('J')->setWidth(20);
+                $sheet->getColumnDimension('K')->setWidth(20);
+                $sheet->getColumnDimension('L')->setWidth(14);
 
-                // Tinggi baris header
-                $sheet->getRowDimension($headerRow)->setRowHeight(25);
-
-                // Wrap text kolom produk & alamat lengkap
-                $sheet->getStyle('H12:H' . $lastDataRow)->getAlignment()->setWrapText(true);
-                $sheet->getStyle('J12:J' . $lastDataRow)->getAlignment()->setWrapText(true);
+                // Wrap text kolom produk
+                if ($lastDataRow >= $dataStartRow) {
+                    $sheet->getStyle('F' . $dataStartRow . ':F' . $lastDataRow)
+                          ->getAlignment()->setWrapText(true);
+                }
 
                 // =====================
-                // FOOTER / CATATAN
+                // FOOTER
                 // =====================
-                $footerRow = $lastDataRow + 2;
-                $sheet->mergeCells('A' . $footerRow . ':P' . $footerRow);
-                $sheet->setCellValue('A' . $footerRow,
-                    'Dicetak pada: ' . now()->format('d M Y H:i') . ' WIB'
-                );
+                $footerRow = $totalRow + 2;
+                $sheet->mergeCells('A' . $footerRow . ':L' . $footerRow);
+                $sheet->setCellValue('A' . $footerRow, 'Dicetak pada: ' . now()->format('d M Y H:i') . ' WIB');
                 $sheet->getStyle('A' . $footerRow)->applyFromArray([
-                    'font'      => ['italic' => true, 'size' => 10],
+                    'font'      => ['italic' => true, 'size' => 9],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
                 ]);
             },

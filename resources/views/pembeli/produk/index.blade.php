@@ -45,13 +45,15 @@
                 </a>
                 @foreach($categories as $category)
                     <a href="javascript:void(0)"
-                       data-category="{{ $category->id }}"
-                       class="category-filter inline-flex items-center gap-1 px-3 md:px-4 py-2 border-2 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap
-                           {{ request('category') == $category->id ? 'border-primary bg-primary text-white shadow-sm' : 'border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#0d1b13] dark:text-white hover:border-primary hover:bg-primary/10' }}">
-                        <span class="material-symbols-outlined text-base">category</span>
+                    data-category="{{ $category->id }}"
+                    class="category-filter inline-flex items-center gap-2 px-3 md:px-4 py-2 border-2 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap
+                        {{ request('category') == $category->id ? 'border-primary bg-primary text-white shadow-sm' : 'border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#0d1b13] dark:text-white hover:border-primary hover:bg-primary/10' }}">
+                        <img src="{{ Storage::url($category->image) }}"
+                            alt="{{ $category->name }}"
+                            class="w-5 h-5 rounded-full object-cover flex-shrink-0">
                         {{ $category->name }}
                     </a>
-                @endforeach
+            @endforeach
             </div>
         </div>
 

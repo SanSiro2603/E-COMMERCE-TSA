@@ -16,17 +16,19 @@ class Product extends Model
         'description', 
         'price',
         'stock', 
-        'unit', // Tambahkan ini jika belum ada
+        'unit',
         'image', 
         'images', 
         'weight',
         'is_active', 
+        'is_featured',
         'health_certificate', 
         'available_from'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_featured' => 'boolean',
         'price' => 'float',
         'weight' => 'float',
         'stock' => 'integer',

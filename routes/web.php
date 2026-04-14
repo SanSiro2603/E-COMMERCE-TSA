@@ -39,7 +39,6 @@ use App\Http\Controllers\Pembeli\ProfileController;
 // LAINNYA
 // =========================
 use App\Http\Controllers\RajaOngkirController;
-use App\Http\Controllers\MidtransController;
 
 /*
 |--------------------------------------------------------------------------
@@ -122,7 +121,7 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
 
-        // Biteship — Kirim & Lacak Pengiriman
+        // Biteship
         Route::post('/orders/{order}/biteship/create', [BiteshipController::class, 'createShipment'])
             ->name('orders.biteship.create');
         Route::get('/orders/{order}/biteship/track', [BiteshipController::class, 'trackShipment'])
@@ -137,7 +136,7 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
         // Settings
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
-        
+
     });
 
 /*
@@ -150,21 +149,19 @@ Route::middleware(['auth', 'role:super_admin', '2fa'])
     ->name('superadmin.')
     ->group(function () {
 
-        // Dashboard
         Route::get('/dashboard',
             [App\Http\Controllers\SuperAdmin\SuperAdminDashboardController::class, 'index']
         )->name('dashboard');
 
-        // Manajemen Admin
-        Route::patch('admins/{admin}/toggle-active', 
+        Route::patch('admins/{admin}/toggle-active',
             [App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'toggleActive']
         )->name('admins.toggle-active');
-        
-        Route::patch('admins/{admin}/reset-2fa', 
+
+        Route::patch('admins/{admin}/reset-2fa',
             [App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'resetTwoFactor']
         )->name('admins.reset-2fa');
 
-        Route::patch('admins/{admin}/reset-password', 
+        Route::patch('admins/{admin}/reset-password',
             [App\Http\Controllers\SuperAdmin\AdminManagementController::class, 'resetPassword']
         )->name('admins.reset-password');
 
@@ -172,9 +169,7 @@ Route::middleware(['auth', 'role:super_admin', '2fa'])
             App\Http\Controllers\SuperAdmin\AdminManagementController::class
         );
 
-        // Laporan
         Route::prefix('reports')->name('reports.')->group(function () {
-
             Route::get('/',
                 [App\Http\Controllers\SuperAdmin\SuperAdminReportController::class, 'index']
             )->name('index');
@@ -191,10 +186,10 @@ Route::middleware(['auth', 'role:super_admin', '2fa'])
 
 /*
 |--------------------------------------------------------------------------
-| WEBHOOK MIDTRANS (TANPA AUTH)
+| WEBHOOK MIDTRANS (TANPA AUTH) — arahkan ke PaymentController
 |--------------------------------------------------------------------------
 */
-Route::post('/midtrans/notification', [MidtransController::class, 'notification'])
+Route::post('/midtrans/notification', [PaymentController::class, 'notification'])
     ->name('midtrans.notification');
 
 /*
@@ -238,10 +233,10 @@ Route::middleware(['auth', 'role:pembeli'])
             Route::get('/{order}/biteship/track', [PesananController::class, 'trackBiteship'])->name('biteship.track');
         });
 
-        // Pembayaran
+        // Pembayaran — finish HARUS di atas /{order} agar tidak tertangkap sebagai parameter
         Route::prefix('payment')->name('payment.')->group(function () {
-            Route::get('/{order}', [PaymentController::class, 'show'])->name('show');
             Route::get('/finish', [PaymentController::class, 'finish'])->name('finish');
+            Route::get('/{order}', [PaymentController::class, 'show'])->name('show');
             Route::get('/{order}/check-status', [PaymentController::class, 'checkStatus'])->name('check-status');
         });
 
@@ -258,21 +253,12 @@ Route::middleware(['auth', 'role:pembeli'])
             ->name('alamat.default');
 
         // Profil
-        // halaman profil (lihat data)
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
-
-        // halaman edit
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-
-        // update data
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::get('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
+        Route::put('/profil/ganti-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
 
-        // ganti password
-        Route::get('/profile/change-password', [ProfileController::class,'changePassword'])->name('profile.change-password');
-        Route::put('/profil/ganti-password', [ProfileController::class, 'updatePassword'])
-               ->name('profile.update-password');
-                
-        
     });
 
 /*

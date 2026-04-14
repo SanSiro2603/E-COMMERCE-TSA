@@ -1,4 +1,5 @@
 <?php
+// app/Http/Controllers/Admin/ReportController.php
 
 namespace App\Http\Controllers\Admin;
 
@@ -14,112 +15,102 @@ class ReportController extends Controller
     public function index(Request $request)
     {
         $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
-        $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $endDate   = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $status    = $request->input('status');
 
-        $orders = Order::whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'completed')
-            ->with('user')
-            ->latest()
-            ->paginate(10);
+        // =====================
+        // QUERY DASAR
+        // =====================
+        $baseQuery = Order::with(['user', 'items.product'])
+            ->whereBetween('created_at', [
+                $startDate . ' 00:00:00',
+                $endDate   . ' 23:59:59',
+            ]);
 
-        // Statistik
-        $totalRevenue = $orders->sum('grand_total');
-        $totalOrders = $orders->count();
-        $averageOrderValue = $totalOrders > 0 ? $totalRevenue / $totalOrders : 0;
+        if ($status) $baseQuery->where('status', $status);
 
-        // Grafik: Pendapatan per Hari
-        $dailyRevenue = Order::whereBetween('created_at', [$startDate, $endDate])
-            ->where('status', 'completed')
-            ->selectRaw('DATE(created_at) as date, SUM(grand_total) as total')
-            ->groupBy('date')
-            ->orderBy('date')
-            ->pluck('total', 'date');
+        // =====================
+        // STATISTIK — dari SEMUA data (bukan dari paginate)
+        // =====================
+        $allOrders = (clone $baseQuery)->get();
 
-        $dates = [];
-        $revenues = [];
-        $current = \Carbon\Carbon::parse($startDate);
-        $end = \Carbon\Carbon::parse($endDate);
+        $stats = [
+            'total_revenue'    => $allOrders->sum('grand_total'),
+            'total_orders'     => $allOrders->count(),
+            'total_items_sold' => $allOrders->sum(fn($o) => $o->items->sum('quantity')),
+            'avg_order_value'  => $allOrders->count() > 0
+                ? round($allOrders->avg('grand_total'), 0)
+                : 0,
+        ];
 
-        while ($current <= $end) {
-            $date = $current->format('Y-m-d');
-            $dates[] = $current->format('d M');
-            $revenues[] = $dailyRevenue->get($date, 0);
-            $current->addDay();
-        }
+        // =====================
+        // TABEL dengan pagination 5
+        // =====================
+        $orders = (clone $baseQuery)->latest()->paginate(5)->withQueryString();
+
+        // =====================
+        // DROPDOWN STATUS
+        // =====================
+        $statusOptions = [
+            'pending'    => 'Menunggu Pembayaran',
+            'paid'       => 'Sudah Dibayar',
+            'processing' => 'Diproses',
+            'shipped'    => 'Dikirim',
+            'completed'  => 'Selesai',
+            'cancelled'  => 'Dibatalkan',
+        ];
 
         return view('admin.reports.index', compact(
-            'orders', 'totalRevenue', 'totalOrders', 'averageOrderValue',
-            'startDate', 'endDate', 'dates', 'revenues'
+            'orders', 'stats',
+            'startDate', 'endDate', 'status',
+            'statusOptions'
         ));
     }
 
+    public function exportPdf(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate   = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $status    = $request->input('status');
 
-public function exportPdf(Request $request)
-{
-    $startDate = $request->start_date;
-    $endDate = $request->end_date;
+        $query = Order::with(['user', 'items.product'])
+            ->whereBetween('created_at', [
+                $startDate . ' 00:00:00',
+                $endDate   . ' 23:59:59',
+            ])
+            ->orderBy('created_at', 'asc');
 
-    $orders = Order::whereBetween('created_at', [$startDate, $endDate])
-        ->where('status', 'completed')
-        ->with(['user', 'items', 'address'])
-        ->orderBy('created_at', 'asc')
-        ->get();
+        if ($status) $query->where('status', $status);
 
-    // Tambahkan jumlah transaksi per pengguna di periode ini
-    $orders->each(function($order) use ($startDate, $endDate) {
-        $order->transactions_count = Order::where('user_id', $order->user_id)
-            ->where('status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
-    });
+        $orders = $query->get();
 
-    $totalRevenue = $orders->sum('grand_total');
+        $stats = [
+            'total_revenue'    => $orders->sum('grand_total'),
+            'total_orders'     => $orders->count(),
+            'total_items_sold' => $orders->sum(fn($o) => $o->items->sum('quantity')),
+            'avg_order_value'  => $orders->count() > 0
+                ? round($orders->avg('grand_total'), 0)
+                : 0,
+        ];
 
-    $pdf = Pdf::loadView('admin.reports.pdf', compact('orders', 'totalRevenue', 'startDate', 'endDate'))
-              ->setPaper('a4', 'landscape'); // <-- landscape
+        $pdf = Pdf::loadView('admin.reports.pdf', compact(
+            'orders', 'stats', 'startDate', 'endDate'
+        ))->setPaper('a4', 'landscape');
 
-    return $pdf->download('laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.pdf');
-}
+        return $pdf->download('laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.pdf');
+    }
 
-public function exportExcel(Request $request)
-{
-    $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
-    $endDate = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+    public function exportExcel(Request $request)
+    {
+        $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
+        $endDate   = $request->input('end_date', now()->endOfMonth()->format('Y-m-d'));
+        $status    = $request->input('status');
 
-    $fileName = 'laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.xlsx';
+        $fileName = 'laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.xlsx';
 
-    return Excel::download(new SalesReportExport($startDate, $endDate), $fileName);
-}
-
-public function preview(Request $request)
-{
-    $startDate = $request->start_date;
-    $endDate   = $request->end_date;
-
-    // Data order SAMA seperti PDF
-    $orders = Order::whereBetween('created_at', [$startDate, $endDate])
-        ->where('status', 'completed')
-        ->with(['user', 'items', 'address'])
-        ->orderBy('created_at', 'asc')
-        ->get();
-
-    // Hitung jumlah transaksi per user (SAMA seperti PDF)
-    $orders->each(function($order) use ($startDate, $endDate) {
-        $order->transactions_count = Order::where('user_id', $order->user_id)
-            ->where('status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
-    });
-
-    // Total pendapatan
-    $totalRevenue = $orders->sum('grand_total');
-
-    return view('admin.reports.preview', [
-        'orders'      => $orders,
-        'totalRevenue'=> $totalRevenue,
-        'startDate'   => $startDate,
-        'endDate'     => $endDate,
-    ]);
-}
-
+        return Excel::download(
+            new SalesReportExport($startDate, $endDate, $status),
+            $fileName
+        );
+    }
 }
