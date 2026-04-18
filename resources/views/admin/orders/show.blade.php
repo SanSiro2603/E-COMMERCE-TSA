@@ -23,9 +23,8 @@
         </a>
     </div>
 
-    <!-- Success / Error Alerts -->
     @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4 animate-fade-in">
+        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4 animate-fade-in" data-auto-dismiss>
             <div class="flex items-start gap-3">
                 <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
                 <div class="flex-1">
@@ -41,7 +40,7 @@
     @endif
 
     @if(session('error'))
-        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-fade-in">
+        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-fade-in" data-auto-dismiss>
             <div class="flex items-start gap-3">
                 <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">error</span>
                 <div class="flex-1">
@@ -57,7 +56,7 @@
     @endif
 
     @if($errors->any())
-        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-fade-in">
+        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-fade-in" data-auto-dismiss>
             <div class="flex items-start gap-3">
                 <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">warning</span>
                 <div class="flex-1">
@@ -134,14 +133,22 @@
                 <!-- Status Badge -->
                 <div class="mt-4">
                     <span class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-full
-                        {{ $order->status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' : '' }}
-                        {{ $order->status === 'paid' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' : '' }}
+                        {{ $order->status === 'pending'    ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' : '' }}
+                        {{ $order->status === 'paid'       ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' : '' }}
                         {{ $order->status === 'processing' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400' : '' }}
-                        {{ $order->status === 'shipped' ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400' : '' }}
-                        {{ $order->status === 'completed' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : '' }}
+                        {{ $order->status === 'shipped'    ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400' : '' }}
+                        {{ $order->status === 'completed'  ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : '' }}
                         {{ in_array($order->status, ['cancelled', 'failed']) ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' : '' }}">
-                        <span class="w-1.5 h-1.5 rounded-full animate-ping {{ $order->status === 'paid' ? 'bg-blue-500' : 'bg-gray-500' }}"></span>
-                        {{ $order->status_label ?? ucfirst(str_replace('_', ' ', $order->status)) }}
+                        <span class="w-1.5 h-1.5 rounded-full animate-ping
+                            @switch($order->status)
+                                @case('pending')    bg-yellow-500 @break
+                                @case('paid')       bg-blue-500   @break
+                                @case('processing') bg-purple-500 @break
+                                @case('shipped')    bg-indigo-500 @break
+                                @case('completed')  bg-green-500  @break
+                                @default            bg-red-500
+                            @endswitch"></span>
+                        {{ $order->status_label }}
                     </span>
 
                     @if($order->paid_at)
@@ -154,6 +161,31 @@
             </div>
         </div>
     </div>
+
+    {{-- ===== PROSES PESANAN (hanya jika status 'paid') ===== --}}
+    @if($order->status === 'paid')
+        <div class="bg-white dark:bg-zinc-900 rounded-xl border border-purple-200 dark:border-purple-500/30 shadow-sm p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                <span class="material-symbols-outlined text-purple-500">inventory</span>
+                Proses Pesanan
+            </h3>
+            <p class="text-sm text-gray-600 dark:text-zinc-400 mb-4">
+                Tandai pesanan ini sedang diproses / disiapkan sebelum dikirim. Status akan berubah menjadi <strong class="text-purple-600 dark:text-purple-400">Diproses</strong>.
+            </p>
+            {{-- Form tersembunyi — di-submit oleh modal --}}
+            <form id="form-processing" action="{{ route('admin.orders.updateStatus', $order) }}" method="POST">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="status" value="processing">
+            </form>
+            <button type="button"
+                    onclick="openModal('modal-processing')"
+                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow transition-all">
+                <span class="material-symbols-outlined text-lg">inventory</span>
+                Tandai Sedang Diproses
+            </button>
+        </div>
+    @endif
 
     <!-- Produk yang Dipesan -->
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6">
@@ -200,15 +232,16 @@
             <p class="text-sm text-emerald-700 dark:text-emerald-400 mb-4">
                 Buat order pengiriman ke Biteship Sandbox. Sistem akan otomatis mengubah status pesanan menjadi <strong>Dikirim</strong> dan menyimpan nomor resi dari kurir.
             </p>
-            <form action="{{ route('admin.orders.biteship.create', $order) }}" method="POST"
-                  onsubmit="return confirm('Yakin ingin membuat order pengiriman Biteship untuk pesanan #{{ $order->order_number }}?')">
+            {{-- Form tersembunyi — di-submit oleh modal --}}
+            <form id="form-biteship" action="{{ route('admin.orders.biteship.create', $order) }}" method="POST">
                 @csrf
-                <button type="submit"
-                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium rounded-lg shadow transition-all">
-                    <span class="material-symbols-outlined text-lg">send</span>
-                    Buat Pengiriman Biteship
-                </button>
             </form>
+            <button type="button"
+                    onclick="openModal('modal-biteship')"
+                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium rounded-lg shadow transition-all">
+                <span class="material-symbols-outlined text-lg">send</span>
+                Buat Pengiriman Biteship
+            </button>
         </div>
     @endif
 
@@ -227,7 +260,6 @@
                 </button>
             </div>
 
-            {{-- Info Dasar --}}
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm mb-4">
                 <div class="bg-gray-50 dark:bg-zinc-800 rounded-lg p-3">
                     <p class="text-gray-500 dark:text-zinc-400 text-xs mb-1">ID Biteship</p>
@@ -243,7 +275,6 @@
                 </div>
             </div>
 
-            {{-- Timeline Tracking --}}
             <div id="tracking-timeline" class="mt-4">
                 <p class="text-sm text-gray-500 dark:text-zinc-400 flex items-center gap-2">
                     <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
@@ -253,10 +284,105 @@
         </div>
     @endif
 
+    {{-- ===== MODAL: Konfirmasi Proses Pesanan ===== --}}
+    @if($order->status === 'paid')
+        <div id="modal-processing" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('modal-processing')"></div>
+            <div class="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fade-in">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-2xl">inventory</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Konfirmasi Proses Pesanan</h3>
+                        <p class="text-sm text-gray-500 dark:text-zinc-400">Tindakan ini tidak dapat dibatalkan</p>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-zinc-300 mb-6">
+                    Yakin ingin mengubah status pesanan <strong class="text-gray-900 dark:text-white">#{{ $order->order_number }}</strong> menjadi <strong class="text-purple-600 dark:text-purple-400">Diproses</strong>?
+                </p>
+                <div class="flex gap-3 justify-end">
+                    <button type="button" onclick="closeModal('modal-processing')"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="button" onclick="document.getElementById('form-processing').submit()"
+                            class="px-4 py-2 text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors inline-flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">check</span>
+                        Ya, Tandai Diproses
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- ===== MODAL: Konfirmasi Biteship ===== --}}
+    @if(in_array($order->status, ['paid', 'processing']) && !$order->biteship_order_id)
+        <div id="modal-biteship" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
+            <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('modal-biteship')"></div>
+            <div class="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fade-in">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span class="material-symbols-outlined text-emerald-600 dark:text-emerald-400 text-2xl">local_shipping</span>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">Konfirmasi Pengiriman Biteship</h3>
+                        <p class="text-sm text-gray-500 dark:text-zinc-400">Tindakan ini tidak dapat dibatalkan</p>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-700 dark:text-zinc-300 mb-6">
+                    Yakin ingin membuat order pengiriman Biteship untuk pesanan <strong class="text-gray-900 dark:text-white">#{{ $order->order_number }}</strong>? Status akan otomatis berubah menjadi <strong class="text-indigo-600 dark:text-indigo-400">Dikirim</strong>.
+                </p>
+                <div class="flex gap-3 justify-end">
+                    <button type="button" onclick="closeModal('modal-biteship')"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 dark:text-zinc-300 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700 rounded-lg transition-colors">
+                        Batal
+                    </button>
+                    <button type="button" onclick="document.getElementById('form-biteship').submit()"
+                            class="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 rounded-lg transition-colors inline-flex items-center gap-2">
+                        <span class="material-symbols-outlined text-base">send</span>
+                        Ya, Buat Pengiriman
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
+
 </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
+// ===== MODAL HELPERS =====
+function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+}
+
+// Tutup modal dengan tombol Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('[id^="modal-"]').forEach(m => {
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        });
+        document.body.style.overflow = '';
+    }
+});
+
+// ===== INIT =====
+document.addEventListener('DOMContentLoaded', () => {
     // Format waktu pembayaran
     const el = document.getElementById('paid-at-text');
     if (el) {
@@ -271,20 +397,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Auto refresh DIHAPUS — gunakan tombol Refresh manual di tracking Biteship
-    // (setTimeout location.reload dihilangkan untuk meringankan sistem)
+    // Auto-dismiss notifikasi setelah 4 detik
+    document.querySelectorAll('[data-auto-dismiss]').forEach(el => {
+        setTimeout(() => {
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-8px)';
+            setTimeout(() => el.remove(), 500);
+        }, 4000);
+    });
 
     @if($order->biteship_order_id)
         loadTracking();
     @endif
 });
 
+// ===== TRACKING =====
 function loadTracking() {
     const url = '{{ route("admin.orders.biteship.track", $order) }}';
     fetch(url)
         .then(r => r.json())
         .then(data => renderTracking(data))
-        .catch(e => {
+        .catch(() => {
             document.getElementById('tracking-timeline').innerHTML =
                 '<p class="text-sm text-red-500">Gagal memuat data tracking. Coba refresh.</p>';
         });
@@ -309,19 +443,19 @@ function renderTracking(data) {
     }
 
     const statusMap = {
-        'confirmed':        'Pesanan Dikonfirmasi',
-        'allocated':        'Kurir Dialokasikan',
-        'picking_up':       'Kurir Menuju Pengirim',
-        'picked':           'Paket Diambil Kurir',
-        'dropping_off':     'Dalam Perjalanan',
-        'return_in_transit':'Paket Dikembalikan',
-        'delivered':        'Paket Terkirim',
-        'rejected':         'Ditolak Penerima',
-        'cancelled':        'Dibatalkan',
-        'on_hold':          'Ditahan',
+        'confirmed':         'Pesanan Dikonfirmasi',
+        'allocated':         'Kurir Dialokasikan',
+        'picking_up':        'Kurir Menuju Pengirim',
+        'picked':            'Paket Diambil Kurir',
+        'dropping_off':      'Dalam Perjalanan',
+        'return_in_transit': 'Paket Dikembalikan',
+        'delivered':         'Paket Terkirim',
+        'rejected':          'Ditolak Penerima',
+        'cancelled':         'Dibatalkan',
+        'on_hold':           'Ditahan',
     };
 
-    const history      = data.history ?? [];
+    const history       = data.history ?? [];
     const courierStatus = data.courier_status ?? data.status ?? '-';
 
     let html = `
@@ -388,4 +522,5 @@ function translateBiteshipNote(text) {
     }
     .animate-fade-in { animation: fade-in 0.3s ease-out; }
 </style>
+
 @endsection
