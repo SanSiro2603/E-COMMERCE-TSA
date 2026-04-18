@@ -113,7 +113,7 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
         // Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
         Route::get('/dashboard/chart', [AdminDashboardController::class, 'chartData'])->name('dashboard.chart');
-        Route::get('/search', SearchController::class)->name('admin.search');
+        Route::get('/search', SearchController::class)->name('search');
 
         // Produk
         Route::resource('products', ProductController::class);
