@@ -178,11 +178,12 @@
         </div>
 
         <!-- Ketersediaan & Status Section -->
-        < class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
+        <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
             <h3 class="text-base font-semibold text-gray-900 dark:text-white flex items-center gap-2">
                 <span class="material-symbols-outlined text-soft-green">schedule</span>
                 Ketersediaan & Status
             </h3>
+        </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
     <!-- Tersedia Dari -->

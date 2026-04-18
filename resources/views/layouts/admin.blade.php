@@ -309,6 +309,13 @@
 
                     <!-- Right Section -->
                     <div class="flex items-center gap-2">
+                        <button onclick="openSearch()"
+                                class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-2">
+                                <span class="material-symbols-outlined text-gray-600 dark:text-zinc-300 text-[20px]">search</span>
+                                <span class="hidden lg:inline text-xs text-gray-400 dark:text-zinc-500 border border-gray-200 dark:border-zinc-700 px-2 py-0.5 rounded-md">
+                                    Ctrl+K
+                                </span>
+                        </button>
                         <!-- Theme Toggle -->
                         <button onclick="toggleTheme()"
                             class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all">
@@ -413,6 +420,7 @@
             });
         @endif
     </script>
+@include('admin.partials.global-search')
 
     @stack('scripts')
 </body>

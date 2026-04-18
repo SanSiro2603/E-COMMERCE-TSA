@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 // ADMIN
 // =========================
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -109,7 +110,10 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
     ->name('admin.')
     ->group(function () {
 
+        // Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/chart', [AdminDashboardController::class, 'chartData'])->name('dashboard.chart');
+        Route::get('/search', SearchController::class)->name('admin.search');
 
         // Produk
         Route::resource('products', ProductController::class);
