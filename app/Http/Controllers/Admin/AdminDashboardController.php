@@ -61,8 +61,14 @@ class AdminDashboardController extends Controller
         // ── Donut chart: penjualan per kategori bulan ini ─────────
         $categoryStats = $this->getCategoryStats();
 
-        // ── Top 5 produk terlaris ─────────────────────────────────
-        $topProducts = Product::withSum('orderItems as total_sold', 'quantity')
+        // ── Top 5 produk terlaris (hanya order valid) ─────────────
+        $topProducts = Product::withSum([
+                'orderItems as total_sold' => function ($query) {
+                    $query->whereHas('order', function ($q) {
+                        $q->whereIn('status', ['paid', 'processing', 'shipped', 'completed']);
+                    });
+                }
+            ], 'quantity')
             ->with('category')
             ->orderByDesc('total_sold')
             ->where('is_active', true)
@@ -75,6 +81,37 @@ class AdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // ── Perlu Perhatian Hari Ini ──────────────────────────────
+
+        // 1. Pesanan pending > 24 jam (urut paling lama dulu)
+        $stalePendingOrders = Order::with('user')
+            ->where('status', 'pending')
+            ->where('created_at', '<=', now()->subHours(24))
+            ->orderBy('created_at', 'asc')
+            ->limit(5)
+            ->get();
+
+        // 2. Produk stok hampir habis (≤ 5, aktif)
+        $lowStockItems = Product::where('stock', '<=', 5)
+            ->where('is_active', true)
+            ->orderBy('stock', 'asc')
+            ->limit(5)
+            ->get();
+
+        // 3. Pesanan baru masuk hari ini
+        $todayOrders = Order::with('user')
+            ->whereDate('created_at', today())
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $todayOrdersCount = Order::whereDate('created_at', today())->count();
+
+        // ── Sparkline data: 7 hari terakhir ──────────────────────
+        $sparkOrders     = $this->getSparkData('orders', 'created_at');
+        $sparkProcessing = $this->getSparkData('orders', 'created_at', 'processing');
+        $sparkCustomers  = $this->getSparkData('users', 'created_at', 'pembeli');
+
         return view('admin.dashboard', compact(
             'totalOrders', 'pendingOrders', 'processingOrders', 'completedOrders',
             'totalRevenue', 'todayRevenue', 'totalProducts', 'lowStockProducts',
@@ -82,7 +119,9 @@ class AdminDashboardController extends Controller
             'ordersTrend', 'pendingTrend', 'revenueTrend', 'customersTrend',
             'dates', 'revenues',
             'categoryStats',
-            'topProducts', 'recentOrders'
+            'topProducts', 'recentOrders',
+            'stalePendingOrders', 'lowStockItems', 'todayOrders', 'todayOrdersCount',
+            'sparkOrders', 'sparkProcessing', 'sparkCustomers'
         ));
     }
 
@@ -156,5 +195,33 @@ class AdminDashboardController extends Controller
     {
         if ($last == 0) return $current > 0 ? 100.0 : 0.0;
         return round((($current - $last) / $last) * 100, 1);
+    }
+
+    // ── Helper: data sparkline 7 hari terakhir ────────────────────
+    private function getSparkData(string $table, string $dateCol, ?string $filterVal = null): array
+    {
+        $query = DB::table($table)
+            ->whereBetween($dateCol, [now()->subDays(6)->startOfDay(), now()->endOfDay()])
+            ->selectRaw("DATE($dateCol) as date, COUNT(*) as total")
+            ->groupBy('date')
+            ->orderBy('date');
+
+        if ($filterVal !== null) {
+            if ($table === 'orders') {
+                $query->where('status', $filterVal);
+            } elseif ($table === 'users') {
+                $query->where('role', $filterVal);
+            }
+        }
+
+        $map = $query->pluck('total', 'date');
+
+        $result = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $result[] = (int) ($map[$date] ?? 0);
+        }
+
+        return $result;
     }
 }

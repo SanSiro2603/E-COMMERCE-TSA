@@ -6,6 +6,7 @@ use App\Models\SystemSetting;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Midtrans\Config;
+use Carbon\Carbon;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,6 +26,9 @@ class AppServiceProvider extends ServiceProvider
 
 public function boot()
 {
+
+    Carbon::setLocale('id');
+
     Config::$serverKey = config('midtrans.server_key');
     Config::$isProduction = config('midtrans.is_production');
     Config::$isSanitized = true;

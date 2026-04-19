@@ -261,9 +261,7 @@ Route::middleware(['auth', 'role:pembeli'])
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::get('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
-        Route::put('/profil/ganti-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
-
+        
     });
 
 /*
