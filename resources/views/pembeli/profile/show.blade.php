@@ -59,6 +59,11 @@
                         <span class="material-symbols-outlined text-xl">receipt_long</span>
                         Riwayat Pesanan
                     </a>
+                    <a href="{{ route('pembeli.alamat.index') }}"
+                        class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
+                        <span class="material-symbols-outlined text-xl">location_on</span>
+                        Atur Alamat
+                    </a>
                 </nav>
             </div>
         </div>
@@ -161,6 +166,10 @@
             <a href="{{ route('pembeli.pesanan.index') }}" class="text-gray-500 dark:text-zinc-400 flex flex-col items-center">
                 <span class="material-symbols-outlined text-2xl">receipt_long</span>
                 <span class="text-xs mt-1">Pesanan</span>
+            </a>
+            <a href="{{ route('pembeli.alamat.index') }}" class="text-gray-500 dark:text-zinc-400 flex flex-col items-center">
+                <span class="material-symbols-outlined text-2xl">location_on</span>
+                <span class="text-xs mt-1">Alamat</span>
             </a>
         </div>
     </div>
