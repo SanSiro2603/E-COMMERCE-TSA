@@ -63,7 +63,7 @@ class ProductController extends Controller
             ];
             
             $html       = $this->renderTableRows($products);
-            $pagination = $products->appends($request->only(['search', 'category']))->links();
+            $pagination = (string)$products->appends($request->only(['search', 'category']))->links();
             
             return response()->json([
                 'html'       => $html,
