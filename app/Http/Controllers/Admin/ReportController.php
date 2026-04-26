@@ -12,6 +12,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportController extends Controller
 {
+    // Status yang dianggap valid untuk dihitung di statistik
+    // pending  = belum bayar  → TIDAK dihitung
+    // cancelled = dibatalkan  → TIDAK dihitung
+    protected array $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
+
     public function index(Request $request)
     {
         $startDate = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
@@ -30,21 +35,26 @@ class ReportController extends Controller
         if ($status) $baseQuery->where('status', $status);
 
         // =====================
-        // STATISTIK — dari SEMUA data (bukan dari paginate)
+        // STATISTIK
+        // Selalu hanya hitung status valid, tidak peduli filter status apapun
+        // pending & cancelled tidak pernah dihitung di statistik
         // =====================
-        $allOrders = (clone $baseQuery)->get();
+        $statsQuery = clone $baseQuery;
+        $statsQuery->whereIn('status', $this->validStatuses);
+        $statsOrders = $statsQuery->get();
 
         $stats = [
-            'total_revenue'    => $allOrders->sum('grand_total'),
-            'total_orders'     => $allOrders->count(),
-            'total_items_sold' => $allOrders->sum(fn($o) => $o->items->sum('quantity')),
-            'avg_order_value'  => $allOrders->count() > 0
-                ? round($allOrders->avg('grand_total'), 0)
+            'total_revenue'    => $statsOrders->sum('grand_total'),
+            'total_orders'     => $statsOrders->count(),
+            'total_items_sold' => $statsOrders->sum(fn($o) => $o->items->sum('quantity')),
+            'avg_order_value'  => $statsOrders->count() > 0
+                ? round($statsOrders->avg('grand_total'), 0)
                 : 0,
         ];
 
         // =====================
         // TABEL dengan pagination 5
+        // Tetap tampilkan semua status agar admin bisa melihat semua pesanan
         // =====================
         $orders = (clone $baseQuery)->latest()->paginate(5)->withQueryString();
 
@@ -82,14 +92,18 @@ class ReportController extends Controller
 
         if ($status) $query->where('status', $status);
 
+        // Tabel PDF: semua data sesuai filter
         $orders = $query->get();
 
+        // Statistik PDF: selalu hanya status valid, tidak peduli filter status apapun
+        $statsOrders = $orders->filter(fn($o) => in_array($o->status, $this->validStatuses));
+
         $stats = [
-            'total_revenue'    => $orders->sum('grand_total'),
-            'total_orders'     => $orders->count(),
-            'total_items_sold' => $orders->sum(fn($o) => $o->items->sum('quantity')),
-            'avg_order_value'  => $orders->count() > 0
-                ? round($orders->avg('grand_total'), 0)
+            'total_revenue'    => $statsOrders->sum('grand_total'),
+            'total_orders'     => $statsOrders->count(),
+            'total_items_sold' => $statsOrders->sum(fn($o) => $o->items->sum('quantity')),
+            'avg_order_value'  => $statsOrders->count() > 0
+                ? round($statsOrders->avg('grand_total'), 0)
                 : 0,
         ];
 

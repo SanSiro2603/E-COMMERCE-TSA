@@ -2,15 +2,16 @@
 
 @if($products->count() > 0)
     <!-- Products Grid -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-8 md:gap-x-6">
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         @foreach($products as $product)
             <div class="group cursor-pointer">
+
                 <!-- Product Image -->
                 <div class="relative aspect-square rounded-xl overflow-hidden mb-3 bg-gray-100 dark:bg-background-dark border border-[#cfe7d9] dark:border-primary/20">
                     <a href="{{ route('pembeli.produk.show', $product->slug) }}">
                         @if($product->image)
-                            <img class="w-full h-full object-cover transition-transform duration-300" 
-                                 src="{{ asset('storage/' . $product->image) }}" 
+                            <img class="w-full h-full object-cover transition-transform duration-300"
+                                 src="{{ asset('storage/' . $product->image) }}"
                                  alt="{{ $product->name }}"
                                  loading="lazy">
                         @else
@@ -35,11 +36,24 @@
 
                     <!-- Category Badge -->
                     @if($product->category)
-                        <div class="absolute top-2 left-2 px-2 py-1 bg-primary/90 backdrop-blur-sm text-white text-[10px] font-bold rounded">
-                            {{ Str::limit($product->category->name, 15) }}
+                        <div class="absolute top-2 left-2 flex flex-col gap-1">
+                            @if($product->category->parent)
+                                <span class="px-2 py-0.5 bg-primary/90 backdrop-blur-sm text-white text-[10px] font-bold rounded">
+                                    {{ Str::limit($product->category->parent->name, 12) }}
+                                </span>
+                                <span class="px-2 py-0.5 bg-purple-600/90 backdrop-blur-sm text-white text-[10px] font-bold rounded">
+                                    {{ Str::limit($product->category->name, 12) }}
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 bg-primary/90 backdrop-blur-sm text-white text-[10px] font-bold rounded">
+                                    {{ Str::limit($product->category->name, 15) }}
+                                </span>
+                            @endif
                         </div>
                     @endif
+
                 </div>
+                {{-- ← ini yang kurang sebelumnya! --}}
 
                 <!-- Product Info -->
                 <a href="{{ route('pembeli.produk.show', $product->slug) }}">
@@ -57,7 +71,7 @@
                     <span>{{ $product->unit ?? 'ekor' }}</span>
                 </div>
 
-                <!-- Action Buttons - PERBAIKAN WARNA -->
+                <!-- Action Buttons -->
                 <div class="flex gap-2">
                     @if($product->stock > 0)
                         <button onclick="addToCart({{ $product->id }})"
@@ -71,12 +85,13 @@
                             Habis
                         </button>
                     @endif
-                    
+
                     <a href="{{ route('pembeli.produk.show', $product->slug) }}"
                        class="flex items-center justify-center px-3 py-2 bg-gray-200 dark:bg-zinc-800 text-[#0d1b13] dark:text-white hover:bg-gray-300 dark:hover:bg-zinc-700 rounded-lg transition-all">
                         <span class="material-symbols-outlined text-sm">visibility</span>
                     </a>
                 </div>
+
             </div>
         @endforeach
     </div>
@@ -84,7 +99,6 @@
     <!-- Pagination -->
     @if($products->hasPages())
         <div class="mt-12 flex justify-center items-center gap-2">
-            {{-- Previous Button --}}
             @if($products->onFirstPage())
                 <button disabled class="w-10 h-10 flex items-center justify-center rounded-lg bg-white dark:bg-primary/10 border border-[#cfe7d9] dark:border-primary/20 text-gray-400 cursor-not-allowed">
                     <span class="material-symbols-outlined">chevron_left</span>
@@ -95,10 +109,9 @@
                 </a>
             @endif
 
-            {{-- Page Numbers --}}
             @foreach(range(1, $products->lastPage()) as $page)
                 @if($page == 1 || $page == $products->lastPage() || abs($page - $products->currentPage()) <= 1)
-                    <a href="{{ $products->url($page) }}" 
+                    <a href="{{ $products->url($page) }}"
                        class="w-10 h-10 flex items-center justify-center rounded-lg font-bold {{ $page == $products->currentPage() ? 'bg-primary text-white' : 'bg-white dark:bg-primary/10 border border-[#cfe7d9] dark:border-primary/20 hover:border-primary text-[#0d1b13] dark:text-white' }} transition-colors">
                         {{ $page }}
                     </a>
@@ -107,7 +120,6 @@
                 @endif
             @endforeach
 
-            {{-- Next Button --}}
             @if($products->hasMorePages())
                 <a href="{{ $products->nextPageUrl() }}" class="w-10 h-10 flex items-center justify-center rounded-lg bg-white dark:bg-primary/10 border border-[#cfe7d9] dark:border-primary/20 hover:border-primary text-[#0d1b13] dark:text-white transition-colors">
                     <span class="material-symbols-outlined">chevron_right</span>
@@ -134,12 +146,12 @@
                 Tidak ada produk yang sesuai dengan pencarian atau filter Anda. Coba kata kunci lain atau hapus filter.
             </p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center">
-                <a href="{{ route('pembeli.produk.index') }}" 
+                <a href="{{ route('pembeli.produk.index') }}"
                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white font-medium rounded-lg hover:shadow-lg active:scale-95 transition-all text-sm">
                     <span class="material-symbols-outlined text-lg">refresh</span>
                     Reset Filter
                 </a>
-                <a href="{{ route('pembeli.dashboard') }}" 
+                <a href="{{ route('pembeli.dashboard') }}"
                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-gray-100 dark:bg-primary/10 text-[#0d1b13] dark:text-white font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-primary/20 active:scale-95 transition-all text-sm">
                     <span class="material-symbols-outlined text-lg">home</span>
                     Kembali ke Beranda
@@ -150,7 +162,6 @@
 @endif
 
 <script>
-// Add to Cart Function
 window.addToCart = function(productId) {
     fetch(`/pembeli/keranjang/tambah/${productId}`, {
         method: 'POST',
@@ -164,9 +175,7 @@ window.addToCart = function(productId) {
     .then(data => {
         if (data.success) {
             showToast(data.message || 'Produk berhasil ditambahkan ke keranjang!', 'success');
-            if (typeof updateCartCount === 'function') {
-                updateCartCount(data.cart_count);
-            }
+            if (typeof updateCartCount === 'function') updateCartCount(data.cart_count);
         } else {
             showToast(data.message || 'Gagal menambahkan produk ke keranjang', 'error');
         }
@@ -177,7 +186,6 @@ window.addToCart = function(productId) {
     });
 }
 
-// Toast Notification
 function showToast(message, type = 'success') {
     let container = document.getElementById('toast-container');
     if (!container) {
@@ -188,15 +196,13 @@ function showToast(message, type = 'success') {
     }
 
     const toast = document.createElement('div');
-    toast.className = `flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white text-sm md:text-base animate-slide-in ${
+    toast.className = `flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white text-sm animate-slide-in ${
         type === 'success' ? 'bg-green-500' : 'bg-red-500'
     }`;
-    
     toast.innerHTML = `
         <span class="material-symbols-outlined">${type === 'success' ? 'check_circle' : 'error'}</span>
         <span>${message}</span>
     `;
-    
     container.appendChild(toast);
 
     setTimeout(() => {
@@ -208,28 +214,12 @@ function showToast(message, type = 'success') {
 
 <style>
 @keyframes slide-in {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
-
 @keyframes slide-out {
-    from {
-        transform: translateX(0);
-        opacity: 1;
-    }
-    to {
-        transform: translateX(100%);
-        opacity: 0;
-    }
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
 }
-
-.animate-slide-in {
-    animation: slide-in 0.3s ease-out;
-}
+.animate-slide-in { animation: slide-in 0.3s ease-out; }
 </style>

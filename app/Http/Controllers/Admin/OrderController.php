@@ -22,7 +22,6 @@ class OrderController extends Controller
 
         $query = Order::with(['user', 'items.product'])->latest();
 
-        // Filter by search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -34,15 +33,12 @@ class OrderController extends Controller
             });
         }
 
-        // Filter by status
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
-        // Pagination 10 per halaman + pertahankan query string (search/filter)
         $orders = $query->paginate(10)->withQueryString();
 
-        // Stats dihitung dari SEMUA data (tidak terpengaruh filter status & pagination)
         $statsQuery = Order::query();
         if ($request->filled('search')) {
             $search = $request->search;
@@ -54,6 +50,7 @@ class OrderController extends Controller
                   });
             });
         }
+
         $stats = [
             'all'        => $statsQuery->count(),
             'pending'    => (clone $statsQuery)->where('status', 'pending')->count(),
@@ -61,9 +58,9 @@ class OrderController extends Controller
             'processing' => (clone $statsQuery)->where('status', 'processing')->count(),
             'shipped'    => (clone $statsQuery)->where('status', 'shipped')->count(),
             'completed'  => (clone $statsQuery)->where('status', 'completed')->count(),
+            'cancelled'  => (clone $statsQuery)->where('status', 'cancelled')->count(),
         ];
 
-        // Handle AJAX request (untuk polling real-time)
         if ($request->ajax() || $request->has('ajax')) {
             $html = '';
             if ($orders->count() > 0) {
@@ -114,15 +111,24 @@ class OrderController extends Controller
             'cancelled'  => 'bg-red-500',
         ];
 
+        $statusLabels = [
+            'pending'    => 'Menunggu Pembayaran',
+            'paid'       => 'Sudah Dibayar',
+            'processing' => 'Diproses',
+            'shipped'    => 'Dikirim',
+            'completed'  => 'Selesai',
+            'cancelled'  => 'Dibatalkan',
+        ];
+
         $statusClass = $statusClasses[$order->status] ?? 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400';
         $dotClass    = $dotClasses[$order->status] ?? 'bg-gray-500';
-        $statusLabel = ucfirst(str_replace('_', ' ', $order->status));
+        $statusLabel = $statusLabels[$order->status] ?? ucfirst($order->status);
         $initial     = strtoupper(substr($order->user->name, 0, 1));
         $itemsCount  = $order->items->count();
 
-        // Highlight baru dibayar (jika < 2 menit)
         $isNewPaid = $order->status === 'paid' && $order->paid_at && $order->paid_at->diffInMinutes(now()) < 2;
 
+        // Susunan kolom: No. Pesanan | Tanggal | Pembeli | Total | Status | Aksi
         return '
             <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-all ' . ($isNewPaid ? 'ring-2 ring-green-400 ring-opacity-50 animate-pulse' : '') . '">
                 <td class="px-6 py-4">
@@ -131,6 +137,10 @@ class OrderController extends Controller
                         #' . e($order->order_number) . '
                     </a>
                     ' . ($isNewPaid ? '<span class="ml-2 inline-flex items-center gap-1 px-2 py-0.5 text-xs font-bold text-green-700 bg-green-100 dark:bg-green-500/20 dark:text-green-300 rounded-full animate-bounce">BARU!</span>' : '') . '
+                </td>
+                <td class="px-6 py-4">
+                    <p class="text-sm text-gray-900 dark:text-white">' . $order->created_at->format('d M Y') . '</p>
+                    <p class="text-xs text-gray-500 dark:text-zinc-400">' . $order->created_at->format('H:i') . '</p>
                 </td>
                 <td class="px-6 py-4">
                     <div class="flex items-center gap-3">
@@ -153,10 +163,6 @@ class OrderController extends Controller
                         ' . $statusLabel . '
                     </span>
                 </td>
-                <td class="px-6 py-4">
-                    <p class="text-sm text-gray-900 dark:text-white">' . $order->created_at->format('d M Y') . '</p>
-                    <p class="text-xs text-gray-500 dark:text-zinc-400">' . $order->created_at->format('H:i') . '</p>
-                </td>
                 <td class="px-6 py-4 text-center">
                     <a href="' . route('admin.orders.show', $order) . '"
                        class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-xs font-medium transition-colors">
@@ -172,5 +178,22 @@ class OrderController extends Controller
     {
         $order->load(['user', 'items.product', 'payment']);
         return view('admin.orders.show', compact('order'));
+    }
+
+    public function updateStatus(Request $request, Order $order)
+    {
+        $request->validate([
+            'status' => ['required', 'in:processing'],
+        ]);
+
+        if ($order->status !== 'paid') {
+            return redirect()->back()
+                ->with('error', 'Status hanya bisa diubah ke Diproses jika pesanan berstatus Sudah Dibayar.');
+        }
+
+        $order->update(['status' => 'processing']);
+
+        return redirect()->route('admin.orders.show', $order)
+            ->with('success', 'Status pesanan #' . $order->order_number . ' berhasil diubah ke Diproses.');
     }
 }

@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Pembeli;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\User;
@@ -19,11 +18,6 @@ class ProfileController extends Controller
         return view('pembeli.profile.show', compact('user'));
     }
    
-
-    public function changePassword()
-    {
-        return view('pembeli.profile.change-password');
-    }
 
     public function edit()
     {
@@ -68,26 +62,4 @@ public function update(Request $request)
         ->with('success', 'Profil berhasil diupdate');
 }
 
-public function updatePassword(Request $request)
-{
-    $request->validate([
-        'current_password' => 'required',
-        'new_password' => 'required|min:6|confirmed',
-    ]);
-    /** @var User $user */
-    $user = Auth::user();
-
-    // cek password lama
-    if (!Hash::check($request->current_password, $user->password)) {
-        return back()->withErrors(['current_password' => 'Password lama salah']);
-    }
-
-    // update password
-    $user->update([
-        'password' => Hash::make($request->new_password),
-    ]);
-
-    return redirect()->route('pembeli.profile.show')
-        ->with('success', 'Password berhasil diubah');
-}
 }

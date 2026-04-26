@@ -17,6 +17,7 @@ use App\Http\Controllers\Auth\NewPasswordController;
 // ADMIN
 // =========================
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\SearchController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\CategoryController;
@@ -109,7 +110,10 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
     ->name('admin.')
     ->group(function () {
 
+        // Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/dashboard/chart', [AdminDashboardController::class, 'chartData'])->name('dashboard.chart');
+        Route::get('/search', SearchController::class)->name('search');
 
         // Produk
         Route::resource('products', ProductController::class);
@@ -120,6 +124,7 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
         // Pesanan
         Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
 
         // Biteship
         Route::post('/orders/{order}/biteship/create', [BiteshipController::class, 'createShipment'])
@@ -258,9 +263,7 @@ Route::middleware(['auth', 'role:pembeli'])
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-        Route::get('/profile/change-password', [ProfileController::class, 'changePassword'])->name('profile.change-password');
-        Route::put('/profil/ganti-password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
-
+        
     });
 
 /*

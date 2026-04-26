@@ -199,12 +199,29 @@
                                 <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">{{ Str::limit($product->description, 50) }}</p>
                             </td>
                             
-                            <!-- Category -->
+                           <!-- Category -->
                             <td class="px-6 py-4">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
-                                    <span class="material-symbols-outlined text-sm">category</span>
-                                    {{ $product->category->name ?? 'Tanpa Kategori' }}
-                                </span>
+                                @if($product->category)
+                                    @if($product->category->parent)
+                                        <div class="flex flex-col gap-1">
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full w-fit">
+                                                <span class="material-symbols-outlined text-sm">category</span>
+                                                {{ $product->category->parent->name }}
+                                            </span>
+                                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full w-fit">
+                                                <span class="material-symbols-outlined text-sm">account_tree</span>
+                                                {{ $product->category->name }}
+                                            </span>
+                                        </div>
+                                    @else
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full">
+                                            <span class="material-symbols-outlined text-sm">category</span>
+                                            {{ $product->category->name }}
+                                        </span>
+                                    @endif
+                                @else
+                                    <span class="text-xs text-gray-400 dark:text-zinc-500">Tanpa Kategori</span>
+                                @endif
                             </td>
                             
                             <!-- Price -->

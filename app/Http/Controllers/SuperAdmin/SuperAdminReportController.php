@@ -13,6 +13,11 @@ use App\Exports\SuperAdminReportExport;
 
 class SuperAdminReportController extends Controller
 {
+    // Status yang dianggap valid untuk dihitung di statistik
+    // pending  = belum bayar  → TIDAK dihitung
+    // cancelled = dibatalkan  → TIDAK dihitung
+    protected array $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
+
     public function index(Request $request)
     {
         $startDate     = $request->input('start_date', now()->startOfMonth()->format('Y-m-d'));
@@ -39,12 +44,15 @@ class SuperAdminReportController extends Controller
         });
         if ($categoryId)    $baseQuery->whereHas('items.product', fn($q) => $q->where('category_id', $categoryId));
 
-        // Ambil semua data untuk statistik (tanpa pagination)
-        $allOrders = (clone $baseQuery)->get();
+        // =====================
+        // STATISTIK
+        // Selalu hanya hitung status valid, tidak peduli filter status apapun
+        // pending & cancelled tidak pernah dihitung di statistik
+        // =====================
+        $statsQuery = clone $baseQuery;
+        $statsQuery->whereIn('status', $this->validStatuses);
+        $allOrders = $statsQuery->get();
 
-        // =====================
-        // STATISTIK — Total = Subtotal + Ongkir
-        // =====================
         $stats = [
             'total_revenue'    => $allOrders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)),
             'total_orders'     => $allOrders->count(),
@@ -56,6 +64,7 @@ class SuperAdminReportController extends Controller
 
         // =====================
         // TABEL (dengan pagination)
+        // Tetap tampilkan semua status agar admin bisa melihat semua pesanan
         // =====================
         $orders = (clone $baseQuery)->latest()->paginate(5)->withQueryString();
 
@@ -128,14 +137,18 @@ class SuperAdminReportController extends Controller
         });
         if ($categoryId)    $query->whereHas('items.product', fn($q) => $q->where('category_id', $categoryId));
 
+        // Tabel PDF: semua data sesuai filter
         $orders = $query->get();
 
+        // Statistik PDF: selalu hanya status valid, tidak peduli filter status apapun
+        $statsOrders = $orders->filter(fn($o) => in_array($o->status, $this->validStatuses));
+
         $stats = [
-            'total_revenue'    => $orders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)),
-            'total_orders'     => $orders->count(),
-            'total_items_sold' => $orders->sum(fn($o) => $o->items->sum('quantity')),
-            'avg_order_value'  => $orders->count() > 0
-                ? round($orders->avg(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)), 0)
+            'total_revenue'    => $statsOrders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)),
+            'total_orders'     => $statsOrders->count(),
+            'total_items_sold' => $statsOrders->sum(fn($o) => $o->items->sum('quantity')),
+            'avg_order_value'  => $statsOrders->count() > 0
+                ? round($statsOrders->avg(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)), 0)
                 : 0,
         ];
 

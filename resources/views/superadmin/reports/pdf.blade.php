@@ -186,7 +186,10 @@
             </tr>
         </thead>
         <tbody>
-            @php $grandTotal = 0; @endphp
+            @php
+                $grandTotal    = 0;
+                $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
+            @endphp
             @foreach($orders as $index => $order)
             @php
                 $categories = $order->items
@@ -195,9 +198,14 @@
                 $products = $order->items
                     ->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')
                     ->implode(', ');
-                $qty      = $order->items->sum('quantity');
-                $total    = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
-                $grandTotal += $total;
+                $qty   = $order->items->sum('quantity');
+                $total = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
+
+                // Grand total di tfoot selalu hanya dari status valid
+                // pending & cancelled tidak pernah dihitung
+                if (in_array($order->status, $validStatuses)) {
+                    $grandTotal += $total;
+                }
 
                 $rawMethod = $order->payment?->payment_type ?? $order->payment_method ?? '';
                 $paymentLabel = match($rawMethod) {

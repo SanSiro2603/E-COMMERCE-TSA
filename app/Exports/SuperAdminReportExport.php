@@ -23,6 +23,9 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
     protected $status;
     protected $orders;
 
+    // Status yang dianggap valid untuk dihitung di statistik
+    protected array $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
+
     public function __construct(
         $startDate,
         $endDate,
@@ -154,13 +157,16 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
 
                 // =====================
                 // RINGKASAN STATISTIK
+                // Selalu hanya hitung status valid, tidak peduli filter status apapun
+                // pending & cancelled tidak pernah dihitung di statistik
                 // =====================
                 $statsStartRow = $currentRow + 1;
 
-                // Hitung statistik — Total = Subtotal + Ongkir
-                $totalRevenue   = $this->orders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0));
-                $totalOrders    = $this->orders->count();
-                $totalItemsSold = $this->orders->sum(fn($o) => $o->items->sum('quantity'));
+                $statsOrders = $this->orders->filter(fn($o) => in_array($o->status, $this->validStatuses));
+
+                $totalRevenue   = $statsOrders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0));
+                $totalOrders    = $statsOrders->count();
+                $totalItemsSold = $statsOrders->sum(fn($o) => $o->items->sum('quantity'));
                 $avgOrderValue  = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 0) : 0;
 
                 // Baris label statistik
@@ -233,6 +239,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
 
                 // =====================
                 // ISI DATA
+                // Tabel tetap menampilkan SEMUA pesanan sesuai filter user
                 // =====================
                 $dataStartRow = $headerRow + 1;
                 $currentRow   = $dataStartRow;
@@ -250,7 +257,12 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
 
                     $qty   = $order->items->sum('quantity');
                     $total = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
-                    $grandTotal += $total;
+
+                    // Grand total di baris TOTAL selalu hanya dari status valid
+                    // pending & cancelled tidak pernah dihitung
+                    if (in_array($order->status, $this->validStatuses)) {
+                        $grandTotal += $total;
+                    }
 
                     $rawMethod = $order->payment?->payment_type
                         ?? $order->payment_method
