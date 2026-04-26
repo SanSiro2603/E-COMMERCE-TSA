@@ -25,15 +25,18 @@ class SuperAdminReportController extends Controller
         // =====================
         // QUERY DASAR
         // =====================
-        $baseQuery = Order::with(['items.product.category', 'payment'])
+        $baseQuery = Order::with(['items.product.category', 'payment', 'address'])
             ->whereBetween('created_at', [
                 $startDate . ' 00:00:00',
                 $endDate   . ' 23:59:59',
             ]);
 
-        if ($province)      $baseQuery->where('province', $province);
+        if ($province)      $baseQuery->whereHas('address', fn($q) => $q->where('province_name', $province));
         if ($status)        $baseQuery->where('status', $status);
-        if ($paymentMethod) $baseQuery->whereHas('payment', fn($q) => $q->where('payment_type', $paymentMethod));
+        if ($paymentMethod) $baseQuery->where(function ($q) use ($paymentMethod) {
+            $q->whereHas('payment', fn($p) => $p->where('payment_type', $paymentMethod))
+              ->orWhere('payment_method', $paymentMethod);
+        });
         if ($categoryId)    $baseQuery->whereHas('items.product', fn($q) => $q->where('category_id', $categoryId));
 
         // Ambil semua data untuk statistik (tanpa pagination)
@@ -59,11 +62,14 @@ class SuperAdminReportController extends Controller
         // =====================
         // DROPDOWN OPTIONS
         // =====================
-        $provinceOptions = Order::whereNotNull('province')
-            ->where('province', '!=', '')
-            ->whereNull('deleted_at')
+        $provinceOptions = \Illuminate\Support\Facades\DB::table('addresses')
+            ->join('orders', 'orders.address_id', '=', 'addresses.id')
+            ->whereNotNull('addresses.province_name')
+            ->where('addresses.province_name', '!=', '')
+            ->whereNull('orders.deleted_at')
+            ->select('addresses.province_name as province')
             ->distinct()
-            ->orderBy('province')
+            ->orderBy('addresses.province_name')
             ->pluck('province');
 
         $categoryOptions = Category::where('is_active', true)
@@ -107,16 +113,19 @@ class SuperAdminReportController extends Controller
         $paymentMethod = $request->input('payment_method');
         $status        = $request->input('status');
 
-        $query = Order::with(['items.product.category', 'payment'])
+        $query = Order::with(['items.product.category', 'payment', 'address'])
             ->whereBetween('created_at', [
                 $startDate . ' 00:00:00',
                 $endDate   . ' 23:59:59',
             ])
             ->orderBy('created_at', 'asc');
 
-        if ($province)      $query->where('province', $province);
+        if ($province)      $query->whereHas('address', fn($q) => $q->where('province_name', $province));
         if ($status)        $query->where('status', $status);
-        if ($paymentMethod) $query->whereHas('payment', fn($q) => $q->where('payment_type', $paymentMethod));
+        if ($paymentMethod) $query->where(function ($q) use ($paymentMethod) {
+            $q->whereHas('payment', fn($p) => $p->where('payment_type', $paymentMethod))
+              ->orWhere('payment_method', $paymentMethod);
+        });
         if ($categoryId)    $query->whereHas('items.product', fn($q) => $q->where('category_id', $categoryId));
 
         $orders = $query->get();

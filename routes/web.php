@@ -216,6 +216,7 @@ Route::middleware(['auth', 'role:pembeli'])
             Route::delete('/hapus/{cart}', [CartController::class, 'hapus'])->name('hapus');
             Route::get('/clear', [CartController::class, 'clear'])->name('clear');
             Route::get('/count', [CartController::class, 'count'])->name('count');
+            Route::post('/checkout-selected', [CartController::class, 'setCheckoutItems'])->name('checkout-selected');
         });
 
         // Pesanan
@@ -238,6 +239,7 @@ Route::middleware(['auth', 'role:pembeli'])
             Route::get('/finish', [PaymentController::class, 'finish'])->name('finish');
             Route::get('/{order}', [PaymentController::class, 'show'])->name('show');
             Route::get('/{order}/check-status', [PaymentController::class, 'checkStatus'])->name('check-status');
+            Route::post('/{order}/save-method', [PaymentController::class, 'savePaymentMethod'])->name('save-method');
         });
 
         // RajaOngkir

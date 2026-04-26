@@ -76,8 +76,9 @@ class OrderService
                 $product->decrement('stock', $cart->quantity);
             }
 
-            // 4. Bersihkan Keranjang
-            Cart::where('user_id', $userId)->delete();
+            // 4. Bersihkan hanya item keranjang yang sudah di-checkout
+            $cartIds = $carts->pluck('id')->toArray();
+            Cart::where('user_id', $userId)->whereIn('id', $cartIds)->delete();
             DB::commit();
 
             return $order;

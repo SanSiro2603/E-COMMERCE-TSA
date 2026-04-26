@@ -184,7 +184,7 @@
                         </a>
                         <a href="{{ route('pembeli.pesanan.index') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-[#0d1b13] dark:text-white hover:bg-primary/10">
                             <span class="material-symbols-outlined text-lg">receipt_long</span>
-                            Pesanan Saya
+                            Transaksi Saya
                         </a>
                         <a href="{{ route('pembeli.alamat.index') }}" class="flex items-center gap-3 px-4 py-2 text-sm text-[#0d1b13] dark:text-white hover:bg-primary/10">
                             <span class="material-symbols-outlined text-lg">location_on</span>

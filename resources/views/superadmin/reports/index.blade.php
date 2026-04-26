@@ -222,15 +222,19 @@
                         $qty   = $order->items->sum('quantity');
                         $total = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
 
-                        $paymentLabel = match($order->payment?->payment_type ?? '') {
-                            'bank_transfer' => 'Transfer Bank',
+                        $rawMethod = $order->payment?->payment_type ?? $order->payment_method ?? '';
+                        $paymentLabel = match($rawMethod) {
+                            'bank_transfer', 'transfer' => 'Transfer Bank',
                             'echannel'      => 'Mandiri E-Channel',
                             'cstore'        => 'Minimarket',
                             'gopay'         => 'GoPay',
                             'qris'          => 'QRIS',
                             'shopeepay'     => 'ShopeePay',
                             'credit_card'   => 'Kartu Kredit',
-                            default         => ucfirst(str_replace('_', ' ', $order->payment?->payment_type ?? '-')),
+                            'wallet'        => 'E-Wallet',
+                            'cod'           => 'COD (Cash on Delivery)',
+                            ''              => '-',
+                            default         => ucfirst(str_replace('_', ' ', $rawMethod)),
                         };
 
                         $statusConfig = [
@@ -255,7 +259,7 @@
                             <p class="text-[10px] text-gray-500 dark:text-zinc-500">{{ $order->created_at->format('H:i') }}</p>
                         </td>
                         <td class="px-4 py-3">
-                            <span class="text-xs text-gray-900 dark:text-white">{{ $order->province ?? '-' }}</span>
+                            <span class="text-xs text-gray-900 dark:text-white">{{ $order->address->province_name ?? '-' }}</span>
                         </td>
                         <td class="px-4 py-3">
                             <span class="text-xs text-gray-900 dark:text-white">{{ $categories ?: '-' }}</span>

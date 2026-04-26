@@ -238,23 +238,25 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     $grandTotal += $order->grand_total ?? 0;
 
                     $sheet->setCellValue('A' . $currentRow, $no++);
-                    $sheet->setCellValue('B' . $currentRow, $order->order_number);
-                    $sheet->setCellValue('C' . $currentRow, $order->created_at->format('d/m/Y'));
-                    $sheet->setCellValue('D' . $currentRow, $order->address?->recipient_name ?? $order->user->name);
-                    $sheet->setCellValue('E' . $currentRow, $order->address?->province_name ?? '-');
-                    $sheet->setCellValue('F' . $currentRow, ($order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-'));
-                    $sheet->setCellValue('G' . $currentRow, $order->address?->full_address ?? '-');
-                    $sheet->setCellValue('H' . $currentRow, $order->address?->recipient_phone ?? '-');
-                    $sheet->setCellValue('I' . $currentRow, $productNames);
-                    $sheet->setCellValue('J' . $currentRow, $totalItems);
+                    $sheet->setCellValue('B' . $currentRow, $order->order_number ?? '-');
+                    $sheet->setCellValue('C' . $currentRow, $order->created_at->format('d/m/Y H:i'));
+                    $sheet->setCellValue('D' . $currentRow, $order->recipient_name ?? $order->user?->name ?? '-');
+                    $sheet->setCellValue('E' . $currentRow, $order->user?->email ?? '-');
+                    $sheet->setCellValue('F' . $currentRow, $order->recipient_phone ?? '-');
+                    $sheet->setCellValue('G' . $currentRow, $order->province ?? '-');
+                    $sheet->setCellValue('H' . $currentRow, $order->city ?? '-');
+                    $sheet->setCellValue('I' . $currentRow, $order->address?->full_address ?? $order->shipping_address ?? '-');
+                    $sheet->setCellValue('J' . $currentRow, $products);
+                    $sheet->setCellValue('K' . $currentRow, $qty);
+                    $sheet->setCellValue('L' . $currentRow, 'Rp ' . number_format($order->grand_total ?? 0, 0, ',', '.'));
+                    $sheet->setCellValue('M' . $currentRow, $statusLabels[$order->status] ?? ucfirst($order->status));
 
-                    // ----------------------------
-                    // ➕ Nama Produk (DITAMBAHKAN)
-                    // ----------------------------
-                    $sheet->setCellValue('K' . $currentRow, $paymentMethod);
-
-                    $sheet->setCellValue('L' . $currentRow, $paymentStatus);
-                    $sheet->setCellValue('M' . $currentRow, 'Rp ' . number_format($order->grand_total, 0, ',', '.'));
+                    // Zebra stripe
+                    if ($no % 2 === 0) {
+                        $sheet->getStyle('A' . $currentRow . ':M' . $currentRow)->applyFromArray([
+                            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
+                        ]);
+                    }
 
                     $currentRow++;
                 }

@@ -199,15 +199,19 @@
                 $total    = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
                 $grandTotal += $total;
 
-                $paymentLabel = match($order->payment?->payment_type ?? '') {
-                    'bank_transfer' => 'Transfer Bank',
+                $rawMethod = $order->payment?->payment_type ?? $order->payment_method ?? '';
+                $paymentLabel = match($rawMethod) {
+                    'bank_transfer', 'transfer' => 'Transfer Bank',
                     'echannel'      => 'Mandiri E-Channel',
                     'cstore'        => 'Minimarket',
                     'gopay'         => 'GoPay',
                     'qris'          => 'QRIS',
                     'shopeepay'     => 'ShopeePay',
                     'credit_card'   => 'Kartu Kredit',
-                    default         => ucfirst(str_replace('_', ' ', $order->payment?->payment_type ?? '-')),
+                    'wallet'        => 'E-Wallet',
+                    'cod'           => 'COD (Cash on Delivery)',
+                    ''              => '-',
+                    default         => ucfirst(str_replace('_', ' ', $rawMethod)),
                 };
                 $statusLabels = [
                     'pending'    => 'Menunggu',
@@ -225,7 +229,7 @@
                 <td class="text-center">{{ $index + 1 }}</td>
                 <td class="text-bold">{{ $order->order_number ?? '-' }}</td>
                 <td>{{ $order->created_at->format('d/m/Y') }}<br><span class="text-muted">{{ $order->created_at->format('H:i') }}</span></td>
-                <td>{{ $order->province ?? '-' }}</td>
+                <td>{{ $order->address->province_name ?? '-' }}</td>
                 <td>{{ $categories }}</td>
                 <td>{{ $products }}</td>
                 <td class="text-center">{{ $qty }}</td>

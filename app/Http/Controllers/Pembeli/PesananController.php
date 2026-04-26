@@ -139,10 +139,22 @@ class PesananController extends Controller
                 ->with('error', 'Maaf, toko sedang tutup. Fitur checkout sementara dinonaktifkan.');
         }
 
-        $carts = Cart::with('product')->where('user_id', Auth::id())->get();
+        // Ambil cart IDs yang dipilih dari session
+        $selectedCartIds = session('checkout_cart_ids', []);
+
+        if (empty($selectedCartIds)) {
+            return redirect()->route('pembeli.keranjang.index')
+                ->with('error', 'Silakan pilih item yang ingin di-checkout terlebih dahulu.');
+        }
+
+        $carts = Cart::with('product')
+            ->where('user_id', Auth::id())
+            ->whereIn('id', $selectedCartIds)
+            ->get();
+
         if ($carts->isEmpty()) {
             return redirect()->route('pembeli.keranjang.index')
-                ->with('error', 'Keranjang kosong');
+                ->with('error', 'Item yang dipilih tidak ditemukan di keranjang.');
         }
 
         $addresses = Auth::user()->addresses()->get();
@@ -178,8 +190,15 @@ class PesananController extends Controller
         }
 
         try {
-            // Hitung estimasi nilai barang (opsional untuk asuransi, kita pakai default atau subtotal keranjang)
-            $itemsValue = Cart::where('user_id', Auth::id())->sum('subtotal');
+            // Hitung estimasi nilai barang dari item yang dipilih saja
+            $selectedCartIds = session('checkout_cart_ids', []);
+            if (!empty($selectedCartIds)) {
+                $itemsValue = Cart::where('user_id', Auth::id())
+                    ->whereIn('id', $selectedCartIds)
+                    ->sum('subtotal');
+            } else {
+                $itemsValue = Cart::where('user_id', Auth::id())->sum('subtotal');
+            }
             if ($itemsValue <= 0) {
                 // Jika dari halaman edit (keranjang kosong), estimasi saja 100000
                 $itemsValue = 100000;
@@ -243,9 +262,21 @@ class PesananController extends Controller
         ]);
 
         try {
-            $carts = Cart::with('product')->where('user_id', Auth::id())->get();
+            // Ambil cart dari session yang dipilih user
+            $selectedCartIds = session('checkout_cart_ids', []);
+
+            if (empty($selectedCartIds)) {
+                return redirect()->route('pembeli.keranjang.index')
+                    ->with('error', 'Sesi checkout habis. Silakan pilih item kembali.');
+            }
+
+            $carts = Cart::with('product')
+                ->where('user_id', Auth::id())
+                ->whereIn('id', $selectedCartIds)
+                ->get();
+
             if ($carts->isEmpty())
-                throw new \Exception('Keranjang kosong');
+                throw new \Exception('Item yang dipilih tidak ditemukan di keranjang');
 
             $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
 
@@ -258,6 +289,9 @@ class PesananController extends Controller
                 $validated['courier_service'],
                 (int) $validated['shipping_cost']
             );
+
+            // Bersihkan session checkout setelah order berhasil dibuat
+            session()->forget('checkout_cart_ids');
 
             return redirect()->route('pembeli.payment.show', $order)
                 ->with('success', 'Pesanan berhasil dibuat! Silakan bayar.');
