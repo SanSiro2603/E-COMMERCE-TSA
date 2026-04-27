@@ -146,27 +146,69 @@
 @push('scripts')
 <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ $clientKey }}"></script>
 <script>
-document.getElementById('pay-button').onclick = function(){
-    snap.pay('{{ $snapToken }}', {
-        onSuccess: function(result){
-            console.log('Payment success:', result);
-            window.location.href = '{{ route("pembeli.pesanan.index") }}?status=success&order={{ $order->order_number }}';
-        },
-        onPending: function(result){
-            console.log('Payment pending:', result);
-            window.location.href = '{{ route("pembeli.payment.show", $order) }}?status=pending&order={{ $order->order_number }}';
-        },
-        onError: function(result){
-            console.log('Payment error:', result);
-            alert('Pembayaran gagal! Silakan coba lagi.');
-            window.location.href = '{{ route("pembeli.payment.show", $order) }}?status=error&order={{ $order->order_number }}';
-        },
-        onClose: function(){
-            console.log('Popup ditutup');
-            // window.location.href = '{{ route("pembeli.pesanan.index") }}?status=cancelled&order={{ $order->order_number }}';
-        }
-    });
-};
+    const savePaymentMethodUrl = '{{ route("pembeli.payment.save-method", $order) }}';
+    const csrfToken = '{{ csrf_token() }}';
+
+    /**
+     * Simpan payment_type ke server via AJAX
+     * Ini solusi agar payment_method tersimpan di lokal maupun production
+     * tanpa harus tunggu webhook dari Midtrans
+     */
+    function savePaymentMethod(paymentType, transactionStatus, callback) {
+        fetch(savePaymentMethodUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+            body: JSON.stringify({
+                payment_type: paymentType,
+                transaction_status: transactionStatus,
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Payment method saved:', data);
+            callback();
+        })
+        .catch(error => {
+            console.warn('Gagal simpan payment method (lanjut redirect):', error);
+            callback(); // Tetap redirect meski gagal simpan
+        });
+    }
+
+    document.getElementById('pay-button').onclick = function(){
+        snap.pay('{{ $snapToken }}', {
+            onSuccess: function(result){
+                console.log('Payment success:', result);
+                savePaymentMethod(
+                    result.payment_type,
+                    result.transaction_status,
+                    function() {
+                        window.location.href = '{{ route("pembeli.pesanan.index") }}?status=success&order={{ $order->order_number }}';
+                    }
+                );
+            },
+            onPending: function(result){
+                console.log('Payment pending:', result);
+                savePaymentMethod(
+                    result.payment_type,
+                    result.transaction_status,
+                    function() {
+                        window.location.href = '{{ route("pembeli.payment.show", $order) }}?status=pending&order={{ $order->order_number }}';
+                    }
+                );
+            },
+            onError: function(result){
+                console.log('Payment error:', result);
+                alert('Pembayaran gagal! Silakan coba lagi.');
+                window.location.href = '{{ route("pembeli.payment.show", $order) }}?status=error&order={{ $order->order_number }}';
+            },
+            onClose: function(){
+                console.log('Popup ditutup');
+            }
+        });
+    };
 </script>
 @endpush
 @endsection

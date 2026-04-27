@@ -137,4 +137,32 @@ class CartController extends Controller
     {
         return response()->json(['count' => Cart::where('user_id', Auth::id())->count()]);
     }
+
+    /**
+     * Simpan ID cart yang dipilih user ke session, lalu redirect ke checkout.
+     * Hanya cart yang benar-benar milik user yang disimpan (validasi server-side).
+     */
+    public function setCheckoutItems(Request $request)
+    {
+        $request->validate([
+            'cart_ids'   => 'required|array|min:1',
+            'cart_ids.*' => 'integer',
+        ]);
+
+        // Verifikasi bahwa semua cart_ids milik user yang sedang login
+        $ownedIds = Cart::where('user_id', Auth::id())
+            ->whereIn('id', $request->cart_ids)
+            ->pluck('id')
+            ->toArray();
+
+        if (empty($ownedIds)) {
+            return redirect()->route('pembeli.keranjang.index')
+                ->with('error', 'Tidak ada item valid yang dipilih.');
+        }
+
+        // Simpan ke session
+        session(['checkout_cart_ids' => $ownedIds]);
+
+        return redirect()->route('pembeli.pesanan.checkout');
+    }
 }

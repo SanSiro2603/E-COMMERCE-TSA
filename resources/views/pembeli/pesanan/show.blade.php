@@ -68,28 +68,21 @@
 
                 @php
                     $addr = $order->address;
-
-                    $name     = $addr?->recipient_name     ?? $order->recipient_name;
-                    $phone    = $addr?->recipient_phone    ?? $order->recipient_phone;
-                    $address  = $addr?->full_address       ?? $order->shipping_address;
-                    $city     = $addr ? ($addr->city_type . ' ' . $addr->city_name) : $order->city;
-                    $province = $addr?->province_name      ?? $order->province;
-                    $postal   = $addr?->postal_code        ?? $order->postal_code;
                 @endphp
 
-                @if($name && $address)
+                @if($addr)
                     <div class="space-y-2 text-sm text-gray-700 dark:text-zinc-300">
                         <p class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-gray-500 text-lg">person</span>
-                            <strong>{{ $name }}</strong>
-                            <span class="text-gray-500">({{ $phone }})</span>
+                            <strong>{{ $addr->recipient_name }}</strong>
+                            <span class="text-gray-500">({{ $addr->recipient_phone }})</span>
                         </p>
                         <p class="flex items-start gap-2">
                             <span class="material-symbols-outlined text-gray-500 text-lg mt-0.5">home</span>
                             <span>
-                                {{ $address }}<br>
-                                <strong>{{ $city }}</strong>, {{ $province }}
-                                @if($postal) <span class="text-gray-500">• {{ $postal }}</span> @endif
+                                {{ $addr->full_address }}<br>
+                                <strong>{{ $addr->city_type }} {{ $addr->city_name }}</strong>, {{ $addr->province_name }}
+                                @if($addr->postal_code) <span class="text-gray-500">• {{ $addr->postal_code }}</span> @endif
                             </span>
                         </p>
                         <p class="flex items-center gap-2">
@@ -216,6 +209,59 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- METODE PEMBAYARAN --}}
+                @php
+                    $rawMethod = $order->payment?->payment_type ?? $order->payment_method ?? null;
+                    $methodConfig = match($rawMethod) {
+                        'bank_transfer'         => ['label' => 'Transfer Bank (Virtual Account)', 'icon' => 'account_balance',     'color' => 'blue'],
+                        'echannel'              => ['label' => 'Mandiri E-Channel',               'icon' => 'account_balance',     'color' => 'blue'],
+                        'gopay'                 => ['label' => 'GoPay',                            'icon' => 'account_balance_wallet', 'color' => 'green'],
+                        'qris'                  => ['label' => 'QRIS',                             'icon' => 'qr_code_2',           'color' => 'purple'],
+                        'shopeepay'             => ['label' => 'ShopeePay',                        'icon' => 'account_balance_wallet', 'color' => 'orange'],
+                        'cstore'                => ['label' => 'Minimarket (Alfamart/Indomaret)',  'icon' => 'store',               'color' => 'yellow'],
+                        'credit_card'           => ['label' => 'Kartu Kredit',                     'icon' => 'credit_card',         'color' => 'indigo'],
+                        default                 => null,
+                    };
+                    $colorMap = [
+                        'blue'   => ['bg' => 'bg-blue-50 dark:bg-blue-500/10',   'border' => 'border-blue-200 dark:border-blue-500/20',   'icon' => 'text-blue-600 dark:text-blue-400',   'text' => 'text-blue-800 dark:text-blue-300'],
+                        'green'  => ['bg' => 'bg-green-50 dark:bg-green-500/10', 'border' => 'border-green-200 dark:border-green-500/20', 'icon' => 'text-green-600 dark:text-green-400', 'text' => 'text-green-800 dark:text-green-300'],
+                        'purple' => ['bg' => 'bg-purple-50 dark:bg-purple-500/10','border' => 'border-purple-200 dark:border-purple-500/20','icon' => 'text-purple-600 dark:text-purple-400','text' => 'text-purple-800 dark:text-purple-300'],
+                        'orange' => ['bg' => 'bg-orange-50 dark:bg-orange-500/10','border' => 'border-orange-200 dark:border-orange-500/20','icon' => 'text-orange-600 dark:text-orange-400','text' => 'text-orange-800 dark:text-orange-300'],
+                        'yellow' => ['bg' => 'bg-yellow-50 dark:bg-yellow-500/10','border' => 'border-yellow-200 dark:border-yellow-500/20','icon' => 'text-yellow-600 dark:text-yellow-400','text' => 'text-yellow-800 dark:text-yellow-300'],
+                        'indigo' => ['bg' => 'bg-indigo-50 dark:bg-indigo-500/10','border' => 'border-indigo-200 dark:border-indigo-500/20','icon' => 'text-indigo-600 dark:text-indigo-400','text' => 'text-indigo-800 dark:text-indigo-300'],
+                    ];
+                @endphp
+
+                @if($methodConfig)
+                @php $c = $colorMap[$methodConfig['color']]; @endphp
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                    <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-2">Metode Pembayaran</p>
+                    <div class="flex items-center gap-3 p-3 rounded-lg {{ $c['bg'] }} border {{ $c['border'] }}">
+                        <span class="material-symbols-outlined text-xl {{ $c['icon'] }}">{{ $methodConfig['icon'] }}</span>
+                        <span class="text-sm font-semibold {{ $c['text'] }}">{{ $methodConfig['label'] }}</span>
+                    </div>
+                    {{-- Detail tambahan: VA Number / Payment Code --}}
+                    @if($order->payment?->bank && $order->payment?->va_number)
+                        <div class="mt-2 px-3 py-2 bg-gray-50 dark:bg-zinc-700 rounded-lg text-xs text-gray-600 dark:text-zinc-300">
+                            <span class="font-medium uppercase">{{ $order->payment->bank }}</span>
+                            — VA: <span class="font-mono tracking-widest">{{ $order->payment->va_number }}</span>
+                        </div>
+                    @elseif($order->payment?->payment_code)
+                        <div class="mt-2 px-3 py-2 bg-gray-50 dark:bg-zinc-700 rounded-lg text-xs text-gray-600 dark:text-zinc-300">
+                            Kode Pembayaran: <span class="font-mono font-bold tracking-widest">{{ $order->payment->payment_code }}</span>
+                        </div>
+                    @endif
+                </div>
+                @elseif($order->status === 'pending')
+                <div class="mt-4 pt-4 border-t border-gray-200 dark:border-zinc-700">
+                    <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide mb-2">Metode Pembayaran</p>
+                    <div class="flex items-center gap-2 p-3 rounded-lg bg-gray-50 dark:bg-zinc-700 border border-gray-200 dark:border-zinc-600">
+                        <span class="material-symbols-outlined text-xl text-gray-400">hourglass_empty</span>
+                        <span class="text-xs text-gray-500 dark:text-zinc-400 italic">Belum dipilih — selesaikan pembayaran terlebih dahulu</span>
+                    </div>
+                </div>
+                @endif
 
                 <!-- AKSI -->
                 <div class="mt-6 space-y-3 border-t border-gray-200 dark:border-zinc-700 pt-6">

@@ -102,6 +102,49 @@ class PaymentController extends Controller
     }
 
     /**
+     * Simpan payment_type dari Snap JS callback (AJAX)
+     * Dipanggil dari onSuccess/onPending callback di browser
+     * Ini solusi agar payment_method tersimpan meski webhook tidak masuk (lokal)
+     */
+    public function savePaymentMethod(Request $request, $orderId)
+    {
+        try {
+            $order = Order::where('user_id', Auth::id())
+                ->findOrFail($orderId);
+
+            $paymentType       = $request->input('payment_type');
+            $transactionStatus = $request->input('transaction_status');
+
+            if (!$paymentType) {
+                return response()->json(['success' => false, 'message' => 'payment_type kosong'], 400);
+            }
+
+            // Simpan ke tabel payments
+            Payment::updateOrCreate(
+                ['order_id' => $order->id],
+                [
+                    'payment_type'       => $paymentType,
+                    'transaction_status' => $transactionStatus ?? 'pending',
+                ]
+            );
+
+            // Sync ke kolom orders.payment_method agar filter SuperAdmin bekerja
+            $order->update(['payment_method' => $paymentType]);
+
+            Log::info("Payment method saved from Snap callback for order {$order->order_number}", [
+                'payment_type'       => $paymentType,
+                'transaction_status' => $transactionStatus,
+            ]);
+
+            return response()->json(['success' => true, 'message' => 'Payment method berhasil disimpan']);
+
+        } catch (\Exception $e) {
+            Log::error('savePaymentMethod error: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Gagal simpan'], 500);
+        }
+    }
+
+    /**
      * Webhook notification dari Midtrans
      * Menangani semua metode: bank_transfer, gopay, qris, shopeepay, cstore, dll
      */
@@ -175,6 +218,14 @@ class PaymentController extends Controller
                     'metadata'           => $payload,
                 ]
             );
+
+            // =============================================
+            // SYNC payment_method ke tabel orders
+            // Agar filter SuperAdmin bisa bekerja
+            // =============================================
+            if (!empty($payload['payment_type'])) {
+                $order->update(['payment_method' => $payload['payment_type']]);
+            }
 
             // =============================================
             // UPDATE STATUS ORDER
@@ -253,11 +304,20 @@ class PaymentController extends Controller
                 $status = $result['data'];
 
                 if ($order->payment) {
+                    $resolvedPaymentType = $status->payment_type
+                        ?? $order->payment->payment_type
+                        ?? null;
+
                     $order->payment->update([
                         'transaction_status' => $status->transaction_status,
-                        'payment_type'       => $status->payment_type ?? $order->payment->payment_type,
+                        'payment_type'       => $resolvedPaymentType,
                         'metadata'           => json_decode(json_encode($status), true),
                     ]);
+
+                    // Sync payment_method ke tabel orders agar filter SuperAdmin bekerja
+                    if ($resolvedPaymentType) {
+                        $order->update(['payment_method' => $resolvedPaymentType]);
+                    }
 
                     if (in_array($status->transaction_status, ['capture', 'settlement'])) {
                         $order->update([

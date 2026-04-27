@@ -51,23 +51,15 @@ class OrderService
 
             // 2. Buat Order
             $order = Order::create([
-                'user_id'          => $userId,
-                'order_number'     => Order::generateOrderNumber(),
-                'subtotal'         => $totalAmount,
-                'shipping_cost'    => $shippingCost,
-                'grand_total'      => $grandTotal,
-                'status'           => 'pending',
-                'address_id'       => $address->id,
-                'recipient_name'   => $address->recipient_name,
-                'recipient_phone'  => $address->recipient_phone,
-                'province'         => $address->province_name,
-                'province_id'      => $address->province_id,
-                'city'             => $address->city_type . ' ' . $address->city_name,
-                'city_id'          => $address->city_id,
-                'postal_code'      => $address->postal_code,
-                'shipping_address' => $address->full_address,
-                'courier'          => $courier,
-                'courier_service'  => $courierService,
+                'user_id'         => $userId,
+                'order_number'    => Order::generateOrderNumber(),
+                'subtotal'        => $totalAmount,
+                'shipping_cost'   => $shippingCost,
+                'grand_total'     => $grandTotal,
+                'status'          => 'pending',
+                'address_id'      => $address->id,   // Sumber kebenaran alamat
+                'courier'         => $courier,
+                'courier_service' => $courierService,
             ]);
 
             // 3. Kurangi Stok & Buat Order Items
@@ -84,8 +76,9 @@ class OrderService
                 $product->decrement('stock', $cart->quantity);
             }
 
-            // 4. Bersihkan Keranjang
-            Cart::where('user_id', $userId)->delete();
+            // 4. Bersihkan hanya item keranjang yang sudah di-checkout
+            $cartIds = $carts->pluck('id')->toArray();
+            Cart::where('user_id', $userId)->whereIn('id', $cartIds)->delete();
             DB::commit();
 
             return $order;
@@ -107,19 +100,11 @@ class OrderService
             $grandTotal = $order->subtotal + $shippingCost;
 
             $order->update([
-                'address_id'       => $address->id,
-                'recipient_name'   => $address->recipient_name,
-                'recipient_phone'  => $address->recipient_phone,
-                'province'         => $address->province_name,
-                'province_id'      => $address->province_id,
-                'city'             => $address->city_type . ' ' . $address->city_name,
-                'city_id'          => $address->city_id,
-                'postal_code'      => $address->postal_code,
-                'shipping_address' => $address->full_address,
-                'courier'          => $courier,
-                'courier_service'  => $courierService,
-                'shipping_cost'    => $shippingCost,
-                'grand_total'      => $grandTotal,
+                'address_id'      => $address->id,   // Sumber kebenaran alamat
+                'courier'         => $courier,
+                'courier_service' => $courierService,
+                'shipping_cost'   => $shippingCost,
+                'grand_total'     => $grandTotal,
             ]);
 
             DB::commit();

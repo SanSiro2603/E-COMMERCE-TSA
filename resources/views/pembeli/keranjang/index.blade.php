@@ -438,8 +438,31 @@
             return;
         }
         
-        // Redirect to checkout
-        window.location.href = '{{ route("pembeli.pesanan.checkout") }}';
+        // Kirim cart IDs yang dipilih ke server (simpan di session)
+        const cartIds = checked.map(cb => cb.dataset.cartId);
+        
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{{ route("pembeli.keranjang.checkout-selected") }}';
+        
+        // CSRF token
+        const csrf = document.createElement('input');
+        csrf.type = 'hidden';
+        csrf.name = '_token';
+        csrf.value = document.querySelector('meta[name="csrf-token"]').content;
+        form.appendChild(csrf);
+        
+        // Append each selected cart ID
+        cartIds.forEach(id => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'cart_ids[]';
+            input.value = id;
+            form.appendChild(input);
+        });
+        
+        document.body.appendChild(form);
+        form.submit();
     }
 
     // Clear Cart

@@ -44,16 +44,19 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
 
     public function collection()
     {
-        $query = Order::with(['items.product.category', 'payment'])
+        $query = Order::with(['items.product.category', 'payment', 'address'])
             ->whereBetween('created_at', [
                 $this->startDate . ' 00:00:00',
                 $this->endDate   . ' 23:59:59',
             ])
             ->orderBy('created_at', 'asc');
 
-        if ($this->province)      $query->where('province', $this->province);
+        if ($this->province)      $query->whereHas('address', fn($q) => $q->where('province_name', $this->province));
         if ($this->status)        $query->where('status', $this->status);
-        if ($this->paymentMethod) $query->whereHas('payment', fn($q) => $q->where('payment_type', $this->paymentMethod));
+        if ($this->paymentMethod) $query->where(function ($q) {
+            $q->whereHas('payment', fn($p) => $p->where('payment_type', $this->paymentMethod))
+              ->orWhere('payment_method', $this->paymentMethod);
+        });
         if ($this->categoryId)    $query->whereHas('items.product', fn($q) => $q->where('category_id', $this->categoryId));
 
         $this->orders = $query->get();
@@ -261,15 +264,20 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                         $grandTotal += $total;
                     }
 
-                    $paymentLabel = match($order->payment?->payment_type ?? '') {
-                        'bank_transfer' => 'Transfer Bank',
+                    $rawMethod = $order->payment?->payment_type
+                        ?? $order->payment_method
+                        ?? '';
+
+                    $paymentLabel = match($rawMethod) {
+                        'bank_transfer', 'transfer' => 'Transfer Bank',
                         'echannel'      => 'Mandiri E-Channel',
                         'cstore'        => 'Minimarket',
                         'gopay'         => 'GoPay',
                         'qris'          => 'QRIS',
                         'shopeepay'     => 'ShopeePay',
                         'credit_card'   => 'Kartu Kredit',
-                        default         => ucfirst(str_replace('_', ' ', $order->payment?->payment_type ?? '-')),
+                        ''              => '-',
+                        default         => ucfirst(str_replace('_', ' ', $rawMethod)),
                     };
 
                     $statusLabels = [
@@ -284,7 +292,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('A' . $currentRow, $no++);
                     $sheet->setCellValue('B' . $currentRow, $order->order_number ?? '-');
                     $sheet->setCellValue('C' . $currentRow, $order->created_at->format('d/m/Y H:i'));
-                    $sheet->setCellValue('D' . $currentRow, $order->province ?? '-');
+                    $sheet->setCellValue('D' . $currentRow, $order->address?->province_name ?? $order->province ?? '-');
                     $sheet->setCellValue('E' . $currentRow, $categories);
                     $sheet->setCellValue('F' . $currentRow, $products);
                     $sheet->setCellValue('G' . $currentRow, $qty);

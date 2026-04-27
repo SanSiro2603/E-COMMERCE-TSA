@@ -12,23 +12,14 @@ class Order extends Model
 
     protected $fillable = [
         'user_id',
+        'address_id',       // Relasi ke tabel addresses (sumber kebenaran alamat)
         'order_number',
         'subtotal',
         'shipping_cost',
         'grand_total',
         'status',
-        'recipient_name',
-        'recipient_phone',
-        'shipping_address',
-        'province',
-        'province_id',
-        'city',
-        'city_id',
-        'postal_code',
         'courier',
         'courier_service',
-        'courier_service_description',
-        'estimated_delivery',
         'tracking_number',
         'biteship_order_id',
         'payment_method',
@@ -37,7 +28,6 @@ class Order extends Model
         'cancelled_at',
         'completed_at',
         'notes',
-        'address_id',
     ];
 
     protected $casts = [
