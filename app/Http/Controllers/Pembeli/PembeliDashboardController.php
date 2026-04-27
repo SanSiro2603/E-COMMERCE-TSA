@@ -38,13 +38,11 @@ class PembeliDashboardController extends Controller
             ->get();
 
         // TAMBAHAN BARU: Kategori aktif
-        $categories = Category::where('is_active', true)
-            ->whereNotNull('image')
-            ->whereHas('products', function ($query) {
-                $query->where('is_active', true);
-            })
-            ->orderBy('name')
-            ->get();
+        $categories = Category::parentOnly()
+        ->where('is_active', true)
+        ->whereNotNull('image')
+        ->orderBy('name')
+        ->get();
 
         // TAMBAHAN BARU: Semua produk (untuk section "Semua Hewan")
         $allProducts = Product::with('category')

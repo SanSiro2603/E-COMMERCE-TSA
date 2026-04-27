@@ -62,6 +62,16 @@ class ProdukController extends Controller
             $query->where('category_id', $request->category);
         }
 
+        // Filter harga
+        if ($request->filled('min_price') || $request->filled('max_price')) {
+            if ($request->filled('min_price')) {
+                $query->where('price', '>=', $request->min_price);
+            }
+            if ($request->filled('max_price')) {
+                $query->where('price', '<=', $request->max_price);
+            }
+        }
+
         $products = $query->paginate(24);
 
         if ($request->ajax() || $request->has('ajax')) {
@@ -79,6 +89,39 @@ class ProdukController extends Controller
 
         return view('pembeli.produk.index', compact('products', 'parentCategories'));
     }
+
+    public function autocomplete(Request $request)
+{
+    $query = $request->get('q', '');
+
+    if (strlen($query) < 2) {
+        return response()->json([]);
+    }
+
+    $products = Product::with('category.parent')
+        ->where('is_active', true)
+        ->where(function($q) use ($query) {
+            $q->where('name', 'like', "%{$query}%")
+              ->orWhere('description', 'like', "%{$query}%");
+        })
+        ->select('id', 'name', 'slug', 'image', 'price', 'category_id')
+        ->limit(6)
+        ->get()
+        ->map(function($product) {
+            return [
+                'id'            => $product->id,
+                'name'          => $product->name,
+                'slug'          => $product->slug,
+                'image'         => $product->image ? asset('storage/' . $product->image) : null,
+                'price'         => 'Rp ' . number_format($product->price, 0, ',', '.'),
+                'category'      => $product->category->parent->name ?? $product->category->name ?? '',
+                'sub_category'  => $product->category->parent ? $product->category->name : null,
+                'url'           => route('pembeli.produk.show', $product->slug),
+            ];
+        });
+
+    return response()->json($products);
+}
 
     public function show($slug)
     {

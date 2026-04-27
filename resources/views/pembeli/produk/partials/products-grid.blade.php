@@ -174,41 +174,39 @@ window.addToCart = function(productId) {
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            showToast(data.message || 'Produk berhasil ditambahkan ke keranjang!', 'success');
             if (typeof updateCartCount === 'function') updateCartCount(data.cart_count);
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: data.message || 'Produk berhasil ditambahkan ke keranjang!',
+                toast: true,
+                position: 'top-end',
+                timer: 2000,
+                showConfirmButton: false,
+            });
         } else {
-            showToast(data.message || 'Gagal menambahkan produk ke keranjang', 'error');
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: data.message || 'Gagal menambahkan produk ke keranjang',
+                toast: true,
+                position: 'top-end',
+                timer: 3000,
+                showConfirmButton: false,
+            });
         }
     })
-    .catch(err => {
-        console.error(err);
-        showToast('Terjadi kesalahan saat menambahkan ke keranjang', 'error');
+    .catch(() => {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error!',
+            text: 'Terjadi kesalahan jaringan.',
+            toast: true,
+            position: 'top-end',
+            timer: 3000,
+            showConfirmButton: false,
+        });
     });
-}
-
-function showToast(message, type = 'success') {
-    let container = document.getElementById('toast-container');
-    if (!container) {
-        container = document.createElement('div');
-        container.id = 'toast-container';
-        container.className = 'fixed top-5 right-5 z-50 flex flex-col gap-2';
-        document.body.appendChild(container);
-    }
-
-    const toast = document.createElement('div');
-    toast.className = `flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg text-white text-sm animate-slide-in ${
-        type === 'success' ? 'bg-green-500' : 'bg-red-500'
-    }`;
-    toast.innerHTML = `
-        <span class="material-symbols-outlined">${type === 'success' ? 'check_circle' : 'error'}</span>
-        <span>${message}</span>
-    `;
-    container.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.animation = 'slide-out 0.3s ease-out';
-        setTimeout(() => toast.remove(), 300);
-    }, 3000);
 }
 </script>
 
