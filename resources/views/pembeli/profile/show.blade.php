@@ -57,7 +57,7 @@
                     <a href="{{ route('pembeli.pesanan.index') }}"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
                         <span class="material-symbols-outlined text-xl">receipt_long</span>
-                        Riwayat Pesanan
+                        Transaksi Saya
                     </a>
                     <a href="{{ route('pembeli.alamat.index') }}"
                         class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-gray-700 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-700 transition">
