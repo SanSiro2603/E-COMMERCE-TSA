@@ -108,21 +108,46 @@
                 </a>
             </div>
 
-            <!-- Search Bar (Desktop Only) -->
-            <div class="hidden lg:block flex-1 max-w-xl">
-                <form action="{{ route('pembeli.produk.index') }}" method="GET">
+            <!-- Search Bar (Desktop Only) dengan Autocomplete -->
+            <div class="hidden lg:block flex-1 max-w-xl relative" id="navbar-autocomplete-wrapper">
+                <form action="{{ route('pembeli.produk.index') }}" method="GET" id="navbar-search-form">
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-primary/70">
                             <span class="material-symbols-outlined">search</span>
                         </div>
-                        <input 
+                        <input
                             type="text"
+                            id="navbar-search-input"
                             name="search"
                             value="{{ request('search') }}"
-                            class="block w-full pl-10 pr-3 py-2 border-none bg-[#e7f3ec] dark:bg-primary/10 rounded-lg focus:ring-2 focus:ring-primary/50 text-sm placeholder:text-primary/60 text-[#0d1b13] dark:text-white" 
+                            autocomplete="off"
+                            class="block w-full pl-10 pr-8 py-2 border-none bg-[#e7f3ec] dark:bg-primary/10 rounded-lg focus:ring-2 focus:ring-primary/50 text-sm placeholder:text-primary/60 text-[#0d1b13] dark:text-white"
                             placeholder="Cari Produk Kami Disini...">
+
+                        <!-- Spinner -->
+                        <div id="navbar-search-spinner" class="hidden absolute right-3 top-1/2 -translate-y-1/2">
+                            <div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                        </div>
+
+                        <!-- Clear -->
+                        <button type="button" id="navbar-search-clear" onclick="clearNavbarSearch()"
+                                class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-primary/60 hover:text-primary">
+                            <span class="material-symbols-outlined text-lg">close</span>
+                        </button>
                     </div>
                 </form>
+
+                <!-- Dropdown -->
+                <div id="navbar-autocomplete-dropdown"
+                    class="hidden absolute top-full left-0 right-0 mt-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                    <div id="navbar-autocomplete-results"></div>
+                    <div id="navbar-autocomplete-footer" class="hidden px-4 py-2.5 border-t border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50">
+                        <button onclick="submitNavbarSearch()"
+                                class="w-full text-center text-xs text-primary font-semibold hover:underline">
+                            Lihat semua hasil untuk "<span id="navbar-query-text"></span>"
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Actions -->
@@ -423,5 +448,172 @@
     @endif
 
     @stack('scripts')
+
+<script>
+(function() {
+    const searchInput  = document.getElementById('navbar-search-input');
+    if (!searchInput) return;
+
+    const dropdown     = document.getElementById('navbar-autocomplete-dropdown');
+    const results      = document.getElementById('navbar-autocomplete-results');
+    const footer       = document.getElementById('navbar-autocomplete-footer');
+    const spinner      = document.getElementById('navbar-search-spinner');
+    const clearBtn     = document.getElementById('navbar-search-clear');
+    const queryText    = document.getElementById('navbar-query-text');
+
+    let debounceTimer;
+    let currentFocus = -1;
+
+    searchInput.addEventListener('input', function() {
+        const val = this.value.trim();
+
+        clearBtn.classList.toggle('hidden', val.length === 0);
+        spinner.classList.add('hidden');
+
+        if (val.length === 0) { closeDropdown(); return; }
+
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            if (val.length >= 2) fetchSuggestions(val);
+            else closeDropdown();
+        }, 300);
+    });
+
+    function fetchSuggestions(query) {
+        spinner.classList.remove('hidden');
+        clearBtn.classList.add('hidden');
+
+        fetch(`/pembeli/produk/search/autocomplete?q=${encodeURIComponent(query)}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            spinner.classList.add('hidden');
+            clearBtn.classList.remove('hidden');
+            renderResults(data, query);
+        })
+        .catch(() => {
+            spinner.classList.add('hidden');
+            clearBtn.classList.remove('hidden');
+            closeDropdown();
+        });
+    }
+
+    function renderResults(data, query) {
+        currentFocus = -1;
+
+        if (data.length === 0) {
+            results.innerHTML = `
+                <div class="px-4 py-6 text-center">
+                    <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-4xl mb-2 block">search_off</span>
+                    <p class="text-sm text-gray-500 dark:text-zinc-400">Tidak ada hasil untuk "<strong>${query}</strong>"</p>
+                </div>`;
+            footer.classList.add('hidden');
+            dropdown.classList.remove('hidden');
+            return;
+        }
+
+        let html = '';
+        data.forEach((product, index) => {
+            const imageHtml = product.image
+                ? `<img src="${product.image}" alt="${product.name}" class="w-10 h-10 object-cover rounded-lg flex-shrink-0">`
+                : `<div class="w-10 h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg flex items-center justify-center flex-shrink-0">
+                       <span class="material-symbols-outlined text-gray-400 text-lg">image</span>
+                   </div>`;
+
+            const categoryHtml = product.sub_category
+                ? `<span class="text-blue-500">${product.category}</span> › <span class="text-purple-500">${product.sub_category}</span>`
+                : `<span class="text-blue-500">${product.category}</span>`;
+
+            const highlighted = product.name.replace(
+                new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+                '<mark class="bg-primary/20 text-primary rounded px-0.5">$1</mark>'
+            );
+
+            html += `
+                <a href="${product.url}"
+                   class="navbar-autocomplete-item flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors border-b border-gray-50 dark:border-zinc-800/50 last:border-0"
+                   data-index="${index}">
+                    ${imageHtml}
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-semibold text-[#0d1b13] dark:text-white truncate">${highlighted}</p>
+                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">${categoryHtml}</p>
+                    </div>
+                    <p class="text-xs font-bold text-primary flex-shrink-0">${product.price}</p>
+                </a>`;
+        });
+
+        results.innerHTML = html;
+        queryText.textContent = query;
+        footer.classList.remove('hidden');
+        dropdown.classList.remove('hidden');
+    }
+
+    // Navigasi keyboard
+    searchInput.addEventListener('keydown', function(e) {
+        const items = dropdown.querySelectorAll('.navbar-autocomplete-item');
+
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            currentFocus = Math.min(currentFocus + 1, items.length - 1);
+            highlightItem(items);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            currentFocus = Math.max(currentFocus - 1, -1);
+            highlightItem(items);
+        } else if (e.key === 'Enter') {
+            if (currentFocus >= 0 && items[currentFocus]) {
+                e.preventDefault();
+                items[currentFocus].click();
+            } else {
+                submitNavbarSearch();
+            }
+        } else if (e.key === 'Escape') {
+            closeDropdown();
+        }
+    });
+
+    function highlightItem(items) {
+        items.forEach((item, i) => {
+            item.classList.toggle('bg-gray-50', i === currentFocus);
+            item.classList.toggle('dark:bg-zinc-800', i === currentFocus);
+        });
+        if (currentFocus >= 0 && items[currentFocus]) {
+            items[currentFocus].scrollIntoView({ block: 'nearest' });
+        }
+    }
+
+    function closeDropdown() {
+        dropdown.classList.add('hidden');
+        results.innerHTML = '';
+        footer.classList.add('hidden');
+        currentFocus = -1;
+    }
+
+    window.submitNavbarSearch = function() {
+        document.getElementById('navbar-search-form').submit();
+    }
+
+    window.clearNavbarSearch = function() {
+        searchInput.value = '';
+        clearBtn.classList.add('hidden');
+        closeDropdown();
+        searchInput.focus();
+    }
+
+    // Tutup saat klik di luar
+    document.addEventListener('click', function(e) {
+        if (!document.getElementById('navbar-autocomplete-wrapper').contains(e.target)) {
+            closeDropdown();
+        }
+    });
+
+    // Buka lagi saat focus
+    searchInput.addEventListener('focus', function() {
+        if (this.value.trim().length >= 2) fetchSuggestions(this.value.trim());
+    });
+})();
+</script>
+
 </body>
 </html>

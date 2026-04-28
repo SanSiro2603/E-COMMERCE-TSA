@@ -65,21 +65,8 @@
         </div>
     </div>
 
-    <!-- Baris 3: Search + Sort -->
-    <div class="flex flex-col sm:flex-row gap-3 pt-1 border-t border-gray-100 dark:border-zinc-800">
-        <!-- Search -->
-        <form method="GET" action="{{ route('pembeli.produk.index') }}" class="flex-1">
-            <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
-                <input type="text"
-                       name="search"
-                       value="{{ request('search') }}"
-                       placeholder="Cari nama hewan..."
-                       class="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-[#0d1b13] dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
-            </div>
-        </form>
-
-        <!-- Sort -->
+    <!-- Baris 3: Sort saja -->
+    <div class="flex justify-end pt-1 border-t border-gray-100 dark:border-zinc-800">
         <div class="relative w-full sm:w-auto">
             <select id="sortSelect"
                     class="appearance-none w-full sm:w-48 px-4 py-2.5 pr-10 border-2 border-gray-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-900 text-sm font-medium text-[#0d1b13] dark:text-white cursor-pointer hover:border-primary transition-all">
@@ -89,6 +76,71 @@
                 <option value="popular">Terpopuler</option>
             </select>
             <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">expand_more</span>
+        </div>
+    </div>
+
+    <!-- Baris 4: Filter Harga -->
+    <div class="pt-1 border-t border-gray-100 dark:border-zinc-800">
+        <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-3">Filter Harga</p>
+        <div class="space-y-3">
+
+            <!-- Slider Range -->
+            <div class="relative px-2 py-4">
+                <div class="relative h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full">
+                    <div id="price-range-fill" class="absolute h-full bg-primary rounded-full"></div>
+                    <div id="thumb-min" class="absolute w-4 h-4 bg-white border-2 border-primary rounded-full shadow-md -translate-y-1/2 top-1/2 -translate-x-1/2 pointer-events-none z-10"></div>
+                    <div id="thumb-max" class="absolute w-4 h-4 bg-white border-2 border-primary rounded-full shadow-md -translate-y-1/2 top-1/2 -translate-x-1/2 pointer-events-none z-10"></div>
+                </div>
+                <input type="range" id="price-min" min="0" max="10000000" step="50000" value="0"
+                    style="position:absolute; top:50%; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:3; margin:0; padding:0; transform:translateY(-50%);">
+                <input type="range" id="price-max" min="0" max="10000000" step="50000" value="10000000"
+                    style="position:absolute; top:50%; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:4; margin:0; padding:0; transform:translateY(-50%);">
+            </div>
+
+            <!-- Input Harga Manual -->
+            <div class="flex items-center gap-3">
+                <div class="flex-1 relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-zinc-400 font-medium">Rp</span>
+                    <input type="number" id="price-min-input" placeholder="0" min="0"
+                           class="w-full pl-8 pr-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg text-xs text-[#0d1b13] dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                </div>
+                <span class="text-xs text-gray-400">—</span>
+                <div class="flex-1 relative">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-zinc-400 font-medium">Rp</span>
+                    <input type="number" id="price-max-input" placeholder="10.000.000" min="0"
+                           class="w-full pl-8 pr-3 py-2 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg text-xs text-[#0d1b13] dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent transition-all">
+                </div>
+                <button onclick="applyPriceFilter()"
+                        class="px-4 py-2 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors whitespace-nowrap">
+                    Terapkan
+                </button>
+                <button onclick="resetPriceFilter()" id="price-reset-btn"
+                        class="hidden px-3 py-2 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors">
+                    Reset
+                </button>
+            </div>
+
+            <!-- Quick Price Buttons -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs text-gray-500 dark:text-zinc-400">Cepat:</span>
+                <button onclick="setQuickPrice(0, 500000)"
+                        class="quick-price px-2.5 py-1 border border-gray-200 dark:border-zinc-700 rounded-lg text-xs text-gray-600 dark:text-zinc-300 hover:border-primary hover:text-primary transition-colors">
+                    &lt; Rp 500rb
+                </button>
+                <button onclick="setQuickPrice(500000, 1000000)"
+                        class="quick-price px-2.5 py-1 border border-gray-200 dark:border-zinc-700 rounded-lg text-xs text-gray-600 dark:text-zinc-300 hover:border-primary hover:text-primary transition-colors">
+                    Rp 500rb - 1jt
+                </button>
+                <button onclick="setQuickPrice(1000000, 5000000)"
+                        class="quick-price px-2.5 py-1 border border-gray-200 dark:border-zinc-700 rounded-lg text-xs text-gray-600 dark:text-zinc-300 hover:border-primary hover:text-primary transition-colors">
+                    Rp 1jt - 5jt
+                </button>
+                <button onclick="setQuickPrice(5000000, 10000000)"
+                        class="quick-price px-2.5 py-1 border border-gray-200 dark:border-zinc-700 rounded-lg text-xs text-gray-600 dark:text-zinc-300 hover:border-primary hover:text-primary transition-colors">
+                    &gt; Rp 5jt
+                </button>
+            </div>
+
         </div>
     </div>
 
@@ -114,20 +166,42 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const productsContainer = document.getElementById('productsContainer');
-    const resultsCount      = document.getElementById('results-count');
-    const subCategoryRow    = document.getElementById('subCategoryRow');
-    const subCategoryFilters = document.getElementById('subCategoryFilters');
-    const activeFilters     = document.getElementById('activeFilters');
-    const activeFilterTags  = document.getElementById('activeFilterTags');
+// =====================================================================
+// SATU DOMContentLoaded — semua logika filter di sini
+// =====================================================================
+document.addEventListener('DOMContentLoaded', function () {
 
-    let currentParent   = '';
-    let currentSub      = '';
-    let currentSearch   = '{{ request("search", "") }}';
-    let currentSort     = 'newest';
+    // ---------- Elemen ----------
+    const productsContainer  = document.getElementById('productsContainer');
+    const resultsCount       = document.getElementById('results-count');
+    const subCategoryRow     = document.getElementById('subCategoryRow');
+    const subCategoryFilters = document.getElementById('subCategoryFilters');
+    const activeFilters      = document.getElementById('activeFilters');
+    const activeFilterTags   = document.getElementById('activeFilterTags');
+
+    // ---------- State kategori & sort ----------
+    let currentParent     = '';
+    let currentSub        = '';
+    let currentSearch     = '{{ request("search", "") }}';
+    let currentSort       = 'newest';
     let currentParentName = '';
-    let currentSubName  = '';
+    let currentSubName    = '';
+
+    // ---------- State harga ----------
+    const PRICE_MIN = 0;
+    const PRICE_MAX = 10000000;
+    window.currentMinPrice = 0;
+    window.currentMaxPrice = 0;
+
+    // ---------- Elemen slider ----------
+    const sliderMin = document.getElementById('price-min');
+    const sliderMax = document.getElementById('price-max');
+    const inputMin  = document.getElementById('price-min-input');
+    const inputMax  = document.getElementById('price-max-input');
+    const thumbMin  = document.getElementById('thumb-min');
+    const thumbMax  = document.getElementById('thumb-max');
+    const rangeFill = document.getElementById('price-range-fill');
+    const resetBtn  = document.getElementById('price-reset-btn');
 
     // ===================== FETCH PRODUCTS =====================
     function fetchProducts() {
@@ -138,6 +212,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (currentParent)  params.append('parent_category', currentParent);
         if (currentSub)     params.append('category', currentSub);
         if (currentSort)    params.append('sort', currentSort);
+        if (window.currentMinPrice > 0)
+            params.append('min_price', window.currentMinPrice);
+        if (window.currentMaxPrice > 0 && window.currentMaxPrice < PRICE_MAX)
+            params.append('max_price', window.currentMaxPrice);
         params.append('ajax', '1');
 
         fetch(`{{ route('pembeli.produk.index') }}?${params.toString()}`, {
@@ -148,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .then(res => res.json())
         .then(data => {
-            if (data.html) productsContainer.innerHTML = data.html;
+            if (data.html !== undefined)  productsContainer.innerHTML = data.html;
             if (data.total !== undefined) resultsCount.textContent = data.total;
             updateActiveFilterTags();
             updateURL();
@@ -156,7 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(() => showError());
     }
 
-    // ===================== LOADING =====================
+    // ===================== LOADING / ERROR =====================
     function showLoading() {
         productsContainer.innerHTML = `
             <div class="bg-white dark:bg-background-dark rounded-xl border border-[#cfe7d9] dark:border-primary/20 shadow-sm">
@@ -190,11 +268,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ===================== ACTIVE FILTER TAGS =====================
     function updateActiveFilterTags() {
-        const hasFilter = currentSearch || currentParent || currentSub;
+        const priceActive = window.currentMinPrice > 0 ||
+                            (window.currentMaxPrice > 0 && window.currentMaxPrice < PRICE_MAX);
+        const hasFilter   = currentSearch || currentParent || currentSub || priceActive;
+
         activeFilters.classList.toggle('hidden', !hasFilter);
-        activeFilters.classList.toggle('flex', hasFilter);
+        activeFilters.classList.toggle('flex',    hasFilter);
 
         let html = '';
+
         if (currentParent) {
             html += `
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 rounded-lg text-xs">
@@ -205,6 +287,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </button>
                 </span>`;
         }
+
         if (currentSub) {
             html += `
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-50 dark:bg-purple-500/10 text-purple-700 dark:text-purple-400 rounded-lg text-xs">
@@ -215,6 +298,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     </button>
                 </span>`;
         }
+
         if (currentSearch) {
             html += `
                 <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-zinc-300 rounded-lg text-xs">
@@ -225,6 +309,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     </button>
                 </span>`;
         }
+
+        if (priceActive) {
+            const minLabel = window.currentMinPrice > 0
+                ? 'Rp ' + window.currentMinPrice.toLocaleString('id-ID') : '0';
+            const maxLabel = window.currentMaxPrice < PRICE_MAX
+                ? 'Rp ' + window.currentMaxPrice.toLocaleString('id-ID') : 'Rp 10jt+';
+            html += `
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 rounded-lg text-xs">
+                    <span class="material-symbols-outlined text-sm">payments</span>
+                    ${minLabel} — ${maxLabel}
+                    <button onclick="resetPriceFilter()" class="hover:text-green-900">
+                        <span class="material-symbols-outlined text-sm">close</span>
+                    </button>
+                </span>`;
+        }
+
         activeFilterTags.innerHTML = html;
     }
 
@@ -238,7 +338,7 @@ document.addEventListener('DOMContentLoaded', function() {
         subCategoryRow.classList.remove('hidden');
 
         let html = `
-            <button data-sub=""
+            <button data-sub="" data-subname=""
                     class="sub-filter inline-flex items-center gap-1 px-3 py-1.5 border-2 rounded-lg text-xs font-medium transition-all
                         border-primary bg-primary text-white shadow-sm">
                 Semua ${currentParentName}
@@ -256,9 +356,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         subCategoryFilters.innerHTML = html;
 
-        // Attach event listeners ke sub filter buttons
+        // Pasang event listener setelah HTML dirender
         document.querySelectorAll('.sub-filter').forEach(btn => {
-            btn.addEventListener('click', function() {
+            btn.addEventListener('click', function () {
                 document.querySelectorAll('.sub-filter').forEach(b => {
                     b.classList.remove('border-primary', 'bg-primary', 'text-white', 'shadow-sm');
                     b.classList.add('border-gray-300', 'dark:border-zinc-700', 'bg-white', 'dark:bg-zinc-900', 'text-[#0d1b13]', 'dark:text-white');
@@ -275,7 +375,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // ===================== PARENT CATEGORY CLICK =====================
     document.querySelectorAll('.parent-filter').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             document.querySelectorAll('.parent-filter').forEach(b => {
                 b.classList.remove('border-primary', 'bg-primary', 'text-white', 'shadow-sm');
                 b.classList.add('border-gray-300', 'dark:border-zinc-700', 'bg-white', 'dark:bg-zinc-900', 'text-[#0d1b13]', 'dark:text-white');
@@ -300,13 +400,111 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ===================== SORT =====================
-    document.getElementById('sortSelect').addEventListener('change', function() {
+    document.getElementById('sortSelect').addEventListener('change', function () {
         currentSort = this.value;
         fetchProducts();
     });
 
-    // ===================== CLEAR FUNCTIONS =====================
-    window.clearParent = function() {
+    // ===================== SLIDER HARGA =====================
+    function updateSliderUI() {
+        const minVal = parseInt(sliderMin.value);
+        const maxVal = parseInt(sliderMax.value);
+        const minPct = ((minVal - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+        const maxPct = ((maxVal - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+
+        thumbMin.style.left   = `${minPct}%`;
+        thumbMax.style.left   = `${maxPct}%`;
+        rangeFill.style.left  = `${minPct}%`;
+        rangeFill.style.width = `${maxPct - minPct}%`;
+
+        sliderMin.style.zIndex = minPct > 90 ? '5' : '3';
+        sliderMax.style.zIndex = '4';
+    }
+
+    sliderMin.addEventListener('input', function () {
+        let val = parseInt(this.value);
+        if (val >= parseInt(sliderMax.value)) {
+            val = parseInt(sliderMax.value) - 50000;
+            this.value = val;
+        }
+        inputMin.value = val;
+        updateSliderUI();
+    });
+
+    sliderMax.addEventListener('input', function () {
+        let val = parseInt(this.value);
+        if (val <= parseInt(sliderMin.value)) {
+            val = parseInt(sliderMin.value) + 50000;
+            this.value = val;
+        }
+        inputMax.value = val;
+        updateSliderUI();
+    });
+
+    inputMin.addEventListener('input', function () {
+        let val = parseInt(this.value) || 0;
+        val = Math.max(PRICE_MIN, Math.min(val, parseInt(sliderMax.value) - 50000));
+        sliderMin.value = val;
+        updateSliderUI();
+    });
+
+    inputMax.addEventListener('input', function () {
+        let val = parseInt(this.value) || PRICE_MAX;
+        val = Math.min(PRICE_MAX, Math.max(val, parseInt(sliderMin.value) + 50000));
+        sliderMax.value = val;
+        updateSliderUI();
+    });
+
+    // ===================== PRICE FILTER FUNCTIONS (global) =====================
+    window.applyPriceFilter = function () {
+        window.currentMinPrice = parseInt(sliderMin.value);
+        window.currentMaxPrice = parseInt(sliderMax.value);
+        resetBtn.classList.remove('hidden');
+        highlightQuickPrice(window.currentMinPrice, window.currentMaxPrice);
+        fetchProducts();  // ← langsung panggil, tidak perlu CustomEvent
+    };
+
+    window.resetPriceFilter = function () {
+        window.currentMinPrice = 0;
+        window.currentMaxPrice = 0;
+        sliderMin.value = PRICE_MIN;
+        sliderMax.value = PRICE_MAX;
+        inputMin.value  = '';
+        inputMax.value  = '';
+        updateSliderUI();
+        resetBtn.classList.add('hidden');
+        document.querySelectorAll('.quick-price').forEach(b => {
+            b.classList.remove('border-primary', 'text-primary', 'bg-primary/5');
+        });
+        fetchProducts();  // ← langsung panggil
+    };
+
+    window.setQuickPrice = function (min, max) {
+        sliderMin.value = min;
+        sliderMax.value = max;
+        inputMin.value  = min;
+        inputMax.value  = max;
+        updateSliderUI();
+        window.applyPriceFilter();
+    };
+
+    function highlightQuickPrice(min, max) {
+        const ranges = [
+            { min: 0,       max: 500000   },
+            { min: 500000,  max: 1000000  },
+            { min: 1000000, max: 5000000  },
+            { min: 5000000, max: 10000000 },
+        ];
+        document.querySelectorAll('.quick-price').forEach((btn, i) => {
+            btn.classList.remove('border-primary', 'text-primary', 'bg-primary/5');
+            if (ranges[i] && ranges[i].min === min && ranges[i].max === max) {
+                btn.classList.add('border-primary', 'text-primary', 'bg-primary/5');
+            }
+        });
+    }
+
+    // ===================== CLEAR FUNCTIONS (global) =====================
+    window.clearParent = function () {
         currentParent     = '';
         currentParentName = '';
         currentSub        = '';
@@ -323,9 +521,9 @@ document.addEventListener('DOMContentLoaded', function() {
             allBtn.classList.remove('border-gray-300', 'dark:border-zinc-700', 'bg-white', 'dark:bg-zinc-900', 'text-[#0d1b13]', 'dark:text-white');
         }
         fetchProducts();
-    }
+    };
 
-    window.clearSub = function() {
+    window.clearSub = function () {
         currentSub     = '';
         currentSubName = '';
         document.querySelectorAll('.sub-filter').forEach(b => {
@@ -338,21 +536,20 @@ document.addEventListener('DOMContentLoaded', function() {
             allSubBtn.classList.remove('border-gray-300', 'dark:border-zinc-700', 'bg-white', 'dark:bg-zinc-900', 'text-[#0d1b13]', 'dark:text-white');
         }
         fetchProducts();
-    }
+    };
 
-    window.clearSearch = function() {
+    window.clearSearch = function () {
         currentSearch = '';
         window.location.href = '{{ route("pembeli.produk.index") }}';
-    }
+    };
 
-    window.clearAllFilters = function() {
-        currentParent = '';
-        currentParentName = '';
-        currentSub = '';
-        currentSubName = '';
-        currentSearch = '';
+    window.clearAllFilters = function () {
         window.location.href = '{{ route("pembeli.produk.index") }}';
-    }
-});
+    };
+
+    // ===================== INIT =====================
+    updateSliderUI();
+
+}); // ← satu DOMContentLoaded selesai di sini
 </script>
 @endpush

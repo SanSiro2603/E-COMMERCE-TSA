@@ -212,6 +212,7 @@ Route::middleware(['auth', 'role:pembeli'])
         // Produk
         Route::get('/produk', [ProdukController::class, 'index'])->name('produk.index');
         Route::get('/produk/{slug}', [ProdukController::class, 'show'])->name('produk.show');
+        Route::get('/produk/search/autocomplete', [ProdukController::class, 'autocomplete'])->name('produk.autocomplete');
 
         // Keranjang
         Route::prefix('keranjang')->name('keranjang.')->group(function () {
