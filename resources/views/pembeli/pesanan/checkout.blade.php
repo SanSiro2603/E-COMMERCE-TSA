@@ -195,7 +195,7 @@
                     {{-- LOGIKA TOMBOL TOKO BUKA/TUTUP --}}
                     @if($shoppingEnabled)
                         <button type="submit" id="submitBtn"
-                                class="w-full mt-6 bg-gradient-to-r from-soft-green to-primary text-white py-3 rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                class="w-full mt-6 bg-[#16a34a] hover:bg-[#15803d] text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                                 disabled>
                             <span class="material-symbols-outlined text-lg">payment</span>
                             Buat Pesanan &amp; Bayar

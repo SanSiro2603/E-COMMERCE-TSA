@@ -140,7 +140,7 @@
 
         <!-- Logo -->
         <div class="flex justify-center mb-2 mt-1">
-            <img src="images/logo.png" alt="Logo" class="w-12 h-12 rounded-full object-cover" />
+            <img src="images/logo header.png" alt="Logo TSA" class="w-12 h-12 object-contain" />
         </div>
 
         <h2 class="text-lg font-bold text-gray-900 mb-0">Welcome Back</h2>

@@ -7,32 +7,36 @@
 
     <!-- SUCCESS / ERROR ALERT -->
     @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4 animate-fade-in">
+        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-xl p-4 animate-slide-in" data-auto-dismiss>
             <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
-                <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-green-900 dark:text-green-300">Berhasil!</h3>
-                    <p class="text-sm text-green-800 dark:text-green-400 mt-1">{{ session('success') }}</p>
+                <div class="flex-shrink-0 w-9 h-9 bg-green-100 dark:bg-green-500/20 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-xl">check_circle</span>
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()" 
-                        class="text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300">
-                    <span class="material-symbols-outlined">close</span>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-bold text-green-900 dark:text-green-300">Berhasil!</h3>
+                    <p class="text-sm text-green-700 dark:text-green-400 mt-0.5">{{ session('success') }}</p>
+                </div>
+                <button onclick="this.closest('[data-auto-dismiss]').remove()"
+                        class="flex-shrink-0 p-1 text-green-500 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-500/20 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-lg">close</span>
                 </button>
             </div>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-shake">
+        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-xl p-4 animate-slide-in" data-auto-dismiss>
             <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">error</span>
-                <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-red-900 dark:text-red-300">Gagal!</h3>
-                    <p class="text-sm text-red-800 dark:text-red-400 mt-1">{{ session('error') }}</p>
+                <div class="flex-shrink-0 w-9 h-9 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center">
+                    <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-xl">error</span>
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()" 
-                        class="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300">
-                    <span class="material-symbols-outlined">close</span>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-bold text-red-900 dark:text-red-300">Gagal!</h3>
+                    <p class="text-sm text-red-700 dark:text-red-400 mt-0.5">{{ session('error') }}</p>
+                </div>
+                <button onclick="this.closest('[data-auto-dismiss]').remove()"
+                        class="flex-shrink-0 p-1 text-red-500 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-lg">close</span>
                 </button>
             </div>
         </div>
@@ -55,7 +59,7 @@
             </p>
         </div>
         <a href="{{ route('pembeli.produk.index') }}"
-           class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-soft-green to-primary text-white rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+           class="flex items-center gap-2 px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200">
             <span class="material-symbols-outlined text-lg">storefront</span>
             Belanja Lagi
         </a>
@@ -195,7 +199,7 @@
                             <!-- Bayar Sekarang -->
                             @if($order->status === 'pending' && $order->payment?->snap_token)
                                 <a href="{{ route('pembeli.payment.show', $order->id) }}"
-                                   class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-soft-green to-primary text-white hover:shadow-lg rounded-lg text-sm font-medium transition-all animate-pulse">
+                                   class="inline-flex items-center gap-1 px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-sm font-semibold shadow-md hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200">
                                     <span class="material-symbols-outlined text-base">payment</span>
                                     Bayar Sekarang
                                 </a>
@@ -203,23 +207,24 @@
 
                             <!-- Batalkan Pesanan -->
                             @if($order->canBeCancelled())
-                                <form action="{{ route('pembeli.pesanan.cancel', $order->id) }}" method="POST" class="inline"
-                                onsubmit="return confirm('Yakin ingin membatalkan pesanan #{{ $order->order_number }}?')">
-                                @csrf @method('PATCH')
-                                <button type="submit" 
-                                        class="inline-flex items-center gap-1 px-4 py-2 bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-500/30 rounded-lg text-sm font-medium transition-colors">
-                                    <span class="material-symbols-outlined text-base">cancel</span>
-                                    Batalkan
-                                </button>
-                            </form>
+                                <form id="cancel-form-{{ $order->id }}" action="{{ route('pembeli.pesanan.cancel', $order->id) }}" method="POST" class="inline">
+                                    @csrf @method('PATCH')
+                                    <button type="button"
+                                            onclick="confirmCancel('{{ $order->id }}', '#{{ $order->order_number }}')"
+                                            class="inline-flex items-center gap-1 px-4 py-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg text-sm font-medium transition-all duration-200">
+                                        <span class="material-symbols-outlined text-base">cancel</span>
+                                        Batalkan
+                                    </button>
+                                </form>
                             @endif
 
                             <!-- Tandai Selesai -->
                             @if($order->canBeCompleted())
-                                <form action="{{ route('pembeli.pesanan.complete', $order->id) }}" method="POST" class="inline">
+                                <form id="complete-form-{{ $order->id }}" action="{{ route('pembeli.pesanan.complete', $order->id) }}" method="POST" class="inline">
                                     @csrf @method('PATCH')
-                                    <button type="submit" 
-                                            class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 text-white hover:shadow-lg rounded-lg text-sm font-medium transition-all">
+                                    <button type="button"
+                                            onclick="confirmComplete('{{ $order->id }}', '#{{ $order->order_number }}')"
+                                            class="inline-flex items-center gap-1 px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-sm font-semibold shadow-sm hover:shadow-md hover:shadow-green-500/30 transition-all duration-200">
                                         <span class="material-symbols-outlined text-base">check_circle</span>
                                         Selesai
                                     </button>
@@ -251,24 +256,111 @@
 
 
 
-<!-- COPY TO CLIPBOARD -->
 <script>
+// Copy to Clipboard
 function copyToClipboard(text) {
     navigator.clipboard.writeText(text).then(() => {
-        alert('Berhasil disalin: ' + text);
+        Swal.fire({
+            icon: 'success',
+            title: 'Disalin!',
+            text: text,
+            toast: true,
+            position: 'top-end',
+            timer: 1500,
+            showConfirmButton: false,
+            timerProgressBar: true,
+        });
     }).catch(() => {
         prompt('Salin manual:', text);
+    });
+}
+
+// Konfirmasi Batalkan Pesanan
+function confirmCancel(orderId, orderNumber) {
+    Swal.fire({
+        title: 'Batalkan Pesanan?',
+        html: `Apakah Anda yakin ingin membatalkan pesanan <strong>${orderNumber}</strong>?<br><small class="text-gray-500">Tindakan ini tidak dapat dibatalkan.</small>`,
+        icon: 'warning',
+        iconColor: '#ef4444',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<span style="display:flex;align-items:center;gap:6px"><span class="material-symbols-outlined" style="font-size:18px">cancel</span> Ya, Batalkan</span>',
+        cancelButtonText: 'Tidak, Kembali',
+        reverseButtons: true,
+        focusCancel: true,
+        customClass: {
+            popup: 'rounded-2xl',
+            confirmButton: 'rounded-lg font-semibold',
+            cancelButton: 'rounded-lg font-medium',
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Membatalkan...',
+                text: 'Mohon tunggu sebentar',
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => Swal.showLoading()
+            });
+            document.getElementById('cancel-form-' + orderId).submit();
+        }
+    });
+}
+
+// Konfirmasi Tandai Selesai
+function confirmComplete(orderId, orderNumber) {
+    Swal.fire({
+        title: 'Tandai Selesai?',
+        html: `Konfirmasi bahwa pesanan <strong>${orderNumber}</strong> telah Anda terima dengan baik.`,
+        icon: 'question',
+        iconColor: '#16a34a',
+        showCancelButton: true,
+        confirmButtonColor: '#16a34a',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: '<span style="display:flex;align-items:center;gap:6px"><span class="material-symbols-outlined" style="font-size:18px">check_circle</span> Ya, Selesai</span>',
+        cancelButtonText: 'Kembali',
+        reverseButtons: true,
+        customClass: {
+            popup: 'rounded-2xl',
+            confirmButton: 'rounded-lg font-semibold',
+            cancelButton: 'rounded-lg font-medium',
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Memproses...',
+                text: 'Mohon tunggu sebentar',
+                icon: 'info',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => Swal.showLoading()
+            });
+            document.getElementById('complete-form-' + orderId).submit();
+        }
     });
 }
 </script>
 
 <!-- ANIMASI CSS -->
 <style>
-    @keyframes fade-in { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slide-in { from { opacity: 0; transform: translateY(-12px); } to { opacity: 1; transform: translateY(0); } }
     @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    .animate-fade-in { animation: fade-in 0.4s ease-out; }
+    .animate-slide-in { animation: slide-in 0.35s cubic-bezier(0.4,0,0.2,1); }
     .animate-shake { animation: shake 0.5s ease-in-out; }
-    .animate-bounce { animation: bounce 0.6s ease-in-out 3; }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('[data-auto-dismiss]').forEach(el => {
+        setTimeout(() => {
+            el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(-8px)';
+            setTimeout(() => el.remove(), 500);
+        }, 4000);
+    });
+});
+</script>
 @endsection
