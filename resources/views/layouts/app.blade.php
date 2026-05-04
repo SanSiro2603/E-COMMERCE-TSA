@@ -208,7 +208,8 @@
                             class="flex items-center gap-3 pl-2 border-l border-gray-200 dark:border-primary/20">
                             <div class="hidden lg:block text-right">
                                 <p class="text-xs font-bold leading-none text-[#0d1b13] dark:text-white">
-                                    {{ Str::limit(auth()->user()->name, 15) }}</p>
+                                    {{ Str::limit(auth()->user()->name, 15) }}
+                                </p>
                                 <p class="text-[10px] text-primary font-medium">Mitra Utama</p>
                             </div>
                             <div class="size-10 rounded-full bg-primary/20 border-2 border-primary overflow-hidden">
@@ -236,7 +237,7 @@
                         <a href="{{ route('pembeli.pesanan.index') }}"
                             class="flex items-center gap-3 px-4 py-2 text-sm text-[#0d1b13] dark:text-white hover:bg-primary/10">
                             <span class="material-symbols-outlined text-lg">receipt_long</span>
-                            Transaksi Saya
+                            Riwayat Pesanan
                         </a>
                         <a href="{{ route('pembeli.alamat.index') }}"
                             class="flex items-center gap-3 px-4 py-2 text-sm text-[#0d1b13] dark:text-white hover:bg-primary/10">

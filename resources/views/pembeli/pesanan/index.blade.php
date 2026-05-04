@@ -69,13 +69,13 @@
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-4">
         <div class="flex flex-wrap gap-2">
             <a href="{{ route('pembeli.pesanan.index') }}" 
-               class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ !request('status') || request('status') == 'all' ? 'bg-gradient-to-r from-soft-green to-primary text-white shadow-md' : 'bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700' }}">
+               class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 {{ !request('status') || request('status') == 'all' ? 'bg-[#16a34a] text-white shadow-md' : 'bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700 hover:text-[#16a34a] dark:hover:text-green-400' }}">
                 Semua
             </a>
             @foreach($statuses as $key => $label)
                 @if($key !== 'all')
                     <a href="{{ route('pembeli.pesanan.index', ['status' => $key]) }}" 
-                       class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ request('status') == $key ? 'bg-gradient-to-r from-soft-green to-primary text-white shadow-md' : 'bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700' }}">
+                       class="px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 {{ request('status') == $key ? 'bg-[#16a34a] text-white shadow-md' : 'bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-700 hover:text-[#16a34a] dark:hover:text-green-400' }}">
                         {{ $label }}
                     </a>
                 @endif
