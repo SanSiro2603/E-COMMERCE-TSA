@@ -21,18 +21,34 @@ class ProdukController extends Controller
             ->orderBy('name')
             ->get();
 
-            // Sort
-            $sortField = 'created_at';
-            $sortDir   = 'desc';
+        // =====================================================================
+        // TAMBAHAN: Hitung jumlah produk per kategori utama
+        // Digunakan untuk badge angka di tombol filter kategori
+        // =====================================================================
+        $categoryCounts = [];
+        foreach ($parentCategories as $parent) {
+            // Hitung produk di kategori parent + semua sub-kategorinya
+            $categoryCounts[$parent->id] = Product::where('is_active', true)
+                ->whereHas('category', function ($q) use ($parent) {
+                    $q->where('id', $parent->id)
+                      ->orWhere('parent_id', $parent->id);
+                })
+                ->count();
+        }
+        // =====================================================================
 
-            if ($request->filled('sort')) {
-                match($request->sort) {
-                    'cheapest'  => [$sortField, $sortDir] = ['price', 'asc'],
-                    'expensive' => [$sortField, $sortDir] = ['price', 'desc'],
-                    'newest'    => [$sortField, $sortDir] = ['created_at', 'desc'],
-                    default     => [$sortField, $sortDir] = ['created_at', 'desc'],
-                };
-            }
+        // Sort
+        $sortField = 'created_at';
+        $sortDir   = 'desc';
+
+        if ($request->filled('sort')) {
+            match($request->sort) {
+                'cheapest'  => [$sortField, $sortDir] = ['price', 'asc'],
+                'expensive' => [$sortField, $sortDir] = ['price', 'desc'],
+                'newest'    => [$sortField, $sortDir] = ['created_at', 'desc'],
+                default     => [$sortField, $sortDir] = ['created_at', 'desc'],
+            };
+        }
 
         $query = Product::with('category.parent')
             ->where('is_active', true)
@@ -87,41 +103,44 @@ class ProdukController extends Controller
             ]);
         }
 
-        return view('pembeli.produk.index', compact('products', 'parentCategories'));
+        // =====================================================================
+        // TAMBAHAN: kirim $categoryCounts ke view
+        // =====================================================================
+        return view('pembeli.produk.index', compact('products', 'parentCategories', 'categoryCounts'));
     }
 
     public function autocomplete(Request $request)
-{
-    $query = $request->get('q', '');
+    {
+        $query = $request->get('q', '');
 
-    if (strlen($query) < 2) {
-        return response()->json([]);
+        if (strlen($query) < 2) {
+            return response()->json([]);
+        }
+
+        $products = Product::with('category.parent')
+            ->where('is_active', true)
+            ->where(function($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%")
+                  ->orWhere('description', 'like', "%{$query}%");
+            })
+            ->select('id', 'name', 'slug', 'image', 'price', 'category_id')
+            ->limit(6)
+            ->get()
+            ->map(function($product) {
+                return [
+                    'id'            => $product->id,
+                    'name'          => $product->name,
+                    'slug'          => $product->slug,
+                    'image'         => $product->image ? asset('storage/' . $product->image) : null,
+                    'price'         => 'Rp ' . number_format($product->price, 0, ',', '.'),
+                    'category'      => $product->category->parent->name ?? $product->category->name ?? '',
+                    'sub_category'  => $product->category->parent ? $product->category->name : null,
+                    'url'           => route('pembeli.produk.show', $product->slug),
+                ];
+            });
+
+        return response()->json($products);
     }
-
-    $products = Product::with('category.parent')
-        ->where('is_active', true)
-        ->where(function($q) use ($query) {
-            $q->where('name', 'like', "%{$query}%")
-              ->orWhere('description', 'like', "%{$query}%");
-        })
-        ->select('id', 'name', 'slug', 'image', 'price', 'category_id')
-        ->limit(6)
-        ->get()
-        ->map(function($product) {
-            return [
-                'id'            => $product->id,
-                'name'          => $product->name,
-                'slug'          => $product->slug,
-                'image'         => $product->image ? asset('storage/' . $product->image) : null,
-                'price'         => 'Rp ' . number_format($product->price, 0, ',', '.'),
-                'category'      => $product->category->parent->name ?? $product->category->name ?? '',
-                'sub_category'  => $product->category->parent ? $product->category->name : null,
-                'url'           => route('pembeli.produk.show', $product->slug),
-            ];
-        });
-
-    return response()->json($products);
-}
 
     public function show($slug)
     {
@@ -137,7 +156,6 @@ class ProdukController extends Controller
             ->where('stock', '>', 0)
             ->where('id', '!=', $product->id)
             ->where(function($q) use ($product) {
-                // Related = sama sub kategori atau sama kategori utama
                 $q->where('category_id', $product->category_id)
                   ->orWhereHas('category', function($q2) use ($product) {
                       $parentId = $product->category->parent_id ?? $product->category_id;

@@ -36,14 +36,16 @@
     <div>
         <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-2">Kategori</p>
         <div class="flex items-center gap-2 flex-wrap" id="parentCategoryFilters">
-            <button data-parent=""
+            <button data-parent="" data-parentname="Semua"
                     class="parent-filter inline-flex items-center gap-1.5 px-3 py-1.5 border-2 rounded-lg text-xs font-medium transition-all
                         border-primary bg-primary text-white shadow-sm">
                 <span class="material-symbols-outlined text-sm">grid_view</span>
                 Semua
+                <span class="ml-1 px-1.5 py-0.5 bg-white/20 rounded text-[10px] font-bold">{{ $products->total() }}</span>
             </button>
             @foreach($parentCategories as $parent)
                 <button data-parent="{{ $parent->id }}"
+                        data-parentname="{{ $parent->name }}"
                         data-children="{{ $parent->children->toJson() }}"
                         class="parent-filter inline-flex items-center gap-1.5 px-3 py-1.5 border-2 rounded-lg text-xs font-medium transition-all
                             border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-[#0d1b13] dark:text-white hover:border-primary hover:bg-primary/10">
@@ -52,6 +54,12 @@
                              class="w-4 h-4 rounded-full object-cover flex-shrink-0">
                     @endif
                     {{ $parent->name }}
+                    {{-- Tampilkan jumlah produk per kategori --}}
+                    @if(isset($categoryCounts[$parent->id]))
+                        <span class="ml-1 px-1.5 py-0.5 bg-gray-100 dark:bg-zinc-700 text-gray-500 dark:text-zinc-400 rounded text-[10px] font-bold">
+                            {{ $categoryCounts[$parent->id] }}
+                        </span>
+                    @endif
                 </button>
             @endforeach
         </div>
@@ -84,17 +92,43 @@
         <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-3">Filter Harga</p>
         <div class="space-y-3">
 
-            <!-- Slider Range -->
-            <div class="relative px-2 py-4">
-                <div class="relative h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full">
-                    <div id="price-range-fill" class="absolute h-full bg-primary rounded-full"></div>
-                    <div id="thumb-min" class="absolute w-4 h-4 bg-white border-2 border-primary rounded-full shadow-md -translate-y-1/2 top-1/2 -translate-x-1/2 pointer-events-none z-10"></div>
-                    <div id="thumb-max" class="absolute w-4 h-4 bg-white border-2 border-primary rounded-full shadow-md -translate-y-1/2 top-1/2 -translate-x-1/2 pointer-events-none z-10"></div>
+            <!-- =====================================================================
+                 SLIDER RANGE — Custom Drag (fix slider kiri tidak bisa digeser)
+                 Pendekatan: thumb adalah div biasa yang di-drag manual via
+                 mousemove/touchmove. Tidak ada dua input bertumpuk yang berebut klik.
+                 ===================================================================== -->
+            <div class="px-1 pt-2 pb-1">
+                <div id="slider-track"
+                     class="relative h-1.5 bg-gray-200 dark:bg-zinc-700 rounded-full"
+                     style="margin: 10px 0;">
+
+                    <!-- Fill bar aktif -->
+                    <div id="price-range-fill"
+                         class="absolute h-full bg-primary rounded-full pointer-events-none"
+                         style="left:0%; width:100%;"></div>
+
+                    <!-- Thumb Min (kiri) -->
+                    <div id="thumb-min"
+                         class="absolute w-5 h-5 bg-white border-2 border-primary rounded-full shadow-md cursor-grab select-none"
+                         style="top:50%; transform:translate(-50%,-50%); left:0%; touch-action:none; z-index:3; user-select:none;">
+                    </div>
+
+                    <!-- Thumb Max (kanan) -->
+                    <div id="thumb-max"
+                         class="absolute w-5 h-5 bg-white border-2 border-primary rounded-full shadow-md cursor-grab select-none"
+                         style="top:50%; transform:translate(-50%,-50%); left:100%; touch-action:none; z-index:3; user-select:none;">
+                    </div>
+
+                    <!-- Hidden inputs — hanya menyimpan nilai, tidak sebagai UI -->
+                    <input type="range" id="price-min" min="0" max="10000000" step="50000" value="0" class="sr-only">
+                    <input type="range" id="price-max" min="0" max="10000000" step="50000" value="10000000" class="sr-only">
                 </div>
-                <input type="range" id="price-min" min="0" max="10000000" step="50000" value="0"
-                    style="position:absolute; top:50%; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:3; margin:0; padding:0; transform:translateY(-50%);">
-                <input type="range" id="price-max" min="0" max="10000000" step="50000" value="10000000"
-                    style="position:absolute; top:50%; left:0; width:100%; height:100%; opacity:0; cursor:pointer; z-index:4; margin:0; padding:0; transform:translateY(-50%);">
+            </div>
+
+            <!-- Label harga min-max realtime -->
+            <div class="flex justify-between text-[11px] text-gray-500 dark:text-zinc-400 px-1">
+                <span id="slider-label-min">Rp 0</span>
+                <span id="slider-label-max">Rp 10.000.000</span>
             </div>
 
             <!-- Input Harga Manual -->
@@ -151,7 +185,7 @@
         <button onclick="clearAllFilters()"
                 class="inline-flex items-center gap-1 px-2.5 py-1 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 rounded-lg text-xs font-medium transition-colors">
             <span class="material-symbols-outlined text-sm">refresh</span>
-            Reset
+            Reset Semua
         </button>
     </div>
 
@@ -187,25 +221,33 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentParentName = '';
     let currentSubName    = '';
 
-    // ---------- State harga ----------
+    // ---------- Konstanta harga ----------
     const PRICE_MIN = 0;
     const PRICE_MAX = 10000000;
     window.currentMinPrice = 0;
     window.currentMaxPrice = 0;
 
     // ---------- Elemen slider ----------
-    const sliderMin = document.getElementById('price-min');
-    const sliderMax = document.getElementById('price-max');
+    const track    = document.getElementById('slider-track');
+    const thumbMin = document.getElementById('thumb-min');
+    const thumbMax = document.getElementById('thumb-max');
+    const fill     = document.getElementById('price-range-fill');
+    const sliderMin = document.getElementById('price-min'); // hidden input
+    const sliderMax = document.getElementById('price-max'); // hidden input
     const inputMin  = document.getElementById('price-min-input');
     const inputMax  = document.getElementById('price-max-input');
-    const thumbMin  = document.getElementById('thumb-min');
-    const thumbMax  = document.getElementById('thumb-max');
-    const rangeFill = document.getElementById('price-range-fill');
     const resetBtn  = document.getElementById('price-reset-btn');
+    const labelMin  = document.getElementById('slider-label-min');
+    const labelMax  = document.getElementById('slider-label-max');
+
+    // ---------- State nilai slider ----------
+    let minVal   = PRICE_MIN;
+    let maxVal   = PRICE_MAX;
+    let dragging = null; // 'min' atau 'max'
 
     // ===================== FETCH PRODUCTS =====================
     function fetchProducts() {
-        showLoading();
+        showSkeleton();
 
         const params = new URLSearchParams();
         if (currentSearch)  params.append('search', currentSearch);
@@ -234,13 +276,23 @@ document.addEventListener('DOMContentLoaded', function () {
         .catch(() => showError());
     }
 
-    // ===================== LOADING / ERROR =====================
-    function showLoading() {
+    // ===================== SKELETON LOADING =====================
+    function showSkeleton() {
+        let skeletonCards = '';
+        for (let i = 0; i < 8; i++) {
+            skeletonCards += `
+                <div class="animate-pulse">
+                    <div class="aspect-square rounded-xl bg-gray-200 dark:bg-zinc-700 mb-3"></div>
+                    <div class="h-4 bg-gray-200 dark:bg-zinc-700 rounded mb-2 w-3/4"></div>
+                    <div class="h-4 bg-gray-200 dark:bg-zinc-700 rounded mb-2 w-1/2"></div>
+                    <div class="h-3 bg-gray-200 dark:bg-zinc-700 rounded mb-3 w-1/3"></div>
+                    <div class="h-9 bg-gray-200 dark:bg-zinc-700 rounded-lg"></div>
+                </div>`;
+        }
         productsContainer.innerHTML = `
-            <div class="bg-white dark:bg-background-dark rounded-xl border border-[#cfe7d9] dark:border-primary/20 shadow-sm">
-                <div class="text-center py-16 px-4">
-                    <div class="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                    <p class="text-sm text-gray-500 dark:text-gray-400">Memuat produk...</p>
+            <div class="bg-white dark:bg-background-dark rounded-xl border border-[#cfe7d9] dark:border-primary/20 shadow-sm p-4 md:p-6">
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    ${skeletonCards}
                 </div>
             </div>`;
     }
@@ -379,12 +431,24 @@ document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.parent-filter').forEach(b => {
                 b.classList.remove('border-primary', 'bg-primary', 'text-white', 'shadow-sm');
                 b.classList.add('border-gray-300', 'dark:border-zinc-700', 'bg-white', 'dark:bg-zinc-900', 'text-[#0d1b13]', 'dark:text-white');
+                // Kembalikan badge count ke warna normal
+                const badge = b.querySelector('span.ml-1');
+                if (badge) {
+                    badge.classList.remove('bg-white/20');
+                    badge.classList.add('bg-gray-100', 'dark:bg-zinc-700', 'text-gray-500', 'dark:text-zinc-400');
+                }
             });
             this.classList.remove('border-gray-300', 'dark:border-zinc-700', 'bg-white', 'dark:bg-zinc-900', 'text-[#0d1b13]', 'dark:text-white');
             this.classList.add('border-primary', 'bg-primary', 'text-white', 'shadow-sm');
+            // Badge aktif warna kontras
+            const activeBadge = this.querySelector('span.ml-1');
+            if (activeBadge) {
+                activeBadge.classList.add('bg-white/20');
+                activeBadge.classList.remove('bg-gray-100', 'dark:bg-zinc-700', 'text-gray-500', 'dark:text-zinc-400');
+            }
 
             currentParent     = this.dataset.parent;
-            currentParentName = this.textContent.trim();
+            currentParentName = this.dataset.parentname || this.textContent.trim();
             currentSub        = '';
             currentSubName    = '';
 
@@ -405,85 +469,170 @@ document.addEventListener('DOMContentLoaded', function () {
         fetchProducts();
     });
 
-    // ===================== SLIDER HARGA =====================
-    function updateSliderUI() {
-        const minVal = parseInt(sliderMin.value);
-        const maxVal = parseInt(sliderMax.value);
-        const minPct = ((minVal - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
-        const maxPct = ((maxVal - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+    // =====================================================================
+    // SLIDER CUSTOM DRAG — FIX FINAL
+    // Tidak pakai dua input range bertumpuk yang berebut klik.
+    // Thumb adalah div biasa yang di-drag manual via mousemove/touchmove.
+    // Klik langsung di track juga bisa — otomatis gerak ke thumb terdekat.
+    // =====================================================================
 
-        thumbMin.style.left   = `${minPct}%`;
-        thumbMax.style.left   = `${maxPct}%`;
-        rangeFill.style.left  = `${minPct}%`;
-        rangeFill.style.width = `${maxPct - minPct}%`;
-
-        sliderMin.style.zIndex = minPct > 90 ? '5' : '3';
-        sliderMax.style.zIndex = '4';
+    function formatRupiah(val) {
+        return 'Rp ' + parseInt(val).toLocaleString('id-ID');
     }
 
-    sliderMin.addEventListener('input', function () {
-        let val = parseInt(this.value);
-        if (val >= parseInt(sliderMax.value)) {
-            val = parseInt(sliderMax.value) - 50000;
-            this.value = val;
+    function pctFromVal(val) {
+        return ((val - PRICE_MIN) / (PRICE_MAX - PRICE_MIN)) * 100;
+    }
+
+    function valFromPct(pct) {
+        // Snap ke step 50000
+        let raw = PRICE_MIN + (pct / 100) * (PRICE_MAX - PRICE_MIN);
+        raw = Math.round(raw / 50000) * 50000;
+        return Math.max(PRICE_MIN, Math.min(PRICE_MAX, raw));
+    }
+
+    function getPctFromEvent(e) {
+        const rect    = track.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const pct     = ((clientX - rect.left) / rect.width) * 100;
+        return Math.max(0, Math.min(100, pct));
+    }
+
+    function updateSliderUI() {
+        const minPct = pctFromVal(minVal);
+        const maxPct = pctFromVal(maxVal);
+
+        thumbMin.style.left = `${minPct}%`;
+        thumbMax.style.left = `${maxPct}%`;
+        fill.style.left     = `${minPct}%`;
+        fill.style.width    = `${maxPct - minPct}%`;
+
+        // Sync ke hidden input (opsional, untuk konsistensi)
+        sliderMin.value = minVal;
+        sliderMax.value = maxVal;
+
+        // Update label realtime
+        if (labelMin) labelMin.textContent = formatRupiah(minVal);
+        if (labelMax) labelMax.textContent = formatRupiah(maxVal);
+    }
+
+    // ---- Drag Start ----
+    function onDragStart(e, type) {
+        e.preventDefault();
+        dragging = type;
+        // Naikkan z-index thumb yang sedang aktif
+        thumbMin.style.zIndex = type === 'min' ? '5' : '3';
+        thumbMax.style.zIndex = type === 'max' ? '5' : '3';
+        document.addEventListener('mousemove', onDragMove);
+        document.addEventListener('mouseup',   onDragEnd);
+        document.addEventListener('touchmove', onDragMove, { passive: false });
+        document.addEventListener('touchend',  onDragEnd);
+    }
+
+    thumbMin.addEventListener('mousedown',  e => onDragStart(e, 'min'));
+    thumbMin.addEventListener('touchstart', e => onDragStart(e, 'min'), { passive: false });
+    thumbMax.addEventListener('mousedown',  e => onDragStart(e, 'max'));
+    thumbMax.addEventListener('touchstart', e => onDragStart(e, 'max'), { passive: false });
+
+    // ---- Drag Move ----
+    function onDragMove(e) {
+        if (!dragging) return;
+        if (e.cancelable) e.preventDefault();
+
+        const pct = getPctFromEvent(e);
+        const val = valFromPct(pct);
+
+        if (dragging === 'min') {
+            minVal = Math.min(val, maxVal - 50000);
+            if (inputMin) inputMin.value = minVal;
+        } else {
+            maxVal = Math.max(val, minVal + 50000);
+            if (inputMax) inputMax.value = maxVal;
         }
-        inputMin.value = val;
-        updateSliderUI();
-    });
 
-    sliderMax.addEventListener('input', function () {
-        let val = parseInt(this.value);
-        if (val <= parseInt(sliderMin.value)) {
-            val = parseInt(sliderMin.value) + 50000;
-            this.value = val;
+        updateSliderUI();
+    }
+
+    // ---- Drag End ----
+    function onDragEnd() {
+        dragging = null;
+        document.removeEventListener('mousemove', onDragMove);
+        document.removeEventListener('mouseup',   onDragEnd);
+        document.removeEventListener('touchmove', onDragMove);
+        document.removeEventListener('touchend',  onDragEnd);
+        // Reset z-index ke semula
+        thumbMin.style.zIndex = '3';
+        thumbMax.style.zIndex = '3';
+    }
+
+    // ---- Klik langsung di track (bukan di thumb) ----
+    track.addEventListener('click', function(e) {
+        // Kalau yang diklik adalah thumb, skip
+        if (e.target === thumbMin || e.target === thumbMax) return;
+
+        const pct        = getPctFromEvent(e);
+        const val        = valFromPct(pct);
+        const distToMin  = Math.abs(val - minVal);
+        const distToMax  = Math.abs(val - maxVal);
+
+        // Gerakkan thumb yang lebih dekat ke posisi klik
+        if (distToMin <= distToMax) {
+            minVal = Math.min(val, maxVal - 50000);
+            if (inputMin) inputMin.value = minVal;
+        } else {
+            maxVal = Math.max(val, minVal + 50000);
+            if (inputMax) inputMax.value = maxVal;
         }
-        inputMax.value = val;
+
         updateSliderUI();
     });
 
-    inputMin.addEventListener('input', function () {
-        let val = parseInt(this.value) || 0;
-        val = Math.max(PRICE_MIN, Math.min(val, parseInt(sliderMax.value) - 50000));
-        sliderMin.value = val;
-        updateSliderUI();
-    });
+    // ---- Input manual (ketik langsung di kotak Rp) ----
+    if (inputMin) {
+        inputMin.addEventListener('input', function () {
+            let val = parseInt(this.value) || 0;
+            minVal  = Math.max(PRICE_MIN, Math.min(val, maxVal - 50000));
+            updateSliderUI();
+        });
+    }
 
-    inputMax.addEventListener('input', function () {
-        let val = parseInt(this.value) || PRICE_MAX;
-        val = Math.min(PRICE_MAX, Math.max(val, parseInt(sliderMin.value) + 50000));
-        sliderMax.value = val;
-        updateSliderUI();
-    });
+    if (inputMax) {
+        inputMax.addEventListener('input', function () {
+            let val = parseInt(this.value) || PRICE_MAX;
+            maxVal  = Math.min(PRICE_MAX, Math.max(val, minVal + 50000));
+            updateSliderUI();
+        });
+    }
 
     // ===================== PRICE FILTER FUNCTIONS (global) =====================
     window.applyPriceFilter = function () {
-        window.currentMinPrice = parseInt(sliderMin.value);
-        window.currentMaxPrice = parseInt(sliderMax.value);
-        resetBtn.classList.remove('hidden');
-        highlightQuickPrice(window.currentMinPrice, window.currentMaxPrice);
-        fetchProducts();  // ← langsung panggil, tidak perlu CustomEvent
+        window.currentMinPrice = minVal;
+        window.currentMaxPrice = maxVal;
+        if (resetBtn) resetBtn.classList.remove('hidden');
+        highlightQuickPrice(minVal, maxVal);
+        fetchProducts();
     };
 
     window.resetPriceFilter = function () {
+        minVal = PRICE_MIN;
+        maxVal = PRICE_MAX;
         window.currentMinPrice = 0;
         window.currentMaxPrice = 0;
-        sliderMin.value = PRICE_MIN;
-        sliderMax.value = PRICE_MAX;
-        inputMin.value  = '';
-        inputMax.value  = '';
-        updateSliderUI();
-        resetBtn.classList.add('hidden');
+        if (inputMin) inputMin.value = '';
+        if (inputMax) inputMax.value = '';
+        if (resetBtn) resetBtn.classList.add('hidden');
         document.querySelectorAll('.quick-price').forEach(b => {
             b.classList.remove('border-primary', 'text-primary', 'bg-primary/5');
         });
-        fetchProducts();  // ← langsung panggil
+        updateSliderUI();
+        fetchProducts();
     };
 
     window.setQuickPrice = function (min, max) {
-        sliderMin.value = min;
-        sliderMax.value = max;
-        inputMin.value  = min;
-        inputMax.value  = max;
+        minVal = min;
+        maxVal = max;
+        if (inputMin) inputMin.value = min;
+        if (inputMax) inputMax.value = max;
         updateSliderUI();
         window.applyPriceFilter();
     };
