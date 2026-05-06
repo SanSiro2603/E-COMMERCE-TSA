@@ -1,5 +1,4 @@
 <?php
-// app/Exports/SalesReportExport.php
 
 namespace App\Exports;
 
@@ -38,7 +37,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
     // [+] Tambah relasi ke with([]) jika perlu kolom baru di Excel
     public function collection()
     {
-        $query = Order::with(['user', 'items.product'])
+        $query = Order::with(['user', 'items.product', 'address'])
             ->whereBetween('created_at', [
                 $this->startDate . ' 00:00:00',
                 $this->endDate   . ' 23:59:59',
@@ -255,12 +254,12 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('A' . $currentRow, $no++);
                     $sheet->setCellValue('B' . $currentRow, $order->order_number ?? '-');
                     $sheet->setCellValue('C' . $currentRow, $order->created_at->format('d/m/Y H:i'));
-                    $sheet->setCellValue('D' . $currentRow, $order->recipient_name ?? $order->user?->name ?? '-');
+                    $sheet->setCellValue('D' . $currentRow, $order->address?->recipient_name ?? $order->user?->name ?? '-');
                     $sheet->setCellValue('E' . $currentRow, $order->user?->email ?? '-');
-                    $sheet->setCellValue('F' . $currentRow, $order->recipient_phone ?? '-');
-                    $sheet->setCellValue('G' . $currentRow, $order->province ?? '-');
-                    $sheet->setCellValue('H' . $currentRow, $order->city ?? '-');
-                    $sheet->setCellValue('I' . $currentRow, $order->address?->full_address ?? $order->shipping_address ?? '-');
+                    $sheet->setCellValue('F' . $currentRow, $order->address?->recipient_phone ?? '-');
+                    $sheet->setCellValue('G' . $currentRow, $order->address?->province_name ?? '-');
+                    $sheet->setCellValue('H' . $currentRow, $order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-');
+                    $sheet->setCellValue('I' . $currentRow, $order->address?->full_address ?? '-');
                     $sheet->setCellValue('J' . $currentRow, $products);
                     $sheet->setCellValue('K' . $currentRow, $qty);
                     $sheet->setCellValue('L' . $currentRow, 'Rp ' . number_format($order->grand_total ?? 0, 0, ',', '.'));

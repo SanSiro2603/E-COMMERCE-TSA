@@ -1,6 +1,6 @@
 <!-- resources/views/layouts/superadmin.blade.php -->
 <!DOCTYPE html>
-<html lang="id" class="dark">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
@@ -207,8 +207,8 @@
 
         <!-- Logo -->
         <div class="logo-container px-5 py-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3 cursor-default">
-            <div class="logo-icon w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-xl flex items-center justify-center shadow-lg shadow-soft-green/20">
-                <span class="material-symbols-outlined text-white text-[22px]">admin_panel_settings</span>
+            <div class="logo-icon w-10 h-10 flex-shrink-0">
+                <img src="{{ asset('images/logo header.png') }}" alt="Logo TSA" class="h-full w-auto object-contain">
             </div>
             <div>
                 <h1 class="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">E-Commerce TSA</h1>
@@ -281,7 +281,7 @@
                     <div class="flex items-center gap-2">
                         <!-- Date Time -->
                         <div class="hidden md:block text-right mr-4">
-                            <p class="text-[11px] font-semibold text-gray-900 dark:text-white">{{ now()->format('l, d F Y') }}</p>
+                             <p class="text-[11px] font-semibold text-gray-900 dark:text-white">{{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
                             <p class="text-[10px] text-gray-500 dark:text-zinc-500">{{ now()->format('H:i') }} WIB</p>
                         </div>
 

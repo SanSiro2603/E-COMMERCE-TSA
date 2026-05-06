@@ -210,7 +210,7 @@
                 <td class="text-center">{{ $index + 1 }}</td>
                 <td class="text-bold">{{ $order->order_number ?? '-' }}</td>
                 <td>{{ $order->created_at->format('d/m/Y') }}<br><span class="text-muted">{{ $order->created_at->format('H:i') }}</span></td>
-                <td>{{ $order->address->province_name ?? '-' }}</td>
+                <td>{{ $order->address?->province_name ?? '-' }}</td>
                 <td>{{ $categories }}</td>
                 <td>{{ $products }}</td>
                 <td class="text-center">{{ $qty }}</td>

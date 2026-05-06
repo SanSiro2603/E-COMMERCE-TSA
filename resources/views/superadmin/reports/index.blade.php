@@ -249,7 +249,7 @@
                             <p class="text-xs text-gray-900 dark:text-white">{{ $order->created_at->format('d M Y') }}</p>
                             <p class="text-[10px] text-gray-500 dark:text-zinc-500">{{ $order->created_at->format('H:i') }}</p>
                         </td>
-                        <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $order->address->province_name ?? '-' }}</span></td>
+                        <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $order->address?->province_name ?? '-' }}</span></td>
                         <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $categories ?: '-' }}</span></td>
                         <td class="px-4 py-3 max-w-[200px]">
                             <span class="text-xs text-gray-900 dark:text-white line-clamp-2" title="{{ $products }}">{{ $products }}</span>

@@ -157,15 +157,17 @@
                             <p class="text-xs text-gray-400 dark:text-zinc-500">{{ $order->created_at->format('H:i') }}</p>
                         </td>
                         <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
-                            {{ $order->recipient_name ?? $order->user?->name ?? '-' }}
+                            {{ $order->address?->recipient_name ?? $order->user?->name ?? '-' }}
                         </td>
                         <td class="px-4 py-4 text-sm text-gray-500 dark:text-zinc-300">{{ $order->user?->email ?? '-' }}</td>
-                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">{{ $order->recipient_phone ?? '-' }}</td>
-                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">{{ $order->province ?? '-' }}</td>
-                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">{{ $order->city ?? '-' }}</td>
+                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">{{ $order->address?->recipient_phone ?? '-' }}</td>
+                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">{{ $order->address?->province_name ?? '-' }}</td>
+                        <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
+                            {{ $order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-' }}
+                        </td>
                         <td class="px-4 py-4 text-sm max-w-[160px]">
-                            <span class="line-clamp-2 text-gray-900 dark:text-white" title="{{ $order->address?->full_address ?? $order->shipping_address ?? '-' }}">
-                                {{ $order->address?->full_address ?? $order->shipping_address ?? '-' }}
+                            <span class="line-clamp-2 text-gray-900 dark:text-white" title="{{ $order->address?->full_address ?? '-' }}">
+                                {{ $order->address?->full_address ?? '-' }}
                             </span>
                         </td>
                         <td class="px-4 py-4 text-sm max-w-[180px]">

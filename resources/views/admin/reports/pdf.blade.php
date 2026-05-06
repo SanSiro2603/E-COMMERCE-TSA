@@ -171,12 +171,12 @@
                 <td class="text-center">{{ $index + 1 }}</td>
                 <td class="text-bold">{{ $order->order_number ?? '-' }}</td>
                 <td>{{ $order->created_at->format('d/m/Y') }}<br><span class="text-muted">{{ $order->created_at->format('H:i') }}</span></td>
-                <td>{{ $order->recipient_name ?? $order->user?->name ?? '-' }}</td>
-                <td class="text-muted">{{ $order->user?->email ?? '-' }}</td>
-                <td>{{ $order->recipient_phone ?? '-' }}</td>
-                <td>{{ $order->province ?? '-' }}</td>
-                <td>{{ $order->city ?? '-' }}</td>
-                <td>{{ $order->address?->full_address ?? $order->shipping_address ?? '-' }}</td>
+                <td>{{ $order->address?->recipient_name ?? $order->user?->name ?? '-' }}</td>
+                <td>{{ $order->user?->email ?? '-' }}</td>
+                <td>{{ $order->address?->recipient_phone ?? '-' }}</td>
+                <td>{{ $order->address?->province_name ?? '-' }}</td>
+                <td>{{ $order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-' }}</td>
+                <td>{{ $order->address?->full_address ?? '-' }}</td>
                 <td>{{ $products }}</td>
                 <td class="text-center">{{ $qty }}</td>
                 <td class="text-right text-bold">Rp {{ number_format($order->grand_total ?? 0, 0, ',', '.') }}</td>

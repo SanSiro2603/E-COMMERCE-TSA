@@ -371,8 +371,12 @@ class SuperAdminDashboardController extends Controller
         // TABEL PENJUALAN — Paginasi 5
         // Menampilkan SEMUA status agar admin bisa monitor pending & cancelled
         // =============================================
-        $salesTable = Order::with(['items.product.category', 'payment'])
+        $salesTable = Order::with(['items.product.category', 'payment', 'address'])
             ->tap($applyBase)
+            ->addSelect([
+                'orders.*',
+                'addresses.province_name as province',
+            ])
             ->latest('orders.created_at')
             ->paginate(5)
             ->withQueryString();
