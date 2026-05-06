@@ -57,7 +57,9 @@
         </div>
     </div>
 
-    <!-- Stats Cards — 7 kolom (tambah Dibatalkan) -->
+    {{-- STATS CARDS — Jumlah pesanan per status
+         [+] Tambah kartu baru di sini jika ada status baru
+         Sesuaikan juga: $stats di OrderController, $statuses, dan kolom grid (grid-cols-7) --}}
     <div class="grid grid-cols-2 lg:grid-cols-7 gap-4">
 
         <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="all">
@@ -132,7 +134,6 @@
             </div>
         </div>
 
-        {{-- ✅ BARU: Kartu Dibatalkan --}}
         <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="cancelled">
             <div class="flex flex-col">
                 <div class="flex items-center justify-between mb-2">
@@ -147,9 +148,11 @@
 
     </div>
 
-    <!-- Filter & Search Card -->
+    <!-- Filter & Search -->
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-4">
         <form method="GET" class="flex flex-col md:flex-row gap-3">
+
+            {{-- [+] Tambah input filter baru di sini (mis: filter by tanggal, kurir) --}}
             <div class="flex-1">
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500">search</span>
@@ -189,11 +192,13 @@
         </form>
     </div>
 
-    <!-- Orders Table -->
+    <!-- Tabel Pesanan -->
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
-                {{-- ✅ DIPERBAIKI: Susunan kolom baru --}}
+                {{-- HEADER TABEL — 6 kolom
+                     [+] Tambah <th> baru di sini jika perlu kolom tambahan
+                     Sesuaikan juga <td> di baris @forelse dan di generateOrderRow() --}}
                 <thead class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">No. Pesanan</th>
@@ -207,12 +212,13 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-zinc-800">
                     @forelse($orders as $order)
                         @php
+                            // Badge "BARU!" jika baru dibayar dalam 2 menit terakhir
                             $isNewPaid = $order->status === 'paid' && $order->paid_at && $order->paid_at->diffInMinutes(now()) < 2;
                         @endphp
-                        {{-- ✅ DIPERBAIKI: Susunan kolom baru: No. Pesanan | Tanggal | Pembeli | Total | Status | Aksi --}}
+
                         <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-all {{ $isNewPaid ? 'ring-2 ring-green-400 ring-opacity-50 animate-pulse' : '' }}">
 
-                            <!-- No. Pesanan -->
+                            {{-- KOLOM 1: Nomor Pesanan --}}
                             <td class="px-6 py-4">
                                 <a href="{{ route('admin.orders.show', $order) }}"
                                    class="text-sm font-semibold text-soft-green hover:text-primary transition-colors">
@@ -223,13 +229,13 @@
                                 @endif
                             </td>
 
-                            <!-- Tanggal -->
+                            {{-- KOLOM 2: Tanggal --}}
                             <td class="px-6 py-4">
                                 <p class="text-sm text-gray-900 dark:text-white">{{ $order->created_at->format('d M Y') }}</p>
                                 <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->created_at->format('H:i') }}</p>
                             </td>
 
-                            <!-- Pembeli -->
+                            {{-- KOLOM 3: Pembeli --}}
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
@@ -242,13 +248,14 @@
                                 </div>
                             </td>
 
-                            <!-- Total -->
+                            {{-- KOLOM 4: Total Bayar + Jumlah Item --}}
                             <td class="px-6 py-4">
                                 <p class="text-sm font-bold text-gray-900 dark:text-white">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</p>
                                 <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->items->count() }} item</p>
                             </td>
 
-                            <!-- Status -->
+                            {{-- KOLOM 5: Badge Status
+                                 [+] Tambah @case baru di @switch jika ada status baru --}}
                             <td class="px-6 py-4 text-center">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full
                                     @switch($order->status)
@@ -272,7 +279,7 @@
                                 </span>
                             </td>
 
-                            <!-- Aksi -->
+                            {{-- KOLOM 6: Aksi --}}
                             <td class="px-6 py-4 text-center">
                                 <a href="{{ route('admin.orders.show', $order) }}"
                                    class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-xs font-medium transition-colors">
@@ -318,6 +325,7 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    // Auto-dismiss notifikasi setelah 4 detik
     document.querySelectorAll('[data-auto-dismiss]').forEach(el => {
         setTimeout(() => {
             el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';

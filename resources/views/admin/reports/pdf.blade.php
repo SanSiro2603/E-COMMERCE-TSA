@@ -1,4 +1,5 @@
 {{-- resources/views/admin/reports/pdf.blade.php --}}
+{{-- Template PDF laporan penjualan — di-render oleh ReportController::exportPdf() via DomPDF --}}
 <!DOCTYPE html>
 <html>
 <head>
@@ -49,7 +50,8 @@
         .text-bold   { font-weight: bold; }
         .text-muted  { color: #666; font-size: 6.5px; }
 
-        /* STATUS BADGE */
+        /* STATUS BADGE
+           [+] Tambah class .badge-namaStatus baru jika ada status baru */
         .badge            { padding: 1px 4px; border-radius: 3px; font-size: 6.5px; font-weight: bold; }
         .badge-pending    { background: #fef9c3; color: #854d0e; }
         .badge-paid       { background: #dbeafe; color: #1e40af; }
@@ -67,7 +69,8 @@
 </head>
 <body>
 
-    {{-- KOP SURAT --}}
+    {{-- KOP SURAT
+         [+] Ubah nama, alamat, atau kontak di sini jika informasi perusahaan berubah --}}
     <div class="kop-wrapper">
         <div class="kop-logo">
             @if(file_exists(public_path('images/logo.png')))
@@ -91,7 +94,9 @@
         Periode: {{ \Carbon\Carbon::parse($startDate)->format('d M Y') }} s/d {{ \Carbon\Carbon::parse($endDate)->format('d M Y') }}
     </div>
 
-    {{-- RINGKASAN STATISTIK --}}
+    {{-- RINGKASAN STATISTIK — hanya dari status valid (bukan pending/cancelled)
+         [+] Tambah .stats-cell baru jika perlu metrik tambahan
+             Sesuaikan juga $stats di ReportController::exportPdf() --}}
     <div class="stats-wrapper">
         <div class="stats-cell">
             <div class="stats-label">Total Pendapatan</div>
@@ -111,8 +116,10 @@
         </div>
     </div>
 
-    {{-- TABEL --}}
-    {{-- Kolom: No | No.Pesanan | Tanggal | Pembeli | Email | No.Telp | Provinsi | Kota/Kab | Alamat | Produk | Jumlah | Total | Status --}}
+    {{-- TABEL — 13 kolom: No | No.Pesanan | Tanggal | Pembeli | Email | No.Telp |
+                            Provinsi | Kota/Kab | Alamat | Produk | Jumlah | Total | Status
+         [+] Tambah <th> dan <td> baru jika perlu kolom tambahan
+             Sesuaikan juga colspan di <tfoot> --}}
     <table>
         <thead>
             <tr>
@@ -134,6 +141,7 @@
         <tbody>
             @php
                 $grandTotal    = 0;
+                // Status valid untuk dihitung di baris TOTAL tfoot
                 $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
             @endphp
             @foreach($orders as $index => $order)
@@ -141,12 +149,12 @@
                 $products = $order->items->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')->implode(', ');
                 $qty      = $order->items->sum('quantity');
 
-                // Grand total di tfoot selalu hanya dari status valid
-                // pending & cancelled tidak pernah dihitung
+                // Grand total tfoot: pending & cancelled tidak dihitung
                 if (in_array($order->status, $validStatuses)) {
                     $grandTotal += $order->grand_total ?? 0;
                 }
 
+                // [+] Tambah entri $statusLabels baru jika ada status baru
                 $statusLabels = [
                     'pending'    => 'Menunggu',
                     'paid'       => 'Dibayar',
@@ -176,6 +184,8 @@
             </tr>
             @endforeach
         </tbody>
+        {{-- BARIS TOTAL — hanya menjumlah dari validStatuses
+             [+] Ubah colspan jika jumlah kolom bertambah (saat ini: 11 = total kolom - 2) --}}
         <tfoot>
             <tr>
                 <td colspan="11" style="text-align:right; padding-right:8px;">TOTAL PENDAPATAN:</td>
@@ -185,7 +195,6 @@
         </tfoot>
     </table>
 
-    {{-- FOOTER --}}
     <div class="footer">Dicetak pada: {{ now()->format('d M Y H:i') }} WIB</div>
 
 </body>

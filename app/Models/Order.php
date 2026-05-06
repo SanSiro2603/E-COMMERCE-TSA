@@ -6,18 +6,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
+// Model utama pesanan — tabel: orders
+// Relasi: users, order_items, payments, shipments, addresses
 class Order extends Model
 {
     use HasFactory, SoftDeletes;
 
+    // [+] Tambah nama kolom baru di sini jika ada kolom baru di migration
     protected $fillable = [
         'user_id',
-        'address_id',       // Relasi ke tabel addresses (sumber kebenaran alamat)
+        'address_id',
         'order_number',
         'subtotal',
         'shipping_cost',
         'grand_total',
-        'status',
+        'status',           // enum: pending | paid | processing | shipped | completed | cancelled
         'courier',
         'courier_service',
         'tracking_number',
@@ -41,6 +44,7 @@ class Order extends Model
     ];
 
     // === RELATIONSHIPS ===
+
     public function user()
     {
         return $this->belongsTo(User::class);
@@ -51,18 +55,23 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    // RELASI PAYMENT — INI YANG HILANG!
     public function payment()
     {
         return $this->hasOne(Payment::class, 'order_id');
     }
 
-    public function shipment() 
+    public function shipment()
     {
-        return $this->hasOne(Shipment::class, 'order_id'); 
+        return $this->hasOne(Shipment::class, 'order_id');
+    }
+
+    public function address()
+    {
+        return $this->belongsTo(\App\Models\Address::class);
     }
 
     // === SCOPES ===
+
     public function scopeForUser($query, $userId)
     {
         return $query->where('user_id', $userId);
@@ -82,41 +91,44 @@ class Order extends Model
     }
 
     // === HELPERS ===
+
     public static function generateOrderNumber()
     {
         return 'ORD-' . date('Ymd') . '-' . strtoupper(substr(uniqid(), -6));
     }
 
+    // Accessor: $order->status_label — label status dalam Bahasa Indonesia
+    // [+] Tambah entri di $labels jika ada status baru
     public function getStatusLabelAttribute()
     {
         $labels = [
-            'pending' => 'Menunggu Pembayaran',
-            'paid' => 'Sudah Dibayar',
+            'pending'    => 'Menunggu Pembayaran',
+            'paid'       => 'Sudah Dibayar',
             'processing' => 'Diproses',
-            'shipped' => 'Dikirim',
-            'completed' => 'Selesai',
-            'cancelled' => 'Dibatalkan',
+            'shipped'    => 'Dikirim',
+            'completed'  => 'Selesai',
+            'cancelled'  => 'Dibatalkan',
         ];
 
         return $labels[$this->status] ?? $this->status;
     }
 
+    // Accessor: $order->status_color — nama warna Tailwind sesuai status
+    // [+] Tambah entri di $colors jika ada status baru
     public function getStatusColorAttribute()
     {
         $colors = [
-            'pending' => 'yellow',
-            'paid' => 'blue',
+            'pending'    => 'yellow',
+            'paid'       => 'blue',
             'processing' => 'purple',
-            'shipped' => 'indigo',
-            'completed' => 'green',
-            'cancelled' => 'red',
+            'shipped'    => 'indigo',
+            'completed'  => 'green',
+            'cancelled'  => 'red',
         ];
 
         return $colors[$this->status] ?? 'gray';
     }
 
-    
-   
     public function calculateSubtotal()
     {
         return $this->items->sum(fn($item) => $item->price * $item->quantity);
@@ -126,22 +138,16 @@ class Order extends Model
     {
         return $this->calculateSubtotal() + $this->shipping_cost;
     }
-    // app/Models/Order.php
-public function canBeCancelled(): bool
-{
-    return in_array($this->status, ['pending', 'paid']) 
-        && is_null($this->cancelled_at)
-        && is_null($this->shipped_at);
-}
 
-public function canBeCompleted(): bool
-{
-    return in_array($this->status, ['processing', 'shipped']) && !$this->completed_at;
-}
+    public function canBeCancelled(): bool
+    {
+        return in_array($this->status, ['pending', 'paid'])
+            && is_null($this->cancelled_at)
+            && is_null($this->shipped_at);
+    }
 
-// app/Models/Order.php
-public function address()
-{
-    return $this->belongsTo(\App\Models\Address::class);
-}
+    public function canBeCompleted(): bool
+    {
+        return in_array($this->status, ['processing', 'shipped']) && !$this->completed_at;
+    }
 }

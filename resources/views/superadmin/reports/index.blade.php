@@ -7,26 +7,26 @@
 @section('content')
 <div class="space-y-6">
 
-    {{-- ===================== FILTER SECTION ===================== --}}
+    {{-- FORM FILTER — tanggal, provinsi, kategori, metode bayar, status, tombol export
+         [+] Tambah input filter baru di dalam grid di bawah
+             Sesuaikan juga query di SuperAdminReportController::index() --}}
     <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-soft border border-gray-100 dark:border-zinc-800">
         <form method="GET" action="{{ route('superadmin.reports.index') }}" id="filterForm">
             <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
 
-                {{-- Tanggal Mulai --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Tanggal Mulai</label>
                     <input type="date" name="start_date" value="{{ $startDate }}"
                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-soft-green focus:border-transparent">
                 </div>
 
-                {{-- Tanggal Akhir --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Tanggal Akhir</label>
                     <input type="date" name="end_date" value="{{ $endDate }}"
                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-lg text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-soft-green focus:border-transparent">
                 </div>
 
-                {{-- Provinsi --}}
+                {{-- Dropdown provinsi — diisi dari DB (hanya provinsi yang punya pesanan) --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Provinsi</label>
                     <select name="province"
@@ -38,7 +38,7 @@
                     </select>
                 </div>
 
-                {{-- Kategori --}}
+                {{-- Dropdown kategori — diisi dari tabel categories (is_active = true) --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Kategori</label>
                     <select name="category_id"
@@ -50,7 +50,8 @@
                     </select>
                 </div>
 
-                {{-- Metode Pembayaran --}}
+                {{-- [+] Tambah opsi metode baru di $paymentMethodOptions di controller
+                         jika ada integrasi payment gateway baru --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Metode Pembayaran</label>
                     <select name="payment_method"
@@ -62,7 +63,6 @@
                     </select>
                 </div>
 
-                {{-- Status Pesanan --}}
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 dark:text-zinc-300 mb-1.5">Status Pesanan</label>
                     <select name="status"
@@ -75,7 +75,8 @@
                 </div>
             </div>
 
-            {{-- Tombol Aksi --}}
+            {{-- Tombol filter + reset + export
+                 Parameter filter ikut dikirim ke URL export via array_filter --}}
             <div class="flex flex-wrap items-center gap-3 mt-5 pt-5 border-t border-gray-100 dark:border-zinc-800">
                 <button type="submit"
                         class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-soft-green to-primary hover:opacity-90 text-white rounded-lg font-medium text-sm shadow-lg shadow-soft-green/30 transition-all">
@@ -120,10 +121,11 @@
         </form>
     </div>
 
-    {{-- ===================== RINGKASAN STATISTIK ===================== --}}
+    {{-- KARTU STATISTIK — hanya menghitung status valid (bukan pending/cancelled)
+         [+] Tambah kartu baru jika dosen minta metrik tambahan
+             Sesuaikan juga $stats di SuperAdminReportController::index() --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
-        {{-- Total Pendapatan --}}
         <div class="bg-white dark:bg-zinc-900 rounded-xl p-5 shadow-soft border border-gray-100 dark:border-zinc-800">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-9 h-9 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center shadow-lg shadow-green-500/30 flex-shrink-0">
@@ -131,13 +133,10 @@
                 </div>
                 <p class="text-[10px] font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide leading-tight">Total Pendapatan</p>
             </div>
-            <p class="text-lg font-bold text-gray-900 dark:text-white">
-                Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}
-            </p>
+            <p class="text-lg font-bold text-gray-900 dark:text-white">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
             <p class="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">Subtotal dikurangi ongkir</p>
         </div>
 
-        {{-- Total Pesanan --}}
         <div class="bg-white dark:bg-zinc-900 rounded-xl p-5 shadow-soft border border-gray-100 dark:border-zinc-800">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-blue-500/30 flex-shrink-0">
@@ -145,13 +144,10 @@
                 </div>
                 <p class="text-[10px] font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide leading-tight">Total Pesanan</p>
             </div>
-            <p class="text-lg font-bold text-gray-900 dark:text-white">
-                {{ number_format($stats['total_orders']) }}
-            </p>
+            <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_orders']) }}</p>
             <p class="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">Sesuai filter aktif</p>
         </div>
 
-        {{-- Total Item Terjual --}}
         <div class="bg-white dark:bg-zinc-900 rounded-xl p-5 shadow-soft border border-gray-100 dark:border-zinc-800">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/30 flex-shrink-0">
@@ -159,13 +155,10 @@
                 </div>
                 <p class="text-[10px] font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide leading-tight">Total Item Terjual</p>
             </div>
-            <p class="text-lg font-bold text-gray-900 dark:text-white">
-                {{ number_format($stats['total_items_sold']) }}
-            </p>
+            <p class="text-lg font-bold text-gray-900 dark:text-white">{{ number_format($stats['total_items_sold']) }}</p>
             <p class="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">Total unit produk</p>
         </div>
 
-        {{-- Rata-rata Nilai Pesanan --}}
         <div class="bg-white dark:bg-zinc-900 rounded-xl p-5 shadow-soft border border-gray-100 dark:border-zinc-800">
             <div class="flex items-center gap-3 mb-3">
                 <div class="w-9 h-9 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/30 flex-shrink-0">
@@ -173,14 +166,14 @@
                 </div>
                 <p class="text-[10px] font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide leading-tight">Rata-rata Pesanan</p>
             </div>
-            <p class="text-lg font-bold text-gray-900 dark:text-white">
-                Rp {{ number_format($stats['avg_order_value'], 0, ',', '.') }}
-            </p>
+            <p class="text-lg font-bold text-gray-900 dark:text-white">Rp {{ number_format($stats['avg_order_value'], 0, ',', '.') }}</p>
             <p class="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">Per transaksi</p>
         </div>
     </div>
 
-    {{-- ===================== TABEL DETAIL PESANAN ===================== --}}
+    {{-- TABEL DETAIL PESANAN — menampilkan SEMUA status sesuai filter user
+         [+] Tambah <th> dan <td> baru jika perlu kolom tambahan
+             Sesuaikan juga kolom di SuperAdminReportExport dan pdf.blade.php --}}
     <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-soft border border-gray-100 dark:border-zinc-800">
         <div class="p-6 border-b border-gray-100 dark:border-zinc-800">
             <div class="flex items-center justify-between flex-wrap gap-2">
@@ -222,7 +215,8 @@
                         $qty   = $order->items->sum('quantity');
                         $total = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
 
-                        $rawMethod = $order->payment?->payment_type ?? $order->payment_method ?? '';
+                        $rawMethod    = $order->payment?->payment_type ?? $order->payment_method ?? '';
+                        // [+] Tambah case baru jika ada metode pembayaran baru
                         $paymentLabel = match($rawMethod) {
                             'bank_transfer', 'transfer' => 'Transfer Bank',
                             'echannel'      => 'Mandiri E-Channel',
@@ -237,6 +231,7 @@
                             default         => ucfirst(str_replace('_', ' ', $rawMethod)),
                         };
 
+                        // [+] Tambah entri baru di $statusConfig jika ada status baru
                         $statusConfig = [
                             'pending'    => ['label' => 'Menunggu',   'class' => 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400'],
                             'paid'       => ['label' => 'Dibayar',    'class' => 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400'],
@@ -248,40 +243,22 @@
                         $sc = $statusConfig[$order->status] ?? ['label' => ucfirst($order->status), 'class' => 'bg-gray-100 text-gray-600'];
                     @endphp
                     <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
-                        <td class="px-4 py-3 text-center text-xs text-gray-500 dark:text-zinc-400">
-                            {{ $orders->firstItem() + $i }}
-                        </td>
-                        <td class="px-4 py-3">
-                            <span class="text-xs font-semibold text-blue-600 dark:text-blue-400">#{{ $order->order_number }}</span>
-                        </td>
+                        <td class="px-4 py-3 text-center text-xs text-gray-500 dark:text-zinc-400">{{ $orders->firstItem() + $i }}</td>
+                        <td class="px-4 py-3"><span class="text-xs font-semibold text-blue-600 dark:text-blue-400">#{{ $order->order_number }}</span></td>
                         <td class="px-4 py-3">
                             <p class="text-xs text-gray-900 dark:text-white">{{ $order->created_at->format('d M Y') }}</p>
                             <p class="text-[10px] text-gray-500 dark:text-zinc-500">{{ $order->created_at->format('H:i') }}</p>
                         </td>
-                        <td class="px-4 py-3">
-                            <span class="text-xs text-gray-900 dark:text-white">{{ $order->address->province_name ?? '-' }}</span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <span class="text-xs text-gray-900 dark:text-white">{{ $categories ?: '-' }}</span>
-                        </td>
+                        <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $order->address->province_name ?? '-' }}</span></td>
+                        <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $categories ?: '-' }}</span></td>
                         <td class="px-4 py-3 max-w-[200px]">
                             <span class="text-xs text-gray-900 dark:text-white line-clamp-2" title="{{ $products }}">{{ $products }}</span>
                         </td>
-                        <td class="px-4 py-3 text-center">
-                            <span class="text-xs font-medium text-gray-900 dark:text-white">{{ $qty }}</span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <span class="text-xs text-gray-900 dark:text-white">Rp {{ number_format($order->subtotal ?? 0, 0, ',', '.') }}</span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <span class="text-xs text-gray-900 dark:text-white">Rp {{ number_format($order->shipping_cost ?? 0, 0, ',', '.') }}</span>
-                        </td>
-                        <td class="px-4 py-3 text-right">
-                            <span class="text-xs font-bold text-green-600 dark:text-green-400">Rp {{ number_format($total, 0, ',', '.') }}</span>
-                        </td>
-                        <td class="px-4 py-3">
-                            <span class="text-xs text-gray-700 dark:text-zinc-300">{{ $paymentLabel }}</span>
-                        </td>
+                        <td class="px-4 py-3 text-center"><span class="text-xs font-medium text-gray-900 dark:text-white">{{ $qty }}</span></td>
+                        <td class="px-4 py-3 text-right"><span class="text-xs text-gray-900 dark:text-white">Rp {{ number_format($order->subtotal ?? 0, 0, ',', '.') }}</span></td>
+                        <td class="px-4 py-3 text-right"><span class="text-xs text-gray-900 dark:text-white">Rp {{ number_format($order->shipping_cost ?? 0, 0, ',', '.') }}</span></td>
+                        <td class="px-4 py-3 text-right"><span class="text-xs font-bold text-green-600 dark:text-green-400">Rp {{ number_format($total, 0, ',', '.') }}</span></td>
+                        <td class="px-4 py-3"><span class="text-xs text-gray-700 dark:text-zinc-300">{{ $paymentLabel }}</span></td>
                         <td class="px-4 py-3 text-center">
                             <span class="inline-flex items-center px-2.5 py-1 text-[10px] font-semibold rounded-full {{ $sc['class'] }}">
                                 {{ $sc['label'] }}

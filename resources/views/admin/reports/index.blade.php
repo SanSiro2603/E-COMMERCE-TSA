@@ -6,13 +6,13 @@
 @section('content')
 <div class="space-y-6">
 
-    {{-- Header --}}
     <div class="flex justify-between items-center">
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Laporan Penjualan</h1>
         <p class="text-gray-500 dark:text-zinc-400 text-sm">Pilih rentang tanggal untuk melihat laporan</p>
     </div>
 
-    {{-- ===================== FILTER ===================== --}}
+    {{-- FORM FILTER — tanggal, status, tombol export
+         [+] Tambah input filter baru (mis: filter by kurir) di dalam grid di bawah --}}
     <form method="GET" action="{{ route('admin.reports.index') }}"
           class="bg-white dark:bg-zinc-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700/50">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -52,6 +52,7 @@
                 Reset
             </a>
 
+            {{-- Tombol export — parameter filter ikut dikirim via URL --}}
             <div class="ml-auto flex flex-wrap gap-2">
                 <a href="{{ route('admin.reports.exportPdf', array_filter([
                         'start_date' => $startDate,
@@ -74,7 +75,9 @@
         </div>
     </form>
 
-    {{-- ===================== STATISTIK ===================== --}}
+    {{-- KARTU STATISTIK — hanya menghitung status valid (bukan pending/cancelled)
+         [+] Tambah kartu baru jika dosen minta metrik tambahan
+             Sesuaikan juga $stats di ReportController::index() --}}
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700/50 p-6 rounded-xl shadow-sm card-hover">
             <p class="text-sm text-gray-500 dark:text-zinc-400">Total Pendapatan</p>
@@ -94,7 +97,9 @@
         </div>
     </div>
 
-    {{-- ===================== TABEL DETAIL PESANAN ===================== --}}
+    {{-- TABEL DETAIL PESANAN — menampilkan SEMUA status sesuai filter user
+         [+] Tambah <th> dan <td> baru jika perlu kolom tambahan
+             Sesuaikan juga kolom di SalesReportExport dan pdf.blade.php --}}
     <div class="bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700/50 rounded-xl shadow-sm card-hover">
         <div class="px-6 py-4 border-b border-gray-100 dark:border-zinc-700 flex items-center justify-between flex-wrap gap-2">
             <h3 class="text-base font-bold text-gray-900 dark:text-white">Detail Pesanan</h3>
@@ -104,7 +109,6 @@
             </span>
         </div>
 
-        {{-- Scroll horizontal --}}
         <div class="overflow-x-auto">
             <table class="w-full text-gray-900 dark:text-white" style="min-width: 1400px;">
                 <thead class="bg-gray-50 dark:bg-zinc-900">
@@ -132,6 +136,7 @@
                             ->implode(', ');
                         $qty = $order->items->sum('quantity');
 
+                        // [+] Tambah entri baru di $statusConfig jika ada status baru
                         $statusConfig = [
                             'pending'    => ['label' => 'Menunggu',   'class' => 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400'],
                             'paid'       => ['label' => 'Dibayar',    'class' => 'bg-blue-500/20 text-blue-600 dark:text-blue-400'],
@@ -146,9 +151,7 @@
                         <td class="px-4 py-4 text-center text-sm text-gray-400 dark:text-zinc-400">
                             {{ $orders->firstItem() + $i }}
                         </td>
-                        <td class="px-4 py-4 text-sm font-medium text-soft-green">
-                            #{{ $order->order_number }}
-                        </td>
+                        <td class="px-4 py-4 text-sm font-medium text-soft-green">#{{ $order->order_number }}</td>
                         <td class="px-4 py-4">
                             <p class="text-sm text-gray-900 dark:text-white">{{ $order->created_at->format('d M Y') }}</p>
                             <p class="text-xs text-gray-400 dark:text-zinc-500">{{ $order->created_at->format('H:i') }}</p>
@@ -156,9 +159,7 @@
                         <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">
                             {{ $order->recipient_name ?? $order->user?->name ?? '-' }}
                         </td>
-                        <td class="px-4 py-4 text-sm text-gray-500 dark:text-zinc-300">
-                            {{ $order->user?->email ?? '-' }}
-                        </td>
+                        <td class="px-4 py-4 text-sm text-gray-500 dark:text-zinc-300">{{ $order->user?->email ?? '-' }}</td>
                         <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">{{ $order->recipient_phone ?? '-' }}</td>
                         <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">{{ $order->province ?? '-' }}</td>
                         <td class="px-4 py-4 text-sm text-gray-900 dark:text-white">{{ $order->city ?? '-' }}</td>

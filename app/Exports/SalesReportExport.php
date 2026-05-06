@@ -13,6 +13,8 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
+// Export Excel laporan penjualan — styling & isi kolom diatur di registerEvents()
+// Dipanggil dari: ReportController::exportExcel()
 class SalesReportExport implements FromCollection, WithEvents, WithDrawings
 {
     protected $startDate;
@@ -20,7 +22,8 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
     protected $status;
     protected $orders;
 
-    // Status yang dianggap valid untuk dihitung di statistik
+    // Status yang dihitung di baris TOTAL (pending & cancelled TIDAK dihitung)
+    // [+] Sesuaikan dengan $validStatuses di ReportController jika ada perubahan
     protected array $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
 
     public function __construct($startDate, $endDate, $status = null)
@@ -30,6 +33,9 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
         $this->status    = $status;
     }
 
+    // Ambil data dari DB dan simpan ke $this->orders untuk dipakai di registerEvents()
+    // Return collect([]) kosong karena penulisan baris dilakukan manual di AfterSheet
+    // [+] Tambah relasi ke with([]) jika perlu kolom baru di Excel
     public function collection()
     {
         $query = Order::with(['user', 'items.product'])
@@ -46,6 +52,8 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
         return collect([]);
     }
 
+    // Sisipkan logo di sel A1
+    // [+] Ganti path atau koordinat jika posisi logo perlu diubah
     public function drawings()
     {
         $logoPath = public_path('images/logo.png');
@@ -69,13 +77,13 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                // Kolom A-M (13 kolom)
-                // A=No, B=No.Pesanan, C=Tanggal, D=Pembeli, E=Email, F=No.Telp,
-                // G=Provinsi, H=Kota/Kab, I=Alamat, J=Produk, K=Jumlah, L=Total, M=Status
+                // Peta kolom Excel (A–M, 13 kolom):
+                // A=No | B=No.Pesanan | C=Tanggal | D=Pembeli | E=Email | F=No.Telp
+                // G=Provinsi | H=Kota/Kab | I=Alamat | J=Produk | K=Jumlah | L=Total | M=Status
+                // [+] Jika perlu TAMBAH KOLOM: geser kolom yang ada, tambah header baru,
+                //     dan tambah setCellValue() di blok ISI DATA di bawah
 
-                // =====================
-                // KOP SURAT
-                // =====================
+                // ---- KOP SURAT (baris 1–5) ----
                 $sheet->mergeCells('B1:M2');
                 $sheet->setCellValue('B1', 'E-COMMERCE TSA');
                 $sheet->getStyle('B1')->applyFromArray([
@@ -102,9 +110,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     'borders' => ['bottom' => ['borderStyle' => Border::BORDER_THICK, 'color' => ['rgb' => '000000']]],
                 ]);
 
-                // =====================
-                // JUDUL
-                // =====================
+                // ---- JUDUL LAPORAN (baris 7–9) ----
                 $sheet->mergeCells('A7:M7');
                 $sheet->setCellValue('A7', 'LAPORAN PENJUALAN');
                 $sheet->getStyle('A7')->applyFromArray([
@@ -123,7 +129,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                // Filter status
+                // Baris keterangan filter status (opsional, muncul jika ada filter)
                 $infoRow = 9;
                 if ($this->status) {
                     $statusLabels = [
@@ -143,11 +149,8 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     $infoRow = 10;
                 }
 
-                // =====================
-                // RINGKASAN STATISTIK
-                // Selalu hanya hitung status valid, tidak peduli filter status apapun
-                // pending & cancelled tidak pernah dihitung di statistik
-                // =====================
+                // ---- RINGKASAN STATISTIK (2 baris: label + nilai) ----
+                // Selalu hanya hitung $validStatuses — pending & cancelled tidak dihitung
                 $statsLabelRow = $infoRow + 1;
                 $statsValueRow = $infoRow + 2;
 
@@ -158,7 +161,8 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                 $totalItemsSold = $statsOrders->sum(fn($o) => $o->items->sum('quantity'));
                 $avgOrderValue  = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 0) : 0;
 
-                // 4 blok statistik span A-M
+                // 4 blok statistik tersebar di kolom A–M
+                // [+] Tambah blok baru jika perlu metrik tambahan (sesuaikan rentang kolom)
                 $statsData = [
                     'A' => ['label' => 'Total Pendapatan',   'value' => 'Rp ' . number_format($totalRevenue, 0, ',', '.'),  'end' => 'C'],
                     'D' => ['label' => 'Total Pesanan',      'value' => number_format($totalOrders),                         'end' => 'F'],
@@ -187,9 +191,9 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                 ]);
                 $sheet->getRowDimension($statsValueRow)->setRowHeight(20);
 
-                // =====================
-                // HEADER TABEL
-                // =====================
+                // ---- HEADER TABEL ----
+                // [+] Tambah header baru di $headers jika perlu kolom tambahan
+                //     Sesuaikan juga setCellValue() di blok ISI DATA dan lebar kolom di bawah
                 $headerRow = $statsValueRow + 2;
 
                 $headers = [
@@ -220,10 +224,9 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                 ]);
                 $sheet->getRowDimension($headerRow)->setRowHeight(22);
 
-                // =====================
-                // ISI DATA
-                // Tabel tetap menampilkan SEMUA pesanan sesuai filter user
-                // =====================
+                // ---- ISI DATA ----
+                // [+] Tambah setCellValue() baru jika perlu isi kolom tambahan
+                //     Sesuaikan kolom di $headers dan lebar kolom di bawah
                 $dataStartRow = $headerRow + 1;
                 $currentRow   = $dataStartRow;
                 $no           = 1;
@@ -244,8 +247,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                         ->implode(', ');
                     $qty = $order->items->sum('quantity');
 
-                    // Grand total di baris TOTAL selalu hanya dari status valid
-                    // pending & cancelled tidak pernah dihitung
+                    // Grand total hanya dijumlah dari validStatuses (pending & cancelled dilewati)
                     if (in_array($order->status, $this->validStatuses)) {
                         $grandTotal += $order->grand_total ?? 0;
                     }
@@ -264,7 +266,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('L' . $currentRow, 'Rp ' . number_format($order->grand_total ?? 0, 0, ',', '.'));
                     $sheet->setCellValue('M' . $currentRow, $statusLabels[$order->status] ?? ucfirst($order->status));
 
-                    // Zebra stripe
+                    // Zebra stripe: baris genap diberi warna latar
                     if ($no % 2 === 0) {
                         $sheet->getStyle('A' . $currentRow . ':M' . $currentRow)->applyFromArray([
                             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
@@ -274,9 +276,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     $currentRow++;
                 }
 
-                // =====================
-                // BORDER DATA
-                // =====================
+                // ---- BORDER AREA DATA ----
                 $lastDataRow = $currentRow - 1;
                 if ($lastDataRow >= $dataStartRow) {
                     $sheet->getStyle('A' . $dataStartRow . ':M' . $lastDataRow)->applyFromArray([
@@ -285,9 +285,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     ]);
                 }
 
-                // =====================
-                // BARIS TOTAL
-                // =====================
+                // ---- BARIS TOTAL ----
                 $totalRow = $lastDataRow + 1;
                 $sheet->mergeCells('A' . $totalRow . ':K' . $totalRow);
                 $sheet->setCellValue('A' . $totalRow, 'TOTAL PENDAPATAN');
@@ -306,9 +304,8 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
                 ]);
 
-                // =====================
-                // LEBAR KOLOM
-                // =====================
+                // ---- LEBAR KOLOM ----
+                // [+] Sesuaikan lebar jika ada kolom baru atau isi kolom yang lebih panjang
                 $sheet->getColumnDimension('A')->setWidth(5);
                 $sheet->getColumnDimension('B')->setWidth(22);
                 $sheet->getColumnDimension('C')->setWidth(18);
@@ -323,15 +320,13 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                 $sheet->getColumnDimension('L')->setWidth(22);
                 $sheet->getColumnDimension('M')->setWidth(14);
 
-                // Wrap text kolom alamat & produk
+                // Wrap text untuk kolom alamat (I) dan produk (J)
                 if ($lastDataRow >= $dataStartRow) {
                     $sheet->getStyle('I' . $dataStartRow . ':I' . $lastDataRow)->getAlignment()->setWrapText(true);
                     $sheet->getStyle('J' . $dataStartRow . ':J' . $lastDataRow)->getAlignment()->setWrapText(true);
                 }
 
-                // =====================
-                // FOOTER
-                // =====================
+                // ---- FOOTER ----
                 $footerRow = $totalRow + 2;
                 $sheet->mergeCells('A' . $footerRow . ':M' . $footerRow);
                 $sheet->setCellValue('A' . $footerRow, 'Dicetak pada: ' . now()->format('d M Y H:i') . ' WIB');
