@@ -13,6 +13,10 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 
+// Export Excel laporan penjualan SuperAdmin
+// Perbedaan dengan SalesReportExport: kolom berbeda (ada Provinsi, Kategori, Metode Bayar)
+// dan mendukung lebih banyak parameter filter
+// Dipanggil dari: SuperAdminReportController::exportExcel()
 class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
 {
     protected $startDate;
@@ -23,7 +27,8 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
     protected $status;
     protected $orders;
 
-    // Status yang dianggap valid untuk dihitung di statistik
+    // Status yang dihitung di baris TOTAL (pending & cancelled TIDAK dihitung)
+    // [+] Sesuaikan dengan $validStatuses di SuperAdminReportController jika ada perubahan
     protected array $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
 
     public function __construct(
@@ -42,6 +47,9 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
         $this->status        = $status;
     }
 
+    // Ambil data dari DB dan simpan ke $this->orders untuk dipakai di registerEvents()
+    // Return collect([]) kosong karena penulisan baris dilakukan manual di AfterSheet
+    // [+] Tambah relasi ke with([]) jika perlu kolom baru di Excel
     public function collection()
     {
         $query = Order::with(['items.product.category', 'payment', 'address'])
@@ -64,6 +72,8 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
         return collect([]);
     }
 
+    // Sisipkan logo di sel A1
+    // [+] Ganti path atau koordinat jika posisi logo perlu diubah
     public function drawings()
     {
         $logoPath = public_path('images/logo.png');
@@ -87,9 +97,13 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
             AfterSheet::class => function (AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
 
-                // =====================
-                // KOP SURAT
-                // =====================
+                // Peta kolom Excel (A–L, 12 kolom):
+                // A=No | B=No.Pesanan | C=Tanggal | D=Provinsi | E=Kategori | F=Produk
+                // G=Qty | H=Subtotal | I=Ongkir | J=Total | K=Metode Bayar | L=Status
+                // [+] Jika perlu TAMBAH KOLOM: geser kolom yang ada, tambah header baru,
+                //     dan tambah setCellValue() di blok ISI DATA di bawah
+
+                // ---- KOP SURAT (baris 1–5) ----
                 $sheet->mergeCells('B1:L2');
                 $sheet->setCellValue('B1', 'E-COMMERCE TSA');
                 $sheet->getStyle('B1')->applyFromArray([
@@ -116,9 +130,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     'borders' => ['bottom' => ['borderStyle' => Border::BORDER_THICK, 'color' => ['rgb' => '000000']]],
                 ]);
 
-                // =====================
-                // JUDUL
-                // =====================
+                // ---- JUDUL LAPORAN (baris 7–8) ----
                 $sheet->mergeCells('A7:L7');
                 $sheet->setCellValue('A7', 'LAPORAN PENJUALAN');
                 $sheet->getStyle('A7')->applyFromArray([
@@ -137,7 +149,8 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                 ]);
 
-                // Filter aktif
+                // Baris keterangan filter aktif (opsional)
+                // [+] Tambah kondisi baru jika ada filter baru
                 $currentRow = 9;
                 $filterParts = [];
                 if ($this->province)      $filterParts[] = 'Provinsi: ' . $this->province;
@@ -155,48 +168,41 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $currentRow = 10;
                 }
 
-                // =====================
-                // RINGKASAN STATISTIK
-                // Selalu hanya hitung status valid, tidak peduli filter status apapun
-                // pending & cancelled tidak pernah dihitung di statistik
-                // =====================
+                // ---- RINGKASAN STATISTIK (2 baris: label + nilai) ----
+                // Selalu hanya hitung $validStatuses — pending & cancelled tidak dihitung
                 $statsStartRow = $currentRow + 1;
+                $statsLabelRow = $statsStartRow;
+                $statsValueRow = $statsStartRow + 1;
 
-                $statsOrders = $this->orders->filter(fn($o) => in_array($o->status, $this->validStatuses));
-
+                $statsOrders    = $this->orders->filter(fn($o) => in_array($o->status, $this->validStatuses));
                 $totalRevenue   = $statsOrders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0));
                 $totalOrders    = $statsOrders->count();
                 $totalItemsSold = $statsOrders->sum(fn($o) => $o->items->sum('quantity'));
                 $avgOrderValue  = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 0) : 0;
 
-                // Baris label statistik
-                $statsLabelRow = $statsStartRow;
-                $statsValueRow = $statsStartRow + 1;
-
+                // 4 blok statistik tersebar di kolom A–L (masing-masing span 3 kolom)
+                // [+] Tambah blok baru jika perlu metrik tambahan (sesuaikan rentang kolom)
                 $statsData = [
-                    'A' => ['label' => 'Total Pendapatan',    'value' => 'Rp ' . number_format($totalRevenue, 0, ',', '.')],
-                    'D' => ['label' => 'Total Pesanan',       'value' => number_format($totalOrders)],
-                    'G' => ['label' => 'Total Item Terjual',  'value' => number_format($totalItemsSold)],
-                    'J' => ['label' => 'Rata-rata Pesanan',   'value' => 'Rp ' . number_format($avgOrderValue, 0, ',', '.')],
+                    'A' => ['label' => 'Total Pendapatan',   'value' => 'Rp ' . number_format($totalRevenue, 0, ',', '.')],
+                    'D' => ['label' => 'Total Pesanan',      'value' => number_format($totalOrders)],
+                    'G' => ['label' => 'Total Item Terjual', 'value' => number_format($totalItemsSold)],
+                    'J' => ['label' => 'Rata-rata Pesanan',  'value' => 'Rp ' . number_format($avgOrderValue, 0, ',', '.')],
                 ];
 
                 foreach ($statsData as $col => $data) {
-                    $endCol = chr(ord($col) + 2); // span 3 kolom
+                    $endCol = chr(ord($col) + 2); // span 3 kolom per blok
                     $sheet->mergeCells($col . $statsLabelRow . ':' . $endCol . $statsLabelRow);
                     $sheet->mergeCells($col . $statsValueRow . ':' . $endCol . $statsValueRow);
                     $sheet->setCellValue($col . $statsLabelRow, $data['label']);
                     $sheet->setCellValue($col . $statsValueRow, $data['value']);
                 }
 
-                // Style label
                 $sheet->getStyle('A' . $statsLabelRow . ':L' . $statsLabelRow)->applyFromArray([
                     'font'      => ['size' => 9, 'color' => ['rgb' => '555555']],
                     'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                     'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'b7dbc8']]],
                 ]);
-
-                // Style nilai
                 $sheet->getStyle('A' . $statsValueRow . ':L' . $statsValueRow)->applyFromArray([
                     'font'      => ['bold' => true, 'size' => 11, 'color' => ['rgb' => '2D6A4F']],
                     'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
@@ -205,9 +211,9 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 ]);
                 $sheet->getRowDimension($statsValueRow)->setRowHeight(20);
 
-                // =====================
-                // HEADER TABEL
-                // =====================
+                // ---- HEADER TABEL ----
+                // [+] Tambah header baru di $headers jika perlu kolom tambahan
+                //     Sesuaikan juga setCellValue() di blok ISI DATA dan lebar kolom di bawah
                 $headerRow = $statsValueRow + 2;
 
                 $headers = [
@@ -237,10 +243,9 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 ]);
                 $sheet->getRowDimension($headerRow)->setRowHeight(22);
 
-                // =====================
-                // ISI DATA
-                // Tabel tetap menampilkan SEMUA pesanan sesuai filter user
-                // =====================
+                // ---- ISI DATA ----
+                // [+] Tambah setCellValue() baru jika perlu isi kolom tambahan
+                //     Sesuaikan kolom di $headers dan lebar kolom di bawah
                 $dataStartRow = $headerRow + 1;
                 $currentRow   = $dataStartRow;
                 $no           = 1;
@@ -258,16 +263,14 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $qty   = $order->items->sum('quantity');
                     $total = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
 
-                    // Grand total di baris TOTAL selalu hanya dari status valid
-                    // pending & cancelled tidak pernah dihitung
+                    // Grand total hanya dijumlah dari validStatuses (pending & cancelled dilewati)
                     if (in_array($order->status, $this->validStatuses)) {
                         $grandTotal += $total;
                     }
 
-                    $rawMethod = $order->payment?->payment_type
-                        ?? $order->payment_method
-                        ?? '';
+                    $rawMethod = $order->payment?->payment_type ?? $order->payment_method ?? '';
 
+                    // [+] Tambah case baru jika ada metode pembayaran baru
                     $paymentLabel = match($rawMethod) {
                         'bank_transfer', 'transfer' => 'Transfer Bank',
                         'echannel'      => 'Mandiri E-Channel',
@@ -280,6 +283,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                         default         => ucfirst(str_replace('_', ' ', $rawMethod)),
                     };
 
+                    // [+] Tambah entri baru jika ada status baru
                     $statusLabels = [
                         'pending'    => 'Menunggu',
                         'paid'       => 'Dibayar',
@@ -302,7 +306,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('K' . $currentRow, $paymentLabel);
                     $sheet->setCellValue('L' . $currentRow, $statusLabels[$order->status] ?? ucfirst($order->status));
 
-                    // Zebra stripe
+                    // Zebra stripe: baris genap diberi warna latar
                     if ($no % 2 === 0) {
                         $sheet->getStyle('A' . $currentRow . ':L' . $currentRow)->applyFromArray([
                             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
@@ -312,9 +316,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $currentRow++;
                 }
 
-                // =====================
-                // BORDER DATA
-                // =====================
+                // ---- BORDER AREA DATA ----
                 $lastDataRow = $currentRow - 1;
                 if ($lastDataRow >= $dataStartRow) {
                     $sheet->getStyle('A' . $dataStartRow . ':L' . $lastDataRow)->applyFromArray([
@@ -323,9 +325,8 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     ]);
                 }
 
-                // =====================
-                // BARIS TOTAL
-                // =====================
+                // ---- BARIS TOTAL ----
+                // Total ditempatkan di kolom J (Total), merge A–I untuk label
                 $totalRow = $lastDataRow + 1;
                 $sheet->mergeCells('A' . $totalRow . ':I' . $totalRow);
                 $sheet->setCellValue('A' . $totalRow, 'TOTAL PENDAPATAN');
@@ -344,9 +345,8 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     'alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT],
                 ]);
 
-                // =====================
-                // LEBAR KOLOM
-                // =====================
+                // ---- LEBAR KOLOM ----
+                // [+] Sesuaikan lebar jika ada kolom baru atau isi kolom yang lebih panjang
                 $sheet->getColumnDimension('A')->setWidth(5);
                 $sheet->getColumnDimension('B')->setWidth(20);
                 $sheet->getColumnDimension('C')->setWidth(18);
@@ -360,15 +360,13 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 $sheet->getColumnDimension('K')->setWidth(20);
                 $sheet->getColumnDimension('L')->setWidth(14);
 
-                // Wrap text kolom produk
+                // Wrap text untuk kolom produk (F)
                 if ($lastDataRow >= $dataStartRow) {
                     $sheet->getStyle('F' . $dataStartRow . ':F' . $lastDataRow)
                           ->getAlignment()->setWrapText(true);
                 }
 
-                // =====================
-                // FOOTER
-                // =====================
+                // ---- FOOTER ----
                 $footerRow = $totalRow + 2;
                 $sheet->mergeCells('A' . $footerRow . ':L' . $footerRow);
                 $sheet->setCellValue('A' . $footerRow, 'Dicetak pada: ' . now()->format('d M Y H:i') . ' WIB');

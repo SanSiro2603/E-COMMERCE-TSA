@@ -75,9 +75,12 @@
         </div>
     @endif
 
-    <!-- Info & Summary Cards -->
+    {{-- INFO CARDS: Pembeli & Ringkasan Pesanan --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Pembeli & Alamat -->
+
+        {{-- Card: Info Pembeli & Alamat
+             [+] Tambah baris <div class="flex justify-between"> baru di sini
+                 jika perlu tampilkan field tambahan dari tabel orders/users/addresses --}}
         <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <span class="material-symbols-outlined text-soft-green">person</span>
@@ -110,7 +113,8 @@
             </div>
         </div>
 
-        <!-- Ringkasan Pesanan -->
+        {{-- Card: Ringkasan Harga & Status
+             [+] Tambah baris harga baru (mis: diskon) sebelum baris "Total Bayar" --}}
         <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <span class="material-symbols-outlined text-soft-green">receipt_long</span>
@@ -130,7 +134,8 @@
                     <span class="text-soft-green text-xl">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</span>
                 </div>
 
-                <!-- Status Badge -->
+                {{-- Badge Status
+                     [+] Tambah kondisi {{ }} baru jika ada status baru --}}
                 <div class="mt-4">
                     <span class="inline-flex items-center gap-1 px-3 py-1.5 text-xs font-medium rounded-full
                         {{ $order->status === 'pending'    ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' : '' }}
@@ -151,6 +156,8 @@
                         {{ $order->status_label }}
                     </span>
 
+                    {{-- Tampilkan waktu pembayaran jika sudah dibayar
+                         Format waktu dikonversi via JavaScript di bawah --}}
                     @if($order->paid_at)
                         <p class="text-xs text-gray-500 dark:text-zinc-400 mt-2"
                            id="paid-at-text"
@@ -162,7 +169,9 @@
         </div>
     </div>
 
-    {{-- ===== PROSES PESANAN (hanya jika status 'paid') ===== --}}
+    {{-- TOMBOL PROSES PESANAN — hanya muncul jika status 'paid'
+         Form dikirim lewat modal konfirmasi (#modal-processing)
+         Handler: OrderController::updateStatus() --}}
     @if($order->status === 'paid')
         <div class="bg-white dark:bg-zinc-900 rounded-xl border border-purple-200 dark:border-purple-500/30 shadow-sm p-6">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -172,7 +181,6 @@
             <p class="text-sm text-gray-600 dark:text-zinc-400 mb-4">
                 Tandai pesanan ini sedang diproses / disiapkan sebelum dikirim. Status akan berubah menjadi <strong class="text-purple-600 dark:text-purple-400">Diproses</strong>.
             </p>
-            {{-- Form tersembunyi — di-submit oleh modal --}}
             <form id="form-processing" action="{{ route('admin.orders.updateStatus', $order) }}" method="POST">
                 @csrf
                 @method('PATCH')
@@ -187,7 +195,9 @@
         </div>
     @endif
 
-    <!-- Produk yang Dipesan -->
+    {{-- DAFTAR PRODUK YANG DIPESAN
+         [+] Tambah field produk baru di dalam div.flex jika perlu tampilkan atribut lain
+             (mis: berat, SKU) — data diambil dari $item->product --}}
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-6">
         <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
             <span class="material-symbols-outlined text-soft-green">inventory_2</span>
@@ -222,7 +232,9 @@
         </div>
     </div>
 
-    {{-- ===== BITESHIP: BUAT PENGIRIMAN ===== --}}
+    {{-- TOMBOL BUAT PENGIRIMAN BITESHIP
+         Muncul jika status paid/processing dan belum ada biteship_order_id
+         Handler: BiteshipController::createShipment() --}}
     @if(in_array($order->status, ['paid', 'processing']) && !$order->biteship_order_id)
         <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-500/10 dark:to-teal-500/10 border border-emerald-200 dark:border-emerald-500/20 rounded-xl p-6">
             <h3 class="text-lg font-semibold text-emerald-900 dark:text-emerald-300 mb-3 flex items-center gap-2">
@@ -232,7 +244,6 @@
             <p class="text-sm text-emerald-700 dark:text-emerald-400 mb-4">
                 Buat order pengiriman ke Biteship Sandbox. Sistem akan otomatis mengubah status pesanan menjadi <strong>Dikirim</strong> dan menyimpan nomor resi dari kurir.
             </p>
-            {{-- Form tersembunyi — di-submit oleh modal --}}
             <form id="form-biteship" action="{{ route('admin.orders.biteship.create', $order) }}" method="POST">
                 @csrf
             </form>
@@ -245,7 +256,9 @@
         </div>
     @endif
 
-    {{-- ===== BITESHIP: TRACKING INFO ===== --}}
+    {{-- INFO TRACKING BITESHIP — muncul setelah pengiriman dibuat
+         Data tracking dimuat via AJAX: loadTracking() → BiteshipController::trackShipment()
+         [+] Untuk tambah kolom info (mis: estimasi tiba), tambahkan di dalam grid di bawah --}}
     @if($order->biteship_order_id)
         <div class="bg-white dark:bg-zinc-900 rounded-xl border border-indigo-200 dark:border-indigo-500/30 shadow-sm p-6" id="biteship-tracking-card">
             <div class="flex items-center justify-between mb-4">
@@ -275,6 +288,7 @@
                 </div>
             </div>
 
+            {{-- Timeline tracking diisi oleh renderTracking() via JavaScript --}}
             <div id="tracking-timeline" class="mt-4">
                 <p class="text-sm text-gray-500 dark:text-zinc-400 flex items-center gap-2">
                     <span class="material-symbols-outlined text-base animate-spin">progress_activity</span>
@@ -284,7 +298,7 @@
         </div>
     @endif
 
-    {{-- ===== MODAL: Konfirmasi Proses Pesanan ===== --}}
+    {{-- MODAL: Konfirmasi ubah status → Diproses --}}
     @if($order->status === 'paid')
         <div id="modal-processing" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('modal-processing')"></div>
@@ -316,7 +330,7 @@
         </div>
     @endif
 
-    {{-- ===== MODAL: Konfirmasi Biteship ===== --}}
+    {{-- MODAL: Konfirmasi buat pengiriman Biteship --}}
     @if(in_array($order->status, ['paid', 'processing']) && !$order->biteship_order_id)
         <div id="modal-biteship" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('modal-biteship')"></div>
@@ -381,20 +395,17 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// ===== INIT =====
 document.addEventListener('DOMContentLoaded', () => {
-    // Format waktu pembayaran
+
+    // Format waktu pembayaran dari ISO ke format lokal Indonesia
     const el = document.getElementById('paid-at-text');
     if (el) {
-        const iso = el.dataset.time;
-        if (iso) {
-            const date = new Date(iso);
-            const formatted = date.toLocaleString('id-ID', {
-                day: '2-digit', month: 'long', year: 'numeric',
-                hour: '2-digit', minute: '2-digit', hour12: false
-            }).replace(',', '');
-            el.textContent = 'Dibayar pada ' + formatted;
-        }
+        const date = new Date(el.dataset.time);
+        const formatted = date.toLocaleString('id-ID', {
+            day: '2-digit', month: 'long', year: 'numeric',
+            hour: '2-digit', minute: '2-digit', hour12: false
+        }).replace(',', '');
+        el.textContent = 'Dibayar pada ' + formatted;
     }
 
     // Auto-dismiss notifikasi setelah 4 detik
@@ -412,7 +423,9 @@ document.addEventListener('DOMContentLoaded', () => {
     @endif
 });
 
-// ===== TRACKING =====
+// ===== TRACKING BITESHIP =====
+
+// Muat data tracking dari server (AJAX ke BiteshipController::trackShipment)
 function loadTracking() {
     const url = '{{ route("admin.orders.biteship.track", $order) }}';
     fetch(url)
@@ -435,6 +448,8 @@ function refreshTracking() {
     }, 2000);
 }
 
+// Render timeline tracking ke dalam #tracking-timeline
+// [+] Ubah di sini jika perlu tampilkan field tambahan dari response Biteship
 function renderTracking(data) {
     const el = document.getElementById('tracking-timeline');
     if (!data.success) {
@@ -491,6 +506,8 @@ function renderTracking(data) {
     el.innerHTML = html;
 }
 
+// Terjemahkan keterangan status dari Biteship ke Bahasa Indonesia
+// [+] Tambah pasangan terjemahan baru jika ada keterangan baru dari Biteship API
 function translateBiteshipNote(text) {
     if (!text) return '-';
     let t = text;
