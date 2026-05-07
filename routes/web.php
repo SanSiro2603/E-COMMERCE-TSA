@@ -116,9 +116,13 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
         Route::get('/search', SearchController::class)->name('search');
 
         // Produk
+        Route::post('products/bulk-delete', [ProductController::class, 'bulkDelete'])->name('products.bulk-delete');
+        Route::post('products/bulk-status', [ProductController::class, 'bulkStatus'])->name('products.bulk-status');
         Route::resource('products', ProductController::class);
 
         // Kategori
+        Route::post('categories/bulk-action', [CategoryController::class, 'bulkAction'])->name('categories.bulk-action');
+        Route::get('categories/check-name', [CategoryController::class, 'checkName'])->name('categories.check-name');
         Route::resource('categories', CategoryController::class);
 
         // Pesanan

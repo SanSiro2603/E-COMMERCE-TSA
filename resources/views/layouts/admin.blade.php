@@ -404,24 +404,28 @@
 
 
         @if (session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: '{{ session("success") }}',
+        toast: true,
+        position: 'top-end',
+        timer: 3000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+    });
+@endif
 
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil!',
-                text: '{{ session('success') }}',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        @endif
-
-        @if (session('error'))
-
-            Swal.fire({
-                icon: 'error',
-                title: 'Login gagal!',
-                text: '{{ session('error') }}'
-            });
-        @endif
+@if (session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: '{{ session("error") }}',
+        toast: true,
+        position: 'top-end',
+        timer: 4000,
+        timerProgressBar: true,
+        showConfirmButton: false,
+    });
+@endif
     </script>
 @include('admin.partials.global-search')
 

@@ -12,174 +12,315 @@ use Illuminate\Support\Facades\Storage;
 class ProductController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = Product::with('category.parent');
-        
+{
+    $query = Product::with('category.parent');
+    
+    // Filter Search
+    if ($request->filled('search')) {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+              ->orWhere('description', 'like', "%{$search}%")
+              ->orWhere('slug', 'like', "%{$search}%");
+        });
+    }
+    
+    // Filter Category
+    if ($request->filled('category')) {
+        $query->whereHas('category', function($q) use ($request) {
+            $q->where('id', $request->category)
+              ->orWhere('parent_id', $request->category);
+        });
+    }
+
+    // Filter Status
+    if ($request->filled('status')) {
+        $query->where('is_active', $request->status === 'active' ? 1 : 0);
+    }
+
+    // Filter Stok
+    if ($request->filled('stock_filter')) {
+        if ($request->stock_filter === 'low') {
+            $query->where('stock', '<=', 5)->where('stock', '>', 0);
+        } elseif ($request->stock_filter === 'empty') {
+            $query->where('stock', 0);
+        }
+    }
+
+    // Filter Harga
+    if ($request->filled('price_min')) {
+        $query->where('price', '>=', (int) $request->price_min);
+    }
+    if ($request->filled('price_max')) {
+        $query->where('price', '<=', (int) $request->price_max);
+    }
+
+    // Sort Kolom
+    $sortable = ['name', 'price', 'stock', 'created_at'];
+    $sortBy   = in_array($request->sort_by, $sortable) ? $request->sort_by : 'created_at';
+    $sortDir  = $request->sort_dir === 'asc' ? 'asc' : 'desc';
+    $query->orderBy($sortBy, $sortDir);
+
+    $perPage  = in_array((int) $request->per_page, [10, 25, 50]) ? (int) $request->per_page : 10;
+    $products = $query->paginate($perPage);
+    $categories = Category::parentOnly()->where('is_active', true)->orderBy('name')->get();
+
+    if ($request->ajax()) {
+        // Query terpisah untuk stats
+        $statsQuery = Product::with('category.parent');
+
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $statsQuery->where(function($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
                   ->orWhere('slug', 'like', "%{$search}%");
             });
         }
-        
         if ($request->filled('category')) {
-            $query->whereHas('category', function($q) use ($request) {
+            $statsQuery->whereHas('category', function($q) use ($request) {
                 $q->where('id', $request->category)
                   ->orWhere('parent_id', $request->category);
             });
         }
-        
-        $products = $query->latest()->paginate(10);
-        $categories = Category::parentOnly()->where('is_active', true)->orderBy('name')->get();
-        
-        if ($request->ajax()) {
-            $allFilteredProducts = Product::with('category.parent');
-            
-            if ($request->filled('search')) {
-                $search = $request->search;
-                $allFilteredProducts->where(function($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                      ->orWhere('description', 'like', "%{$search}%")
-                      ->orWhere('slug', 'like', "%{$search}%");
-                });
-            }
-            
-            if ($request->filled('category')) {
-                $allFilteredProducts->whereHas('category', function($q) use ($request) {
-                    $q->where('id', $request->category)
-                      ->orWhere('parent_id', $request->category);
-                });
-            }
-            
-            $allProducts = $allFilteredProducts->get();
-            
-            $stats = [
-                'total'     => $allProducts->count(),
-                'active'    => $allProducts->where('is_active', true)->count(),
-                'low_stock' => $allProducts->where('stock', '<=', 5)->count(),
-                'inactive'  => $allProducts->where('is_active', false)->count(),
-            ];
-            
-            $html       = $this->renderTableRows($products);
-            $pagination = (string)$products->appends($request->only(['search', 'category']))->links();
-            
-            return response()->json([
-                'html'       => $html,
-                'pagination' => $pagination,
-                'stats'      => $stats
-            ]);
+        if ($request->filled('status')) {
+            $statsQuery->where('is_active', $request->status === 'active' ? 1 : 0);
         }
-        
-        return view('admin.products.index', compact('products', 'categories'));
+        if ($request->filled('stock_filter')) {
+            if ($request->stock_filter === 'low') {
+                $statsQuery->where('stock', '<=', 5)->where('stock', '>', 0);
+            } elseif ($request->stock_filter === 'empty') {
+                $statsQuery->where('stock', 0);
+            }
+        }
+        if ($request->filled('price_min')) {
+            $statsQuery->where('price', '>=', (int) $request->price_min);
+        }
+        if ($request->filled('price_max')) {
+            $statsQuery->where('price', '<=', (int) $request->price_max);
+        }
+
+        $allProducts = $statsQuery->get();
+        $stats = [
+            'total'     => $allProducts->count(),
+            'active'    => $allProducts->where('is_active', true)->count(),
+            'low_stock' => $allProducts->where('stock', '<=', 5)->count(),
+            'inactive'  => $allProducts->where('is_active', false)->count(),
+        ];
+
+        $appendKeys = ['search', 'category', 'status', 'stock_filter', 'price_min', 'price_max', 'sort_by', 'sort_dir', 'per_page'];
+        $html       = $this->renderTableRows($products);
+        $pagination = (string) $products->appends($request->only($appendKeys))->links();
+
+        return response()->json([
+            'html'       => $html,
+            'pagination' => $pagination,
+            'stats'      => $stats,
+        ]);
     }
 
-    private function renderTableRows($products)
-    {
-        if ($products->isEmpty()) {
-            return '
-                <tr>
-                    <td colspan="7" class="px-6 py-12 text-center">
-                        <div class="flex flex-col items-center justify-center">
-                            <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl mb-3">inventory_2</span>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">Tidak ada produk ditemukan</p>
-                            <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">Coba ubah filter atau kata kunci pencarian</p>
-                        </div>
-                    </td>
-                </tr>
-            ';
-        }
-        
-        $html = '';
-        foreach ($products as $product) {
-            $imageHtml = $product->image 
-                ? '<img src="' . asset('storage/' . $product->image) . '" alt="' . e($product->name) . '" class="h-14 w-14 object-cover rounded-lg border border-gray-200 dark:border-zinc-700">'
-                : '<div class="h-14 w-14 bg-gray-200 dark:bg-zinc-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-zinc-600">
-                    <span class="material-symbols-outlined text-gray-400 dark:text-zinc-500 text-xl">image</span>
-                   </div>';
-            
-            $stockClass   = $product->stock <= 5 ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' : 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400';
-            $stockWarning = $product->stock <= 5 ? '<span class="material-symbols-outlined text-base">warning</span>' : '';
-            $statusClass  = $product->is_active ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400';
-            $statusDot    = $product->is_active ? 'bg-green-500' : 'bg-gray-500';
-            $statusText   = $product->is_active ? 'Aktif' : 'Nonaktif';
-            $description  = Str::limit($product->description, 50);
+    return view('admin.products.index', compact('products', 'categories'));
+}
 
-            // Category — tampilkan parent › sub
-            if ($product->category) {
-                if ($product->category->parent) {
-                    $categoryHtml = '
-                        <div class="flex flex-col gap-1">
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full w-fit">
-                                <span class="material-symbols-outlined text-sm">category</span>
-                                ' . e($product->category->parent->name) . '
-                            </span>
-                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full w-fit">
-                                <span class="material-symbols-outlined text-sm">account_tree</span>
-                                ' . e($product->category->name) . '
-                            </span>
-                        </div>';
-                } else {
-                    $categoryHtml = '
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full">
+   private function renderTableRows($products)
+{
+    if ($products->isEmpty()) {
+        return '
+            <tr>
+                <td colspan="8" class="px-6 py-12 text-center">
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl mb-3">inventory_2</span>
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">Tidak ada produk ditemukan</p>
+                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">Coba ubah filter atau kata kunci pencarian</p>
+                    </div>
+                </td>
+            </tr>
+        ';
+    }
+
+    $html = '';
+    foreach ($products as $product) {
+
+        // ── Gambar ──────────────────────────────────────────
+        $imageHtml = $product->image
+            ? '<img src="' . asset('storage/' . $product->image) . '" alt="' . e($product->name) . '" class="h-14 w-14 object-cover rounded-lg border border-gray-200 dark:border-zinc-700">'
+            : '<div class="h-14 w-14 bg-gray-200 dark:bg-zinc-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-zinc-600">
+                <span class="material-symbols-outlined text-gray-400 dark:text-zinc-500 text-xl">image</span>
+               </div>';
+
+        // ── Stok ─────────────────────────────────────────────
+        $stockClass   = $product->stock <= 5
+            ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400'
+            : 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400';
+        $stockWarning = $product->stock <= 5
+            ? '<span class="material-symbols-outlined text-base">warning</span>'
+            : '';
+
+        // ── Status ───────────────────────────────────────────
+        $statusClass = $product->is_active
+            ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400'
+            : 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400';
+        $statusDot   = $product->is_active ? 'bg-green-500' : 'bg-gray-500';
+        $statusText  = $product->is_active ? 'Aktif' : 'Nonaktif';
+
+        // ── Deskripsi ────────────────────────────────────────
+        $description = Str::limit($product->description, 50);
+
+        // ── Kategori ─────────────────────────────────────────
+        if ($product->category) {
+            if ($product->category->parent) {
+                $categoryHtml = '
+                    <div class="flex flex-col gap-1">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full w-fit">
                             <span class="material-symbols-outlined text-sm">category</span>
+                            ' . e($product->category->parent->name) . '
+                        </span>
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full w-fit">
+                            <span class="material-symbols-outlined text-sm">account_tree</span>
                             ' . e($product->category->name) . '
-                        </span>';
-                }
+                        </span>
+                    </div>';
             } else {
-                $categoryHtml = '<span class="text-xs text-gray-400 dark:text-zinc-500">Tanpa Kategori</span>';
+                $categoryHtml = '
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full">
+                        <span class="material-symbols-outlined text-sm">category</span>
+                        ' . e($product->category->name) . '
+                    </span>';
             }
-            
-            $html .= '
-                <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors" data-product-id="' . $product->id . '">
-                    <td class="px-6 py-4">' . $imageHtml . '</td>
-                    <td class="px-6 py-4">
-                        <p class="text-sm font-semibold text-gray-900 dark:text-white">' . e($product->name) . '</p>
-                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">' . e($description) . '</p>
-                    </td>
-                    <td class="px-6 py-4">' . $categoryHtml . '</td>
-                    <td class="px-6 py-4">
-                        <p class="text-sm font-bold text-gray-900 dark:text-white">Rp ' . number_format($product->price, 0, ',', '.') . '</p>
-                        <p class="text-xs text-gray-500 dark:text-zinc-400">per ' . e($product->unit ?? 'unit') . '</p>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-semibold text-sm ' . $stockClass . '">
-                            ' . $stockWarning . '
-                            ' . $product->stock . '
-                        </span>
-                    </td>
-                    <td class="px-6 py-4 text-center">
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full ' . $statusClass . '">
-                            <span class="w-1.5 h-1.5 rounded-full ' . $statusDot . '"></span>
-                            ' . $statusText . '
-                        </span>
-                    </td>
-                    <td class="px-6 py-4">
-                        <div class="flex items-center justify-center gap-2">
-                            <a href="' . route('admin.products.edit', $product) . '" 
-                               class="flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-xs font-medium transition-colors">
-                                <span class="material-symbols-outlined text-base">edit</span>
-                                Edit
-                            </a>
-                            <form action="' . route('admin.products.destroy', $product) . '" method="POST" class="inline">
-                                ' . csrf_field() . '
-                                ' . method_field('DELETE') . '
-                                <button type="submit" 
-                                        onclick="return confirm(\'Yakin ingin menghapus produk ' . e($product->name) . '?\')" 
-                                        class="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg text-xs font-medium transition-colors">
-                                    <span class="material-symbols-outlined text-base">delete</span>
-                                    Hapus
-                                </button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-            ';
+        } else {
+            $categoryHtml = '<span class="text-xs text-gray-400 dark:text-zinc-500">Tanpa Kategori</span>';
         }
-        
-        return $html;
+
+        // ── Route ─────────────────────────────────────────────
+        $editRoute    = route('admin.products.edit', $product);
+        $deleteRoute  = route('admin.products.destroy', $product);
+        $productName  = e($product->name);
+        $csrfField    = csrf_field();
+        $methodField  = method_field('DELETE');
+
+        $html .= '
+            <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors product-row" data-product-id="' . $product->id . '">
+
+                <!-- ✅ Checkbox -->
+                <td class="px-4 py-4">
+                    <input type="checkbox"
+                           class="product-checkbox w-4 h-4 rounded border-gray-300 dark:border-zinc-600 text-soft-green focus:ring-soft-green cursor-pointer"
+                           value="' . $product->id . '">
+                </td>
+
+                <!-- Gambar -->
+                <td class="px-6 py-4">' . $imageHtml . '</td>
+
+                <!-- Nama Produk -->
+                <td class="px-6 py-4">
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white">' . $productName . '</p>
+                    <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">' . e($description) . '</p>
+                </td>
+
+                <!-- Kategori -->
+                <td class="px-6 py-4">' . $categoryHtml . '</td>
+
+                <!-- Harga -->
+                <td class="px-6 py-4">
+                    <p class="text-sm font-bold text-gray-900 dark:text-white">Rp ' . number_format($product->price, 0, ',', '.') . '</p>
+                    <p class="text-xs text-gray-500 dark:text-zinc-400">per ' . e($product->unit ?? 'unit') . '</p>
+                </td>
+
+                <!-- Stok -->
+                <td class="px-6 py-4 text-center">
+                    <span class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg font-semibold text-sm ' . $stockClass . '">
+                        ' . $stockWarning . '
+                        ' . $product->stock . '
+                    </span>
+                </td>
+
+                <!-- Status -->
+                <td class="px-6 py-4 text-center">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full ' . $statusClass . '">
+                        <span class="w-1.5 h-1.5 rounded-full ' . $statusDot . '"></span>
+                        ' . $statusText . '
+                    </span>
+                </td>
+
+                <!-- Aksi -->
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-center gap-2">
+                        <a href="' . $editRoute . '"
+                           class="flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-xs font-medium transition-colors">
+                            <span class="material-symbols-outlined text-base">edit</span>
+                            Edit
+                        </a>
+                        <form action="' . $deleteRoute . '" method="POST" class="inline">
+                            ' . $csrfField . '
+                            ' . $methodField . '
+                            <button type="button"
+                                    onclick="confirmDelete(this.closest(\'form\'), \'' . $productName . '\')"
+                                    class="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg text-xs font-medium transition-colors">
+                                <span class="material-symbols-outlined text-base">delete</span>
+                                Hapus
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        ';
     }
+
+    return $html;
+}
+    public function bulkDelete(Request $request)
+{
+    $request->validate([
+        'ids'   => 'required|array',
+        'ids.*' => 'exists:products,id',
+    ]);
+
+    $products = Product::whereIn('id', $request->ids)->get();
+
+    foreach ($products as $product) {
+        // Hapus gambar utama
+        if ($product->image) {
+            Storage::disk('public')->delete($product->image);
+        }
+        // Hapus gallery
+        if (!empty($product->images)) {
+            foreach ($product->images as $img) {
+                if (Storage::disk('public')->exists($img)) {
+                    Storage::disk('public')->delete($img);
+                }
+            }
+        }
+        // Hapus sertifikat
+        if ($product->health_certificate) {
+            Storage::disk('public')->delete($product->health_certificate);
+        }
+
+        $product->delete();
+    }
+
+    return response()->json([
+        'success' => true,
+        'message' => count($request->ids) . ' produk berhasil dihapus.',
+    ]);
+}
+
+public function bulkStatus(Request $request)
+{
+    $request->validate([
+        'ids'    => 'required|array',
+        'ids.*'  => 'exists:products,id',
+        'status' => 'required|boolean',
+    ]);
+
+    Product::whereIn('id', $request->ids)->update(['is_active' => $request->status]);
+
+    $label = $request->status ? 'diaktifkan' : 'dinonaktifkan';
+
+    return response()->json([
+        'success' => true,
+        'message' => count($request->ids) . " produk berhasil {$label}.",
+    ]);
+}
 
     public function create()
     {
