@@ -47,14 +47,38 @@ class CategoryController extends Controller
         return view('admin.categories.create', compact('parentCategories'));
     }
 
-    public function store(Request $request)
+    public function checkName(Request $request)
     {
+        $name      = $request->query('name');
+        $excludeId = $request->query('exclude_id'); // untuk edit — skip ID sendiri
+
+        if (!$name) {
+            return response()->json(['available' => true]);
+        }
+
+        $query = Category::where('name', $name);
+
+        if ($excludeId) {
+            $query->where('id', '!=', $excludeId);
+        }
+
+        $exists = $query->exists();
+
+        return response()->json([
+            'available' => !$exists,
+            'message'   => $exists ? 'Nama ini sudah digunakan.' : 'Nama tersedia.',
+        ]);
+    }
+
+    public function store(Request $request)
+{
+    // ── Kategori Utama ──
+    if ($request->has('single_sub') === false && is_null($request->parent_id) && !$request->has('sub_names')) {
         $request->validate([
-            'name'        => 'required|string|max:100|unique:categories',
-            'description' => 'nullable|string',
-            'is_active'   => 'required|boolean',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'parent_id'   => 'nullable|exists:categories,id',
+            'name'      => 'required|string|max:100|unique:categories',
+            'slug'      => 'required|string|max:120|unique:categories',
+            'is_active' => 'required|boolean',
+            'image'     => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
         $imagePath = null;
@@ -63,26 +87,65 @@ class CategoryController extends Controller
         }
 
         $category = Category::create([
-            'name'        => $request->name,
-            'slug'        => Str::slug($request->name),
-            'description' => $request->description,
-            'is_active'   => $request->boolean('is_active'),
-            'image'       => $imagePath,
-            'parent_id'   => $request->parent_id ?? null,
+            'name'      => $request->name,
+            'slug'      => Str::slug($request->slug),
+            'is_active' => $request->boolean('is_active'),
+            'image'     => $imagePath,
+            'parent_id' => null,
         ]);
 
-        if (is_null($category->parent_id)) {
-            return redirect()->route('admin.categories.create')
-                ->with('success_parent', 'Kategori utama "' . $category->name . '" berhasil disimpan! Sekarang tambahkan sub kategorinya.')
-                ->with('last_parent_id', $category->id);
+        return redirect()->route('admin.categories.create')
+            ->with('success_parent', 'Kategori utama "' . $category->name . '" berhasil disimpan! Sekarang tambahkan sub kategorinya.')
+            ->with('last_parent_id', $category->id);
+    }
+
+    // ── Multiple Sub Kategori ──
+    $request->validate([
+        'parent_id'     => 'required|exists:categories,id',
+        'sub_names'     => 'required|array|min:1',
+        'sub_names.*'   => 'required|string|max:100|distinct',
+        'sub_slugs'     => 'required|array|min:1',
+        'sub_slugs.*'   => 'required|string|max:120|distinct',
+    ]);
+
+    $saved   = 0;
+    $skipped = [];
+
+    foreach ($request->sub_names as $i => $subName) {
+        $subSlug = Str::slug($request->sub_slugs[$i] ?? $subName);
+
+        // Skip kalau nama atau slug sudah ada
+        if (Category::where('name', $subName)->exists()) {
+            $skipped[] = $subName;
+            continue;
+        }
+        if (Category::where('slug', $subSlug)->exists()) {
+            $subSlug = $subSlug . '-' . uniqid();
         }
 
-        return redirect()->route('admin.categories.index')
-            ->with('success', 'Sub kategori berhasil ditambahkan!');
+        Category::create([
+            'name'      => $subName,
+            'slug'      => $subSlug,
+            'is_active' => true,
+            'parent_id' => $request->parent_id,
+        ]);
+
+        $saved++;
     }
+
+    $message = $saved . ' sub kategori berhasil ditambahkan!';
+    if (!empty($skipped)) {
+        $message .= ' ' . count($skipped) . ' dilewati karena nama sudah ada: ' . implode(', ', $skipped) . '.';
+    }
+
+    return redirect()->route('admin.categories.index')
+        ->with('success', $message);
+}
 
     public function edit(Category $category)
     {
+        $category->load(['children' => fn($q) => $q->withCount('products')]);
+
         $parentCategories = Category::parentOnly()
             ->where('id', '!=', $category->id)
             ->get();
@@ -91,44 +154,43 @@ class CategoryController extends Controller
     }
 
     public function update(Request $request, Category $category)
-    {
-        $request->validate([
-            'name'        => 'required|string|max:100|unique:categories,name,' . $category->id,
-            'description' => 'nullable|string',
-            'is_active'   => 'required|boolean',
-            'image'       => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
-            'parent_id'   => 'nullable|exists:categories,id',
-        ]);
+{
+    $request->validate([
+        'name'      => 'required|string|max:100|unique:categories,name,' . $category->id,
+        'slug'      => 'required|string|max:120|unique:categories,slug,' . $category->id,
+        'is_active' => 'required|boolean',
+        'image'     => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+        'parent_id' => 'nullable|exists:categories,id',
+    ]);
 
-        if ($request->parent_id && $category->children()->exists()) {
-            return back()->withInput()
-                ->with('error', 'Kategori yang memiliki sub-kategori tidak bisa dijadikan sub-kategori.');
-        }
-
-        $imagePath = $category->image;
-
-        if ($request->hasFile('image')) {
-            if ($category->image) Storage::disk('public')->delete($category->image);
-            $imagePath = $request->file('image')->store('categories', 'public');
-        }
-
-        if ($request->boolean('remove_image')) {
-            if ($category->image) Storage::disk('public')->delete($category->image);
-            $imagePath = null;
-        }
-
-        $category->update([
-            'name'        => $request->name,
-            'slug'        => Str::slug($request->name),
-            'description' => $request->description,
-            'is_active'   => $request->boolean('is_active'),
-            'image'       => $imagePath,
-            'parent_id'   => $request->parent_id ?? null,
-        ]);
-
-        return redirect()->route('admin.categories.index')
-            ->with('success', 'Kategori berhasil diperbarui!');
+    if ($request->parent_id && $category->children()->exists()) {
+        return back()->withInput()
+            ->with('error', 'Kategori yang memiliki sub-kategori tidak bisa dijadikan sub-kategori.');
     }
+
+    $imagePath = $category->image;
+
+    if ($request->hasFile('image')) {
+        if ($category->image) Storage::disk('public')->delete($category->image);
+        $imagePath = $request->file('image')->store('categories', 'public');
+    }
+
+    if ($request->boolean('remove_image')) {
+        if ($category->image) Storage::disk('public')->delete($category->image);
+        $imagePath = null;
+    }
+
+    $category->update([
+        'name'      => $request->name,
+        'slug'      => Str::slug($request->slug),
+        'is_active' => $request->boolean('is_active'),
+        'image'     => $imagePath,
+        'parent_id' => $request->parent_id ?? null,
+    ]);
+
+    return redirect()->route('admin.categories.index')
+        ->with('success', 'Kategori berhasil diperbarui!');
+}
 
     public function destroy(Category $category)
     {
@@ -149,5 +211,65 @@ class CategoryController extends Controller
         return redirect()->route('admin.categories.index')
             ->with('success', 'Kategori berhasil dihapus!');
     }
+
+public function bulkAction(Request $request): \Illuminate\Http\RedirectResponse
+{
+    $request->validate([
+        'action' => ['required', 'in:activate,deactivate,delete'],
+        'ids'    => ['required', 'array', 'min:1'],
+        'ids.*'  => ['integer', 'exists:categories,id'],
+    ]);
+
+    $ids    = $request->input('ids');
+    $action = $request->input('action');
+
+    switch ($action) {
+
+        case 'activate':
+            Category::whereIn('id', $ids)->update(['is_active' => true]);
+            $message = count($ids) . ' kategori berhasil diaktifkan.';
+            break;
+
+        case 'deactivate':
+            Category::whereIn('id', $ids)->update(['is_active' => false]);
+            $message = count($ids) . ' kategori berhasil dinonaktifkan.';
+            break;
+
+        case 'delete':
+            // Hanya hapus kategori yang TIDAK punya sub-kategori (aman)
+            $deleted  = 0;
+            $skipped  = 0;
+
+            foreach ($ids as $id) {
+                $category = Category::withCount('children')->find($id);
+                if (!$category) continue;
+
+                if ($category->children_count > 0) {
+                    // Skip — masih punya sub-kategori
+                    $skipped++;
+                    continue;
+                }
+
+                // Hapus gambar jika ada
+                if ($category->image && \Illuminate\Support\Facades\Storage::exists($category->image)) {
+                    \Illuminate\Support\Facades\Storage::delete($category->image);
+                }
+
+                $category->delete();
+                $deleted++;
+            }
+
+            if ($skipped > 0) {
+                $message = "{$deleted} kategori dihapus. {$skipped} dilewati (masih punya sub-kategori).";
+            } else {
+                $message = "{$deleted} kategori berhasil dihapus.";
+            }
+            break;
+    }
+
+    return redirect()
+        ->route('admin.categories.index')
+        ->with('success', $message);
+}
 
     }

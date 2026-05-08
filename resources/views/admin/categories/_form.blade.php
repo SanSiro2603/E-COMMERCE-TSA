@@ -17,11 +17,38 @@
                 Nama {{ isset($category) && $category->isChild() ? 'Sub Kategori' : 'Kategori Utama' }}
                 <span class="text-red-500">*</span>
             </label>
-            <input type="text" name="name"
-                   value="{{ old('name', $category->name ?? '') }}" required
-                   placeholder="Masukkan nama kategori"
-                   class="block w-full px-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
-            @error('name')
+            <input type="text" name="name" id="edit-name"
+                    value="{{ old('name', $category->name ?? '') }}" required
+                    placeholder="Masukkan nama kategori"
+                    class="block w-full px-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
+                <div id="check-edit" class="hidden mt-1.5 flex items-center gap-1 text-xs"></div>
+                @error('name')
+                    <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
+                        <span class="material-symbols-outlined text-sm">error</span>
+                        <span>{{ $message }}</span>
+                    </div>
+                @enderror
+        </div>
+
+        <!-- Slug -->
+        <div>
+            <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                Slug <span class="text-red-500">*</span>
+                <span class="text-gray-400 text-xs font-normal">(otomatis dari nama, bisa diedit manual)</span>
+            </label>
+            <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-zinc-500 select-none">/</span>
+                <input type="text" name="slug" id="edit-slug"
+                       value="{{ old('slug', $category->slug ?? '') }}" required
+                       placeholder="nama-kategori"
+                       class="block w-full pl-6 pr-10 py-2.5 bg-gray-50 dark:bg-zinc-800/60 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm text-gray-700 dark:text-zinc-300 placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors font-mono">
+                <button type="button" onclick="refreshEditSlug()"
+                        title="Reset slug dari nama"
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-soft-green transition-colors">
+                    <span class="material-symbols-outlined text-lg">refresh</span>
+                </button>
+            </div>
+            @error('slug')
                 <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
                     <span class="material-symbols-outlined text-sm">error</span>
                     <span>{{ $message }}</span>
@@ -55,15 +82,6 @@
         @else
             <input type="hidden" name="parent_id" value="">
         @endif
-
-        <!-- Deskripsi -->
-        <div>
-            <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                Deskripsi <span class="text-gray-400 text-xs">(Opsional)</span>
-            </label>
-            <textarea name="description" rows="4" placeholder="Masukkan deskripsi kategori"
-                      class="block w-full px-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors resize-none">{{ old('description', $category->description ?? '') }}</textarea>
-        </div>
 
         <!-- Gambar — hanya untuk kategori utama -->
         @if(!isset($category) || !$category->isChild())
@@ -138,25 +156,99 @@
 </style>
 
 <script>
-    function previewImage(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = e => {
-            document.getElementById('image-preview').src = e.target.result;
-            document.getElementById('preview-filename').textContent = file.name;
-            document.getElementById('image-preview-container').classList.remove('hidden');
-            document.getElementById('upload-box').classList.add('hidden');
-            document.getElementById('remove_image').value = '0';
-        };
-        reader.readAsDataURL(file);
+// ── Slug generator ──
+function toSlug(str) {
+    return str.toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-');
+}
+
+// ── Variable deklarasi dulu ──
+const editName = document.getElementById('edit-name');
+const editSlug = document.getElementById('edit-slug');
+let editSlugEdited = false;
+let timerEdit = null;
+
+const CHECK_URL_EDIT = "{{ route('admin.categories.check-name') }}";
+const EXCLUDE_ID     = {{ $category->id ?? 'null' }};
+
+// ── 1 listener untuk slug + duplicate check sekaligus ──
+editName.addEventListener('input', function () {
+    // Auto slug
+    if (!editSlugEdited) editSlug.value = toSlug(this.value);
+
+    // Duplicate check
+    clearTimeout(timerEdit);
+    const val = this.value.trim();
+    const checkEl = document.getElementById('check-edit');
+
+    if (!val) {
+        checkEl.classList.add('hidden');
+        checkEl.innerHTML = '';
+        this.classList.remove('border-green-500', 'border-red-500');
+        return;
     }
-    function removeImage() {
-        document.getElementById('image-input').value = '';
-        document.getElementById('image-preview').src = '';
-        document.getElementById('preview-filename').textContent = '';
-        document.getElementById('image-preview-container').classList.add('hidden');
-        document.getElementById('upload-box').classList.remove('hidden');
-        document.getElementById('remove_image').value = '1';
-    }
+
+    checkEl.classList.remove('hidden');
+    checkEl.innerHTML = `<span class="material-symbols-outlined text-sm text-gray-400 animate-spin">progress_activity</span>
+                         <span class="text-gray-400">Mengecek...</span>`;
+
+    timerEdit = setTimeout(() => {
+        let url = `${CHECK_URL_EDIT}?name=${encodeURIComponent(val)}`;
+        if (EXCLUDE_ID) url += `&exclude_id=${EXCLUDE_ID}`;
+
+        fetch(url)
+            .then(r => r.json())
+            .then(data => {
+                checkEl.classList.remove('hidden');
+                if (data.available) {
+                    checkEl.innerHTML = `<span class="material-symbols-outlined text-sm text-green-500">check_circle</span>
+                                         <span class="text-green-600 dark:text-green-400">${data.message}</span>`;
+                    editName.classList.remove('border-red-500');
+                    editName.classList.add('border-green-500');
+                } else {
+                    checkEl.innerHTML = `<span class="material-symbols-outlined text-sm text-red-500">cancel</span>
+                                         <span class="text-red-500">${data.message}</span>`;
+                    editName.classList.remove('border-green-500');
+                    editName.classList.add('border-red-500');
+                }
+            })
+            .catch(() => checkEl.classList.add('hidden'));
+    }, 500);
+});
+
+editSlug.addEventListener('input', function () {
+    editSlugEdited = this.value !== toSlug(editName.value);
+});
+
+function refreshEditSlug() {
+    editSlug.value = toSlug(editName.value);
+    editSlugEdited = false;
+}
+
+// ── Image preview ──
+function previewImage(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+        document.getElementById('image-preview').src = e.target.result;
+        document.getElementById('preview-filename').textContent = file.name;
+        document.getElementById('image-preview-container').classList.remove('hidden');
+        document.getElementById('upload-box').classList.add('hidden');
+        document.getElementById('remove_image').value = '0';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeImage() {
+    document.getElementById('image-input').value = '';
+    document.getElementById('image-preview').src = '';
+    document.getElementById('preview-filename').textContent = '';
+    document.getElementById('image-preview-container').classList.add('hidden');
+    document.getElementById('upload-box').classList.remove('hidden');
+    document.getElementById('remove_image').value = '1';
+}
 </script>
