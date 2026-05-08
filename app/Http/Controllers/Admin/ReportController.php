@@ -103,9 +103,28 @@ class ReportController extends Controller
                 : 0,
         ];
 
+        // ✅ DIPERBAIKI: tambah $statsNote agar PDF tidak membingungkan
+        // ketika admin filter status di luar validStatuses (misal: cancelled)
+        // statistik akan nol — beri keterangan eksplisit
+        $statusOptions = [
+            'pending'    => 'Menunggu Pembayaran',
+            'paid'       => 'Sudah Dibayar',
+            'processing' => 'Diproses',
+            'shipped'    => 'Dikirim',
+            'completed'  => 'Selesai',
+            'cancelled'  => 'Dibatalkan',
+        ];
+
+        $statsNote = null;
+        if ($status && !in_array($status, $this->validStatuses)) {
+            $statsNote = 'Statistik tidak tersedia untuk status "'
+                . ($statusOptions[$status] ?? $status)
+                . '" karena status ini tidak dihitung sebagai transaksi valid.';
+        }
+
         // [+] Ganti 'landscape' ke 'portrait' jika perlu orientasi berbeda
         $pdf = Pdf::loadView('admin.reports.pdf', compact(
-            'orders', 'stats', 'startDate', 'endDate'
+            'orders', 'stats', 'startDate', 'endDate', 'statsNote'
         ))->setPaper('a4', 'landscape');
 
         return $pdf->download('laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.pdf');

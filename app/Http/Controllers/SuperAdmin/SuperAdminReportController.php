@@ -54,13 +54,14 @@ class SuperAdminReportController extends Controller
         $statsQuery = clone $baseQuery;
         $allOrders  = $statsQuery->whereIn('status', $this->validStatuses)->get();
 
-        // [+] Tambah metrik baru di $stats jika dosen minta tambah kartu statistik
+        // ✅ DIPERBAIKI: gunakan grand_total agar konsisten dengan Admin ReportController
+        // dan tidak ada perbedaan angka jika ada diskon/voucher di masa depan
         $stats = [
-            'total_revenue'    => $allOrders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)),
+            'total_revenue'    => $allOrders->sum('grand_total'),
             'total_orders'     => $allOrders->count(),
             'total_items_sold' => $allOrders->sum(fn($o) => $o->items->sum('quantity')),
             'avg_order_value'  => $allOrders->count() > 0
-                ? round($allOrders->avg(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)), 0)
+                ? round($allOrders->avg('grand_total'), 0)
                 : 0,
         ];
 
@@ -146,12 +147,13 @@ class SuperAdminReportController extends Controller
         // Statistik PDF: sama dengan aturan di index(), hanya dari validStatuses
         $statsOrders = $orders->filter(fn($o) => in_array($o->status, $this->validStatuses));
 
+        // ✅ DIPERBAIKI: gunakan grand_total agar konsisten
         $stats = [
-            'total_revenue'    => $statsOrders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)),
+            'total_revenue'    => $statsOrders->sum('grand_total'),
             'total_orders'     => $statsOrders->count(),
             'total_items_sold' => $statsOrders->sum(fn($o) => $o->items->sum('quantity')),
             'avg_order_value'  => $statsOrders->count() > 0
-                ? round($statsOrders->avg(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0)), 0)
+                ? round($statsOrders->avg('grand_total'), 0)
                 : 0,
         ];
 
@@ -164,9 +166,27 @@ class SuperAdminReportController extends Controller
             'Status'            => $status,
         ]);
 
+        // ✅ DIPERBAIKI: tambah $statsNote agar PDF tidak membingungkan
+        // ketika superadmin filter status di luar validStatuses (misal: cancelled)
+        $statusOptions = [
+            'pending'    => 'Menunggu Pembayaran',
+            'paid'       => 'Sudah Dibayar',
+            'processing' => 'Diproses',
+            'shipped'    => 'Dikirim',
+            'completed'  => 'Selesai',
+            'cancelled'  => 'Dibatalkan',
+        ];
+
+        $statsNote = null;
+        if ($status && !in_array($status, $this->validStatuses)) {
+            $statsNote = 'Statistik tidak tersedia untuk status "'
+                . ($statusOptions[$status] ?? $status)
+                . '" karena status ini tidak dihitung sebagai transaksi valid.';
+        }
+
         // [+] Ganti 'landscape' ke 'portrait' jika perlu orientasi berbeda
         $pdf = Pdf::loadView('superadmin.reports.pdf', compact(
-            'orders', 'stats', 'startDate', 'endDate', 'activeFilters'
+            'orders', 'stats', 'startDate', 'endDate', 'activeFilters', 'statsNote'
         ))->setPaper('a4', 'landscape');
 
         return $pdf->download('laporan-penjualan-' . $startDate . '-sd-' . $endDate . '.pdf');

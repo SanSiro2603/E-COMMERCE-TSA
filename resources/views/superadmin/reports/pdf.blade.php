@@ -77,8 +77,8 @@
          [+] Ubah nama, alamat, atau kontak di sini jika informasi perusahaan berubah --}}
     <div class="kop-wrapper">
         <div class="kop-logo">
-            @if(file_exists(public_path('images/logo.png')))
-                <img src="{{ public_path('images/logo.png') }}" alt="Logo">
+            @if(file_exists(public_path('images/logo header.png')))
+                <img src="{{ public_path('images/logo header.png') }}" alt="Logo">
             @else
                 <table style="width:70px;height:60px;background:#2D6A4F;border-radius:4px;">
                     <tr><td style="text-align:center;color:#fff;font-weight:bold;font-size:8px;padding:4px;">LOGO</td></tr>

@@ -134,7 +134,7 @@
                 <p class="text-[10px] font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide leading-tight">Total Pendapatan</p>
             </div>
             <p class="text-lg font-bold text-gray-900 dark:text-white">Rp {{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
-            <p class="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">Subtotal dikurangi ongkir</p>
+            <p class="text-[10px] text-gray-400 dark:text-zinc-500 mt-1">Total Keseluruhan Pendapatan</p>
         </div>
 
         <div class="bg-white dark:bg-zinc-900 rounded-xl p-5 shadow-soft border border-gray-100 dark:border-zinc-800">

@@ -55,7 +55,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
     // [+] Ganti path atau koordinat jika posisi logo perlu diubah
     public function drawings()
     {
-        $logoPath = public_path('images/logo.png');
+        $logoPath = public_path('images/logo header.png');
         if (!file_exists($logoPath)) return [];
 
         $drawing = new Drawing();
@@ -251,7 +251,9 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                         $grandTotal += $order->grand_total ?? 0;
                     }
 
-                    $sheet->setCellValue('A' . $currentRow, $no++);
+                    // ✅ DIPERBAIKI: $no dipakai SEBELUM di-increment
+                    // agar nomor urut di kolom A sesuai dengan pengecekan zebra stripe
+                    $sheet->setCellValue('A' . $currentRow, $no);
                     $sheet->setCellValue('B' . $currentRow, $order->order_number ?? '-');
                     $sheet->setCellValue('C' . $currentRow, $order->created_at->format('d/m/Y H:i'));
                     $sheet->setCellValue('D' . $currentRow, $order->address?->recipient_name ?? $order->user?->name ?? '-');
@@ -265,13 +267,15 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('L' . $currentRow, 'Rp ' . number_format($order->grand_total ?? 0, 0, ',', '.'));
                     $sheet->setCellValue('M' . $currentRow, $statusLabels[$order->status] ?? ucfirst($order->status));
 
-                    // Zebra stripe: baris genap diberi warna latar
-                    if ($no % 2 === 0) {
+                    // ✅ DIPERBAIKI: cek $no SEBELUM increment, kondisi ganjil (1,3,5...)
+                    // baris pertama (no=1) akan diberi warna, baris kedua (no=2) tidak, dst.
+                    if ($no % 2 !== 0) {
                         $sheet->getStyle('A' . $currentRow . ':M' . $currentRow)->applyFromArray([
                             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
                         ]);
                     }
 
+                    $no++;          // ✅ increment di paling akhir
                     $currentRow++;
                 }
 
