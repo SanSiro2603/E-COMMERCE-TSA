@@ -23,6 +23,11 @@ class GoogleController extends Controller
             // Cek apakah user sudah terdaftar
             $user = User::where('email', $googleUser->getEmail())->first();
 
+            if ($user && $user->role !== 'pembeli') {
+                return redirect()->route('login')
+                    ->with('error', 'Anda harus login melalui username password dan mengisi captcha.');
+            }
+
             if (!$user) {
                 // Jika belum ada → otomatis register sebagai pembeli
                 $user = User::create([
