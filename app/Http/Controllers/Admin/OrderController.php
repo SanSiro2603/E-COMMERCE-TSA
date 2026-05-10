@@ -29,8 +29,8 @@ class OrderController extends Controller
         // Filter: cari berdasarkan nomor pesanan atau nama/email pembeli
         // [+] Tambah kolom pencarian lain di dalam closure $q
         if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $search = ltrim($request->search, '#');
+            $query->where(function ($q) use ($search) {        
                 $q->where('order_number', 'like', '%' . $search . '%')
                   ->orWhereHas('user', function ($q) use ($search) {
                       $q->where('name', 'like', '%' . $search . '%')
@@ -50,7 +50,7 @@ class OrderController extends Controller
         // Query terpisah untuk menghitung stats card (tidak terpengaruh filter status)
         $statsQuery = Order::query();
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = ltrim($request->search, '#');
             $statsQuery->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', '%' . $search . '%')
                   ->orWhereHas('user', function ($q) use ($search) {
@@ -204,6 +204,13 @@ class OrderController extends Controller
         $request->validate([
             'status' => ['required', 'in:processing'],
         ]);
+
+        // ✅ DIPERBAIKI: proteksi double-submit
+        // Jika sudah processing, anggap sukses agar admin tidak panik
+        if ($order->status === 'processing') {
+            return redirect()->route('admin.orders.show', $order)
+                ->with('success', 'Pesanan #' . $order->order_number . ' sudah berstatus Diproses.');
+        }
 
         if ($order->status !== 'paid') {
             return redirect()->back()

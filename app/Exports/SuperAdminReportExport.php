@@ -76,7 +76,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
     // [+] Ganti path atau koordinat jika posisi logo perlu diubah
     public function drawings()
     {
-        $logoPath = public_path('images/logo.png');
+        $logoPath = public_path('images/logo header.png');
         if (!file_exists($logoPath)) return [];
 
         $drawing = new Drawing();

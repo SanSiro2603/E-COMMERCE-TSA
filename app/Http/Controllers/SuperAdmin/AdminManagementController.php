@@ -4,7 +4,9 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\LogHelper;
 use App\Models\User;
+use App\Models\AdminLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
@@ -25,11 +27,12 @@ class AdminManagementController extends Controller
             });
         }
 
-        $admins = $query->withCount(['orders as orders_handled'])
-            ->latest()
+        $admins = $query->latest()
             ->paginate(10);
 
-        return view('superadmin.admins.index', compact('admins'));
+        $logs = AdminLog::with('user')->latest()->limit(50)->get();
+
+        return view('superadmin.admins.index', compact('admins', 'logs'));
     }
 
     public function create()
@@ -56,6 +59,8 @@ class AdminManagementController extends Controller
             'address' => $validated['address'] ?? null,
         ]);
 
+        LogHelper::record('Tambah Admin', "Menambahkan akun admin baru: {$validated['email']}");
+
         return redirect()->route('superadmin.admins.index')
             ->with('success', 'Admin berhasil ditambahkan!');
     }
@@ -66,18 +71,7 @@ class AdminManagementController extends Controller
             abort(404);
         }
 
-        $admin->load(['orders' => function($q) {
-            $q->latest()->limit(10);
-        }]);
-
-        $stats = [
-            'total_orders' => $admin->orders()->count(),
-            'completed_orders' => $admin->orders()->where('status', 'completed')->count(),
-            'processing_orders' => $admin->orders()->where('status', 'processing')->count(),
-            'total_revenue' => $admin->orders()->where('status', 'completed')->sum('grand_total'),
-        ];
-
-        return view('superadmin.admins.show', compact('admin', 'stats'));
+        return view('superadmin.admins.show', compact('admin'));
     }
 
     public function edit(User $admin)
@@ -114,6 +108,8 @@ class AdminManagementController extends Controller
             $admin->update(['password' => Hash::make($validated['password'])]);
         }
 
+        LogHelper::record('Update Admin', "Memperbarui data admin: {$admin->email}");
+
         return redirect()->route('superadmin.admins.index')
             ->with('success', 'Data admin berhasil diperbarui!');
     }
@@ -124,7 +120,10 @@ class AdminManagementController extends Controller
             abort(404);
         }
 
+        $email = $admin->email;
         $admin->delete();
+
+        LogHelper::record('Hapus Admin', "Menghapus akun admin: {$email}");
 
         return redirect()->route('superadmin.admins.index')
             ->with('success', 'Admin berhasil dihapus!');
@@ -139,6 +138,8 @@ class AdminManagementController extends Controller
         $admin->update(['is_active' => !$admin->is_active]);
 
         $status = $admin->is_active ? 'diaktifkan' : 'dinonaktifkan';
+        LogHelper::record('Toggle Status', "Mengubah status akun admin {$admin->email} menjadi {$status}");
+        
         return back()->with('success', "Akun admin berhasil {$status}.");
     }
 
@@ -149,6 +150,8 @@ class AdminManagementController extends Controller
         }
 
         $admin->update(['google2fa_secret' => null]);
+
+        LogHelper::record('Reset 2FA', "Mereset verifikasi 2FA untuk admin: {$admin->email}");
 
         return back()->with('success', '2FA untuk admin ini berhasil di-reset. Mereka akan diminta mengatur ulang pada saat login berikutnya.');
     }
@@ -166,6 +169,8 @@ class AdminManagementController extends Controller
         $admin->update([
             'password' => Hash::make($validated['password'])
         ]);
+
+        LogHelper::record('Reset Password', "Mereset password untuk admin: {$admin->email}");
 
         return back()->with('success', 'Password admin berhasil di-reset.');
     }

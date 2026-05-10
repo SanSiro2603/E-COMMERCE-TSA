@@ -33,7 +33,7 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         // CLOSURE FILTER — dipakai di semua query Eloquent
         // =============================================
-      $applyBase = function ($q) use ($dateFrom, $dateTo, $province, $categoryId, $paymentMethod, $paymentStatus) {
+        $applyBase = function ($q) use ($dateFrom, $dateTo, $province, $categoryId, $paymentMethod, $paymentStatus) {
 
             $q->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id'); // LEFT JOIN agar order tanpa alamat tidak hilang
 
@@ -60,22 +60,24 @@ class SuperAdminDashboardController extends Controller
 
         // =============================================
         // SCORE CARDS
+        // ✅ DIPERBAIKI: tambah prefix orders. di semua kolom score cards
+        // agar tidak ambigu setelah leftJoin addresses
         // =============================================
         $baseQ = Order::query()->tap($applyBase);
 
         // Total Pendapatan: hanya status valid (paid, processing, shipped, completed)
         $totalRevenue = (clone $baseQ)
-            ->whereIn('status', $validStatuses)
-            ->sum('grand_total');
+            ->whereIn('orders.status', $validStatuses)
+            ->sum('orders.grand_total');
 
         // Total Transaksi: hanya status valid — TIDAK termasuk pending & cancelled
         $totalTransactions = (clone $baseQ)
-            ->whereIn('status', $validStatuses)
-            ->count();
+            ->whereIn('orders.status', $validStatuses)
+            ->count('orders.id');
 
         // Produk Terjual: hanya dari order berstatus valid
         $totalProductsSold = (clone $baseQ)
-            ->whereIn('status', $validStatuses)
+            ->whereIn('orders.status', $validStatuses)
             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
             ->sum('order_items.quantity');
 
@@ -86,7 +88,7 @@ class SuperAdminDashboardController extends Controller
 
         // Pelanggan Aktif: distinct user yang punya transaksi valid
         $totalBuyers = (clone $baseQ)
-            ->whereIn('status', $validStatuses)
+            ->whereIn('orders.status', $validStatuses)
             ->distinct('orders.user_id')
             ->count('orders.user_id');
 
@@ -95,7 +97,7 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $revenueByDate = Order::query()
             ->tap($applyBase)
-            ->whereIn('status', $validStatuses)
+            ->whereIn('orders.status', $validStatuses)
             ->selectRaw('DATE(orders.created_at) as date, SUM(grand_total) as total')
             ->groupBy('date')
             ->orderBy('date')
@@ -116,7 +118,7 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         // TOP 5 PRODUK TERLARIS — Bar Chart
         // =============================================
-       $topProducts = DB::table('order_items')
+        $topProducts = DB::table('order_items')
             ->join('orders',   'order_items.order_id',   '=', 'orders.id')
             ->join('products', 'order_items.product_id', '=', 'products.id')
             ->join('addresses', 'orders.address_id', '=', 'addresses.id') // 🔥 WAJIB
@@ -177,7 +179,7 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $topProvinces = Order::query()
             ->tap($applyBase)
-            ->whereIn('status', $validStatuses)
+            ->whereIn('orders.status', $validStatuses)
             ->whereNotNull('addresses.province_name')
             ->where('addresses.province_name', '!=', '')
             ->select(
@@ -254,8 +256,8 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $paymentStatuses = Order::query()
             ->tap($applyBase)
-            ->select('status', DB::raw('COUNT(*) as total'))
-            ->groupBy('status')
+            ->select('orders.status', DB::raw('COUNT(*) as total'))
+            ->groupBy('orders.status')
             ->get()
             ->map(fn($item) => [
                 'label' => $this->labelStatus($item->status),
@@ -327,7 +329,7 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $hourRaw = Order::query()
             ->tap($applyBase)
-            ->whereIn('status', $validStatuses)
+            ->whereIn('orders.status', $validStatuses)
             ->selectRaw('HOUR(orders.created_at) as hour, COUNT(*) as total')
             ->groupBy('hour')
             ->pluck('total', 'hour');
@@ -346,7 +348,7 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $allBuyerIds = Order::query()
             ->tap($applyBase)
-            ->whereIn('status', $validStatuses)
+            ->whereIn('orders.status', $validStatuses)
             ->whereNotNull('orders.user_id')
             ->distinct()
             ->pluck('orders.user_id');
@@ -384,14 +386,14 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         // DROPDOWN OPTIONS
         // =============================================
-       $provinceOptions = DB::table('orders')
-        ->join('addresses', 'orders.address_id', '=', 'addresses.id')
-        ->whereNotNull('addresses.province_name')
-        ->where('addresses.province_name', '!=', '')
-        ->whereNull('orders.deleted_at')
-        ->distinct()
-        ->orderBy('addresses.province_name')
-        ->pluck('addresses.province_name');
+        $provinceOptions = DB::table('orders')
+            ->join('addresses', 'orders.address_id', '=', 'addresses.id')
+            ->whereNotNull('addresses.province_name')
+            ->where('addresses.province_name', '!=', '')
+            ->whereNull('orders.deleted_at')
+            ->distinct()
+            ->orderBy('addresses.province_name')
+            ->pluck('addresses.province_name');
 
         $categoryOptions = Category::where('is_active', true)
             ->orderBy('name')

@@ -297,9 +297,10 @@
         <!-- Page Content -->
         <main class="p-4 lg:p-8 animate-slide-down">
             <div class="max-w-7xl mx-auto">
+
                 <!-- Success Alert -->
                 @if(session('success'))
-                <div class="mb-6 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-green-800 dark:text-green-400 px-6 py-4 rounded-xl flex items-center gap-3 shadow-soft animate-slide-down">
+                <div data-auto-dismiss class="mb-6 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 text-green-800 dark:text-green-400 px-6 py-4 rounded-xl flex items-center gap-3 shadow-soft animate-slide-down">
                     <span class="material-symbols-outlined text-green-600 dark:text-green-400">check_circle</span>
                     <span class="font-medium text-sm">{{ session('success') }}</span>
                 </div>
@@ -307,7 +308,7 @@
 
                 <!-- Error Alert -->
                 @if(session('error'))
-                <div class="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-800 dark:text-red-400 px-6 py-4 rounded-xl flex items-center gap-3 shadow-soft animate-slide-down">
+                <div data-auto-dismiss class="mb-6 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 text-red-800 dark:text-red-400 px-6 py-4 rounded-xl flex items-center gap-3 shadow-soft animate-slide-down">
                     <span class="material-symbols-outlined text-red-600 dark:text-red-400">error</span>
                     <span class="font-medium text-sm">{{ session('error') }}</span>
                 </div>
@@ -366,6 +367,18 @@
             document.documentElement.classList.add('dark');
             document.getElementById('themeIcon').textContent = 'dark_mode';
         }
+
+        // Auto-dismiss notifikasi setelah 4 detik
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('[data-auto-dismiss]').forEach(el => {
+                setTimeout(() => {
+                    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(-8px)';
+                    setTimeout(() => el.remove(), 500);
+                }, 4000);
+            });
+        });
 
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(event) {
