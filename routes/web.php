@@ -234,6 +234,7 @@ Route::middleware(['auth', 'role:pembeli'])
             Route::get('/', [PesananController::class, 'index'])->name('index');
             Route::get('/checkout', [PesananController::class, 'checkout'])->name('checkout');
             Route::post('/checkout/shipping-cost', [PesananController::class, 'checkShippingCost'])->name('checkout.shipping_cost');
+            Route::post('/buy-now', [PesananController::class, 'buyNow'])->name('buy-now');
             Route::post('/store', [PesananController::class, 'store'])->name('store');
             Route::get('/{order}', [PesananController::class, 'show'])->name('show');
             Route::get('/{order}/edit', [PesananController::class, 'edit'])->name('edit');

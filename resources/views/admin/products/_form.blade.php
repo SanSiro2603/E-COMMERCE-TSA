@@ -1,5 +1,5 @@
 {{-- resources/views/admin/products/_form.blade.php --}}
-<form action="{{ $action }}" method="POST" enctype="multipart/form-data">
+<form id="product-form" action="{{ $action }}" method="POST" enctype="multipart/form-data">
     @csrf
     @if(isset($product)) @method('PUT') @endif
 
@@ -93,13 +93,24 @@
                     <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
                         Deskripsi <span class="text-gray-400 text-xs">(Opsional)</span>
                     </label>
-                    <textarea name="description"
-                              rows="4"
-                              placeholder="Masukkan deskripsi detail produk..."
-                              class="block w-full px-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors resize-none">{{ old('description', $product->description ?? '') }}</textarea>
+                    <div class="relative">
+                        <textarea name="description"
+                                id="description"
+                                rows="4"
+                                maxlength="1000"
+                                placeholder="Masukkan deskripsi detail produk..."
+                                class="block w-full px-4 py-2.5 pb-7 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors resize-none">{{ old('description', $product->description ?? '') }}</textarea>
+                        {{-- Counter --}}
+                        <span id="desc-counter"
+                            class="absolute bottom-2 right-3 text-xs text-gray-400 dark:text-zinc-500 pointer-events-none transition-colors">
+                            0 / 1000
+                        </span>
+                    </div>
                 </div>
+
             </div>
         </div>
+        {{-- ↑ TUTUP section-info di sini --}}
 
         <!-- Harga & Stok Section -->
         <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
@@ -109,6 +120,7 @@
             </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
                 <!-- Harga -->
                 <div>
                     <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
@@ -117,11 +129,14 @@
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-zinc-400 text-sm font-medium">Rp</span>
                         <input type="number"
-                               name="price"
-                               value="{{ old('price', $product->price ?? '') }}"
-                               required min="0" step="1000" placeholder="0"
-                               class="block w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
+                            name="price"
+                            id="price_input"
+                            value="{{ old('price', $product->price ?? '') }}"
+                            required min="0" step="1000" placeholder="0"
+                            class="block w-full pl-10 pr-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
                     </div>
+                    {{-- Preview format rupiah --}}
+                    <p id="price-display" class="mt-1.5 text-xs font-semibold text-soft-green flex items-center gap-1 min-h-[1.25rem]"></p>
                     @error('price')
                         <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
                             <span class="material-symbols-outlined text-sm">error</span>
@@ -177,6 +192,7 @@
                         </div>
                     @enderror
                 </div>
+
             </div>
 
             <div class="bg-blue-50 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/30 rounded-lg p-3">
@@ -189,6 +205,7 @@
                 </div>
             </div>
         </div>
+        {{-- ↑ TUTUP section-price di sini --}}
 
         <!-- Ketersediaan & Status Section -->
         <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
@@ -198,6 +215,7 @@
             </h3>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
                 <!-- Tersedia Dari -->
                 <div>
                     <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
@@ -246,8 +264,10 @@
                         </label>
                     </div>
                 </div>
+
             </div>
         </div>
+        {{-- ↑ TUTUP section-availability di sini --}}
 
         <!-- Galeri Gambar Section -->
         <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
@@ -256,59 +276,116 @@
                 Galeri Gambar Produk
             </h3>
 
-            <div>
-                <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
-                    Upload Gambar <span class="text-gray-400 text-xs">(Gambar pertama akan menjadi gambar utama)</span>
-                </label>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-                <div class="border-2 border-dashed border-gray-300 dark:border-zinc-700 rounded-lg p-6 hover:border-soft-green transition-colors bg-gray-50 dark:bg-zinc-800/30">
-                    <input type="file" name="image" id="main_image"
-                           accept="image/jpeg,image/png,image/jpg" class="hidden"
-                           onchange="handleMainImage(event)">
-                    <input type="file" name="gallery_images[]" id="gallery_images"
-                           accept="image/jpeg,image/png,image/jpg" multiple class="hidden"
-                           onchange="handleGalleryImages(event)">
-
-                    <div class="text-center">
-                        <span class="material-symbols-outlined text-gray-400 dark:text-zinc-500 text-5xl mb-3 block">collections</span>
-                        <div class="space-y-2">
-                            <label for="main_image" class="inline-flex items-center gap-2 px-4 py-2 bg-soft-green text-white rounded-lg hover:bg-soft-green/90 cursor-pointer transition-colors">
-                                <span class="material-symbols-outlined text-lg">image</span>
-                                <span class="text-sm font-medium">Upload Gambar Utama</span>
-                            </label>
-                            <span class="mx-2 text-gray-400">atau</span>
-                            <label for="gallery_images" class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer transition-colors">
-                                <span class="material-symbols-outlined text-lg">add_photo_alternate</span>
-                                <span class="text-sm font-medium">Upload Beberapa Gambar</span>
-                            </label>
+                {{-- Upload Gambar Utama --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        Gambar Utama
+                        <span class="text-gray-400 text-xs font-normal">(Tampil di katalog)</span>
+                    </label>
+                    <label for="main_image"
+                        class="group relative flex flex-col items-center justify-center gap-3
+                                h-40 border-2 border-dashed border-gray-300 dark:border-zinc-700
+                                rounded-xl cursor-pointer
+                                hover:border-soft-green hover:bg-soft-green/5
+                                dark:hover:border-soft-green dark:hover:bg-soft-green/5
+                                transition-all duration-200">
+                        <input type="file" name="image" id="main_image"
+                            accept="image/jpeg,image/png,image/jpg" class="hidden"
+                            onchange="handleMainImage(event)">
+                        <div class="w-12 h-12 rounded-full bg-soft-green/10 dark:bg-soft-green/20
+                                    flex items-center justify-center
+                                    group-hover:bg-soft-green/20 transition-colors">
+                            <span class="material-symbols-outlined text-soft-green text-2xl">add_photo_alternate</span>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-3">JPG, PNG (Max 5MB per gambar)</p>
-                    </div>
+                        <div class="text-center">
+                            <p class="text-sm font-medium text-gray-700 dark:text-zinc-300
+                                    group-hover:text-soft-green transition-colors">
+                                Klik untuk upload
+                            </p>
+                            <p class="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">JPG, PNG — Max 5MB</p>
+                        </div>
+                        {{-- Badge UTAMA --}}
+                        <span class="absolute top-2 left-2 px-2 py-0.5 bg-soft-green text-white text-[10px] font-bold rounded-full">
+                            UTAMA
+                        </span>
+                    </label>
                 </div>
 
-                @error('image')
-                    <div class="flex items-center gap-1 mt-2 text-xs text-red-600 dark:text-red-400">
-                        <span class="material-symbols-outlined text-sm">error</span>
-                        <span>{{ $message }}</span>
-                    </div>
-                @enderror
+                {{-- Upload Galeri --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-900 dark:text-white mb-2">
+                        Gambar Tambahan
+                        <span class="text-gray-400 text-xs font-normal">(Bisa pilih banyak)</span>
+                    </label>
+                    <label for="gallery_images"
+                        class="group relative flex flex-col items-center justify-center gap-3
+                                h-40 border-2 border-dashed border-gray-300 dark:border-zinc-700
+                                rounded-xl cursor-pointer
+                                hover:border-blue-500 hover:bg-blue-500/5
+                                dark:hover:border-blue-400 dark:hover:bg-blue-500/5
+                                transition-all duration-200">
+                        <input type="file" name="gallery_images[]" id="gallery_images"
+                            accept="image/jpeg,image/png,image/jpg" multiple class="hidden"
+                            onchange="handleGalleryImages(event)">
+                        <div class="w-12 h-12 rounded-full bg-blue-500/10 dark:bg-blue-500/20
+                                    flex items-center justify-center
+                                    group-hover:bg-blue-500/20 transition-colors">
+                            <span class="material-symbols-outlined text-blue-500 dark:text-blue-400 text-2xl">collections</span>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm font-medium text-gray-700 dark:text-zinc-300
+                                    group-hover:text-blue-500 dark:group-hover:text-blue-400 transition-colors">
+                                Klik untuk upload
+                            </p>
+                            <p class="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">JPG, PNG — Max 5MB per file</p>
+                        </div>
+                        {{-- Badge GALERI --}}
+                        <span class="absolute top-2 left-2 px-2 py-0.5 bg-blue-500 text-white text-[10px] font-bold rounded-full">
+                            GALERI
+                        </span>
+                    </label>
+                </div>
+
             </div>
 
+            @error('image')
+                <div class="flex items-center gap-1 mt-1 text-xs text-red-600 dark:text-red-400">
+                    <span class="material-symbols-outlined text-sm">error</span>
+                    <span>{{ $message }}</span>
+                </div>
+            @enderror
+
             <!-- Preview Gallery -->
-            <div id="images-preview-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+            <div id="images-preview-container" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
                 @if(isset($product) && !empty($product->images))
                     @foreach($product->images as $index => $image)
-                        <div class="relative group image-item" data-existing="true">
-                            <div class="relative aspect-square rounded-lg overflow-hidden border-2 {{ $index === 0 ? 'border-blue-500' : 'border-gray-200 dark:border-zinc-700' }}">
-                                <img src="{{ asset('storage/' . $image) }}" alt="Image {{ $index + 1 }}" class="w-full h-full object-cover">
-                                <div class="absolute top-2 left-2 px-2 py-1 {{ $index === 0 ? 'bg-blue-500' : 'bg-gray-700/80' }} text-white text-[10px] font-bold rounded-full shadow-lg">
+                        <div class="relative group image-item" data-existing="true"
+                            onmouseenter="this.querySelector('.remove-btn').style.opacity='1'"
+                            onmouseleave="this.querySelector('.remove-btn').style.opacity='0'">
+                            <div class="relative aspect-square rounded-xl overflow-hidden shadow-sm"
+                                style="border: 2px solid {{ $index === 0 ? '#7BB661' : '#374151' }}">
+                                <img src="{{ asset('storage/' . $image) }}"
+                                alt="Image {{ $index + 1 }}"
+                                class="w-full h-full object-cover"
+                                style="cursor:zoom-in; transition: transform 0.3s ease;"
+                                onclick="openImageModal('{{ asset('storage/' . $image) }}', 'Gambar {{ $index + 1 }}')"
+                                onmouseover="this.style.transform='scale(1.08)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                                <div class="absolute top-2 left-2 px-2 py-0.5 text-white text-[10px] font-bold rounded-full shadow"
+                                    style="background: {{ $index === 0 ? '#7BB661' : 'rgba(0,0,0,0.5)' }}">
                                     {{ $index === 0 ? 'UTAMA' : '#' . ($index + 1) }}
                                 </div>
                             </div>
-                            <label class="absolute top-2 right-2 cursor-pointer">
-                                <input type="checkbox" name="remove_images[]" value="{{ $image }}" class="peer hidden" onchange="toggleRemoveImage(this)">
-                                <div class="w-7 h-7 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 peer-checked:opacity-100 peer-checked:bg-red-600 transition-all shadow-lg">
-                                    <span class="material-symbols-outlined text-sm">close</span>
+                            {{-- Tombol hapus existing --}}
+                            <label class="remove-btn" style="position:absolute; top:8px; right:8px; cursor:pointer; opacity:0; transition:opacity 0.2s;">
+                                <input type="checkbox" name="remove_images[]" value="{{ $image }}"
+                                    class="peer hidden" onchange="toggleRemoveImage(this)">
+                                <div style="width:24px; height:24px; background:#ef4444; border-radius:50%;
+                                            color:white; display:flex; align-items:center; justify-content:center;
+                                            box-shadow:0 2px 6px rgba(0,0,0,0.3);">
+                                    <span class="material-symbols-outlined" style="font-size:14px">close</span>
                                 </div>
                             </label>
                         </div>
@@ -316,6 +393,7 @@
                 @endif
             </div>
 
+            {{-- Info & Tips --}}
             <div class="bg-purple-50 dark:bg-purple-500/10 border border-purple-200 dark:border-purple-500/30 rounded-lg p-3">
                 <div class="flex gap-2">
                     <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-lg">lightbulb</span>
@@ -329,7 +407,9 @@
                     </div>
                 </div>
             </div>
+
         </div>
+        {{-- ↑ TUTUP section-gallery di sini --}}
 
         <!-- Sertifikat Kesehatan Section -->
         <div class="space-y-4 pt-6 border-t border-gray-200 dark:border-zinc-800">
@@ -369,22 +449,10 @@
                 @enderror
             </div>
         </div>
+        {{-- ↑ TUTUP section-cert di sini --}}
 
     </div>
 
-    <!-- Action Buttons -->
-    <div class="mt-8 flex items-center gap-3 pt-6 border-t border-gray-200 dark:border-zinc-800">
-        <button type="submit"
-                class="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-soft-green to-primary text-white font-medium rounded-lg hover:shadow-lg hover:scale-[1.02] transition-all">
-            <span class="material-symbols-outlined text-lg">save</span>
-            {{ $buttonText ?? 'Simpan Produk' }}
-        </button>
-        <a href="{{ route('admin.products.index') }}"
-           class="flex items-center gap-2 px-6 py-2.5 border border-gray-300 dark:border-zinc-700 rounded-lg text-gray-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">
-            <span class="material-symbols-outlined text-lg">close</span>
-            Batal
-        </a>
-    </div>
 </form>
 
 <style>
@@ -403,17 +471,14 @@
 
     function populateSub(children, selectedId = null) {
         subSelect.innerHTML = '';
-
         if (!children || children.length === 0) {
             subSelect.innerHTML = '<option value="">Tidak ada sub kategori</option>';
             return;
         }
-
         const defaultOpt = document.createElement('option');
         defaultOpt.value = '';
         defaultOpt.textContent = '— Pilih Sub Kategori —';
         subSelect.appendChild(defaultOpt);
-
         children.forEach(child => {
             const opt = document.createElement('option');
             opt.value = child.id;
@@ -426,22 +491,18 @@
     parentSelect.addEventListener('change', function() {
         const selected = this.options[this.selectedIndex];
         const children = selected.dataset.children ? JSON.parse(selected.dataset.children) : [];
-
         if (children.length === 0 && this.value) {
-            // Tidak ada sub → pakai parent langsung
             subSelect.innerHTML = `<option value="${this.value}" selected>— (Gunakan kategori ini langsung) —</option>`;
         } else {
             populateSub(children);
         }
     });
 
-    // Auto restore saat edit
     if (savedParentId) {
         const parentOption = parentSelect.querySelector(`option[value="${savedParentId}"]`);
         if (parentOption) {
             parentOption.selected = true;
             const children = parentOption.dataset.children ? JSON.parse(parentOption.dataset.children) : [];
-
             if (children.length === 0 && savedParentId) {
                 subSelect.innerHTML = `<option value="${savedParentId}" selected>— (Gunakan kategori ini langsung) —</option>`;
             } else {
@@ -452,7 +513,7 @@
 })();
 
 // ===================== BERAT =====================
-const weightInput      = document.getElementById('weight');
+const weightInput       = document.getElementById('weight');
 const weightInKgDisplay = document.getElementById('weightInKg');
 
 function updateWeightDisplay() {
@@ -469,7 +530,7 @@ function handleMainImage(event) {
     const file = event.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = e => addImagePreview(e.target.result, 'Utama (Baru)', true);
+    reader.onload = e => addImagePreview(e.target.result, 'UTAMA', true);
     reader.readAsDataURL(file);
 }
 
@@ -477,7 +538,7 @@ function handleGalleryImages(event) {
     const files = Array.from(event.target.files);
     files.forEach((file, index) => {
         const reader = new FileReader();
-        reader.onload = e => addImagePreview(e.target.result, `Baru #${previewImageCount + index + 1}`, false);
+        reader.onload = e => addImagePreview(e.target.result, `#${previewImageCount + index + 1}`, false);
         reader.readAsDataURL(file);
     });
     previewImageCount += files.length;
@@ -487,25 +548,222 @@ function addImagePreview(imageSrc, label, isMain = false) {
     const container = document.getElementById('images-preview-container');
     const div = document.createElement('div');
     div.className = 'relative group image-item';
+
+    const borderColor = isMain ? '#7BB661' : '#6b7280';
+    const badgeColor  = isMain ? '#7BB661' : 'rgba(0,0,0,0.5)';
+
     div.innerHTML = `
-        <div class="relative aspect-square rounded-lg overflow-hidden border-2 ${isMain ? 'border-blue-500' : 'border-green-500'}">
-            <img src="${imageSrc}" alt="${label}" class="w-full h-full object-cover">
-            <div class="absolute top-2 left-2 px-2 py-1 ${isMain ? 'bg-blue-500' : 'bg-green-500'} text-white text-[10px] font-bold rounded-full shadow-lg">
+    <div class="relative aspect-square rounded-xl overflow-hidden shadow-sm"
+         style="border: 2px solid ${borderColor}">
+            <img src="${imageSrc}" alt="${label}"
+                class="w-full h-full object-cover"
+                style="cursor:zoom-in; transition: transform 0.3s ease;"
+                onclick="openImageModal('${imageSrc}', '${label}')"
+                onmouseover="this.style.transform='scale(1.08)'"
+                onmouseout="this.style.transform='scale(1)'">
+            <div class="absolute top-2 left-2 px-2 py-0.5 text-white text-[10px] font-bold rounded-full shadow"
+                 style="background:${badgeColor}">
                 ${label}
             </div>
+            {{-- Overlay --}}
+            <div class="absolute inset-0 pointer-events-none"
+                 style="background:rgba(0,0,0,0); transition: background 0.2s"
+                 onmouseover="this.style.background='rgba(0,0,0,0.15)'"
+                 onmouseout="this.style.background='rgba(0,0,0,0)'">
+            </div>
         </div>
+        {{-- Tombol hapus pakai inline style --}}
+        <button type="button"
+                onclick="removeNewPreview(this)"
+                style="position:absolute; top:8px; right:8px;
+                       width:24px; height:24px;
+                       background:#ef4444; border:none; border-radius:50%;
+                       color:white; cursor:pointer;
+                       display:flex; align-items:center; justify-content:center;
+                       opacity:0; transition:opacity 0.2s; box-shadow:0 2px 6px rgba(0,0,0,0.3);"
+                onmouseover="this.style.background='#dc2626'"
+                onmouseout="this.style.background='#ef4444'">
+            <span class="material-symbols-outlined" style="font-size:14px">close</span>
+        </button>
     `;
+
+    // Show/hide tombol hapus saat hover
+    div.addEventListener('mouseenter', () => {
+        div.querySelector('button').style.opacity = '1';
+    });
+    div.addEventListener('mouseleave', () => {
+        div.querySelector('button').style.opacity = '0';
+    });
+
     container.appendChild(div);
+}
+
+function removeNewPreview(btn) {
+    btn.closest('.image-item').remove();
+    previewImageCount = Math.max(0, previewImageCount - 1);
 }
 
 function toggleRemoveImage(checkbox) {
     const imageItem = checkbox.closest('.image-item');
-    imageItem.classList.toggle('removing', checkbox.checked);
+    const img       = imageItem.querySelector('img');
+    let badge       = imageItem.querySelector('.will-delete-badge');
+
+    if (checkbox.checked) {
+        // Efek pudar + grayscale
+        imageItem.style.opacity = '0.5';
+        img.style.filter        = 'grayscale(100%)';
+
+        // Tambah badge "Akan Dihapus" kalau belum ada
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.className = 'will-delete-badge';
+            badge.style.cssText = `
+                position: absolute; inset: 0;
+                display: flex; flex-direction: column;
+                align-items: center; justify-content: center;
+                gap: 4px; pointer-events: none;
+                background: rgba(239,68,68,0.15);
+                border-radius: 10px;
+            `;
+            badge.innerHTML = `
+                <span class="material-symbols-outlined" style="color:#ef4444; font-size:28px;">delete</span>
+                <span style="color:#ef4444; font-size:10px; font-weight:700; 
+                             background:rgba(239,68,68,0.9); color:white;
+                             padding:2px 8px; border-radius:99px;">
+                    Akan Dihapus
+                </span>
+            `;
+            imageItem.querySelector('div').appendChild(badge);
+        }
+        badge.style.display = 'flex';
+
+    } else {
+        // Batalkan — kembalikan normal
+        imageItem.style.opacity = '1';
+        img.style.filter        = '';
+        if (badge) badge.style.display = 'none';
+    }
 }
+
+// ===================== KARAKTER COUNTER DESKRIPSI =====================
+const descTextarea = document.getElementById('description');
+const descCounter  = document.getElementById('desc-counter');
+
+function updateDescCounter() {
+    const len = descTextarea?.value.length ?? 0;
+    if (!descCounter) return;
+    descCounter.textContent = `${len} / 1000`;
+    if (len >= 1000) {
+        descCounter.className = 'absolute bottom-2 right-3 text-xs pointer-events-none transition-colors text-red-500 font-semibold';
+    } else if (len >= 900) {
+        descCounter.className = 'absolute bottom-2 right-3 text-xs pointer-events-none transition-colors text-yellow-500';
+    } else {
+        descCounter.className = 'absolute bottom-2 right-3 text-xs pointer-events-none transition-colors text-gray-400 dark:text-zinc-500';
+    }
+}
+descTextarea?.addEventListener('input', updateDescCounter);
+updateDescCounter();
+
+// ===================== FORMAT RUPIAH =====================
+const priceInput   = document.getElementById('price_input');
+const priceDisplay = document.getElementById('price-display');
+
+function formatRupiah(angka) {
+    if (!angka || isNaN(angka)) return '';
+    return 'Rp ' + parseInt(angka).toLocaleString('id-ID');
+}
+
+function updatePriceDisplay() {
+    if (!priceDisplay) return;
+    const val = priceInput?.value;
+    if (val && parseInt(val) > 0) {
+        priceDisplay.innerHTML = `
+            <span class="material-symbols-outlined text-xs">payments</span>
+            ${formatRupiah(val)}
+        `;
+    } else {
+        priceDisplay.textContent = '';
+    }
+}
+priceInput?.addEventListener('input', updatePriceDisplay);
+updatePriceDisplay();
 
 // ===================== SERTIFIKAT =====================
 document.getElementById('health_certificate')?.addEventListener('change', function(e) {
     const file = e.target.files[0];
     if (file) document.getElementById('cert-label').textContent = `📄 ${file.name}`;
+});
+
+// ===================== ZOOM GAMBAR MODAL =====================
+function openImageModal(src, name) {
+    // Buat modal kalau belum ada
+    if (!document.getElementById('img-zoom-modal')) {
+        const modal = document.createElement('div');
+        modal.id = 'img-zoom-modal';
+        modal.style.cssText = `
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            padding: 16px; cursor: zoom-out;
+        `;
+        modal.innerHTML = `
+            <div style="position:relative; max-width:700px; width:100%;" onclick="event.stopPropagation()">
+                <div style="background:#18181b; border-radius:16px; overflow:hidden; box-shadow:0 25px 60px rgba(0,0,0,0.5);">
+                    <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid #3f3f46;">
+                        <p id="img-zoom-title" style="font-size:14px; font-weight:600; color:white; margin:0;"></p>
+                        <button onclick="closeImageModal()"
+                                style="background:transparent; border:none; cursor:pointer; color:#a1a1aa; padding:4px;">
+                            <span class="material-symbols-outlined" style="font-size:20px">close</span>
+                        </button>
+                    </div>
+                    <div style="background:#09090b; display:flex; align-items:center; justify-content:center; min-height:300px;">
+                        <img id="img-zoom-src" src="" alt=""
+                             style="max-height:70vh; max-width:100%; object-fit:contain;">
+                    </div>
+                </div>
+            </div>
+        `;
+        modal.addEventListener('click', closeImageModal);
+        document.body.appendChild(modal);
+    }
+
+    document.getElementById('img-zoom-title').textContent = name;
+    document.getElementById('img-zoom-src').src = src;
+    document.getElementById('img-zoom-modal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('img-zoom-modal');
+    if (modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+}
+
+// Tutup dengan ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeImageModal();
+});
+
+// ===================== KONFIRMASI LEAVE PAGE =====================
+let formChanged = false;
+
+document.getElementById('product-form')?.addEventListener('input', () => {
+    formChanged = true;
+});
+document.getElementById('product-form')?.addEventListener('change', () => {
+    formChanged = true;
+});
+
+window.addEventListener('beforeunload', function(e) {
+    if (formChanged) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+// Reset flag saat form di-submit supaya tidak muncul konfirmasi
+document.getElementById('product-form')?.addEventListener('submit', () => {
+    formChanged = false;
 });
 </script>

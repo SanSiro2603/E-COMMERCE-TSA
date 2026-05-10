@@ -142,11 +142,19 @@ class ProductController extends Controller
     foreach ($products as $product) {
 
         // ── Gambar ──────────────────────────────────────────
+        $imgSrc    = $product->image ? asset('storage/' . $product->image) : null;
+        $imgName   = e($product->name);
+
         $imageHtml = $product->image
-            ? '<img src="' . asset('storage/' . $product->image) . '" alt="' . e($product->name) . '" class="h-14 w-14 object-cover rounded-lg border border-gray-200 dark:border-zinc-700">'
-            : '<div class="h-14 w-14 bg-gray-200 dark:bg-zinc-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-zinc-600">
-                <span class="material-symbols-outlined text-gray-400 dark:text-zinc-500 text-xl">image</span>
-               </div>';
+            ? '<button onclick="openImageModal(\'' . $imgSrc . '\', \'' . $imgName . '\')" class="group relative block cursor-zoom-in">
+                    <img src="' . $imgSrc . '" alt="' . $imgName . '" class="h-14 w-14 object-cover rounded-lg border border-gray-200 dark:border-zinc-700 group-hover:opacity-80 transition-opacity">
+                    <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span class="material-symbols-outlined text-white text-lg drop-shadow">zoom_in</span>
+                    </div>
+            </button>'
+            : '<button onclick="openImageModal(null, \'' . $imgName . '\')" class="h-14 w-14 bg-gray-200 dark:bg-zinc-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-zinc-600 hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors cursor-pointer">
+                    <span class="material-symbols-outlined text-gray-400 dark:text-zinc-500 text-xl">image</span>
+            </button>';
 
         // ── Stok ─────────────────────────────────────────────
         $stockClass   = $product->stock <= 5

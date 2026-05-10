@@ -26,36 +26,35 @@ class PesananController extends Controller
 
     public function __construct(MidtransService $midtrans, BiteshipService $biteship, OrderService $orderService)
     {
-        $this->midtrans = $midtrans;
-        $this->biteship = $biteship;
+        $this->midtrans     = $midtrans;
+        $this->biteship     = $biteship;
         $this->orderService = $orderService;
     }
+
     public function index(Request $request)
     {
         $userId = Auth::id();
 
-        // DETEKSI RETURN DARI MIDTRANS
         $midtransStatus = $request->query('status');
-        $orderNumber = $request->query('order');
+        $orderNumber    = $request->query('order');
 
         $highlightedOrder = null;
-        $flashMessage = null;
-        $flashType = 'success';
+        $flashMessage     = null;
+        $flashType        = 'success';
 
         if ($midtransStatus && $orderNumber) {
             $message = match ($midtransStatus) {
-                    'success' => "Pembayaran #{$orderNumber} BERHASIL! Produk segera kami proses.",
-                    'pending' => "Pembayaran #{$orderNumber} sedang DIPROSES. Kami akan konfirmasi secepatnya.",
-                    'error' => "Pembayaran #{$orderNumber} GAGAL. Silakan coba metode lain.",
-                    'cancelled' => "Pembayaran #{$orderNumber} DIBATALKAN.",
-                    default => "Status pembayaran #{$orderNumber} diperbarui.",
-                };
+                'success'   => "Pembayaran #{$orderNumber} BERHASIL! Produk segera kami proses.",
+                'pending'   => "Pembayaran #{$orderNumber} sedang DIPROSES. Kami akan konfirmasi secepatnya.",
+                'error'     => "Pembayaran #{$orderNumber} GAGAL. Silakan coba metode lain.",
+                'cancelled' => "Pembayaran #{$orderNumber} DIBATALKAN.",
+                default     => "Status pembayaran #{$orderNumber} diperbarui.",
+            };
 
-            $flashType = in_array($midtransStatus, ['success', 'pending']) ? 'success' : 'error';
+            $flashType    = in_array($midtransStatus, ['success', 'pending']) ? 'success' : 'error';
             $flashMessage = $message;
 
             if (in_array($midtransStatus, ['success', 'pending'])) {
-                // Sync status ke database jika sukses/pending
                 try {
                     $order = Order::where('order_number', $orderNumber)->first();
                     if ($order && $order->status === 'pending') {
@@ -63,23 +62,16 @@ class PesananController extends Controller
                         if ($statusResult['success']) {
                             $status = $statusResult['data']->transaction_status;
                             if (in_array($status, ['capture', 'settlement'])) {
-                                $order->update([
-                                    'status' => 'paid',
-                                    'paid_at' => now()
-                                ]);
-
-                                // Update juga di table payments
+                                $order->update(['status' => 'paid', 'paid_at' => now()]);
                                 if ($order->payment) {
                                     $order->payment->update(['transaction_status' => $status]);
                                 }
                             }
                         }
                     }
+                } catch (\Exception $e) {
+                    Log::error("Status sync failed for order {$orderNumber}: " . $e->getMessage());
                 }
-                catch (\Exception $e) {
-                    \Log::error("Status sync failed for order {$orderNumber}: " . $e->getMessage());
-                }
-
                 $request->merge(['status' => $midtransStatus === 'success' ? 'paid' : 'pending']);
             }
 
@@ -103,43 +95,136 @@ class PesananController extends Controller
         }
 
         $statuses = [
-            'all' => 'Semua Pesanan',
-            'pending' => 'Menunggu Pembayaran',
-            'paid' => 'Sudah Dibayar',
+            'all'        => 'Semua Pesanan',
+            'pending'    => 'Menunggu Pembayaran',
+            'paid'       => 'Sudah Dibayar',
             'processing' => 'Sedang Diproses',
-            'shipped' => 'Dikirim',
-            'completed' => 'Selesai',
-            'cancelled' => 'Dibatalkan',
+            'shipped'    => 'Dikirim',
+            'completed'  => 'Selesai',
+            'cancelled'  => 'Dibatalkan',
         ];
 
-        return view('pembeli.pesanan.index', compact(
-            'orders',
-            'statuses',
-            'highlightedOrder'
-        ));
+        return view('pembeli.pesanan.index', compact('orders', 'statuses', 'highlightedOrder'));
     }
 
-    public function show($id)    {
-        $order = Order::with([
-            'items.product.category',
-            'payment',
-            'address'
-        ])
+    public function show($id)
+    {
+        $order = Order::with(['items.product.category', 'payment', 'address'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
 
-        return view('pembeli.pesanan.show', compact('order'));    }
-    // === CHECKOUT: PILIH ALAMAT TERSIMPAN + KURIR ===
+        return view('pembeli.pesanan.show', compact('order'));
+    }
+
+    // =========================================================================
+    // BUY NOW — langsung checkout tanpa menyentuh keranjang
+    // Dipanggil via POST dari halaman detail produk (show.blade.php)
+    // Menyimpan data sementara ke session('buy_now') lalu redirect ke checkout
+    // =========================================================================
+    public function buyNow(Request $request)
+    {
+        $request->validate([
+            'product_id' => 'required|exists:products,id',
+            'quantity'   => 'required|integer|min:1',
+        ]);
+
+        $product  = Product::where('is_active', true)->findOrFail($request->product_id);
+        $quantity = (int) $request->quantity;
+
+        // Validasi stok
+        if ($product->stock < $quantity) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Stok tidak mencukupi. Tersedia: ' . $product->stock,
+            ], 422);
+        }
+
+        // Cek toko buka
+        $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
+        if ($isStoreOpen !== '1') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Maaf, toko sedang tutup.',
+            ], 403);
+        }
+
+        // Simpan ke session — TIDAK masuk keranjang
+        session([
+            'buy_now' => [
+                'product_id' => $product->id,
+                'quantity'   => $quantity,
+                'price'      => $product->price,
+                'subtotal'   => $product->price * $quantity,
+                'weight'     => ($product->weight ?? 1000) * $quantity,
+                'product'    => [
+                    'id'     => $product->id,
+                    'name'   => $product->name,
+                    'image'  => $product->image,
+                    'price'  => $product->price,
+                    'weight' => $product->weight ?? 1000,
+                    'unit'   => $product->unit ?? 'ekor',
+                    'stock'  => $product->stock,
+                ],
+            ],
+        ]);
+
+        return response()->json([
+            'success'      => true,
+            'redirect_url' => route('pembeli.pesanan.checkout'),
+        ]);
+    }
+
+    // =========================================================================
+    // CHECKOUT — cek session buy_now dulu, kalau tidak ada pakai keranjang
+    // =========================================================================
     public function checkout()
     {
-        // --- TAMBAHAN BARU ---
         $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
         if ($isStoreOpen !== '1') {
             return redirect()->route('pembeli.keranjang.index')
                 ->with('error', 'Maaf, toko sedang tutup. Fitur checkout sementara dinonaktifkan.');
         }
 
-        // Ambil cart IDs yang dipilih dari session
+        $addresses = Auth::user()->addresses()->get();
+        if ($addresses->isEmpty()) {
+            return redirect()->route('pembeli.alamat.create')
+                ->with('error', 'Silakan tambah alamat terlebih dahulu');
+        }
+
+        // ── MODE BUY NOW ──────────────────────────────────────────────────────
+        $buyNow = session('buy_now');
+
+        if ($buyNow) {
+            // Pastikan produk masih aktif dan stok masih cukup
+            $product = Product::where('is_active', true)->find($buyNow['product_id']);
+
+            if (!$product || $product->stock < $buyNow['quantity']) {
+                session()->forget('buy_now');
+                return redirect()->route('pembeli.produk.index')
+                    ->with('error', 'Produk tidak tersedia atau stok habis.');
+            }
+
+            // Buat object serupa Cart agar blade checkout bisa dipakai ulang
+            $fakeCarts = collect([
+                (object) [
+                    'id'       => null,
+                    'quantity' => $buyNow['quantity'],
+                    'subtotal' => $buyNow['subtotal'],
+                    'product'  => (object) $buyNow['product'],
+                ]
+            ]);
+
+            $subtotal      = $buyNow['subtotal'];
+            $totalWeight   = $buyNow['weight'];
+            $isBuyNow      = true;
+            $shoppingEnabled = true;
+
+            return view('pembeli.pesanan.checkout', compact(
+                'fakeCarts', 'subtotal', 'totalWeight', 'addresses', 'shoppingEnabled', 'isBuyNow'
+            ))->with('carts', $fakeCarts);
+        }
+
+        // ── MODE KERANJANG NORMAL ─────────────────────────────────────────────
         $selectedCartIds = session('checkout_cart_ids', []);
 
         if (empty($selectedCartIds)) {
@@ -157,21 +242,19 @@ class PesananController extends Controller
                 ->with('error', 'Item yang dipilih tidak ditemukan di keranjang.');
         }
 
-        $addresses = Auth::user()->addresses()->get();
-        if ($addresses->isEmpty()) {
-            return redirect()->route('pembeli.alamat.create')
-                ->with('error', 'Silakan tambah alamat terlebih dahulu');
-        }
-
-        $subtotal = $carts->sum('subtotal');
-        $totalWeight = $carts->sum(fn($c) => ($c->product->weight ?? 1000) * $c->quantity);
-
+        $subtotal        = $carts->sum('subtotal');
+        $totalWeight     = $carts->sum(fn($c) => ($c->product->weight ?? 1000) * $c->quantity);
+        $isBuyNow        = false;
         $shoppingEnabled = $isStoreOpen === '1';
 
-        return view('pembeli.pesanan.checkout', compact('carts', 'subtotal', 'totalWeight', 'addresses', 'shoppingEnabled'));
+        return view('pembeli.pesanan.checkout', compact(
+            'carts', 'subtotal', 'totalWeight', 'addresses', 'shoppingEnabled', 'isBuyNow'
+        ));
     }
 
-    // === AJAX: CEK ONGKIR BITESHIP ===
+    // =========================================================================
+    // AJAX: CEK ONGKIR BITESHIP
+    // =========================================================================
     public function checkShippingCost(Request $request)
     {
         $request->validate([
@@ -185,28 +268,24 @@ class PesananController extends Controller
         if (!$address->postal_code) {
             return response()->json([
                 'success' => false,
-                'message' => 'Alamat tidak memiliki kode pos yang valid. Silakan perbarui alamat Anda.'
+                'message' => 'Alamat tidak memiliki kode pos yang valid. Silakan perbarui alamat Anda.',
             ], 422);
         }
 
         try {
-            // Hitung estimasi nilai barang dari item yang dipilih saja
-            $selectedCartIds = session('checkout_cart_ids', []);
-            if (!empty($selectedCartIds)) {
-                $itemsValue = Cart::where('user_id', Auth::id())
-                    ->whereIn('id', $selectedCartIds)
+            // Nilai barang: cek buy_now dulu, lalu keranjang
+            $buyNow     = session('buy_now');
+            $itemsValue = $buyNow
+                ? $buyNow['subtotal']
+                : Cart::where('user_id', Auth::id())
+                    ->whereIn('id', session('checkout_cart_ids', []))
                     ->sum('subtotal');
-            } else {
-                $itemsValue = Cart::where('user_id', Auth::id())->sum('subtotal');
-            }
-            if ($itemsValue <= 0) {
-                // Jika dari halaman edit (keranjang kosong), estimasi saja 100000
-                $itemsValue = 100000;
-            }
+
+            if ($itemsValue <= 0) $itemsValue = 100000;
 
             $payload = [
                 'destination_postal_code' => $address->postal_code,
-                'couriers'                => strtolower($request->courier), // Pastikan lowercase
+                'couriers'                => strtolower($request->courier),
                 'weight'                  => (int) $request->weight,
                 'items_value'             => $itemsValue,
             ];
@@ -233,7 +312,6 @@ class PesananController extends Controller
                 return response()->json(['success' => false, 'message' => 'Tidak ada layanan kurir tersedia untuk rute ini.']);
             }
 
-            // Urutkan dari harga termurah
             usort($services, fn($a, $b) => $a['price'] - $b['price']);
 
             return response()->json(['success' => true, 'services' => $services]);
@@ -244,14 +322,14 @@ class PesananController extends Controller
         }
     }
 
-    // === STORE: BUAT PESANAN DARI ALAMAT TERPILIH ===
+    // =========================================================================
+    // STORE — buat pesanan, cek buy_now dulu lalu keranjang
+    // =========================================================================
     public function store(Request $request)
     {
-        // --- TAMBAHAN BARU ---
         $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
         if ($isStoreOpen !== '1') {
-            return redirect()->back()
-                ->with('error', 'Transaksi DITOLAK: Toko sedang tutup.');
+            return redirect()->back()->with('error', 'Transaksi DITOLAK: Toko sedang tutup.');
         }
 
         $validated = $request->validate([
@@ -262,7 +340,45 @@ class PesananController extends Controller
         ]);
 
         try {
-            // Ambil cart dari session yang dipilih user
+            $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
+
+            // ── MODE BUY NOW ──────────────────────────────────────────────────
+            $buyNow = session('buy_now');
+
+            if ($buyNow) {
+                $product = Product::where('is_active', true)->findOrFail($buyNow['product_id']);
+
+                if ($product->stock < $buyNow['quantity']) {
+                    throw new \Exception('Stok tidak mencukupi. Tersedia: ' . $product->stock);
+                }
+
+                // Buat koleksi fake Cart agar OrderService bisa dipakai ulang
+                $fakeCarts = collect([
+                    (object) [
+                        'id'       => null,
+                        'quantity' => $buyNow['quantity'],
+                        'subtotal' => $buyNow['subtotal'],
+                        'product'  => $product,
+                    ]
+                ]);
+
+                $order = $this->orderService->createOrder(
+                    Auth::id(),
+                    $fakeCarts,
+                    $address,
+                    $validated['courier'],
+                    $validated['courier_service'],
+                    (int) $validated['shipping_cost']
+                );
+
+                // Bersihkan session buy_now setelah order dibuat
+                session()->forget('buy_now');
+
+                return redirect()->route('pembeli.payment.show', $order)
+                    ->with('success', 'Pesanan berhasil dibuat! Silakan bayar.');
+            }
+
+            // ── MODE KERANJANG NORMAL ─────────────────────────────────────────
             $selectedCartIds = session('checkout_cart_ids', []);
 
             if (empty($selectedCartIds)) {
@@ -275,12 +391,10 @@ class PesananController extends Controller
                 ->whereIn('id', $selectedCartIds)
                 ->get();
 
-            if ($carts->isEmpty())
+            if ($carts->isEmpty()) {
                 throw new \Exception('Item yang dipilih tidak ditemukan di keranjang');
+            }
 
-            $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
-
-            // Delegate logic to OrderService — kirim shipping_cost dari hasil RajaOngkir
             $order = $this->orderService->createOrder(
                 Auth::id(),
                 $carts,
@@ -290,19 +404,20 @@ class PesananController extends Controller
                 (int) $validated['shipping_cost']
             );
 
-            // Bersihkan session checkout setelah order berhasil dibuat
             session()->forget('checkout_cart_ids');
 
             return redirect()->route('pembeli.payment.show', $order)
                 ->with('success', 'Pesanan berhasil dibuat! Silakan bayar.');
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
 
-    // === EDIT: GANTI ALAMAT / KURIR SEBELUM BAYAR ===
+    // =========================================================================
+    // EDIT, UPDATE, REMOVE ITEM, CANCEL, COMPLETE, TRACK — tidak berubah
+    // =========================================================================
+
     public function edit($id)
     {
         $order = Order::with(['items.product', 'address'])
@@ -338,7 +453,6 @@ class PesananController extends Controller
         try {
             $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
 
-            // Delegate logic to Service — kirim shipping_cost dari hasil RajaOngkir
             $this->orderService->updateShippingDetails(
                 $order,
                 $address,
@@ -350,8 +464,7 @@ class PesananController extends Controller
             return redirect()->route('pembeli.pesanan.index')
                 ->with('success', 'Pesanan berhasil diperbarui!');
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return back()->withInput()->with('error', 'Gagal: ' . $e->getMessage());
         }
     }
@@ -365,8 +478,7 @@ class PesananController extends Controller
                 return back()->with('error', 'Item hanya bisa dihapus jika pesanan belum dibayar.');
             }
 
-            $item = $order->items()->findOrFail($itemId);
-
+            $item   = $order->items()->findOrFail($itemId);
             $result = $this->orderService->removeOrderItem($order, $item);
 
             if ($result === 'cancel') {
@@ -376,8 +488,7 @@ class PesananController extends Controller
 
             return back()->with('success', 'Produk berhasil dihapus dari pesanan.');
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghapus produk: ' . $e->getMessage());
         }
     }
@@ -395,12 +506,11 @@ class PesananController extends Controller
 
             return back()->with('success', "Pesanan #{$order->order_number} berhasil dibatalkan. Stok produk telah dikembalikan.");
 
-        }
-        catch (\Exception $e) {
-            \Log::error('Gagal batalkan pesanan ID ' . $id, [
+        } catch (\Exception $e) {
+            Log::error('Gagal batalkan pesanan ID ' . $id, [
                 'user_id' => Auth::id(),
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error'   => $e->getMessage(),
+                'trace'   => $e->getTraceAsString(),
             ]);
             return back()->with('error', 'Gagal membatalkan pesanan. Silakan coba lagi.');
         }
@@ -416,24 +526,19 @@ class PesananController extends Controller
             }
 
             $order->update([
-                'status' => 'completed',
+                'status'  => 'completed',
                 'paid_at' => $order->paid_at ?? now(),
             ]);
 
             return back()->with('success', 'Pesanan telah diselesaikan. Terima kasih!');
 
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return back()->with('error', 'Gagal menyelesaikan pesanan: ' . $e->getMessage());
         }
     }
 
-    /**
-     * Tracking pengiriman Biteship untuk pembeli (AJAX)
-     */
     public function trackBiteship(Order $order)
     {
-        // Pastikan hanya pemilik pesanan yang bisa akses
         if ($order->user_id !== Auth::id()) {
             return response()->json(['success' => false, 'message' => 'Tidak diizinkan.'], 403);
         }

@@ -279,13 +279,21 @@
                             </td>
                             <td class="px-6 py-4">
                                 @if($product->image)
-                                    <img src="{{ asset('storage/' . $product->image) }}"
-                                         alt="{{ $product->name }}"
-                                         class="h-14 w-14 object-cover rounded-lg border border-gray-200 dark:border-zinc-700">
+                                    <button onclick="openImageModal('{{ asset('storage/' . $product->image) }}', '{{ $product->name }}')"
+                                            class="group relative block cursor-zoom-in">
+                                        <img src="{{ asset('storage/' . $product->image) }}"
+                                            alt="{{ $product->name }}"
+                                            class="h-14 w-14 object-cover rounded-lg border border-gray-200 dark:border-zinc-700 group-hover:opacity-80 transition-opacity">
+                                        <!-- Overlay icon zoom -->
+                                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <span class="material-symbols-outlined text-white text-lg drop-shadow">zoom_in</span>
+                                        </div>
+                                    </button>
                                 @else
-                                    <div class="h-14 w-14 bg-gray-200 dark:bg-zinc-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-zinc-600">
+                                    <button onclick="openImageModal(null, '{{ $product->name }}')"
+                                            class="h-14 w-14 bg-gray-200 dark:bg-zinc-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-zinc-600 hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors cursor-pointer">
                                         <span class="material-symbols-outlined text-gray-400 dark:text-zinc-500 text-xl">image</span>
-                                    </div>
+                                    </button>
                                 @endif
                             </td>
                             <td class="px-6 py-4">
@@ -382,7 +390,43 @@
             @endif
         </div>
     </div>
+<!-- Modal Preview Gambar -->
+<div id="imageModal"
+     class="fixed inset-0 z-50 hidden items-center justify-center p-4"
+     onclick="closeImageModal()">
+    
+    <!-- Backdrop -->
+    <div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+    
+    <!-- Modal Content -->
+    <div class="relative z-10 max-w-2xl w-full" onclick="event.stopPropagation()">
+        <div class="bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden shadow-2xl">
+            
+            <!-- Header -->
+            <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 dark:border-zinc-800">
+                <p id="imageModalTitle" class="text-sm font-semibold text-gray-900 dark:text-white truncate"></p>
+                <button onclick="closeImageModal()"
+                        class="p-1 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </div>
 
+            <!-- Image -->
+            <div class="relative bg-gray-100 dark:bg-zinc-800 flex items-center justify-center min-h-64">
+                <img id="imageModalImg"
+                     src=""
+                     alt=""
+                     class="max-h-[70vh] max-w-full object-contain">
+                <!-- Placeholder kalau no image -->
+                <div id="imageModalPlaceholder" class="hidden flex-col items-center justify-center py-16 gap-3">
+                    <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl">image_not_supported</span>
+                    <p class="text-sm text-gray-400 dark:text-zinc-500">Tidak ada gambar</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
 </div>
 
 <style>
@@ -405,6 +449,11 @@
     .dark .product-row.selected {
         background-color: rgb(59 130 246 / 0.08);
     }
+
+    #imageModal.show {
+    display: flex;
+    animation: fade-in 0.2s ease-out;
+    }
 </style>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -423,6 +472,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const tableBody           = document.getElementById('productsTableBody');
     const loadingIndicator    = document.getElementById('loadingIndicator');
     const paginationContainer = document.getElementById('paginationContainer');
+    const perPageSelect       = document.getElementById('perPageSelect');
 
     // ── Elemen Bulk ──────────────────────────────────────────
     const checkAll   = document.getElementById('checkAll');
@@ -474,6 +524,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (priceMax.value)       params.append('price_max',    priceMax.value);
         params.append('sort_by',  currentSort.by);
         params.append('sort_dir', currentSort.dir);
+        params.append('per_page', perPageSelect.value);
         params.append('page',     page);
 
         fetch(`{{ route('admin.products.index') }}?${params.toString()}`, {
@@ -549,6 +600,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    perPageSelect.addEventListener('change', function () {
+    fetchProducts(1);
+    });
+
     resetBtn.addEventListener('click', function () {
         searchInput.value    = '';
         categoryFilter.value = '';
@@ -556,6 +611,7 @@ document.addEventListener('DOMContentLoaded', function () {
         stockFilter.value    = '';
         priceMin.value       = '';
         priceMax.value       = '';
+         perPageSelect.value  = '10';
         currentSort          = { by: 'created_at', dir: 'desc' };
         document.querySelectorAll('.sort-btn').forEach(b => {
             b.classList.remove('active');
@@ -751,6 +807,43 @@ function confirmDelete(form, productName) {
         if (result.isConfirmed) form.submit();
     });
 }
+
+// ── Preview Gambar Modal ──────────────────────────────────────
+function openImageModal(src, name) {
+    const modal       = document.getElementById('imageModal');
+    const img         = document.getElementById('imageModalImg');
+    const title       = document.getElementById('imageModalTitle');
+    const placeholder = document.getElementById('imageModalPlaceholder');
+
+    title.textContent = name;
+
+    if (src) {
+        img.src = src;
+        img.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+        placeholder.classList.remove('flex');
+    } else {
+        img.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        placeholder.classList.add('flex');
+    }
+
+    modal.classList.remove('hidden');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('imageModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// Tutup modal dengan tombol ESC
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeImageModal();
+});
 </script>
 
 @if(session('success'))

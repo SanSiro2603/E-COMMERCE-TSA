@@ -102,4 +102,48 @@
     </div>
 
 </div>
+
+
+</div> 
+
+{{-- Spacer --}}
+<div class="h-20"></div>
+
+{{-- Sticky Action Bar --}}
+<div class="fixed bottom-0 left-0 right-0 z-40
+            bg-white/80 dark:bg-zinc-900/80
+            backdrop-blur-md
+            border-t border-gray-200 dark:border-zinc-800
+            px-6 py-3 lg:pl-64">
+    <div class="max-w-screen-xl mx-auto flex items-center gap-4">
+
+        {{-- Hint kiri --}}
+        <p class="text-xs text-gray-500 dark:text-zinc-400 hidden sm:flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm text-yellow-500">info</span>
+            Pastikan semua field wajib (<span class="text-red-500 font-bold">*</span>) sudah terisi
+        </p>
+
+        {{-- Tombol kanan --}}
+        <div class="flex items-center gap-3 ml-auto">
+            <a href="{{ route('admin.products.index') }}"
+               class="flex items-center gap-2 px-5 py-2 border border-gray-300 dark:border-zinc-700
+                      rounded-lg text-sm text-gray-700 dark:text-zinc-300
+                      bg-white dark:bg-zinc-800
+                      hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">
+                <span class="material-symbols-outlined text-base">close</span>
+                Batal
+            </a>
+            <button type="submit" form="product-form"
+                    class="flex items-center gap-2 px-6 py-2
+                           bg-gradient-to-r from-soft-green to-primary
+                           text-white text-sm font-medium rounded-lg
+                           hover:shadow-lg hover:scale-[1.02] transition-all">
+                <span class="material-symbols-outlined text-base">save</span>
+                Update Produk
+            </button>
+        </div>
+
+    </div>
+</div>
+
 @endsection
