@@ -207,90 +207,148 @@
             gap: 0.5rem;
             font-size: 0.813rem;
         }
+
+        /* Sidebar feature image transition */
+        #sidebar-feature-image {
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 dark:bg-zinc-950">
-
-
 
     <!-- Mobile Overlay -->
     <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
     <aside id="sidebar"
-        class="sidebar fixed left-0 top-0 z-50 h-screen w-64 bg-white/95 dark:bg-zinc-900/95 border-r border-gray-100 dark:border-zinc-800/50 flex flex-col shadow-soft">
+        class="sidebar fixed left-0 top-0 z-50 h-screen w-72 bg-[#03150B] border-r border-green-500/10 flex flex-col shadow-2xl overflow-hidden">
+
+        <!-- Background Glow -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(114,226,54,0.15),transparent_40%)] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-green-500/10 to-transparent pointer-events-none"></div>
 
         <!-- Logo -->
-        <div
-            class="logo-container px-5 py-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3 cursor-default">
-            <div class="logo-icon w-10 h-10 flex-shrink-0">
-                <img src="{{ asset('images/logo header.png') }}" alt="Logo TSA" class="h-full w-auto object-contain">
+        <div class="relative px-5 py-6 border-b border-white/10 flex items-center gap-3 z-10">
+            <div class="w-14 h-14 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <img src="{{ asset('images/logo header.png') }}"
+                    alt="Logo TSA"
+                    class="h-14 w-14 object-contain">
             </div>
             <div>
-                <h1 class="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">E-Commerce TSA</h1>
-                <p class="text-[10px] text-gray-400 dark:text-zinc-500 font-medium tracking-wide uppercase">Admin Panel
-                </p>
+                <h1 class="text-white text-[18px] font-bold leading-tight">E-Commerce TSA</h1>
+                <p class="text-green-400 text-[11px] uppercase tracking-[2px] font-semibold">Admin Panel</p>
             </div>
         </div>
 
-        <!-- Navigation -->
-        <nav class="flex-1 px-3 py-6 overflow-y-auto custom-scrollbar space-y-1.5">
-            @php
-                $menu = [
-                    ['route' => 'admin.dashboard', 'icon' => 'dashboard', 'label' => 'Dashboard'],
-                    ['route' => 'admin.categories.index', 'icon' => 'category', 'label' => 'Kategori'],
-                    ['route' => 'admin.products.index', 'icon' => 'inventory_2', 'label' => 'Produk'],
-                    ['route' => 'admin.orders.index', 'icon' => 'shopping_cart', 'label' => 'Pesanan'],
-                    ['route' => 'admin.reports.index', 'icon' => 'analytics', 'label' => 'Laporan'],
-                    ['route' => 'admin.settings.index', 'icon' => 'settings', 'label' => 'Pengaturan'],
-                ];
-            @endphp
+        @php
+            $menu = [
+                [
+                    'route' => 'admin.dashboard',
+                    'icon'  => 'dashboard',
+                    'label' => 'Dashboard',
+                    'image' => 'images/sidebar/dashboard.png',
+                ],
+                [
+                    'route' => 'admin.categories.index',
+                    'icon'  => 'category',
+                    'label' => 'Kategori',
+                    'image' => null,
+                ],
+                [
+                    'route' => 'admin.products.index',
+                    'icon'  => 'inventory_2',
+                    'label' => 'Produk',
+                    'image' => null,
+                ],
+                [
+                    'route' => 'admin.orders.index',
+                    'icon'  => 'shopping_cart',
+                    'label' => 'Pesanan',
+                    'image' => 'images/sidebar/manajemen-pesanan.png',
+                ],
+                [
+                    'route' => 'admin.reports.index',
+                    'icon'  => 'analytics',
+                    'label' => 'Laporan',
+                    'image' => 'images/sidebar/laporan.png',
+                ],
+                [
+                    'route' => 'admin.settings.index',
+                    'icon'  => 'settings',
+                    'label' => 'Pengaturan',
+                    'image' => null,
+                ],
+            ];
 
+            $activeMenu = collect($menu)->first(fn($item) => request()->routeIs($item['route'].'*'))
+                ?? $menu[0];
+        @endphp
+
+        <!-- Navigation -->
+        <nav class="relative px-3 pt-4 pb-2 space-y-2 z-10">
             @foreach ($menu as $item)
                 @php $active = request()->routeIs($item['route'].'*'); @endphp
-                <a href="{{ route($item['route']) }}"
-                    class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all
-                   {{ $active
-                       ? 'menu-item-active text-soft-green font-semibold'
-                       : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-soft-green' }}">
 
-                    <span
-                        class="material-symbols-outlined text-[20px] transition-colors
-                        {{ $active ? 'text-soft-green' : 'text-gray-400 dark:text-zinc-500' }}">
-                        {{ $item['icon'] }}
-                    </span>
-                    <span>{{ $item['label'] }}</span>
+                <a href="{{ route($item['route']) }}"
+                    class="group relative flex items-center gap-3 px-4 py-3 rounded-none transition-all duration-300 overflow-hidden
+                        {{ $active
+                            ? 'bg-gradient-to-r from-green-500 to-green-400 text-white shadow-[0_10px_30px_rgba(114,226,54,0.35)]'
+                            : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
+
+                    @if ($active)
+                        <div class="absolute inset-0 bg-white/10 backdrop-blur-xl pointer-events-none"></div>
+                    @endif
+
+                    <div class="relative z-10 flex items-center gap-3">
+                        <span class="material-symbols-outlined text-[21px]">{{ $item['icon'] }}</span>
+                        <span class="text-[14px] font-semibold tracking-wide">{{ $item['label'] }}</span>
+                    </div>
                 </a>
             @endforeach
         </nav>
 
-        <!-- User Profile -->
-        <div class="px-4 py-4 border-t border-gray-100 dark:border-zinc-800/50">
-            <div
-                class="flex items-center gap-3 px-3 py-3 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-zinc-800/40 dark:to-zinc-800/20 hover:shadow-md transition-all duration-300">
-                <div
-                    class="w-9 h-9 bg-gradient-to-br from-soft-green to-primary rounded-full flex items-center justify-center text-white font-bold text-[13px] shadow-lg shadow-soft-green/30">
+        <!-- Dynamic Illustration -->
+        <div class="relative flex items-end justify-center px-4 pb-4 z-10" style="height: 180px; flex-shrink: 0;">
+            @if($activeMenu['image'])
+                <img
+                    id="sidebar-feature-image"
+                    src="{{ asset($activeMenu['image']) }}"
+                    alt="{{ $activeMenu['label'] }}"
+                    class="w-full max-h-[160px] object-contain drop-shadow-2xl">
+            @else
+                <div id="sidebar-feature-image" class="w-full"></div>
+            @endif
+        </div>
+
+        <!-- Footer User -->
+        <div class="relative px-4 py-4 border-t border-white/10 z-10">
+            <div class="flex items-center gap-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl p-3">
+
+                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-lime-300 text-black font-bold flex items-center justify-center shadow-lg shadow-green-500/30 flex-shrink-0">
                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                 </div>
+
                 <div class="flex-1 min-w-0">
-                    <p class="text-[13px] font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}
-                    </p>
-                    <p class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase tracking-wide">Admin</p>
+                    <p class="text-white text-[13px] font-semibold truncate">{{ Auth::user()->name }}</p>
+                    <p class="text-green-300 text-[10px] uppercase tracking-wider">Admin</p>
                 </div>
+
                 <a href="{{ route('logout') }}"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                    class="p-1.5 text-gray-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
-                    title="Logout">
+                    class="w-9 h-9 rounded-xl flex items-center justify-center bg-red-600 hover:bg-red-700 text-white transition-all duration-300 flex-shrink-0">
                     <span class="material-symbols-outlined text-[18px]">logout</span>
                 </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
+
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                    @csrf
+                </form>
             </div>
         </div>
     </aside>
 
     <!-- Main Content Area -->
-    <div class="lg:pl-64">
+    <div class="lg:pl-72">
         <!-- Top Navigation Bar -->
         <header class="sticky top-0 z-30 glass-effect shadow-soft">
             <div class="px-4 lg:px-8 py-4">
@@ -400,33 +458,32 @@
             }
         });
 
-
-
         @if (session('success'))
-    Swal.fire({
-        icon: 'success',
-        title: '{{ session("success") }}',
-        toast: true,
-        position: 'top-end',
-        timer: 3000,
-        timerProgressBar: true,
-        showConfirmButton: false,
-    });
-@endif
+            Swal.fire({
+                icon: 'success',
+                title: '{{ session("success") }}',
+                toast: true,
+                position: 'top-end',
+                timer: 3000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+            });
+        @endif
 
-@if (session('error'))
-    Swal.fire({
-        icon: 'error',
-        title: '{{ session("error") }}',
-        toast: true,
-        position: 'top-end',
-        timer: 4000,
-        timerProgressBar: true,
-        showConfirmButton: false,
-    });
-@endif
+        @if (session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: '{{ session("error") }}',
+                toast: true,
+                position: 'top-end',
+                timer: 4000,
+                timerProgressBar: true,
+                showConfirmButton: false,
+            });
+        @endif
     </script>
-@include('admin.partials.global-search')
+
+    @include('admin.partials.global-search')
 
     @stack('scripts')
 </body>

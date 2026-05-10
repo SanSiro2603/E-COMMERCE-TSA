@@ -251,6 +251,23 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 $no           = 1;
                 $grandTotal   = 0;
 
+                // ✅ DIPERBAIKI: mapping warna badge status disamakan dengan index.blade.php
+                // pending    = bg-yellow-400 (#FCD34D) text-yellow-900 (#78350F)
+                // paid       = bg-blue-500   (#3B82F6) text-white      (#FFFFFF)
+                // processing = bg-purple-500 (#A855F7) text-white      (#FFFFFF)
+                // shipped    = bg-indigo-500 (#6366F1) text-white      (#FFFFFF)
+                // completed  = bg-emerald-500(#10B981) text-white      (#FFFFFF)
+                // cancelled  = bg-red-500    (#EF4444) text-white      (#FFFFFF)
+                // [+] Tambah entri baru jika ada status baru
+                $statusColors = [
+                    'pending'    => ['bg' => 'FCD34D', 'font' => '78350F'],
+                    'paid'       => ['bg' => '3B82F6', 'font' => 'FFFFFF'],
+                    'processing' => ['bg' => 'A855F7', 'font' => 'FFFFFF'],
+                    'shipped'    => ['bg' => '6366F1', 'font' => 'FFFFFF'],
+                    'completed'  => ['bg' => '10B981', 'font' => 'FFFFFF'],
+                    'cancelled'  => ['bg' => 'EF4444', 'font' => 'FFFFFF'],
+                ];
+
                 foreach ($this->orders as $order) {
                     $categories = $order->items
                         ->map(fn($item) => $item->product?->category?->name)
@@ -283,6 +300,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                         default         => ucfirst(str_replace('_', ' ', $rawMethod)),
                     };
 
+                    // ✅ DIPERBAIKI: label status disamakan dengan index.blade.php
                     // [+] Tambah entri baru jika ada status baru
                     $statusLabels = [
                         'pending'    => 'Menunggu',
@@ -306,9 +324,18 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('K' . $currentRow, $paymentLabel);
                     $sheet->setCellValue('L' . $currentRow, $statusLabels[$order->status] ?? ucfirst($order->status));
 
-                    // Zebra stripe: baris genap diberi warna latar
+                    // ✅ DIPERBAIKI: warna sel Status (kolom L) disesuaikan per-status
+                    //    seperti badge warna di index.blade.php
+                    $sc = $statusColors[$order->status] ?? ['bg' => '9CA3AF', 'font' => 'FFFFFF'];
+                    $sheet->getStyle('L' . $currentRow)->applyFromArray([
+                        'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $sc['bg']]],
+                        'font'      => ['color' => ['rgb' => $sc['font']], 'bold' => true],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    ]);
+
+                    // Zebra stripe: baris genap diberi warna latar (hanya kolom A–K, kolom L sudah punya warna status)
                     if ($no % 2 === 0) {
-                        $sheet->getStyle('A' . $currentRow . ':L' . $currentRow)->applyFromArray([
+                        $sheet->getStyle('A' . $currentRow . ':K' . $currentRow)->applyFromArray([
                             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
                         ]);
                     }

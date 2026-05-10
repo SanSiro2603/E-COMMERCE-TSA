@@ -99,8 +99,8 @@
                             @endif
                         </td>
                         <td class="px-6 py-4">
-                            <p class="text-xs text-gray-900 dark:text-white">{{ $admin->created_at->format('d M Y') }}</p>
-                            <p class="text-[10px] text-gray-500 dark:text-zinc-500">{{ $admin->created_at->diffForHumans() }}</p>
+                            <p class="text-xs text-gray-900 dark:text-white">{{ $admin->created_at?->format('d M Y') ?? '-' }}</p>
+                            <p class="text-[10px] text-gray-500 dark:text-zinc-500">{{ $admin->created_at?->diffForHumans() ?? '-' }}</p>
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center gap-2">
@@ -176,7 +176,7 @@
                         @forelse($logs as $log)
                         <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
                             <td class="px-6 py-4 text-xs text-gray-500 dark:text-zinc-400">
-                                {{ $log->created_at->format('d M Y H:i') }}
+                                {{ $log->created_at?->format('d M Y H:i') ?? '-' }}
                             </td>
                             <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">
                                 {{ $log->admin_name }}

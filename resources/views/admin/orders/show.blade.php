@@ -97,17 +97,22 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-zinc-400">Penerima</span>
-                    <span class="font-medium text-gray-900 dark:text-white">{{ $order->recipient_name }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">
+                        {{ $order->address->recipient_name ?? '-' }}
+                    </span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-zinc-400">No. HP</span>
-                    <span class="font-medium text-gray-900 dark:text-white">{{ $order->recipient_phone }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">
+                        {{ $order->address->recipient_phone ?? '-' }}
+                    </span>
                 </div>
                 <div class="col-span-2">
                     <span class="text-gray-600 dark:text-zinc-400 block mb-1">Alamat Pengiriman</span>
                     <p class="font-medium text-gray-900 dark:text-white text-sm">
-                        {{ $order->shipping_address }}<br>
-                        {{ $order->city }}, {{ $order->province }}{{ $order->postal_code ? ' - ' . $order->postal_code : '' }}
+                        {{ $order->address->full_address ?? '-' }}<br>
+                        {{ $order->address->city_name ?? '' }}{{ $order->address->city_name ? ', ' : '' }}{{ $order->address->province_name ?? '' }}
+                        {{ $order->address->postal_code ? ' - ' . $order->address->postal_code : '' }}
                     </p>
                 </div>
             </div>

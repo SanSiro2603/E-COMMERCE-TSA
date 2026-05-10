@@ -50,15 +50,21 @@
         .text-bold   { font-weight: bold; }
         .text-muted  { color: #666; font-size: 6.5px; }
 
-        /* STATUS BADGE
+        /* ✅ DIPERBAIKI: STATUS BADGE — warna solid seperti di superadmin pdf.blade.php
+           pending    = bg-yellow-400 text-yellow-900
+           paid       = bg-blue-500   text-white
+           processing = bg-purple-500 text-white
+           shipped    = bg-indigo-500 text-white
+           completed  = bg-emerald-500 text-white
+           cancelled  = bg-red-500   text-white
            [+] Tambah class .badge-namaStatus baru jika ada status baru */
-        .badge            { padding: 1px 4px; border-radius: 3px; font-size: 6.5px; font-weight: bold; }
-        .badge-pending    { background: #fef9c3; color: #854d0e; }
-        .badge-paid       { background: #dbeafe; color: #1e40af; }
-        .badge-processing { background: #f3e8ff; color: #6b21a8; }
-        .badge-shipped    { background: #e0e7ff; color: #3730a3; }
-        .badge-completed  { background: #dcfce7; color: #15803d; }
-        .badge-cancelled  { background: #fee2e2; color: #991b1b; }
+        .badge            { padding: 2px 6px; border-radius: 3px; font-size: 7px; font-weight: bold; }
+        .badge-pending    { background: #FACC15; color: #713F12; }
+        .badge-paid       { background: #3B82F6; color: #FFFFFF; }
+        .badge-processing { background: #A855F7; color: #FFFFFF; }
+        .badge-shipped    { background: #6366F1; color: #FFFFFF; }
+        .badge-completed  { background: #10B981; color: #FFFFFF; }
+        .badge-cancelled  { background: #EF4444; color: #FFFFFF; }
 
         /* TFOOT */
         tfoot td { background: #e8f5e9; font-weight: bold; border-top: 2px solid #2D6A4F; font-size: 8px; }

@@ -193,7 +193,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         // [+] Tambah nama relasi di load([]) jika perlu tampilkan data tambahan
-        $order->load(['user', 'items.product', 'payment']);
+        $order->load(['user', 'items.product', 'payment', 'address']);
         return view('admin.orders.show', compact('order'));
     }
 

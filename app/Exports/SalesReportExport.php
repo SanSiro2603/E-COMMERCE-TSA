@@ -240,6 +240,23 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     'cancelled'  => 'Dibatalkan',
                 ];
 
+                // ✅ DIPERBAIKI: warna badge status disamakan dengan superadmin (solid color)
+                // pending    = FCD34D / 78350F
+                // paid       = 3B82F6 / FFFFFF
+                // processing = A855F7 / FFFFFF
+                // shipped    = 6366F1 / FFFFFF
+                // completed  = 10B981 / FFFFFF
+                // cancelled  = EF4444 / FFFFFF
+                // [+] Tambah entri baru jika ada status baru
+                $statusColors = [
+                    'pending'    => ['bg' => 'FCD34D', 'font' => '78350F'],
+                    'paid'       => ['bg' => '3B82F6', 'font' => 'FFFFFF'],
+                    'processing' => ['bg' => 'A855F7', 'font' => 'FFFFFF'],
+                    'shipped'    => ['bg' => '6366F1', 'font' => 'FFFFFF'],
+                    'completed'  => ['bg' => '10B981', 'font' => 'FFFFFF'],
+                    'cancelled'  => ['bg' => 'EF4444', 'font' => 'FFFFFF'],
+                ];
+
                 foreach ($this->orders as $order) {
                     $products = $order->items
                         ->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')
@@ -267,10 +284,18 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('L' . $currentRow, 'Rp ' . number_format($order->grand_total ?? 0, 0, ',', '.'));
                     $sheet->setCellValue('M' . $currentRow, $statusLabels[$order->status] ?? ucfirst($order->status));
 
+                    // ✅ DIPERBAIKI: warna sel Status (kolom M) solid per-status seperti superadmin
+                    $sc = $statusColors[$order->status] ?? ['bg' => '9CA3AF', 'font' => 'FFFFFF'];
+                    $sheet->getStyle('M' . $currentRow)->applyFromArray([
+                        'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => $sc['bg']]],
+                        'font'      => ['color' => ['rgb' => $sc['font']], 'bold' => true],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                    ]);
+
                     // ✅ DIPERBAIKI: cek $no SEBELUM increment, kondisi ganjil (1,3,5...)
                     // baris pertama (no=1) akan diberi warna, baris kedua (no=2) tidak, dst.
                     if ($no % 2 !== 0) {
-                        $sheet->getStyle('A' . $currentRow . ':M' . $currentRow)->applyFromArray([
+                        $sheet->getStyle('A' . $currentRow . ':L' . $currentRow)->applyFromArray([
                             'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F0F7F4']],
                         ]);
                     }

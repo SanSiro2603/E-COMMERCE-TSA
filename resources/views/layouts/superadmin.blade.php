@@ -57,33 +57,6 @@
             }
         }
 
-        /* Menu Item Styling */
-        .menu-item {
-            position: relative;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .menu-item:hover {
-            transform: translateX(2px);
-        }
-
-        .menu-item-active {
-            background: linear-gradient(135deg, rgba(123, 182, 97, 0.12) 0%, rgba(123, 182, 97, 0.04) 100%);
-            color: #7BB661 !important;
-        }
-
-        .menu-item-active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 60%;
-            background: linear-gradient(180deg, #7BB661 0%, #72e236 100%);
-            border-radius: 0 4px 4px 0;
-        }
-
         /* Scrollbar minimal */
         .custom-scrollbar::-webkit-scrollbar {
             width: 4px;
@@ -94,12 +67,12 @@
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(123, 182, 97, 0.3);
+            background: rgba(114, 226, 54, 0.3);
             border-radius: 10px;
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(123, 182, 97, 0.5);
+            background: rgba(114, 226, 54, 0.5);
         }
 
         /* Card minimal hover */
@@ -149,15 +122,6 @@
             animation: slideDown 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        /* Logo animation */
-        .logo-icon {
-            transition: transform 0.3s ease;
-        }
-
-        .logo-container:hover .logo-icon {
-            transform: rotate(12deg) scale(1.1);
-        }
-
         /* Glass effect */
         .glass-effect {
             background: rgba(255, 255, 255, 0.7);
@@ -194,6 +158,11 @@
             gap: 0.5rem;
             font-size: 0.813rem;
         }
+
+        /* Sidebar feature image transition */
+        #sidebar-feature-image {
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
     </style>
 </head>
 
@@ -203,65 +172,116 @@
     <div class="mobile-overlay" id="mobileOverlay" onclick="toggleSidebar()"></div>
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar fixed left-0 top-0 z-50 h-screen w-64 bg-white/95 dark:bg-zinc-900/95 border-r border-gray-100 dark:border-zinc-800/50 flex flex-col shadow-soft">
+    <aside id="sidebar"
+        class="sidebar fixed left-0 top-0 z-50 h-screen w-72 bg-[#03150B] border-r border-green-500/10 flex flex-col shadow-2xl overflow-hidden">
+
+        <!-- Background Glow -->
+        <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(114,226,54,0.15),transparent_40%)] pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-green-500/10 to-transparent pointer-events-none"></div>
 
         <!-- Logo -->
-        <div class="logo-container px-5 py-6 border-b border-gray-100 dark:border-zinc-800/50 flex items-center gap-3 cursor-default">
-            <div class="logo-icon w-10 h-10 flex-shrink-0">
-                <img src="{{ asset('images/logo header.png') }}" alt="Logo TSA" class="h-full w-auto object-contain">
+        {{-- PERBAIKAN: logo transparan (hapus bg-white/10), ukuran lebih besar --}}
+        <div class="relative px-5 py-6 border-b border-white/10 flex items-center gap-3 z-10">
+            <div class="w-14 h-14 flex items-center justify-center overflow-hidden flex-shrink-0">
+                <img src="{{ asset('images/logo header.png') }}"
+                    alt="Logo TSA"
+                    class="h-14 w-14 object-contain">
             </div>
             <div>
-                <h1 class="text-[15px] font-bold text-gray-900 dark:text-white tracking-tight">E-Commerce TSA</h1>
-                <p class="text-[10px] text-gray-400 dark:text-zinc-500 font-medium tracking-wide uppercase">Super Admin</p>
+                <h1 class="text-white text-[18px] font-bold leading-tight">E-Commerce TSA</h1>
+                <p class="text-green-400 text-[11px] uppercase tracking-[2px] font-semibold">Super Admin</p>
             </div>
         </div>
 
-        <!-- Navigation -->
-        <nav class="flex-1 px-3 py-6 overflow-y-auto custom-scrollbar space-y-1.5">
-            @php
-                $menu = [
-                    ['route' => 'superadmin.dashboard', 'icon' => 'dashboard', 'label' => 'Dashboard'],
-                    ['route' => 'superadmin.admins.index', 'icon' => 'group', 'label' => 'Manajemen Admin'],
-                    ['route' => 'superadmin.reports.index', 'icon' => 'analytics', 'label' => 'Laporan'],
-                ];
-            @endphp
+        @php
+            $menu = [
+                [
+                    'route' => 'superadmin.dashboard',
+                    'icon'  => 'dashboard',
+                    'label' => 'Dashboard',
+                    'image' => 'images/sidebar/dashboard.png',
+                ],
+                [
+                    'route' => 'superadmin.admins.index',
+                    'icon'  => 'group',
+                    'label' => 'Manajemen Admin',
+                    'image' => 'images/sidebar/manajemen-admin.png',
+                ],
+                [
+                    'route' => 'superadmin.reports.index',
+                    'icon'  => 'analytics',
+                    'label' => 'Laporan',
+                    'image' => 'images/sidebar/laporan.png',
+                ],
+            ];
 
+            $activeMenu = collect($menu)->first(fn($item) => request()->routeIs($item['route'].'*'))
+                ?? $menu[0];
+        @endphp
+
+        <!-- Navigation (di atas gambar) -->
+        {{-- PERBAIKAN: rounded-2xl diganti rounded-none (tidak ada border radius) --}}
+        <nav class="relative px-3 pt-4 pb-2 space-y-2 z-10">
             @foreach ($menu as $item)
                 @php $active = request()->routeIs($item['route'].'*'); @endphp
+
                 <a href="{{ route($item['route']) }}"
-                    class="menu-item flex items-center gap-3 px-4 py-2.5 rounded-xl text-[13px] font-medium transition-all
-                   {{ $active ? 'menu-item-active text-soft-green font-semibold' : 'text-gray-600 dark:text-zinc-400 hover:bg-gray-50 dark:hover:bg-zinc-800/50 hover:text-soft-green' }}">
-                    <span class="material-symbols-outlined text-[20px] transition-colors {{ $active ? 'text-soft-green' : 'text-gray-400 dark:text-zinc-500' }}">
-                        {{ $item['icon'] }}
-                    </span>
-                    <span>{{ $item['label'] }}</span>
+                    data-image="{{ asset($item['image']) }}"
+                    class="sidebar-nav-link group relative flex items-center gap-3 px-4 py-3 rounded-none transition-all duration-300 overflow-hidden
+                        {{ $active
+                            ? 'bg-gradient-to-r from-green-500 to-green-400 text-white shadow-[0_10px_30px_rgba(114,226,54,0.35)]'
+                            : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
+
+                    @if ($active)
+                        <div class="absolute inset-0 bg-white/10 backdrop-blur-xl pointer-events-none"></div>
+                    @endif
+
+                    <div class="relative z-10 flex items-center gap-3">
+                        <span class="material-symbols-outlined text-[21px]">{{ $item['icon'] }}</span>
+                        <span class="text-[14px] font-semibold tracking-wide">{{ $item['label'] }}</span>
+                    </div>
                 </a>
             @endforeach
         </nav>
 
-        <!-- User Profile -->
-        <div class="px-4 py-4 border-t border-gray-100 dark:border-zinc-800/50">
-            <div class="flex items-center gap-3 px-3 py-3 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100/50 dark:from-zinc-800/40 dark:to-zinc-800/20 hover:shadow-md transition-all duration-300">
-                <div class="w-9 h-9 bg-gradient-to-br from-soft-green to-primary rounded-full flex items-center justify-center text-white font-bold text-[13px] shadow-lg shadow-soft-green/30">
+        <!-- Dynamic Illustration (di bawah navigasi, transparan tanpa kotak) -->
+        <div class="relative flex-1 flex items-end justify-center px-4 pb-4 z-10">
+            <img
+                id="sidebar-feature-image"
+                src="{{ asset($activeMenu['image']) }}"
+                alt="{{ $activeMenu['label'] }}"
+                class="w-full max-h-[220px] object-contain drop-shadow-2xl">
+        </div>
+
+        <!-- Footer User -->
+        <div class="relative px-4 py-4 border-t border-white/10 z-10">
+            <div class="flex items-center gap-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl p-3">
+
+                <div class="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-lime-300 text-black font-bold flex items-center justify-center shadow-lg shadow-green-500/30 flex-shrink-0">
                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                 </div>
+
                 <div class="flex-1 min-w-0">
-                    <p class="text-[13px] font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-[10px] text-gray-500 dark:text-zinc-500 uppercase tracking-wide">Super Admin</p>
+                    <p class="text-white text-[13px] font-semibold truncate">{{ Auth::user()->name }}</p>
+                    <p class="text-green-300 text-[10px] uppercase tracking-wider">Super Admin</p>
                 </div>
+
+                {{-- PERBAIKAN: background merah jelas (bg-red-600 hover:bg-red-700), text putih --}}
                 <a href="{{ route('logout') }}"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                    class="p-1.5 text-gray-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
-                    title="Logout">
+                    class="w-9 h-9 rounded-xl flex items-center justify-center bg-red-600 hover:bg-red-700 text-white transition-all duration-300 flex-shrink-0">
                     <span class="material-symbols-outlined text-[18px]">logout</span>
                 </a>
-                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
+
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                    @csrf
+                </form>
             </div>
         </div>
     </aside>
 
     <!-- Main Content Area -->
-    <div class="lg:pl-64">
+    <div class="lg:pl-72">
         <!-- Top Navigation Bar -->
         <header class="sticky top-0 z-30 glass-effect shadow-soft">
             <div class="px-4 lg:px-8 py-4">
@@ -281,7 +301,7 @@
                     <div class="flex items-center gap-2">
                         <!-- Date Time -->
                         <div class="hidden md:block text-right mr-4">
-                             <p class="text-[11px] font-semibold text-gray-900 dark:text-white">{{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
+                            <p class="text-[11px] font-semibold text-gray-900 dark:text-white">{{ \Carbon\Carbon::now()->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
                             <p class="text-[10px] text-gray-500 dark:text-zinc-500">{{ now()->format('H:i') }} WIB</p>
                         </div>
 
@@ -333,7 +353,7 @@
         </footer>
     </div>
 
-    <!-- Chart.js -->
+    <!-- Chart.js & SweetAlert -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
@@ -350,7 +370,6 @@
         function toggleTheme() {
             const html = document.documentElement;
             const themeIcon = document.getElementById('themeIcon');
-
             if (html.classList.contains('dark')) {
                 html.classList.remove('dark');
                 localStorage.setItem('theme', 'light');
@@ -368,8 +387,9 @@
             document.getElementById('themeIcon').textContent = 'dark_mode';
         }
 
-        // Auto-dismiss notifikasi setelah 4 detik
         document.addEventListener('DOMContentLoaded', () => {
+
+            // Auto-dismiss notifikasi setelah 4 detik
             document.querySelectorAll('[data-auto-dismiss]').forEach(el => {
                 setTimeout(() => {
                     el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
@@ -378,6 +398,10 @@
                     setTimeout(() => el.remove(), 500);
                 }, 4000);
             });
+
+            // PERBAIKAN: Hapus event hover untuk gambar sidebar
+            // Gambar sidebar hanya mengikuti menu yang sedang aktif (route), tidak berubah saat hover
+
         });
 
         // Close sidebar when clicking outside on mobile
@@ -385,7 +409,6 @@
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('mobileOverlay');
             const menuButton = event.target.closest('button[onclick="toggleSidebar()"]');
-
             if (!sidebar.contains(event.target) && !menuButton && window.innerWidth < 1024) {
                 sidebar.classList.add('hidden-mobile');
                 overlay.classList.remove('active');
