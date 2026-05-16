@@ -4,6 +4,65 @@
 @section('title', 'Kelola Pesanan - E-Commerce TSA')
 
 @section('content')
+
+<style>
+    /* ── Pagination: tombol angka biasa ── */
+    nav svg {
+        color: #2D6A4F !important;
+    }
+    nav a.relative.inline-flex {
+        color: #2D6A4F !important;
+        background-color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    nav a.relative.inline-flex:hover {
+        background-color: #2D6A4F !important;
+        color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    /* ── Tombol aktif ── */
+    nav span[aria-current="page"] span.relative.inline-flex {
+        background: #2D6A4F !important;
+        color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    /* ── Tombol disabled ── */
+    nav span[aria-disabled="true"] span {
+        color: #9ca3af !important;
+        border-color: #e5e7eb !important;
+        background-color: #ffffff !important;
+    }
+    /* ── Dark mode: tombol biasa ── */
+    .dark nav a.relative.inline-flex {
+        color: #4ade80 !important;
+        background-color: #27272a !important;
+        border-color: #2D6A4F !important;
+    }
+    .dark nav a.relative.inline-flex:hover {
+        background-color: #2D6A4F !important;
+        color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    /* ── Dark mode: tombol aktif ── */
+    .dark nav span[aria-current="page"] span.relative.inline-flex {
+        background: #2D6A4F !important;
+        color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    /* ── Dark mode: tombol disabled ── */
+    .dark nav span[aria-disabled="true"] span {
+        color: #52525b !important;
+        border-color: #3f3f46 !important;
+        background-color: #27272a !important;
+    }
+
+    @keyframes fade-in {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in { animation: fade-in 0.3s ease-out; }
+</style>
+
 <div class="space-y-6">
 
     @if(session('success'))
@@ -57,93 +116,86 @@
         </div>
     </div>
 
-    {{-- STATS CARDS — Jumlah pesanan per status
+    {{-- STATS CARDS — background soft per status
          [+] Tambah kartu baru di sini jika ada status baru
          Sesuaikan juga: $stats di OrderController, $statuses, dan kolom grid (grid-cols-7) --}}
     <div class="grid grid-cols-2 lg:grid-cols-7 gap-4">
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="all">
-            <div class="flex flex-col">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-gray-500 dark:text-zinc-400 uppercase font-medium">Semua</span>
-                    <div class="w-8 h-8 bg-gray-100 dark:bg-gray-500/10 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-gray-600 dark:text-gray-400 text-lg">shopping_bag</span>
-                    </div>
+        {{-- Semua — abu-abu --}}
+        <div class="bg-gradient-to-br from-gray-500 to-gray-700 rounded-xl p-4 shadow-sm border border-gray-400 dark:border-zinc-600" data-stat="all">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-lg">shopping_bag</span>
                 </div>
-                <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ $stats['all'] }}</p>
             </div>
+            <p class="text-2xl font-bold text-white">{{ $stats['all'] }}</p>
+            <p class="text-[10px] font-semibold text-gray-200 uppercase tracking-wide mt-1">Semua</p>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="pending">
-            <div class="flex flex-col">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-yellow-600 dark:text-yellow-400 uppercase font-medium">Menunggu</span>
-                    <div class="w-8 h-8 bg-yellow-100 dark:bg-yellow-500/10 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-lg">hourglass_top</span>
-                    </div>
+        {{-- Menunggu — kuning --}}
+        <div class="bg-gradient-to-br from-yellow-400 to-amber-500 rounded-xl p-4 shadow-sm border border-yellow-400 dark:border-yellow-500/50" data-stat="pending">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-lg">hourglass_top</span>
                 </div>
-                <p class="text-2xl font-bold text-yellow-600 dark:text-yellow-400">{{ $stats['pending'] }}</p>
             </div>
+            <p class="text-2xl font-bold text-white">{{ $stats['pending'] }}</p>
+            <p class="text-[10px] font-semibold text-yellow-100 uppercase tracking-wide mt-1">Menunggu</p>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="paid">
-            <div class="flex flex-col">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-blue-600 dark:text-blue-400 uppercase font-medium">Dibayar</span>
-                    <div class="w-8 h-8 bg-blue-100 dark:bg-blue-500/10 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-lg">payments</span>
-                    </div>
+        {{-- Dibayar — biru --}}
+        <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-4 shadow-sm border border-blue-400 dark:border-blue-500/50" data-stat="paid">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-lg">payments</span>
                 </div>
-                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $stats['paid'] }}</p>
             </div>
+            <p class="text-2xl font-bold text-white">{{ $stats['paid'] }}</p>
+            <p class="text-[10px] font-semibold text-blue-100 uppercase tracking-wide mt-1">Dibayar</p>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="processing">
-            <div class="flex flex-col">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-purple-600 dark:text-purple-400 uppercase font-medium">Diproses</span>
-                    <div class="w-8 h-8 bg-purple-100 dark:bg-purple-500/10 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-lg">inventory</span>
-                    </div>
+        {{-- Diproses — ungu --}}
+        <div class="bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl p-4 shadow-sm border border-purple-400 dark:border-purple-500/50" data-stat="processing">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-lg">inventory</span>
                 </div>
-                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ $stats['processing'] }}</p>
             </div>
+            <p class="text-2xl font-bold text-white">{{ $stats['processing'] }}</p>
+            <p class="text-[10px] font-semibold text-purple-100 uppercase tracking-wide mt-1">Diproses</p>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="shipped">
-            <div class="flex flex-col">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-indigo-600 dark:text-indigo-400 uppercase font-medium">Dikirim</span>
-                    <div class="w-8 h-8 bg-indigo-100 dark:bg-indigo-500/10 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400 text-lg">local_shipping</span>
-                    </div>
+        {{-- Dikirim — indigo --}}
+        <div class="bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl p-4 shadow-sm border border-indigo-400 dark:border-indigo-500/50" data-stat="shipped">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-lg">local_shipping</span>
                 </div>
-                <p class="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{{ $stats['shipped'] }}</p>
             </div>
+            <p class="text-2xl font-bold text-white">{{ $stats['shipped'] }}</p>
+            <p class="text-[10px] font-semibold text-indigo-100 uppercase tracking-wide mt-1">Dikirim</p>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="completed">
-            <div class="flex flex-col">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-green-600 dark:text-green-400 uppercase font-medium">Selesai</span>
-                    <div class="w-8 h-8 bg-green-100 dark:bg-green-500/10 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-lg">check_circle</span>
-                    </div>
+        {{-- Selesai — hijau --}}
+        <div class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl p-4 shadow-sm border border-emerald-400 dark:border-emerald-500/50" data-stat="completed">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-lg">check_circle</span>
                 </div>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ $stats['completed'] }}</p>
             </div>
+            <p class="text-2xl font-bold text-white">{{ $stats['completed'] }}</p>
+            <p class="text-[10px] font-semibold text-emerald-100 uppercase tracking-wide mt-1">Selesai</p>
         </div>
 
-        <div class="bg-white dark:bg-zinc-900 p-4 rounded-lg border border-gray-200 dark:border-zinc-800" data-stat="cancelled">
-            <div class="flex flex-col">
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs text-red-600 dark:text-red-400 uppercase font-medium">Dibatalkan</span>
-                    <div class="w-8 h-8 bg-red-100 dark:bg-red-500/10 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-lg">cancel</span>
-                    </div>
+        {{-- Dibatalkan — merah --}}
+        <div class="bg-gradient-to-br from-red-500 to-rose-600 rounded-xl p-4 shadow-sm border border-red-400 dark:border-red-500/50" data-stat="cancelled">
+            <div class="flex items-center justify-between mb-3">
+                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
+                    <span class="material-symbols-outlined text-white text-lg">cancel</span>
                 </div>
-                <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ $stats['cancelled'] }}</p>
             </div>
+            <p class="text-2xl font-bold text-white">{{ $stats['cancelled'] }}</p>
+            <p class="text-[10px] font-semibold text-red-100 uppercase tracking-wide mt-1">Dibatalkan</p>
         </div>
 
     </div>
@@ -196,17 +248,15 @@
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full">
-                {{-- HEADER TABEL — 6 kolom
-                     [+] Tambah <th> baru di sini jika perlu kolom tambahan
-                     Sesuaikan juga <td> di baris @forelse dan di generateOrderRow() --}}
-                <thead class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800">
-                    <tr>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">No. Pesanan</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Tanggal</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Pembeli</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Total</th>
-                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wider">Aksi</th>
+                {{-- HEADER TABEL — background hijau tua #2D6A4F seperti laporan --}}
+                <thead>
+                    <tr style="background-color: #2D6A4F;">
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">No. Pesanan</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Tanggal</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Pembeli</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-white uppercase tracking-wider">Total</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-white uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-zinc-800">
@@ -214,6 +264,9 @@
                         @php
                             // Badge "BARU!" jika baru dibayar dalam 2 menit terakhir
                             $isNewPaid = $order->status === 'paid' && $order->paid_at && $order->paid_at->diffInMinutes(now()) < 2;
+
+                            // Status yang TIDAK pakai animasi ping (sudah final)
+                            $noPing = in_array($order->status, ['completed', 'cancelled']);
                         @endphp
 
                         <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-all {{ $isNewPaid ? 'ring-2 ring-green-400 ring-opacity-50 animate-pulse' : '' }}">
@@ -235,12 +288,18 @@
                                 <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->created_at->format('H:i') }}</p>
                             </td>
 
-                            {{-- KOLOM 3: Pembeli --}}
+                            {{-- KOLOM 3: Pembeli — foto profil dari storage jika ada, fallback ke inisial --}}
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                        {{ strtoupper(substr($order->user->name, 0, 1)) }}
-                                    </div>
+                                    @if($order->user->profile_photo)
+                                        <img src="{{ Storage::url($order->user->profile_photo) }}"
+                                             alt="{{ $order->user->name }}"
+                                             class="w-10 h-10 rounded-full object-cover border-2 border-soft-green/30 flex-shrink-0">
+                                    @else
+                                        <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                                            {{ strtoupper(substr($order->user->name, 0, 1)) }}
+                                        </div>
+                                    @endif
                                     <div>
                                         <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $order->user->name }}</p>
                                         <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->user->email }}</p>
@@ -255,6 +314,7 @@
                             </td>
 
                             {{-- KOLOM 5: Badge Status
+                                 completed & cancelled → tidak pakai animate-ping
                                  [+] Tambah @case baru di @switch jika ada status baru --}}
                             <td class="px-6 py-4 text-center">
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full
@@ -266,7 +326,8 @@
                                         @case('completed') bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 @break
                                         @case('cancelled') bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 @break
                                     @endswitch">
-                                    <span class="w-1.5 h-1.5 rounded-full animate-ping
+                                    {{-- Dot: ping hanya untuk status non-final --}}
+                                    <span class="w-1.5 h-1.5 rounded-full {{ $noPing ? '' : 'animate-ping' }}
                                         @switch($order->status)
                                             @case('pending') bg-yellow-500 @break
                                             @case('paid') bg-blue-500 @break
@@ -279,10 +340,10 @@
                                 </span>
                             </td>
 
-                            {{-- KOLOM 6: Aksi --}}
+                            {{-- KOLOM 6: Aksi — background hijau seperti button filter --}}
                             <td class="px-6 py-4 text-center">
                                 <a href="{{ route('admin.orders.show', $order) }}"
-                                   class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-xs font-medium transition-colors">
+                                   class="inline-flex items-center gap-1 px-3 py-1.5 bg-soft-green hover:bg-primary text-white rounded-lg text-xs font-medium transition-colors shadow-sm shadow-soft-green/30">
                                     <span class="material-symbols-outlined text-base">visibility</span>
                                     Detail
                                 </a>
@@ -314,14 +375,6 @@
     </div>
 
 </div>
-
-<style>
-    @keyframes fade-in {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fade-in { animation: fade-in 0.3s ease-out; }
-</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {

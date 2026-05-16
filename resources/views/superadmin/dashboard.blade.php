@@ -1,10 +1,76 @@
-
 {{-- resources/views/superadmin/dashboard.blade.php --}}
 @extends('layouts.superadmin')
 
 @section('title', 'Dashboard Analitik - E-Commerce TSA')
 
 @section('content')
+
+<style>
+    /* ── Pagination: tombol angka biasa ── */
+    nav svg {
+        color: #2D6A4F !important;
+    }
+    nav a.relative.inline-flex {
+        color: #2D6A4F !important;
+        background-color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    nav a.relative.inline-flex:hover {
+        background-color: #2D6A4F !important;
+        color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    /* ── Tombol aktif ── */
+    nav span[aria-current="page"] span.relative.inline-flex {
+        background: #2D6A4F !important;
+        color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    /* ── Tombol disabled ── */
+    nav span[aria-disabled="true"] span {
+        color: #9ca3af !important;
+        border-color: #e5e7eb !important;
+        background-color: #ffffff !important;
+    }
+    /* ── Dark mode: tombol biasa ── */
+    .dark nav a.relative.inline-flex {
+        color: #4ade80 !important;
+        background-color: #27272a !important;
+        border-color: #2D6A4F !important;
+    }
+    .dark nav a.relative.inline-flex:hover {
+        background-color: #2D6A4F !important;
+        color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    /* ── Dark mode: tombol aktif ── */
+    .dark nav span[aria-current="page"] span.relative.inline-flex {
+        background: #2D6A4F !important;
+        color: #ffffff !important;
+        border-color: #2D6A4F !important;
+    }
+    /* ── Dark mode: tombol disabled ── */
+    .dark nav span[aria-disabled="true"] span {
+        color: #52525b !important;
+        border-color: #3f3f46 !important;
+        background-color: #27272a !important;
+    }
+
+    /* ── Zebra striping tabel (genap = hijau muda, ganjil = putih) ── */
+    tr.row-even-green {
+        background-color: #F0F7F4;
+    }
+    .dark tr.row-even-green {
+        background-color: rgba(39, 68, 54, 0.3);
+    }
+    tr.row-odd-white {
+        background-color: #ffffff;
+    }
+    .dark tr.row-odd-white {
+        background-color: transparent;
+    }
+</style>
+
 <div class="space-y-6">
 
     {{-- PAGE HEADER --}}
@@ -94,63 +160,74 @@
         </form>
     </div>
 
-    {{-- SCORE CARDS --}}
+    {{-- SCORE CARDS — warna gradient per kartu --}}
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+
+        {{-- Total Pendapatan — emerald (uang/revenue) --}}
+        <div class="bg-gradient-to-br from-emerald-500 to-green-600 rounded-xl p-5 shadow-lg shadow-emerald-500/25 border border-emerald-400/20">
             <div class="flex items-start justify-between gap-2">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Total Pendapatan</p>
-                    <p class="text-lg font-bold text-gray-900 dark:text-white mt-1.5 truncate">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</p>
+                    <p class="text-[10px] font-semibold text-emerald-100 uppercase tracking-wide leading-tight">Total Pendapatan</p>
+                    <p class="text-lg font-bold text-white mt-1.5 truncate">Rp {{ number_format($totalRevenue, 0, ',', '.') }}</p>
                 </div>
-                <div class="w-10 h-10 bg-green-50 dark:bg-green-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-xl">payments</span>
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-white text-xl">payments</span>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+
+        {{-- Total Transaksi — blue (transaksi/aktivitas) --}}
+        <div class="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-5 shadow-lg shadow-blue-500/25 border border-blue-400/20">
             <div class="flex items-start justify-between gap-2">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Total Transaksi</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1.5">{{ number_format($totalTransactions) }}</p>
+                    <p class="text-[10px] font-semibold text-blue-100 uppercase tracking-wide leading-tight">Total Transaksi</p>
+                    <p class="text-2xl font-bold text-white mt-1.5">{{ number_format($totalTransactions) }}</p>
                 </div>
-                <div class="w-10 h-10 bg-blue-50 dark:bg-blue-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-blue-600 dark:text-blue-400 text-xl">receipt_long</span>
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-white text-xl">receipt_long</span>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+
+        {{-- Produk Terjual — orange (produk/inventory) --}}
+        <div class="bg-gradient-to-br from-orange-500 to-amber-600 rounded-xl p-5 shadow-lg shadow-orange-500/25 border border-orange-400/20">
             <div class="flex items-start justify-between gap-2">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Produk Terjual</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1.5">{{ number_format($totalProductsSold) }}</p>
+                    <p class="text-[10px] font-semibold text-orange-100 uppercase tracking-wide leading-tight">Produk Terjual</p>
+                    <p class="text-2xl font-bold text-white mt-1.5">{{ number_format($totalProductsSold) }}</p>
                 </div>
-                <div class="w-10 h-10 bg-orange-50 dark:bg-orange-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-orange-600 dark:text-orange-400 text-xl">inventory_2</span>
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-white text-xl">inventory_2</span>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+
+        {{-- Rata-rata Transaksi — violet (analitik/statistik) --}}
+        <div class="bg-gradient-to-br from-violet-500 to-purple-700 rounded-xl p-5 shadow-lg shadow-violet-500/25 border border-violet-400/20">
             <div class="flex items-start justify-between gap-2">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Rata-rata Transaksi</p>
-                    <p class="text-lg font-bold text-gray-900 dark:text-white mt-1.5 truncate">Rp {{ number_format($avgTransactionValue, 0, ',', '.') }}</p>
+                    <p class="text-[10px] font-semibold text-violet-100 uppercase tracking-wide leading-tight">Rata-rata Transaksi</p>
+                    <p class="text-lg font-bold text-white mt-1.5 truncate">Rp {{ number_format($avgTransactionValue, 0, ',', '.') }}</p>
                 </div>
-                <div class="w-10 h-10 bg-purple-50 dark:bg-purple-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-purple-600 dark:text-purple-400 text-xl">query_stats</span>
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-white text-xl">query_stats</span>
                 </div>
             </div>
         </div>
-        <div class="bg-white dark:bg-zinc-900 p-5 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm">
+
+        {{-- Pelanggan Aktif — pink (pelanggan/user) --}}
+        <div class="bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl p-5 shadow-lg shadow-pink-500/25 border border-pink-400/20">
             <div class="flex items-start justify-between gap-2">
                 <div class="flex-1 min-w-0">
-                    <p class="text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wide">Pelanggan Aktif</p>
-                    <p class="text-2xl font-bold text-gray-900 dark:text-white mt-1.5">{{ number_format($totalBuyers) }}</p>
+                    <p class="text-[10px] font-semibold text-pink-100 uppercase tracking-wide leading-tight">Pelanggan Aktif</p>
+                    <p class="text-2xl font-bold text-white mt-1.5">{{ number_format($totalBuyers) }}</p>
                 </div>
-                <div class="w-10 h-10 bg-pink-50 dark:bg-pink-500/10 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <span class="material-symbols-outlined text-pink-600 dark:text-pink-400 text-xl">group</span>
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <span class="material-symbols-outlined text-white text-xl">group</span>
                 </div>
             </div>
         </div>
+
     </div>
 
     {{-- GRAFIK PENDAPATAN --}}
@@ -440,27 +517,27 @@
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
-                <thead class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-200 dark:border-zinc-800">
-                    <tr>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">No. Pesanan</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Tanggal</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Provinsi</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Kategori</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Produk</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Qty</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Subtotal</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Ongkir</th>
-                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Total</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Metode Bayar</th>
-                        <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase whitespace-nowrap">Status</th>
+                <thead>
+                    <tr style="background-color: #2D6A4F;" class="dark:bg-zinc-800">
+                        <th class="px-4 py-3.5 text-left   text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">No. Pesanan</th>
+                        <th class="px-4 py-3.5 text-left   text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Tanggal</th>
+                        <th class="px-4 py-3.5 text-left   text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Provinsi</th>
+                        <th class="px-4 py-3.5 text-left   text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Kategori</th>
+                        <th class="px-4 py-3.5 text-left   text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Produk</th>
+                        <th class="px-4 py-3.5 text-center text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Qty</th>
+                        <th class="px-4 py-3.5 text-right  text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Subtotal</th>
+                        <th class="px-4 py-3.5 text-right  text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Ongkir</th>
+                        <th class="px-4 py-3.5 text-right  text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Total</th>
+                        <th class="px-4 py-3.5 text-center text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Metode Bayar</th>
+                        <th class="px-4 py-3.5 text-center text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider whitespace-nowrap">Status</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-                    @forelse($salesTable as $order)
+                    @forelse($salesTable as $i => $order)
                         @php
                             $itemCount     = $order->items->sum('quantity');
-                            $productNames  = $order->items->map(fn($i) => optional($i->product)->name ?? 'Dihapus')->implode(', ');
-                            $categoryNames = $order->items->map(fn($i) => optional(optional($i->product)->category)->name ?? '-')->unique()->implode(', ');
+                            $productNames  = $order->items->map(fn($it) => optional($it->product)->name ?? 'Dihapus')->implode(', ');
+                            $categoryNames = $order->items->map(fn($it) => optional(optional($it->product)->category)->name ?? '-')->unique()->implode(', ');
                             $pmLabel = match(optional($order->payment)->payment_type) {
                                 'bank_transfer' => 'Transfer Bank',
                                 'echannel'      => 'Mandiri',
@@ -480,8 +557,10 @@
                                 'cancelled'  => 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400',
                                 default      => 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400',
                             };
+                            // Baris genap (0,2,4,...) = hijau muda | Baris ganjil (1,3,5,...) = putih
+                            $rowClass = ($i % 2 === 0) ? 'row-odd-white' : 'row-even-green';
                         @endphp
-                        <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/40 transition-colors">
+                        <tr class="{{ $rowClass }}">
                             <td class="px-4 py-3 whitespace-nowrap font-semibold text-soft-green">#{{ $order->order_number }}</td>
                             <td class="px-4 py-3 whitespace-nowrap text-gray-700 dark:text-zinc-300">
                                 {{ $order->created_at->format('d M Y') }}<br>
@@ -612,7 +691,6 @@ if (revCtx) {
 // ═══════════════════════════════════════════════
 const prodCtx = document.getElementById('productChart');
 if (prodCtx) {
-    // Pecah nama panjang jadi multi-line (maks 20 karakter per baris)
     function wrapLabel(str, maxLen) {
         const words = str.split(' ');
         const lines = [];
@@ -655,12 +733,10 @@ if (prodCtx) {
                 tooltip: {
                     backgroundColor: tooltipBg, padding: 10, borderRadius: 8,
                     callbacks: {
-                        // Tooltip tampilkan nama asli (flat), bukan array
                         title: (items) => prodRawLabels[items[0].dataIndex],
                         label: c => '  ' + c.parsed.x.toLocaleString('id-ID') + ' item',
                     }
                 },
-                // Label nilai di ujung bar
                 datalabels: false,
             },
             scales: {
@@ -676,7 +752,6 @@ if (prodCtx) {
                     ticks: {
                         color: tickColor,
                         font: { size: 11 },
-                        // Pastikan multi-line label tidak terpotong
                         crossAlign: 'far',
                     }
                 }

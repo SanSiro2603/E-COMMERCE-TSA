@@ -63,6 +63,34 @@
         border-color: #3f3f46 !important;
         background-color: #27272a !important;
     }
+
+    /* ── Warna baris genap (index 0,2,4,...) — putih, tidak berubah saat hover ── */
+    tr.row-even-white {
+        background-color: #ffffff;
+    }
+    .dark tr.row-even-white {
+        background-color: transparent;
+    }
+    tr.row-even-white:hover {
+        background-color: #ffffff !important;
+    }
+    .dark tr.row-even-white:hover {
+        background-color: transparent !important;
+    }
+
+    /* ── Warna baris ganjil (index 1,3,5,...) — hijau muda, tidak berubah saat hover ── */
+    tr.row-odd-green {
+        background-color: #F0F7F4;
+    }
+    .dark tr.row-odd-green {
+        background-color: rgba(39, 68, 54, 0.3);
+    }
+    tr.row-odd-green:hover {
+        background-color: #F0F7F4 !important;
+    }
+    .dark tr.row-odd-green:hover {
+        background-color: rgba(39, 68, 54, 0.3) !important;
+    }
 </style>
 
 <div class="space-y-6">
@@ -237,8 +265,11 @@
                             'cancelled'  => ['label' => 'Dibatalkan', 'class' => 'bg-red-500 text-white'],
                         ];
                         $sc = $statusConfig[$order->status] ?? ['label' => ucfirst($order->status), 'class' => 'bg-gray-400 text-white'];
+
+                        // Baris ganjil (1,3,5,...) = hijau muda | Baris genap (0,2,4,...) = putih
+                        $rowClass = ($i % 2 !== 0) ? 'row-odd-green' : 'row-even-white';
                     @endphp
-                    <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <tr class="{{ $rowClass }} transition-colors">
                         <td class="px-4 py-3 text-center text-xs text-gray-500 dark:text-zinc-400">
                             {{ $orders->firstItem() + $i }}
                         </td>

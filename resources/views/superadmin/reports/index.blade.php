@@ -7,7 +7,6 @@
 @section('content')
 
 <style>
-    /* ── Tombol angka biasa (tidak aktif) ── */
     nav svg {
         color: #2D6A4F !important;
     }
@@ -24,21 +23,18 @@
         border-color: #2D6A4F !important;
     }
 
-    /* ── Tombol aktif (halaman sekarang) ── */
     nav span[aria-current="page"] span.relative.inline-flex {
         background: #2D6A4F !important;
         color: #ffffff !important;
         border-color: #2D6A4F !important;
     }
 
-    /* ── Tombol disabled (prev/next di halaman awal/akhir) ── */
     nav span[aria-disabled="true"] span {
         color: #9ca3af !important;
         border-color: #e5e7eb !important;
         background-color: #ffffff !important;
     }
 
-    /* ── Dark mode: tombol biasa ── */
     .dark nav a.relative.inline-flex {
         color: #4ade80 !important;
         background-color: #27272a !important;
@@ -51,14 +47,12 @@
         border-color: #2D6A4F !important;
     }
 
-    /* ── Dark mode: tombol aktif ── */
     .dark nav span[aria-current="page"] span.relative.inline-flex {
         background: #2D6A4F !important;
         color: #ffffff !important;
         border-color: #2D6A4F !important;
     }
 
-    /* ── Dark mode: tombol disabled ── */
     .dark nav span[aria-disabled="true"] span {
         color: #52525b !important;
         border-color: #3f3f46 !important;
@@ -243,7 +237,6 @@
         <div class="overflow-x-auto">
             <table class="w-full min-w-[1100px]">
                 <thead>
-                    {{-- ✅ DIPERBAIKI: warna header disamakan dengan PDF/Excel (#2D6A4F) --}}
                     <tr style="background-color: #2D6A4F;" class="dark:bg-zinc-800">
                         <th class="px-4 py-3.5 text-center text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider w-10">No.</th>
                         <th class="px-4 py-3.5 text-left   text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider">No. Pesanan</th>
@@ -294,8 +287,13 @@
                             'cancelled'  => ['label' => 'Dibatalkan', 'class' => 'bg-red-500 text-white'],
                         ];
                         $sc = $statusConfig[$order->status] ?? ['label' => ucfirst($order->status), 'class' => 'bg-gray-400 text-white'];
+
+                        // Baris genap (#F0F7F4) seperti di PDF, baris ganjil putih
+                        $rowBg = (($i + 1) % 2 === 0)
+                            ? 'bg-[#F0F7F4] dark:bg-emerald-950/20'
+                            : 'bg-white dark:bg-zinc-900';
                     @endphp
-                    <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
+                    <tr class="{{ $rowBg }}>
                         <td class="px-4 py-3 text-center text-xs text-gray-500 dark:text-zinc-400">{{ $orders->firstItem() + $i }}</td>
 
                         <td class="px-4 py-3"><span class="text-xs font-semibold text-gray-900 dark:text-white">#{{ $order->order_number }}</span></td>
