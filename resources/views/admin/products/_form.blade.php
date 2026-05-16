@@ -766,4 +766,126 @@ window.addEventListener('beforeunload', function(e) {
 document.getElementById('product-form')?.addEventListener('submit', () => {
     formChanged = false;
 });
+
+// ===================== DRAFT AUTO-SAVE =====================
+// Hanya aktif di halaman CREATE (bukan edit)
+@if(!isset($product))
+(function() {
+    const DRAFT_KEY = 'product_draft';
+    let draftTimer  = null;
+    let isSubmitting = false;
+
+    // Kumpulkan semua nilai form saat ini
+    function collectFormData() {
+        const form = document.getElementById('product-form');
+        if (!form) return null;
+ 
+        return {
+            parent_category_id : document.getElementById('parent_category_id')?.value ?? '',
+            sub_category_id    : document.getElementById('sub_category_id')?.value ?? '',
+            name               : form.querySelector('[name="name"]')?.value ?? '',
+            unit               : form.querySelector('[name="unit"]')?.value ?? '',
+            description        : form.querySelector('[name="description"]')?.value ?? '',
+            price              : form.querySelector('[name="price"]')?.value ?? '',
+            stock              : form.querySelector('[name="stock"]')?.value ?? '',
+            weight             : form.querySelector('[name="weight"]')?.value ?? '',
+            available_from     : form.querySelector('[name="available_from"]')?.value ?? '',
+            is_active          : form.querySelector('[name="is_active"]')?.checked ?? true,
+            is_featured        : form.querySelector('[name="is_featured"]')?.checked ?? false,
+            savedAt            : new Date().toISOString(),
+        };
+    }
+ 
+    // Cek apakah ada data yang sudah diisi (minimal nama atau harga)
+    function hasData(data) {
+        return data && (data.name.trim() !== '' || data.price !== '' || data.description.trim() !== '');
+    }
+ 
+    // Simpan draft ke localStorage (debounce 1.5 detik)
+    function saveDraft() {
+        if (isSubmitting) return;
+        clearTimeout(draftTimer);
+        draftTimer = setTimeout(() => {
+            const data = collectFormData();
+            if (!hasData(data)) return;
+            try {
+                localStorage.setItem(DRAFT_KEY, JSON.stringify(data));
+            } catch(e) {}
+        }, 1500);
+    }
+ 
+    // Pasang listener ke semua input di form
+    const form = document.getElementById('product-form');
+    if (form) {
+        form.addEventListener('input',  saveDraft);
+        form.addEventListener('change', saveDraft);
+ 
+        // Hapus draft saat form berhasil disubmit
+        form.addEventListener('submit', () => {
+            isSubmitting = true;          // ← set flag dulu
+            clearTimeout(draftTimer)
+            try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+        });
+    }
+ 
+    // Expose fungsi restore untuk dipakai di create.blade.php
+    window.productDraft = {
+        DRAFT_KEY,
+        collectFormData,
+        hasData,
+ 
+        // Restore data ke form
+        restore(data) {
+            if (!data) return;
+            const form = document.getElementById('product-form');
+            if (!form) return;
+ 
+            // Nama, unit, deskripsi, harga, stok, berat, tanggal
+            const set = (name, val) => {
+                const el = form.querySelector(`[name="${name}"]`);
+                if (el) el.value = val;
+            };
+ 
+            set('name',           data.name);
+            set('unit',           data.unit);
+            set('description',    data.description);
+            set('price',          data.price);
+            set('stock',          data.stock);
+            set('weight',         data.weight);
+            set('available_from', data.available_from);
+ 
+            // Checkbox
+            const isActive   = form.querySelector('[name="is_active"]');
+            const isFeatured = form.querySelector('[name="is_featured"]');
+            if (isActive)   isActive.checked   = data.is_active;
+            if (isFeatured) isFeatured.checked  = data.is_featured;
+ 
+            // Kategori utama — trigger change supaya sub kategori ikut muncul
+            const parentSelect = document.getElementById('parent_category_id');
+            if (parentSelect && data.parent_category_id) {
+                parentSelect.value = data.parent_category_id;
+                parentSelect.dispatchEvent(new Event('change'));
+ 
+                // Sub kategori butuh sedikit delay karena harus nunggu populate
+                setTimeout(() => {
+                    const subSelect = document.getElementById('sub_category_id');
+                    if (subSelect && data.sub_category_id) {
+                        subSelect.value = data.sub_category_id;
+                    }
+                }, 100);
+            }
+ 
+            // Update tampilan turunan (counter, format rupiah, berat)
+            updateDescCounter?.();
+            updatePriceDisplay?.();
+            updateWeightDisplay?.();
+        },
+ 
+        // Buang draft
+        discard() {
+            try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+        }
+    };
+})();
+@endif
 </script>

@@ -853,4 +853,8 @@
     @endif
 </script>
 @endpush
+
+@push('scripts')
+    @include('admin.partials.global-search')
+@endpush
 @endsection

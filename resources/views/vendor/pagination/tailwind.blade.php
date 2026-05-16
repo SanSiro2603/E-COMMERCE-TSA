@@ -89,7 +89,7 @@
                     @else
                         <span aria-disabled="true" aria-label="Next">
                             <span class="relative inline-flex items-center px-3 py-2 text-sm font-medium text-gray-400 bg-gray-100 dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 cursor-default rounded-lg" aria-hidden="true">
-                                <span class="material-symbols-oriented text-lg">chevron_right</span>
+                                <span class="material-symbols-outlined text-lg">chevron_right</span>
                             </span>
                         </span>
                     @endif

@@ -6,50 +6,50 @@
 @section('content')
 <div class="space-y-6">
 
-    <!-- Success Alert -->
-    @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4 animate-fade-in">
-            <div class="flex items-start gap-3">
-                <div class="flex-shrink-0">
-                    <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-2xl">check_circle</span>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-green-900 dark:text-green-300">Berhasil!</h3>
-                    <p class="text-sm text-green-800 dark:text-green-400 mt-1">{{ session('success') }}</p>
-                </div>
-                <button onclick="this.parentElement.parentElement.remove()" 
-                        class="flex-shrink-0 text-green-600 dark:text-green-400 hover:text-green-800 dark:hover:text-green-300 transition-colors">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-        </div>
-    @endif
-
-    <!-- Error Alert -->
-    @if(session('error'))
-        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4 animate-fade-in">
-            <div class="flex items-start gap-3">
-                <div class="flex-shrink-0">
-                    <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-2xl">error</span>
-                </div>
-                <div class="flex-1">
-                    <h3 class="text-sm font-semibold text-red-900 dark:text-red-300">Gagal!</h3>
-                    <p class="text-sm text-red-800 dark:text-red-400 mt-1">{{ session('error') }}</p>
-                </div>
-                <button onclick="this.parentElement.parentElement.remove()" 
-                        class="flex-shrink-0 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors">
-                    <span class="material-symbols-outlined">close</span>
-                </button>
-            </div>
-        </div>
-    @endif
-
     <!-- Breadcrumb -->
     <nav class="flex items-center gap-2 text-sm text-gray-500 dark:text-zinc-400">
         <a href="{{ route('admin.dashboard') }}" class="hover:text-soft-green transition-colors">Dashboard</a>
         <span class="material-symbols-outlined text-lg">chevron_right</span>
         <span class="text-gray-900 dark:text-white font-medium">Produk</span>
     </nav>
+
+    <!-- Draft Banner -->
+    <div id="draft-banner" class="hidden items-center gap-3 p-4
+        bg-yellow-50 dark:bg-yellow-500/10
+        border border-yellow-200 dark:border-yellow-500/20
+        rounded-xl">
+    
+        <div class="w-9 h-9 bg-yellow-100 dark:bg-yellow-500/20 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span class="material-symbols-outlined text-yellow-600 dark:text-yellow-400 text-xl">edit_note</span>
+        </div>
+    
+        <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-yellow-900 dark:text-yellow-300">
+                Ada draft produk yang belum selesai
+            </p>
+            <p id="draft-banner-meta" class="text-xs text-yellow-700 dark:text-yellow-400 mt-0.5"></p>
+        </div>
+    
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <a href="{{ route('admin.products.create') }}"
+            class="flex items-center gap-1.5 px-3 py-1.5
+                    bg-yellow-500 hover:bg-yellow-600
+                    text-white text-xs font-medium rounded-lg transition-colors">
+                <span class="material-symbols-outlined text-base">edit_note</span>
+                Lanjutkan Draft
+            </a>
+            <button onclick="discardDraftFromIndex()"
+                    class="flex items-center gap-1.5 px-3 py-1.5
+                        bg-white dark:bg-zinc-800
+                        border border-yellow-300 dark:border-yellow-500/30
+                        text-yellow-700 dark:text-yellow-400
+                        hover:bg-yellow-50 dark:hover:bg-yellow-500/10
+                        text-xs font-medium rounded-lg transition-colors">
+                <span class="material-symbols-outlined text-base">delete</span>
+                Buang
+            </button>
+        </div>
+    </div>
 
     <!-- Page Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -456,8 +456,6 @@
     }
 </style>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
@@ -492,6 +490,37 @@ document.addEventListener('DOMContentLoaded', function () {
             setTimeout(() => alert.remove(), 300);
         }, 5000);
     });
+
+
+    (function() {
+        try {
+            const raw = localStorage.getItem('product_draft');
+            if (!raw) return;
+    
+            const data = JSON.parse(raw);
+            if (!data || (!data.name?.trim() && !data.price && !data.description?.trim())) return;
+    
+            // Tampilkan banner
+            const banner = document.getElementById('draft-banner');
+            const meta   = document.getElementById('draft-banner-meta');
+            if (!banner) return;
+    
+            const savedAt = new Date(data.savedAt);
+            const timeStr = savedAt.toLocaleDateString('id-ID', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+    
+            if (meta) {
+                const namePart = data.name?.trim() ? ` · "${data.name}"` : '';
+                meta.textContent = `Terakhir disimpan ${timeStr}${namePart}`;
+            }
+    
+            banner.classList.remove('hidden');
+            banner.classList.add('flex');
+    
+        } catch(e) {}
+    })();
 
     // ── Helper: cek filter aktif ─────────────────────────────
     function hasActiveFilter() {
@@ -792,6 +821,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+// ── Buang Draft dari Index ────────────────────────────────────
+function discardDraftFromIndex() {
+    Swal.fire({
+        title: 'Buang draft?',
+        text: 'Data yang sudah diisi akan dihapus permanen.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Buang!',
+        cancelButtonText: 'Batal',
+    }).then(result => {
+        if (!result.isConfirmed) return;
+        try { localStorage.removeItem('product_draft'); } catch(e) {}
+        const banner = document.getElementById('draft-banner');
+        if (banner) {
+            banner.style.transition = 'opacity 0.3s, transform 0.3s';
+            banner.style.opacity    = '0';
+            banner.style.transform  = 'translateY(-8px)';
+            setTimeout(() => banner.remove(), 300);
+        }
+    });
+}
+
 // ── Konfirmasi Hapus Single ───────────────────────────────────
 function confirmDelete(form, productName) {
     Swal.fire({
@@ -845,19 +898,5 @@ document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') closeImageModal();
 });
 </script>
-
-@if(session('success'))
-<script>
-    Swal.fire({
-        icon: 'success',
-        title: '{{ session("success") }}',
-        toast: true,
-        position: 'top-end',
-        timer: 2500,
-        showConfirmButton: false,
-        timerProgressBar: true,
-    });
-</script>
-@endif
 
 @endsection

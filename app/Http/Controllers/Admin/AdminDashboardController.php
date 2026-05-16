@@ -61,7 +61,6 @@ class AdminDashboardController extends Controller
         // ── Donut chart: penjualan per kategori bulan ini ─────────
         $categoryStats = $this->getCategoryStats();
 
-        // ── Top 5 produk terlaris (hanya order valid) ─────────────
         $topProducts = Product::withSum([
                 'orderItems as total_sold' => function ($query) {
                     $query->whereHas('order', function ($q) {
@@ -70,8 +69,9 @@ class AdminDashboardController extends Controller
                 }
             ], 'quantity')
             ->with('category')
-            ->orderByDesc('total_sold')
             ->where('is_active', true)
+            ->having('total_sold', '>', 0)
+            ->orderByDesc('total_sold')
             ->limit(5)
             ->get();
 
@@ -189,6 +189,7 @@ class AdminDashboardController extends Controller
             'percentage' => round(($row->total_sold / $grandTotal) * 100, 1),
         ])->toArray();
     }
+    
 
     // ── Helper: hitung % tren ─────────────────────────────────────
     private function calcTrend(int|float $last, int|float $current): float
@@ -224,4 +225,5 @@ class AdminDashboardController extends Controller
 
         return $result;
     }
+    
 }

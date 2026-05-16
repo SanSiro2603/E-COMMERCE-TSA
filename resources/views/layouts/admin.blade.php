@@ -3,13 +3,18 @@
 <html lang="id">
 
 <head>
+    {{-- ⚡ PERTAMA SEBELUM APAPUN — cegah flash putih saat navigasi --}}
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">  
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Admin - E-Commerce TSA')</title>
-    
+
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
@@ -39,7 +44,16 @@
             }
         }
     </script>
+
     <style>
+        /* Cegah flash warna saat navigasi antar halaman */
+        html {
+            background-color: #09090b;
+        }
+        html:not(.dark) {
+            background-color: #f9fafb;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -136,25 +150,13 @@
 
         /* Animations */
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
+            from { opacity: 0; }
+            to   { opacity: 1; }
         }
 
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-8px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-8px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         .animate-slide-down {
@@ -213,6 +215,8 @@
             transition: opacity 0.25s ease, transform 0.25s ease;
         }
     </style>
+
+    @stack('styles')
 </head>
 
 <body class="bg-gray-50 dark:bg-zinc-950">
@@ -288,7 +292,11 @@
         <!-- Navigation -->
         <nav class="relative px-3 pt-4 pb-2 space-y-2 z-10">
             @foreach ($menu as $item)
-                @php $active = request()->routeIs($item['route'].'*'); @endphp
+                @php
+                    // Ambil prefix grup dari route (misal 'admin.categories.index' → 'admin.categories')
+                    $routePrefix = implode('.', array_slice(explode('.', $item['route']), 0, 2));
+                    $active = request()->routeIs($routePrefix . '.*');
+                @endphp
 
                 <a href="{{ route($item['route']) }}"
                     class="group relative flex items-center gap-3 px-4 py-3 rounded-none transition-all duration-300 overflow-hidden
@@ -362,26 +370,30 @@
                     <!-- Breadcrumb -->
                     <div class="breadcrumb hidden lg:flex">
                         <span class="text-gray-900 dark:text-white font-semibold">Dashboard</span>
-                        <span
-                            class="material-symbols-outlined text-[14px] text-gray-300 dark:text-zinc-600">chevron_right</span>
+                        <span class="material-symbols-outlined text-[14px] text-gray-300 dark:text-zinc-600">chevron_right</span>
                         <span class="text-gray-500 dark:text-zinc-400">Overview</span>
                     </div>
 
                     <!-- Right Section -->
                     <div class="flex items-center gap-2">
-                        <button onclick="openSearch()"
-                                class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-2">
+
+                        @if(request()->routeIs('admin.dashboard'))
+                            <button onclick="openSearch()"
+                                    class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all flex items-center gap-2">
                                 <span class="material-symbols-outlined text-gray-600 dark:text-zinc-300 text-[20px]">search</span>
                                 <span class="hidden lg:inline text-xs text-gray-400 dark:text-zinc-500 border border-gray-200 dark:border-zinc-700 px-2 py-0.5 rounded-md">
                                     Ctrl+K
                                 </span>
-                        </button>
+                            </button>
+                        @endif
+
                         <!-- Theme Toggle -->
                         <button onclick="toggleTheme()"
                             class="p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-zinc-800 transition-all">
                             <span id="themeIcon"
                                 class="material-symbols-outlined text-gray-600 dark:text-zinc-300 text-[20px]">light_mode</span>
                         </button>
+
                     </div>
                 </div>
             </div>
@@ -395,11 +407,9 @@
         </main>
 
         <!-- Footer -->
-        <footer
-            class="px-4 lg:px-8 py-6 border-t border-gray-100 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-900/50">
+        <footer class="px-4 lg:px-8 py-6 border-t border-gray-100 dark:border-zinc-800/50 bg-white/50 dark:bg-zinc-900/50">
             <div class="max-w-7xl mx-auto">
-                <div
-                    class="flex flex-col md:flex-row justify-between items-center gap-3 text-[12px] text-gray-500 dark:text-zinc-500">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-3 text-[12px] text-gray-500 dark:text-zinc-500">
                     <p class="font-medium">© 2025 E-Commerce TSA. All rights reserved.</p>
                     <div class="flex items-center gap-4">
                         <a href="#" class="hover:text-soft-green transition-colors font-medium">Dokumentasi</a>
@@ -411,12 +421,12 @@
         </footer>
     </div>
 
-    <!-- Chart.js -->
+    <!-- Chart.js & SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Sidebar Toggle for Mobile
+        // ── Sidebar Toggle (Mobile) ───────────────────────────────
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('mobileOverlay');
@@ -424,9 +434,9 @@
             overlay.classList.toggle('active');
         }
 
-        // Theme Toggle
+        // ── Theme Toggle ──────────────────────────────────────────
         function toggleTheme() {
-            const html = document.documentElement;
+            const html      = document.documentElement;
             const themeIcon = document.getElementById('themeIcon');
 
             if (html.classList.contains('dark')) {
@@ -440,16 +450,15 @@
             }
         }
 
-        // Load theme from localStorage
+        // ── Sinkronisasi icon theme (class dark sudah dipasang di <head>) ──
         if (localStorage.getItem('theme') === 'dark') {
-            document.documentElement.classList.add('dark');
             document.getElementById('themeIcon').textContent = 'dark_mode';
         }
 
-        // Close sidebar when clicking outside on mobile
+        // ── Tutup sidebar saat klik di luar (mobile) ──────────────
         document.addEventListener('click', function(event) {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('mobileOverlay');
+            const sidebar    = document.getElementById('sidebar');
+            const overlay    = document.getElementById('mobileOverlay');
             const menuButton = event.target.closest('button[onclick="toggleSidebar()"]');
 
             if (!sidebar.contains(event.target) && !menuButton && window.innerWidth < 1024) {
@@ -458,6 +467,7 @@
             }
         });
 
+        // ── SweetAlert toast notifikasi ───────────────────────────
         @if (session('success'))
             Swal.fire({
                 icon: 'success',
@@ -482,8 +492,6 @@
             });
         @endif
     </script>
-
-    @include('admin.partials.global-search')
 
     @stack('scripts')
 </body>

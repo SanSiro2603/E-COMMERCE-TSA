@@ -14,9 +14,9 @@ class ProductController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::with('category');
+        $query = Product::with('category.parent');
 
-        // Search filter
+        // Filter Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -26,72 +26,114 @@ class ProductController extends Controller
             });
         }
 
-        // Category filter
+        // Filter Category
         if ($request->filled('category')) {
-            $query->where('category_id', $request->category);
+            $query->whereHas('category', function ($q) use ($request) {
+                $q->where('id', $request->category)
+                    ->orWhere('parent_id', $request->category);
+            });
         }
 
-        // Get paginated products
-        $products = $query->latest()->paginate(10);
+        // Filter Status
+        if ($request->filled('status')) {
+            $query->where('is_active', $request->status === 'active' ? 1 : 0);
+        }
 
-        // Get all categories for filter dropdown
+        // Filter Stok
+        if ($request->filled('stock_filter')) {
+            if ($request->stock_filter === 'low') {
+                $query->where('stock', '<=', 5)->where('stock', '>', 0);
+            } elseif ($request->stock_filter === 'empty') {
+                $query->where('stock', 0);
+            }
+        }
+
+        // Filter Harga
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', (int) $request->price_min);
+        }
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', (int) $request->price_max);
+        }
+
+        // Sort
+        $sortable = ['name', 'price', 'stock', 'created_at'];
+        $sortBy   = in_array($request->sort_by, $sortable) ? $request->sort_by : 'created_at';
+        $sortDir  = $request->sort_dir === 'asc' ? 'asc' : 'desc';
+        $query->orderBy($sortBy, $sortDir);
+
+        // Per Page
+        $perPage  = in_array((int) $request->per_page, [10, 25, 50]) ? (int) $request->per_page : 10;
+        $products = $query->paginate($perPage);
+
+        // Categories untuk filter dropdown
         $categories = Category::where('is_active', true)->orderBy('name')->get();
 
-        // If AJAX request, return JSON with HTML
         if ($request->ajax()) {
-            // Get all filtered products for accurate stats
-            $allFilteredProducts = Product::with('category');
+            // Stats query terpisah
+            $statsQuery = Product::with('category.parent');
 
             if ($request->filled('search')) {
                 $search = $request->search;
-                $allFilteredProducts->where(function ($q) use ($search) {
+                $statsQuery->where(function ($q) use ($search) {
                     $q->where('name', 'like', "%{$search}%")
                         ->orWhere('description', 'like', "%{$search}%")
                         ->orWhere('slug', 'like', "%{$search}%");
                 });
             }
-
             if ($request->filled('category')) {
-                $allFilteredProducts->where('category_id', $request->category);
+                $statsQuery->whereHas('category', function ($q) use ($request) {
+                    $q->where('id', $request->category)
+                        ->orWhere('parent_id', $request->category);
+                });
+            }
+            if ($request->filled('status')) {
+                $statsQuery->where('is_active', $request->status === 'active' ? 1 : 0);
+            }
+            if ($request->filled('stock_filter')) {
+                if ($request->stock_filter === 'low') {
+                    $statsQuery->where('stock', '<=', 5)->where('stock', '>', 0);
+                } elseif ($request->stock_filter === 'empty') {
+                    $statsQuery->where('stock', 0);
+                }
+            }
+            if ($request->filled('price_min')) {
+                $statsQuery->where('price', '>=', (int) $request->price_min);
+            }
+            if ($request->filled('price_max')) {
+                $statsQuery->where('price', '<=', (int) $request->price_max);
             }
 
-            $allProducts = $allFilteredProducts->get();
-
-            // Calculate stats
+            $allProducts = $statsQuery->get();
             $stats = [
-                'total' => $allProducts->count(),
-                'active' => $allProducts->where('is_active', true)->count(),
+                'total'     => $allProducts->count(),
+                'active'    => $allProducts->where('is_active', true)->count(),
                 'low_stock' => $allProducts->where('stock', '<=', 5)->count(),
-                'inactive' => $allProducts->where('is_active', false)->count(),
+                'inactive'  => $allProducts->where('is_active', false)->count(),
             ];
 
-            // Render table rows HTML
-            $html = $this->renderTableRows($products);
+            $appendKeys = ['search', 'category', 'status', 'stock_filter', 'price_min', 'price_max', 'sort_by', 'sort_dir', 'per_page'];
+            $html       = $this->renderTableRows($products);
 
-            // Render pagination HTML
-            /** @var \Illuminate\Pagination\LengthAwarePaginator $products */
-            $pagination = $products->appends($request->only(['search', 'category']))->links();
+            // ✅ FIX: cast ke string supaya tidak jadi [object Object]
+            $pagination = (string) $products->appends($request->only($appendKeys))->links();
 
             return response()->json([
-                'html' => $html,
+                'html'       => $html,
                 'pagination' => $pagination,
-                'stats' => $stats
+                'stats'      => $stats,
             ]);
         }
 
-        // Regular page load
         return view('admin.products.index', compact('products', 'categories'));
     }
 
-    /**
-     * Render table rows HTML for AJAX response
-     */
     private function renderTableRows($products)
     {
         if ($products->isEmpty()) {
             return '
                 <tr>
-                    <td colspan="7" class="px-6 py-12 text-center">
+                    <td colspan="8" class="px-6 py-12 text-center">
                         <div class="flex flex-col items-center justify-center">
                             <span class="material-symbols-outlined text-gray-300 dark:text-zinc-600 text-6xl mb-3">inventory_2</span>
                             <p class="text-sm font-medium text-gray-900 dark:text-white">Tidak ada produk ditemukan</p>
@@ -102,54 +144,86 @@ class ProductController extends Controller
             ';
         }
 
-    $html = '';
-    foreach ($products as $product) {
+        $html = '';
+        foreach ($products as $product) {
 
-        // ── Gambar ──────────────────────────────────────────
-        $imageHtml = $product->image
-            ? '<img src="' . asset('storage/' . $product->image) . '" alt="' . e($product->name) . '" class="h-14 w-14 object-cover rounded-lg border border-gray-200 dark:border-zinc-700">'
-            : '<div class="h-14 w-14 bg-gray-200 dark:bg-zinc-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-zinc-600">
-                <span class="material-symbols-outlined text-gray-400 dark:text-zinc-500 text-xl">image</span>
-               </div>';
+            // Gambar
+            $imgSrc  = $product->image ? asset('storage/' . $product->image) : null;
+            $imgName = e($product->name);
 
-            // Stock styling
-            $stockClass = $product->stock <= 5
+            $imageHtml = $imgSrc
+                ? '<button onclick="openImageModal(\'' . $imgSrc . '\', \'' . $imgName . '\')" class="group relative block cursor-zoom-in">
+                        <img src="' . $imgSrc . '" alt="' . $imgName . '" class="h-14 w-14 object-cover rounded-lg border border-gray-200 dark:border-zinc-700 group-hover:opacity-80 transition-opacity">
+                        <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-white text-lg drop-shadow">zoom_in</span>
+                        </div>
+                   </button>'
+                : '<button onclick="openImageModal(null, \'' . $imgName . '\')" class="h-14 w-14 bg-gray-200 dark:bg-zinc-700 rounded-lg flex items-center justify-center border border-gray-300 dark:border-zinc-600 hover:bg-gray-300 dark:hover:bg-zinc-600 transition-colors cursor-pointer">
+                        <span class="material-symbols-outlined text-gray-400 dark:text-zinc-500 text-xl">image</span>
+                   </button>';
+
+            // Stok
+            $stockClass   = $product->stock <= 5
                 ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400'
                 : 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400';
-
             $stockWarning = $product->stock <= 5
                 ? '<span class="material-symbols-outlined text-base">warning</span>'
                 : '';
 
-            // Status styling
+            // Status
             $statusClass = $product->is_active
                 ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400'
                 : 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400';
+            $statusDot   = $product->is_active ? 'bg-green-500' : 'bg-gray-500';
+            $statusText  = $product->is_active ? 'Aktif' : 'Nonaktif';
 
-            $statusDot = $product->is_active ? 'bg-green-500' : 'bg-gray-500';
-            $statusText = $product->is_active ? 'Aktif' : 'Nonaktif';
+            // Deskripsi
+            $description = e(Str::limit($product->description, 50));
 
-            // Category name
-            $categoryName = $product->category ? e($product->category->name) : 'Tanpa Kategori';
+            // Kategori
+            if ($product->category) {
+                if ($product->category->parent) {
+                    $categoryHtml = '
+                        <div class="flex flex-col gap-1">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full w-fit">
+                                <span class="material-symbols-outlined text-sm">category</span>
+                                ' . e($product->category->parent->name) . '
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full w-fit">
+                                <span class="material-symbols-outlined text-sm">account_tree</span>
+                                ' . e($product->category->name) . '
+                            </span>
+                        </div>';
+                } else {
+                    $categoryHtml = '
+                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full">
+                            <span class="material-symbols-outlined text-sm">category</span>
+                            ' . e($product->category->name) . '
+                        </span>';
+                }
+            } else {
+                $categoryHtml = '<span class="text-xs text-gray-400 dark:text-zinc-500">Tanpa Kategori</span>';
+            }
 
-            // Description
-            $description = Str::limit($product->description, 50);
+            $editRoute   = route('admin.products.edit', $product);
+            $deleteRoute = route('admin.products.destroy', $product);
+            $productName = e($product->name);
+            $csrfField   = csrf_field();
+            $methodField = method_field('DELETE');
 
             $html .= '
-                <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors" data-product-id="' . $product->id . '">
-                    <td class="px-6 py-4">
-                        ' . $imageHtml . '
+                <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors product-row" data-product-id="' . $product->id . '">
+                    <td class="px-4 py-4">
+                        <input type="checkbox"
+                               class="product-checkbox w-4 h-4 rounded border-gray-300 dark:border-zinc-600 text-soft-green focus:ring-soft-green cursor-pointer"
+                               value="' . $product->id . '">
                     </td>
+                    <td class="px-6 py-4">' . $imageHtml . '</td>
                     <td class="px-6 py-4">
-                        <p class="text-sm font-semibold text-gray-900 dark:text-white">' . e($product->name) . '</p>
-                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">' . e($description) . '</p>
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">' . $productName . '</p>
+                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">' . $description . '</p>
                     </td>
-                    <td class="px-6 py-4">
-                        <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400 text-xs font-medium rounded-full">
-                            <span class="material-symbols-outlined text-sm">category</span>
-                            ' . $categoryName . '
-                        </span>
-                    </td>
+                    <td class="px-6 py-4">' . $categoryHtml . '</td>
                     <td class="px-6 py-4">
                         <p class="text-sm font-bold text-gray-900 dark:text-white">Rp ' . number_format($product->price, 0, ',', '.') . '</p>
                         <p class="text-xs text-gray-500 dark:text-zinc-400">per ' . e($product->unit ?? 'unit') . '</p>
@@ -168,16 +242,16 @@ class ProductController extends Controller
                     </td>
                     <td class="px-6 py-4">
                         <div class="flex items-center justify-center gap-2">
-                            <a href="' . route('admin.products.edit', $product) . '" 
+                            <a href="' . $editRoute . '"
                                class="flex items-center gap-1 px-3 py-1.5 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-xs font-medium transition-colors">
                                 <span class="material-symbols-outlined text-base">edit</span>
                                 Edit
                             </a>
-                            <form action="' . route('admin.products.destroy', $product) . '" method="POST" class="inline">
-                                ' . csrf_field() . '
-                                ' . method_field('DELETE') . '
-                                <button type="submit" 
-                                        onclick="return confirm(\'Yakin ingin menghapus produk ' . e($product->name) . '?\')" 
+                            <form action="' . $deleteRoute . '" method="POST" class="inline">
+                                ' . $csrfField . '
+                                ' . $methodField . '
+                                <button type="button"
+                                        onclick="confirmDelete(this.closest(\'form\'), \'' . $productName . '\')"
                                         class="flex items-center gap-1 px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg text-xs font-medium transition-colors">
                                     <span class="material-symbols-outlined text-base">delete</span>
                                     Hapus
@@ -192,55 +266,101 @@ class ProductController extends Controller
         return $html;
     }
 
+    public function bulkDelete(Request $request)
+    {
+        $request->validate([
+            'ids'   => 'required|array',
+            'ids.*' => 'exists:products,id',
+        ]);
+
+        $products = Product::whereIn('id', $request->ids)->get();
+
+        foreach ($products as $product) {
+            if ($product->image) Storage::disk('public')->delete($product->image);
+            if (!empty($product->images)) {
+                foreach ($product->images as $img) {
+                    if (Storage::disk('public')->exists($img)) Storage::disk('public')->delete($img);
+                }
+            }
+            if ($product->health_certificate) Storage::disk('public')->delete($product->health_certificate);
+            $product->delete();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => count($request->ids) . ' produk berhasil dihapus.',
+        ]);
+    }
+
+    public function bulkStatus(Request $request)
+    {
+        $request->validate([
+            'ids'    => 'required|array',
+            'ids.*'  => 'exists:products,id',
+            'status' => 'required|boolean',
+        ]);
+
+        Product::whereIn('id', $request->ids)->update(['is_active' => $request->status]);
+        $label = $request->status ? 'diaktifkan' : 'dinonaktifkan';
+
+        return response()->json([
+            'success' => true,
+            'message' => count($request->ids) . " produk berhasil {$label}.",
+        ]);
+    }
+
     public function create()
     {
         $categories = Category::where('is_active', true)->get();
-        return view('admin.products.create', compact('categories'));
+
+        $parentCategories = Category::where('is_active', true)
+            ->whereNull('parent_id')
+            ->with(['children' => fn($q) => $q->where('is_active', true)])
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.products.create', compact('categories', 'parentCategories'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'weight' => 'nullable|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Multiple images
+            'category_id'        => 'required|exists:categories,id',
+            'name'               => 'required|string|max:255',
+            'description'        => 'nullable|string',
+            'price'              => 'required|numeric|min:0',
+            'stock'              => 'required|integer|min:0',
+            'weight'             => 'nullable|numeric|min:0',
+            'image'              => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'gallery_images.*'   => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'health_certificate' => 'nullable|mimes:pdf|max:5120',
-            'available_from' => 'nullable|date',
-            'is_active' => 'required|boolean',
-            'is_featured' => 'nullable|boolean',
+            'available_from'     => 'nullable|date',
+            'is_active'          => 'required|boolean',
+            'is_featured'        => 'nullable|boolean',
         ]);
 
-        $data = $request->all();
-        $data['slug'] = Str::slug($request->name);
+        $data              = $request->all();
+        $slug              = Str::slug($request->name);
+        $count             = Product::where('slug', 'LIKE', "{$slug}%")->count();
+        $data['slug']      = $count ? "{$slug}-" . ($count + 1) : $slug;
         $data['is_featured'] = $request->boolean('is_featured');
 
-        // Handle multiple images untuk gallery
         $imagesPaths = [];
 
-        // Upload gambar utama (main image)
         if ($request->hasFile('image')) {
-            $mainImage = $request->file('image')->store('products', 'public');
+            $mainImage     = $request->file('image')->store('products', 'public');
             $data['image'] = $mainImage;
-            $imagesPaths[] = $mainImage; // Tambahkan ke array images
+            $imagesPaths[] = $mainImage;
         }
 
-        // Upload gambar tambahan (gallery images)
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $image) {
-                $path = $image->store('products', 'public');
-                $imagesPaths[] = $path; // Tambahkan ke array
+                $imagesPaths[] = $image->store('products', 'public');
             }
         }
 
-        // Simpan semua path gambar ke kolom images (JSON)
         $data['images'] = !empty($imagesPaths) ? $imagesPaths : null;
 
-        // Upload sertifikat
         if ($request->hasFile('health_certificate')) {
             $data['health_certificate'] = $request->file('health_certificate')->store('certificates', 'public');
         }
@@ -256,76 +376,68 @@ class ProductController extends Controller
     public function edit(Product $product)
     {
         $categories = Category::where('is_active', true)->get();
-        return view('admin.products.edit', compact('product', 'categories'));
+
+        $parentCategories = Category::where('is_active', true)
+            ->whereNull('parent_id')
+            ->with(['children' => fn($q) => $q->where('is_active', true)])
+            ->orderBy('name')
+            ->get();
+
+        return view('admin.products.edit', compact('product', 'categories', 'parentCategories'));
     }
 
     public function update(Request $request, Product $product)
     {
         $request->validate([
-            'category_id' => 'required|exists:categories,id',
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:0',
-            'stock' => 'required|integer|min:0',
-            'weight' => 'nullable|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'gallery_images.*' => 'nullable|image|mimes:jpeg,png,jpg|max:5120', // Multiple images
+            'category_id'        => 'required|exists:categories,id',
+            'name'               => 'required|string|max:255',
+            'description'        => 'nullable|string',
+            'price'              => 'required|numeric|min:0',
+            'stock'              => 'required|integer|min:0',
+            'weight'             => 'nullable|numeric|min:0',
+            'image'              => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'gallery_images.*'   => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             'health_certificate' => 'nullable|mimes:pdf|max:5120',
-            'available_from' => 'nullable|date',
-            'is_active' => 'required|boolean',
-            'is_featured' => 'nullable|boolean',
-            'remove_images' => 'nullable|array', // Array of images to remove
+            'available_from'     => 'nullable|date',
+            'is_active'          => 'required|boolean',
+            'is_featured'        => 'nullable|boolean',
+            'remove_images'      => 'nullable|array',
         ]);
 
-        $data = $request->all();
-        $data['slug'] = Str::slug($request->name);
+        $data                = $request->all();
+        $data['slug']        = Str::slug($request->name);
         $data['is_featured'] = $request->boolean('is_featured');
 
-        // Get existing images
         $existingImages = $product->images ?? [];
 
-        // Remove selected images
         if ($request->filled('remove_images')) {
             foreach ($request->remove_images as $imageToRemove) {
-                // Delete from storage
                 if (Storage::disk('public')->exists($imageToRemove)) {
                     Storage::disk('public')->delete($imageToRemove);
                 }
-                // Remove from array
-                $existingImages = array_values(array_filter($existingImages, function ($img) use ($imageToRemove) {
-                    return $img !== $imageToRemove;
-                }));
+                $existingImages = array_values(array_filter($existingImages, fn($img) => $img !== $imageToRemove));
             }
         }
 
-        // Update main image if uploaded
         if ($request->hasFile('image')) {
-            // Delete old main image if exists and not in existing images array
             if ($product->image && !in_array($product->image, $existingImages)) {
                 Storage::disk('public')->delete($product->image);
             }
-
-            $mainImage = $request->file('image')->store('products', 'public');
+            $mainImage     = $request->file('image')->store('products', 'public');
             $data['image'] = $mainImage;
-
-            // Add to existing images if not already there
             if (!in_array($mainImage, $existingImages)) {
                 array_unshift($existingImages, $mainImage);
             }
         }
 
-        // Upload new gallery images
         if ($request->hasFile('gallery_images')) {
             foreach ($request->file('gallery_images') as $image) {
-                $path = $image->store('products', 'public');
-                $existingImages[] = $path;
+                $existingImages[] = $image->store('products', 'public');
             }
         }
 
-        // Update images array
         $data['images'] = !empty($existingImages) ? array_values($existingImages) : null;
 
-        // Update health certificate
         if ($request->hasFile('health_certificate')) {
             if ($product->health_certificate) {
                 Storage::disk('public')->delete($product->health_certificate);
@@ -343,21 +455,14 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        // Delete main image
-        if ($product->image) {
-            Storage::disk('public')->delete($product->image);
-        }
+        if ($product->image) Storage::disk('public')->delete($product->image);
 
-        // Delete all gallery images
         if (!empty($product->images)) {
             foreach ($product->images as $image) {
-                if (Storage::disk('public')->exists($image)) {
-                    Storage::disk('public')->delete($image);
-                }
+                if (Storage::disk('public')->exists($image)) Storage::disk('public')->delete($image);
             }
         }
 
-        // Delete health certificate
         if ($product->health_certificate) {
             Storage::disk('public')->delete($product->health_certificate);
         }

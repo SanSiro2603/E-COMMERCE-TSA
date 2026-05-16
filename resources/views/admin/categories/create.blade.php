@@ -28,18 +28,7 @@
         </a>
     </div>
 
-    @if(session('success_parent'))
-        <div class="p-4 text-sm text-green-700 bg-green-100 dark:bg-green-800/40 dark:text-green-300 rounded-lg flex items-center gap-2">
-            <span class="material-symbols-outlined">check_circle</span>
-            {{ session('success_parent') }}
-        </div>
-    @endif
-    @if(session('success'))
-        <div class="p-4 text-sm text-green-700 bg-green-100 dark:bg-green-800/40 dark:text-green-300 rounded-lg flex items-center gap-2">
-            <span class="material-symbols-outlined">check_circle</span>
-            {{ session('success') }}
-        </div>
-    @endif
+    {{-- Alert session ditangani layout global via SweetAlert --}}
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -57,7 +46,7 @@
                 </div>
             </div>
             <div class="p-6">
-                <form action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
+                <form id="form-utama" action="{{ route('admin.categories.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <input type="hidden" name="is_active" value="1">
                     <input type="hidden" name="parent_id" value="">
@@ -71,10 +60,10 @@
                             <input type="text" name="name" id="name-utama" value="{{ old('name') }}" required
                                     placeholder="Masukkan nama kategori utama"
                                     class="block w-full px-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
-                                <div id="check-utama" class="hidden mt-1.5 flex items-center gap-1 text-xs"></div>
-                                @error('name')
-                                    <p class="text-xs text-red-500 mt-1.5">{{ $message }}</p>
-                                @enderror
+                            <div id="check-utama" class="hidden mt-1.5 flex items-center gap-1 text-xs"></div>
+                            @error('name')
+                                <p class="text-xs text-red-500 mt-1.5">{{ $message }}</p>
+                            @enderror
                         </div>
 
                         <!-- Slug Auto-generate -->
@@ -205,7 +194,6 @@
                                 </label>
 
                                 <div id="sub-rows" class="space-y-2">
-                                    {{-- Row pertama (tidak bisa dihapus) --}}
                                     <div class="sub-row flex items-start gap-2" data-index="0">
                                         <div class="flex-1 space-y-1.5">
                                             <input type="text" name="sub_names[]"
@@ -228,7 +216,6 @@
                                     </div>
                                 </div>
 
-                                {{-- Tombol Tambah Row --}}
                                 <button type="button" onclick="addSubRow()"
                                         class="mt-3 w-full flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 border border-dashed border-purple-300 dark:border-purple-700 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-500/10 transition-colors">
                                     <span class="material-symbols-outlined text-lg">add</span>
@@ -236,7 +223,6 @@
                                 </button>
                             </div>
 
-                            {{-- Counter info --}}
                             <p id="sub-counter" class="text-xs text-gray-400 dark:text-zinc-500 text-right">
                                 1 sub kategori akan ditambahkan
                             </p>
@@ -302,12 +288,10 @@ function hideCheck(elId, inputEl) {
 
 function doCheckName(value, elId, inputEl) {
     if (!value.trim()) { hideCheck(elId, inputEl); return; }
-
     const el = document.getElementById(elId);
     el.classList.remove('hidden');
     el.innerHTML = `<span class="material-symbols-outlined text-sm text-gray-400 animate-spin">progress_activity</span>
                     <span class="text-gray-400">Mengecek...</span>`;
-
     fetch(`${CHECK_URL}?name=${encodeURIComponent(value)}`)
         .then(r => r.json())
         .then(data => showCheckResult(elId, inputEl, data.available, data.message))
@@ -315,17 +299,14 @@ function doCheckName(value, elId, inputEl) {
 }
 
 // ══════════════════════════════════════════
-// KATEGORI UTAMA — slug + check dalam 1 listener
+// KATEGORI UTAMA
 // ══════════════════════════════════════════
 const nameUtama = document.getElementById('name-utama');
 const slugUtama = document.getElementById('slug-utama');
 let slugUtamaEdited = false;
 
 nameUtama.addEventListener('input', function () {
-    // 1. Auto slug
     if (!slugUtamaEdited) slugUtama.value = toSlug(this.value);
-
-    // 2. Duplicate check (debounce 500ms)
     clearTimeout(timerUtama);
     timerUtama = setTimeout(() => doCheckName(this.value, 'check-utama', this), 500);
 });
@@ -340,36 +321,7 @@ function refreshSlugUtama() {
 }
 
 // ══════════════════════════════════════════
-// SUB KATEGORI — slug + check dalam 1 listener
-// ══════════════════════════════════════════
-const nameSub = document.getElementById('name-sub');
-const slugSub = document.getElementById('slug-sub');
-let slugSubEdited = false;
-
-if (nameSub && slugSub) {
-    nameSub.addEventListener('input', function () {
-        // 1. Auto slug
-        if (!slugSubEdited) slugSub.value = toSlug(this.value);
-
-        // 2. Duplicate check (debounce 500ms)
-        clearTimeout(timerSub);
-        timerSub = setTimeout(() => doCheckName(this.value, 'check-sub', this), 500);
-    });
-
-    slugSub.addEventListener('input', function () {
-        slugSubEdited = this.value !== toSlug(nameSub.value);
-    });
-}
-
-function refreshSlugSub() {
-    if (nameSub && slugSub) {
-        slugSub.value = toSlug(nameSub.value);
-        slugSubEdited = false;
-    }
-}
-
-// ══════════════════════════════════════════
-// MULTIPLE SUB KATEGORI — dynamic rows
+// MULTIPLE SUB KATEGORI
 // ══════════════════════════════════════════
 let subRowCount = 1;
 let subTimers   = {};
@@ -383,27 +335,21 @@ function updateCounter() {
 function bindSubRow(row, index) {
     const nameInput = row.querySelector('.sub-name-input');
     const slugInput = row.querySelector('.sub-slug-input');
-    const checkEl  = row.querySelector('.check-result');
+    const checkEl   = row.querySelector('.check-result');
 
-    // Auto slug
     nameInput.addEventListener('input', function () {
         slugInput.value = toSlug(this.value);
-
-        // Duplicate check
         clearTimeout(subTimers[index]);
         const val = this.value.trim();
-
         if (!val) {
             checkEl.classList.add('hidden');
             checkEl.innerHTML = '';
             nameInput.classList.remove('border-green-500', 'border-red-500');
             return;
         }
-
         checkEl.classList.remove('hidden');
         checkEl.innerHTML = `<span class="material-symbols-outlined text-sm text-gray-400 animate-spin">progress_activity</span>
                              <span class="text-gray-400">Mengecek...</span>`;
-
         subTimers[index] = setTimeout(() => {
             fetch(`${CHECK_URL}?name=${encodeURIComponent(val)}`)
                 .then(r => r.json())
@@ -424,31 +370,21 @@ function bindSubRow(row, index) {
                 .catch(() => checkEl.classList.add('hidden'));
         }, 500);
     });
-
-    // Manual slug edit
-    slugInput.addEventListener('input', function () {
-        // allow manual override, no auto re-fill
-    });
 }
 
 function addSubRow() {
     const container = document.getElementById('sub-rows');
     const index     = subRowCount;
-
     const row = document.createElement('div');
-    row.className   = 'sub-row flex items-start gap-2';
+    row.className     = 'sub-row flex items-start gap-2';
     row.dataset.index = index;
     row.innerHTML = `
         <div class="flex-1 space-y-1.5">
-            <input type="text" name="sub_names[]"
-                   placeholder="Nama sub kategori"
-                   required
+            <input type="text" name="sub_names[]" placeholder="Nama sub kategori" required
                    class="sub-name-input block w-full px-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg text-sm text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors">
             <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 dark:text-zinc-500">/</span>
-                <input type="text" name="sub_slugs[]"
-                       placeholder="slug-otomatis"
-                       required
+                <input type="text" name="sub_slugs[]" placeholder="slug-otomatis" required
                        class="sub-slug-input block w-full pl-6 pr-4 py-2 bg-gray-50 dark:bg-zinc-800/60 border border-gray-300 dark:border-zinc-700 rounded-lg text-xs text-gray-600 dark:text-zinc-400 placeholder-gray-400 dark:placeholder-zinc-500 focus:ring-2 focus:ring-soft-green focus:border-soft-green transition-colors font-mono">
             </div>
             <div class="check-result hidden flex items-center gap-1 text-xs"></div>
@@ -458,24 +394,19 @@ function addSubRow() {
             <span class="material-symbols-outlined text-lg">delete</span>
         </button>
     `;
-
     container.appendChild(row);
     bindSubRow(row, index);
     subRowCount++;
     updateCounter();
-
-    // Focus ke input baru
     row.querySelector('.sub-name-input').focus();
 }
 
 function removeSubRow(btn) {
-    const row = btn.closest('.sub-row');
-    row.remove();
+    btn.closest('.sub-row').remove();
     subRowCount--;
     updateCounter();
 }
 
-// Bind row pertama
 const firstRow = document.querySelector('.sub-row[data-index="0"]');
 if (firstRow) bindSubRow(firstRow, 0);
 
@@ -501,6 +432,146 @@ function removeImageUtama() {
     document.getElementById('preview-container-utama').classList.add('hidden');
     document.getElementById('upload-box-utama').classList.remove('hidden');
 }
+
+// ══════════════════════════════════════════
+// DRAFT AUTO-SAVE — Kategori Utama
+// ══════════════════════════════════════════
+(function() {
+    const DRAFT_KEY = 'category_draft';
+    let draftTimer  = null;
+
+    function collectData() {
+        return {
+            name    : document.getElementById('name-utama')?.value ?? '',
+            slug    : document.getElementById('slug-utama')?.value ?? '',
+            savedAt : new Date().toISOString(),
+        };
+    }
+
+    function hasData(data) {
+        return data && data.name.trim() !== '';
+    }
+
+    function saveDraft() {
+        clearTimeout(draftTimer);
+        draftTimer = setTimeout(() => {
+            const data = collectData();
+            if (!hasData(data)) return;
+            try { localStorage.setItem(DRAFT_KEY, JSON.stringify(data)); } catch(e) {}
+        }, 1500);
+    }
+
+    // Pasang listener
+    document.getElementById('name-utama')?.addEventListener('input', saveDraft);
+    document.getElementById('slug-utama')?.addEventListener('input', saveDraft);
+
+    // Hapus draft saat submit berhasil
+    document.getElementById('form-utama')?.addEventListener('submit', () => {
+        try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+    });
+
+    // Expose untuk restore
+    window.categoryDraft = {
+        DRAFT_KEY,
+        hasData,
+        restore(data) {
+            if (!data) return;
+            const nameEl = document.getElementById('name-utama');
+            const slugEl = document.getElementById('slug-utama');
+            if (nameEl) nameEl.value = data.name;
+            if (slugEl) slugEl.value = data.slug;
+        },
+        discard() {
+            try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
+        }
+    };
+
+    // ── Cek draft saat halaman dimuat ──
+    document.addEventListener('DOMContentLoaded', () => {
+        try {
+            const raw = localStorage.getItem(DRAFT_KEY);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            if (!hasData(data)) return;
+
+            const savedAt = new Date(data.savedAt);
+            const timeStr = savedAt.toLocaleDateString('id-ID', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            Swal.fire({
+            title: 'Ada draft yang belum selesai',
+            html: `
+                <div class="text-sm text-gray-600 space-y-2">
+                    <p>Ditemukan draft kategori yang tersimpan pada:</p>
+                    <p class="font-semibold">${timeStr}</p>
+                    ${data.name ? `<p class="text-xs text-gray-500">Nama: <strong>${data.name}</strong></p>` : ''}
+                </div>
+            `,
+            icon: 'info',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonColor: '#7BB661',
+            denyButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '✏️ Lanjutkan Draft',
+            denyButtonText: '🗑️ Buang Draft',
+            cancelButtonText: 'Nanti saja',
+        }).then(result => {
+            if (result.isConfirmed) {
+                window.categoryDraft.restore(data);
+                Swal.fire({
+                    icon: 'success', title: 'Draft dipulihkan!',
+                    toast: true, position: 'top-end',
+                    timer: 2000, showConfirmButton: false, timerProgressBar: true,
+                });
+            } else if (result.isDenied) {
+                window.categoryDraft.discard();
+                Swal.fire({
+                    icon: 'info', title: 'Draft dibuang',
+                    toast: true, position: 'top-end',
+                    timer: 2000, showConfirmButton: false, timerProgressBar: true,
+                });
+            }
+        });
+        } catch(e) {}
+    });
+})();
+
+// ── Konfirmasi Leave Page untuk form kategori utama ──
+let categoryFormChanged = false;
+
+document.getElementById('form-utama')?.addEventListener('input', () => {
+    categoryFormChanged = true;
+});
+document.getElementById('form-utama')?.addEventListener('change', () => {
+    categoryFormChanged = true;
+});
+
+// Form sub kategori
+document.getElementById('form-sub')?.addEventListener('input', () => {
+    categoryFormChanged = true;
+});
+document.getElementById('form-sub')?.addEventListener('change', () => {
+    categoryFormChanged = true;
+});
+
+window.addEventListener('beforeunload', function(e) {
+    if (categoryFormChanged) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+// Reset saat submit
+document.getElementById('form-utama')?.addEventListener('submit', () => {
+    categoryFormChanged = false;
+});
+document.getElementById('form-sub')?.addEventListener('submit', () => {
+    categoryFormChanged = false;
+});
+
 </script>
 
 @endsection
