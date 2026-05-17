@@ -33,66 +33,56 @@
                 Kembali
             </a>
             <form action="{{ route('admin.categories.destroy', $category) }}" method="POST" class="inline" id="delete-form">
-                    @csrf @method('DELETE')
-                    <button type="button"
-                            onclick="confirmDelete()"
-                            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
-                        <span class="material-symbols-outlined text-lg">delete</span>Hapus
-                    </button>
-                </form>
-
-                <script>
-                function confirmDelete() {
-                    Swal.fire({
-                        title: 'Hapus Kategori?',
-                        html: `Yakin ingin menghapus <strong>{{ $category->name }}</strong>?
-                            @if(!$category->isChild())
-                            <br><span class="text-sm text-red-400 mt-1 block">⚠️ Sub-kategorinya harus dihapus dulu.</span>
-                            @endif`,
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#ef4444',
-                        cancelButtonColor: '#6b7280',
-                        confirmButtonText: 'Ya, Hapus!',
-                        cancelButtonText: 'Batal',
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            document.getElementById('delete-form').submit();
-                        }
-                    });
-                }
-                </script>
+                @csrf @method('DELETE')
+                <button type="button"
+                        onclick="confirmDelete()"
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors">
+                    <span class="material-symbols-outlined text-lg">delete</span>Hapus
+                </button>
+            </form>
         </div>
     </div>
 
     <!-- Form Card -->
     <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm overflow-hidden">
         <div class="p-6 border-b border-gray-200 dark:border-zinc-800">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center
-                    {{ $category->isChild() ? 'bg-purple-50 dark:bg-purple-500/10' : 'bg-blue-50 dark:bg-blue-500/10' }}">
-                    <span class="material-symbols-outlined text-xl
-                        {{ $category->isChild() ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400' }}">
-                        {{ $category->isChild() ? 'account_tree' : 'category' }}
-                    </span>
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center
+                        {{ $category->isChild() ? 'bg-purple-50 dark:bg-purple-500/10' : 'bg-blue-50 dark:bg-blue-500/10' }}">
+                        <span class="material-symbols-outlined text-xl
+                            {{ $category->isChild() ? 'text-purple-600 dark:text-purple-400' : 'text-blue-600 dark:text-blue-400' }}">
+                            {{ $category->isChild() ? 'account_tree' : 'category' }}
+                        </span>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                            Edit {{ $category->isChild() ? 'Sub Kategori' : 'Kategori Utama' }}
+                        </h2>
+                        <p class="text-sm text-gray-500 dark:text-zinc-400">Update data di form bawah ini</p>
+                    </div>
                 </div>
-                <div>
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
-                        Edit {{ $category->isChild() ? 'Sub Kategori' : 'Kategori Utama' }}
-                    </h2>
-                    <p class="text-sm text-gray-500 dark:text-zinc-400">Update data di form bawah ini</p>
-                </div>
+
+                {{-- Badge field wajib (seragam dengan halaman produk) --}}
+                <span class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5
+                            bg-red-50 dark:bg-red-500/10
+                            border border-red-200 dark:border-red-500/20
+                            text-red-600 dark:text-red-400
+                            text-xs font-medium rounded-full flex-shrink-0">
+                    <span class="text-red-500 font-bold text-sm leading-none">*</span>
+                    Field wajib diisi
+                </span>
             </div>
         </div>
+
         <div class="p-6">
             @include('admin.categories._form', [
-                'action' => route('admin.categories.update', $category),
-                'category' => $category,
-                'buttonText' => 'Update ' . ($category->isChild() ? 'Sub Kategori' : 'Kategori Utama'),
+                'action'           => route('admin.categories.update', $category),
+                'category'         => $category,
+                'buttonText'       => 'Update ' . ($category->isChild() ? 'Sub Kategori' : 'Kategori Utama'),
                 'parentCategories' => $parentCategories,
             ])
         </div>
-   </div>
     </div>
 
     {{-- ── INFO SUB KATEGORI (hanya untuk kategori utama) ── --}}
@@ -213,4 +203,68 @@
     </div>
 
 </div>
+
+{{-- Spacer supaya konten tidak ketutupan sticky bar --}}
+<div class="h-20"></div>
+
+{{-- Sticky Action Bar --}}
+<div class="fixed bottom-0 left-0 right-0 z-40
+            bg-white/80 dark:bg-zinc-900/80
+            backdrop-blur-md
+            border-t border-gray-200 dark:border-zinc-800
+            px-6 py-3 lg:pl-72">
+    <div class="max-w-screen-xl mx-auto flex items-center gap-4 min-w-0">
+
+        {{-- Hint kiri --}}
+        <p class="text-xs text-gray-500 dark:text-zinc-400 hidden lg:flex items-center gap-1 min-w-0">
+            <span class="material-symbols-outlined text-sm text-yellow-500 flex-shrink-0">info</span>
+            <span class="truncate">Pastikan semua field wajib (<span class="text-red-500 font-bold">*</span>) sudah terisi</span>
+        </p>
+
+        {{-- Tombol kanan --}}
+        <div class="flex items-center gap-3 ml-auto">
+            <a href="{{ route('admin.categories.index') }}"
+               class="flex items-center gap-2 px-5 py-2 border border-gray-300 dark:border-zinc-700
+                      rounded-lg text-sm text-gray-700 dark:text-zinc-300
+                      bg-white dark:bg-zinc-800
+                      hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">
+                <span class="material-symbols-outlined text-base">close</span>
+                Batal
+            </a>
+            <button type="submit" form="category-form"
+                    class="flex items-center gap-2 px-6 py-2 text-white text-sm font-medium rounded-lg
+                           hover:shadow-lg hover:scale-[1.02] transition-all
+                           {{ $category->isChild()
+                               ? 'bg-gradient-to-r from-purple-500 to-purple-700'
+                               : 'bg-gradient-to-r from-soft-green to-primary' }}">
+                <span class="material-symbols-outlined text-base">save</span>
+                Update {{ $category->isChild() ? 'Sub Kategori' : 'Kategori Utama' }}
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function confirmDelete() {
+    Swal.fire({
+        title: 'Hapus Kategori?',
+        html: `Yakin ingin menghapus <strong>{{ $category->name }}</strong>?
+            @if(!$category->isChild())
+            <br><span class="text-sm text-red-400 mt-1 block">⚠️ Sub-kategorinya harus dihapus dulu.</span>
+            @endif`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal',
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('delete-form').submit();
+        }
+    });
+}
+</script>
+
 @endsection

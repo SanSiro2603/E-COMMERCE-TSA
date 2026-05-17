@@ -28,24 +28,6 @@
         </a>
     </div>
 
-    @if(session('success'))
-        <div class="bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/20 rounded-lg p-4">
-            <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-green-600 dark:text-green-400 text-xl mt-0.5">check_circle</span>
-                <p class="text-sm text-green-800 dark:text-green-400">{{ session('success') }}</p>
-            </div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-4">
-            <div class="flex items-start gap-3">
-                <span class="material-symbols-outlined text-red-600 dark:text-red-400 text-xl mt-0.5">error</span>
-                <p class="text-sm text-red-800 dark:text-red-400">{{ session('error') }}</p>
-            </div>
-        </div>
-    @endif
-
     <!-- Product Info Banner -->
     <div class="bg-gradient-to-r from-soft-green/10 to-primary/10 dark:from-soft-green/5 dark:to-primary/5 border border-soft-green/20 dark:border-soft-green/10 rounded-lg p-4">
         <div class="flex items-start gap-3">
@@ -104,7 +86,6 @@
 </div>
 
 
-</div> 
 
 {{-- Spacer --}}
 <div class="h-20"></div>
@@ -114,13 +95,13 @@
             bg-white/80 dark:bg-zinc-900/80
             backdrop-blur-md
             border-t border-gray-200 dark:border-zinc-800
-            px-6 py-3 lg:pl-64">
-    <div class="max-w-screen-xl mx-auto flex items-center gap-4">
+            px-6 py-3 lg:pl-72">
+    <div class="max-w-screen-xl mx-auto flex items-center gap-4 min-w-0">
 
         {{-- Hint kiri --}}
-        <p class="text-xs text-gray-500 dark:text-zinc-400 hidden sm:flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm text-yellow-500">info</span>
-            Pastikan semua field wajib (<span class="text-red-500 font-bold">*</span>) sudah terisi
+        <p class="text-xs text-gray-500 dark:text-zinc-400 hidden lg:flex items-center gap-1 min-w-0">
+            <span class="material-symbols-outlined text-sm text-yellow-500 flex-shrink-0">info</span>
+            <span class="truncate">Pastikan semua field wajib (<span class="text-red-500 font-bold">*</span>) sudah terisi</span>
         </p>
 
         {{-- Tombol kanan --}}

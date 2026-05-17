@@ -32,6 +32,14 @@
                 <div id="searchSpinner" class="hidden">
                     <div class="w-4 h-4 border-2 border-soft-green border-t-transparent rounded-full animate-spin"></div>
                 </div>
+
+                {{-- Tombol Close --}}
+                <button onclick="closeSearch()"
+                        class="flex items-center justify-center w-7 h-7 rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors flex-shrink-0"
+                        title="Tutup (ESC)">
+                    <span class="material-symbols-outlined text-gray-400 dark:text-zinc-500 text-[18px]">close</span>
+                </button>
+
                 <kbd class="hidden sm:inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-gray-400 dark:text-zinc-500 bg-gray-100 dark:bg-zinc-800 rounded-lg">
                     ESC
                 </kbd>

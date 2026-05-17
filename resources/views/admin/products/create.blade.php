@@ -93,13 +93,13 @@
             bg-white/80 dark:bg-zinc-900/80
             backdrop-blur-md
             border-t border-gray-200 dark:border-zinc-800
-            px-6 py-3 lg:pl-64">
-    <div class="max-w-screen-xl mx-auto flex items-center gap-4">
+            px-6 py-3 lg:pl-72">
+    <div class="max-w-screen-xl mx-auto flex items-center gap-4 min-w-0">
 
         {{-- Hint kiri --}}
-        <p class="text-xs text-gray-500 dark:text-zinc-400 hidden sm:flex items-center gap-1">
-            <span class="material-symbols-outlined text-sm text-yellow-500">info</span>
-            Pastikan semua field wajib (<span class="text-red-500 font-bold">*</span>) sudah terisi
+        <p class="text-xs text-gray-500 dark:text-zinc-400 hidden lg:flex items-center gap-1 min-w-0">
+            <span class="material-symbols-outlined text-sm text-yellow-500 flex-shrink-0">info</span>
+            <span class="truncate">Pastikan semua field wajib (<span class="text-red-500 font-bold">*</span>) sudah terisi</span>
         </p>
 
         {{-- Tombol kanan --}}
@@ -125,6 +125,64 @@
     </div>
 </div>
 
+{{-- ── DRAFT RESTORE ── --}}
+<script>
+// ── Restore draft saat halaman create dimuat ──
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        const raw = localStorage.getItem('product_draft');
+        if (!raw) return;
+
+        const data = JSON.parse(raw);
+        if (!window.productDraft?.hasData(data)) return;
+
+        // Format waktu simpan
+        const savedAt = new Date(data.savedAt);
+        const timeStr = savedAt.toLocaleDateString('id-ID', {
+            day: '2-digit', month: 'short', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+
+        // Tampilkan toast konfirmasi restore
+        Swal.fire({
+            title: 'Ada draft yang belum selesai',
+            html: `
+                <div class="text-sm text-gray-600 space-y-2">
+                    <p>Ditemukan draft produk yang tersimpan pada:</p>
+                    <p class="font-semibold">${timeStr}</p>
+                    ${data.name ? `<p class="text-xs text-gray-500">Nama: <strong>${data.name}</strong></p>` : ''}
+                </div>
+            `,
+            icon: 'info',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonColor: '#7BB661',
+            denyButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: '✏️ Lanjutkan Draft',
+            denyButtonText: '🗑️ Buang Draft',
+            cancelButtonText: 'Nanti saja',
+        }).then(result => {
+            if (result.isConfirmed) {
+                window.productDraft.restore(data);
+                Swal.fire({
+                    icon: 'success', title: 'Draft dipulihkan!',
+                    toast: true, position: 'top-end',
+                    timer: 2000, showConfirmButton: false, timerProgressBar: true,
+                });
+            } else if (result.isDenied) {
+                window.productDraft.discard();
+                Swal.fire({
+                    icon: 'info', title: 'Draft dibuang',
+                    toast: true, position: 'top-end',
+                    timer: 2000, showConfirmButton: false, timerProgressBar: true,
+                });
+            }
+        });
+
+    } catch(e) {}
+});
+</script>
 @endsection
 
 
