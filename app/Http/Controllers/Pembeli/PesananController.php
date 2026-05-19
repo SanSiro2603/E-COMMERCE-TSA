@@ -207,10 +207,11 @@ class PesananController extends Controller
             // Buat object serupa Cart agar blade checkout bisa dipakai ulang
             $fakeCarts = collect([
                 (object) [
-                    'id'       => null,
-                    'quantity' => $buyNow['quantity'],
-                    'subtotal' => $buyNow['subtotal'],
-                    'product'  => (object) $buyNow['product'],
+                    'id'         => null,
+                    'product_id' => $buyNow['product_id'],
+                    'quantity'   => $buyNow['quantity'],
+                    'subtotal'   => $buyNow['subtotal'],
+                    'product'    => (object) $buyNow['product'],
                 ]
             ]);
 
@@ -355,10 +356,11 @@ class PesananController extends Controller
                 // Buat koleksi fake Cart agar OrderService bisa dipakai ulang
                 $fakeCarts = collect([
                     (object) [
-                        'id'       => null,
-                        'quantity' => $buyNow['quantity'],
-                        'subtotal' => $buyNow['subtotal'],
-                        'product'  => $product,
+                        'id'         => null,
+                        'product_id' => $product->id,
+                        'quantity'   => $buyNow['quantity'],
+                        'subtotal'   => $buyNow['subtotal'],
+                        'product'    => $product,
                     ]
                 ]);
 

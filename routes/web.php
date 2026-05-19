@@ -64,7 +64,7 @@ Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallb
 */
 use App\Http\Controllers\Auth\TwoFactorController;
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'role:admin,super_admin'])->group(function () {
     Route::get('/2fa', [TwoFactorController::class, 'index'])->name('2fa.index');
     Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify');
 });

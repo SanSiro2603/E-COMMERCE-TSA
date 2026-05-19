@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>Ecommerce TSA Website Resmi</title>
+    <title>E-Commerce TSA Website Resmi</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet" />
@@ -163,8 +163,9 @@
                     <!-- Logo -->
                     <div class="flex items-center gap-3 group cursor-pointer">
                         <div
-                            class="size-11 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center transform group-hover:rotate-12 transition-all duration-300 shadow-lg">
-                            <span class="material-symbols-outlined text-3xl text-white">storefront</span>
+                            class="size-11 flex items-center justify-center transform group-hover:rotate-12 transition-all duration-300">
+                            <img src="images/logo header.png" alt="Logo Tunas Sejahtera Adhi Perkasa"
+                                class="h-10 w-10 object-contain" />
                         </div>
                         <div>
                             <h2 class="text-xl font-bold text-gradient">E-Commerce TSA</h2>
@@ -299,7 +300,7 @@
 
                     <!-- Deskripsi -->
                     <p class="text-lg sm:text-xl text-gray-200 max-w-3xl mx-auto mb-12">
-                        {{ __('Welcome to Ecommerce TSA, your trusted source for naturally raised livestock with full transparency and high ethical standards.') }}
+                        {{ __('Welcome to E-Commerce TSA, your trusted source for naturally raised livestock with full transparency and high ethical standards.') }}
                     </p>
 
                     <!-- Tombol -->
@@ -383,7 +384,7 @@
                         </h2>
 
                         <p class="text-lg text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                            {{ __('Ecommerce TSA is dedicated to providing the freshest and naturally raised livestock. Our commitment to eco-friendly farming practices ensures that our animals are healthy, happy, and raised in a sustainable environment.') }}
+                            {{ __('E-Commerce TSA is dedicated to providing the freshest and naturally raised livestock. Our commitment to eco-friendly farming practices ensures that our animals are healthy, happy, and raised in a sustainable environment.') }}
                         </p>
 
                         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
@@ -545,7 +546,7 @@
                     </div>
                 </div>
                 <h2 class="text-4xl md:text-5xl font-black text-gray-900 dark:text-white mb-4">
-                    {{ __('Mengapa Memilih') }} <span class="text-gradient">Ecommerce TSA</span>
+                    {{ __('Mengapa Memilih') }} <span class="text-gradient">E-Commerce TSA</span>
                 </h2>
                     {{ __('We provide unparalleled quality and service in the livestock market') }}
             </div>
@@ -607,7 +608,7 @@
                     </h2>
 
                     <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 leading-relaxed">
-                        {{ __('At Ecommerce TSA, we believe in complete transparency and adherence to the highest legal standards. We are committed to ethical practices, ensuring every animal is responsibly sourced and sold.') }}
+                        {{ __('At E-Commerce TSA, we believe in complete transparency and adherence to the highest legal standards. We are committed to ethical practices, ensuring every animal is responsibly sourced and sold.') }}
                     </p>
 
                     <a href="#contact"
@@ -697,7 +698,7 @@
                         <span class="material-symbols-outlined text-yellow-400">star</span>
                     </div>
                     <p class="text-gray-600 dark:text-gray-400 italic mb-6 leading-relaxed">
-                        "{{ __('The goat we bought was very healthy and well-cared for. The whole process was smooth and professional. Highly recommend Ecommerce TSA!') }}"
+                        "{{ __('The goat we bought was very healthy and well-cared for. The whole process was smooth and professional. Highly recommend E-Commerce TSA!') }}"
                     </p>
                     <div class="flex items-center gap-4">
                         <div
@@ -833,11 +834,12 @@
                 <div class="md:col-span-2">
                     <div class="flex items-center gap-3 mb-4">
                         <div
-                            class="size-12 bg-gradient-to-br from-primary to-green-600 rounded-2xl flex items-center justify-center shadow-lg">
-                            <span class="material-symbols-outlined text-3xl text-white">eco</span>
+                            class="size-12 flex items-center justify-center">
+                            <img src="images/logo header.png" alt="Logo Tunas Sejahtera Adhi Perkasa"
+                                class="h-11 w-11 object-contain" />
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-gradient">Ecommerce TSA</h3>
+                            <h3 class="text-xl font-bold text-gradient">E-Commerce TSA</h3>
                             <p class="text-xs text-gray-600 dark:text-gray-400">Perdagangan Hewan Premium</p>
                         </div>
                     </div>
@@ -870,7 +872,7 @@
             <!-- Bottom Bar -->
             <div class="border-t border-white/10 pt-8">
                 <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('© 2025 Ecommerce TSA. All rights reserved.') }}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">{{ __('© 2025 E-Commerce TSA. All rights reserved.') }}</p>
                     <div class="flex gap-6 text-sm">
                         <a href="#"
                             class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-secondary transition-colors">{{ __('Privacy Policy') }}</a>

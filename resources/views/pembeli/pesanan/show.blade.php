@@ -35,7 +35,7 @@
             <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
                 Pesanan #{{ $order->order_number }}
             </h1>
-            <p class="text-sm text-white dark:text-white mt-1">
+            <p class="text-sm text-gray-600 dark:text-zinc-400 mt-1">
                 Pesanan dibuat: {{ $order->created_at->timezone('Asia/Jakarta')->format('d-m-Y H:i:s') }}
             </p>
 
@@ -281,7 +281,7 @@
                         <form action="{{ route('pembeli.pesanan.complete', $order->id) }}" method="POST">
                             @csrf @method('PATCH')
                             <button type="submit"
-                                    class="w-full py-3 bg-gradient-to-r from-soft-green to-primary text-white font-semibold rounded-lg hover:shadow-lg transition flex items-center justify-center gap-2">
+                                    class="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg border border-green-700/20 shadow-sm hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-green-500/40 transition flex items-center justify-center gap-2">
                                 <span class="material-symbols-outlined text-lg">check_circle</span>
                                 Tandai Selesai
                             </button>
@@ -297,7 +297,7 @@
                     @endif
 
                     <a href="{{ route('pembeli.pesanan.index') }}"
-                       class="block text-center py-3 text-gray-600 dark:text-zinc-400 hover:text-soft-green transition">
+                       class="block text-center py-3 rounded-lg border border-gray-200 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-gray-700 dark:text-zinc-200 hover:bg-gray-50 dark:hover:bg-zinc-600 hover:text-soft-green transition">
                         Kembali ke Pesanan
                     </a>
                 </div>

@@ -265,7 +265,7 @@
                                        bg-[#0d1b13] dark:bg-white hover:opacity-90 active:scale-[0.98]
                                        text-white dark:text-[#0d1b13] rounded-xl font-bold text-sm
                                        transition-all border border-transparent">
-                            <span class="material-symbols-outlined">bolt</span>
+                            <span class="material-symbols-outlined">shopping_bag</span>
                             Beli Sekarang
                         </button>
 
@@ -609,7 +609,7 @@ function buyNow(productId) {
             window.location.href = data.redirect_url;
         } else {
             btn.disabled = false;
-            btn.innerHTML = '<span class="material-symbols-outlined">bolt</span> Beli Sekarang';
+            btn.innerHTML = '<span class="material-symbols-outlined">shopping_bag</span> Beli Sekarang';
             Swal.fire({
                 icon: 'error', title: 'Gagal!',
                 text: data.message || 'Gagal memproses pesanan',
@@ -619,7 +619,7 @@ function buyNow(productId) {
     })
     .catch(() => {
         btn.disabled = false;
-        btn.innerHTML = '<span class="material-symbols-outlined">bolt</span> Beli Sekarang';
+        btn.innerHTML = '<span class="material-symbols-outlined">shopping_bag</span> Beli Sekarang';
         Swal.fire({
             icon: 'error', title: 'Error!',
             text: 'Terjadi kesalahan jaringan.',
@@ -633,7 +633,7 @@ window.addEventListener('pageshow', () => {
     const btn = document.getElementById('btn-buy-now');
     if (btn) {
         btn.disabled = false;
-        btn.innerHTML = '<span class="material-symbols-outlined">bolt</span> Beli Sekarang';
+        btn.innerHTML = '<span class="material-symbols-outlined">shopping_bag</span> Beli Sekarang';
     }
 });
 
