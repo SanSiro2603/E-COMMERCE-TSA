@@ -257,13 +257,13 @@
                     'route' => 'admin.categories.index',
                     'icon'  => 'category',
                     'label' => 'Kategori',
-                    'image' => null,
+                    'image' => 'images/sidebar/kategori.png',
                 ],
                 [
                     'route' => 'admin.products.index',
                     'icon'  => 'inventory_2',
                     'label' => 'Produk',
-                    'image' => null,
+                    'image' => 'images/sidebar/produk.png',
                 ],
                 [
                     'route' => 'admin.orders.index',
@@ -293,9 +293,13 @@
         <nav class="relative px-3 pt-4 pb-2 space-y-2 z-10">
             @foreach ($menu as $item)
                 @php
-                    // Ambil prefix grup dari route (misal 'admin.categories.index' → 'admin.categories')
-                    $routePrefix = implode('.', array_slice(explode('.', $item['route']), 0, 2));
-                    $active = request()->routeIs($routePrefix . '.*');
+                    // Dashboard dicek exact, yang lain pakai prefix grup
+                    if ($item['route'] === 'admin.dashboard') {
+                        $active = request()->routeIs('admin.dashboard');
+                    } else {
+                        $routePrefix = implode('.', array_slice(explode('.', $item['route']), 0, 2));
+                        $active = request()->routeIs($routePrefix . '.*');
+                    }
                 @endphp
 
                 <a href="{{ route($item['route']) }}"
@@ -400,7 +404,7 @@
         </header>
 
         <!-- Page Content -->
-        <main class="p-4 lg:p-8 animate-slide-down">
+        <main class="p-4 lg:p-8 pb-32 animate-slide-down">
             <div class="max-w-7xl mx-auto">
                 @yield('content')
             </div>

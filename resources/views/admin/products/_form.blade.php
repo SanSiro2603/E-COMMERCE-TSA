@@ -451,6 +451,32 @@
         </div>
         {{-- ↑ TUTUP section-cert di sini --}}
 
+        {{-- Action Buttons --}}
+        <div class="pt-6 border-t border-gray-200 dark:border-zinc-800 mt-6">
+            <div class="flex items-center gap-3">
+                <button type="submit"
+                        class="flex items-center gap-2 px-6 py-2.5
+                               bg-gradient-to-r from-soft-green to-primary
+                               text-white font-medium rounded-lg
+                               hover:shadow-lg hover:scale-[1.02] transition-all">
+                    <span class="material-symbols-outlined text-lg">save</span>
+                    {{ $buttonText ?? 'Simpan Produk' }}
+                </button>
+                <a href="{{ route('admin.products.index') }}"
+                   class="flex items-center gap-2 px-6 py-2.5 border border-gray-300 dark:border-zinc-700
+                          rounded-lg text-gray-700 dark:text-zinc-300
+                          bg-white dark:bg-zinc-800
+                          hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">
+                    <span class="material-symbols-outlined text-lg">close</span>
+                    Batal
+                </a>
+                <p class="ml-auto text-xs text-gray-500 dark:text-zinc-400 flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm text-yellow-500">info</span>
+                    Field bertanda <span class="text-red-500 font-bold mx-1">*</span> wajib diisi
+                </p>
+            </div>
+        </div>
+
     </div>
 
 </form>

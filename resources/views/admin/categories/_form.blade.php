@@ -133,6 +133,27 @@
             </label>
         </div>
 
+        {{-- Action Buttons --}}
+        <div class="mt-8 flex items-center gap-3 pt-6 border-t border-gray-200 dark:border-zinc-800">
+            <button type="submit"
+                    class="flex items-center gap-2 px-6 py-2.5 text-white font-medium rounded-lg
+                           hover:shadow-lg hover:scale-[1.02] transition-all
+                           {{ isset($category) && $category->isChild()
+                               ? 'bg-gradient-to-r from-purple-500 to-purple-700'
+                               : 'bg-gradient-to-r from-soft-green to-primary' }}">
+                <span class="material-symbols-outlined text-lg">save</span>
+                {{ $buttonText ?? 'Simpan Kategori' }}
+            </button>
+            <a href="{{ route('admin.categories.index') }}"
+               class="flex items-center gap-2 px-6 py-2.5 border border-gray-300 dark:border-zinc-700
+                      rounded-lg text-gray-700 dark:text-zinc-300
+                      bg-white dark:bg-zinc-800
+                      hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors">
+                <span class="material-symbols-outlined text-lg">close</span>
+                Batal
+            </a>
+        </div>
+
     </div>
 </form>
 
