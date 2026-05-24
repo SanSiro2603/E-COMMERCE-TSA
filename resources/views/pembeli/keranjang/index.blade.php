@@ -32,7 +32,7 @@
             <div class="lg:col-span-2 space-y-4">
                 
                 <!-- Select All Header -->
-                <div class="bg-white dark:bg-background-dark rounded-xl border border-[#cfe7d9] dark:border-primary/20 shadow-sm p-4">
+                <div class="bg-white dark:bg-background-dark rounded-xl border border-[#cfe7d9] dark:border-primary/20 shadow-sm p-3 sm:p-4">
                     <div class="flex items-center justify-between">
                         <label class="flex items-center gap-3 cursor-pointer">
                             <input type="checkbox" 
@@ -46,8 +46,8 @@
                         
                         <button onclick="deleteSelected()" 
                                 id="deleteSelectedBtn"
-                                class="hidden items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors">
-                            <span class="material-symbols-outlined text-lg">delete</span>
+                                class="hidden items-center gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg transition-colors">
+                            <span class="material-symbols-outlined text-sm sm:text-lg">delete</span>
                             Hapus Dipilih
                         </button>
                     </div>
@@ -55,15 +55,15 @@
 
                 @foreach($carts as $cart)
                     <div class="bg-white dark:bg-background-dark rounded-2xl border border-[#cfe7d9] dark:border-primary/20 shadow-sm hover:shadow-md transition-shadow overflow-hidden cart-item" 
-                         data-cart-id="{{ $cart->id }}" 
-                         data-product-id="{{ $cart->product_id }}"
-                         data-price="{{ $cart->product->price }}"
-                         data-quantity="{{ $cart->quantity }}">
+                          data-cart-id="{{ $cart->id }}" 
+                          data-product-id="{{ $cart->product_id }}"
+                          data-price="{{ $cart->product->price }}"
+                          data-quantity="{{ $cart->quantity }}">
                         <div class="p-4 sm:p-5">
-                            <div class="flex gap-4">
+                            <div class="flex gap-3 sm:gap-4 items-start sm:items-center">
                                 
                                 <!-- Checkbox -->
-                                <div class="flex items-center">
+                                <div class="flex items-center self-center sm:self-auto shrink-0">
                                     <input type="checkbox" 
                                            class="item-checkbox w-5 h-5 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary focus:ring-2 dark:bg-zinc-800 dark:border-zinc-700 cursor-pointer"
                                            data-cart-id="{{ $cart->id }}"
@@ -85,58 +85,52 @@
                                     </div>
                                 </a>
 
-                                <!-- Product Info -->
-                                <div class="flex-1 min-w-0 flex flex-col justify-between">
+                                <!-- Product Info (Shopee Style) -->
+                                <div class="flex-1 min-w-0 flex flex-col h-20 sm:h-auto justify-between">
                                     <!-- Name & Category -->
                                     <div>
                                         <a href="{{ route('pembeli.produk.show', $cart->product->slug) }}" class="block">
-                                            <h3 class="text-sm sm:text-base font-semibold text-[#0d1b13] dark:text-white hover:text-primary transition-colors line-clamp-2 leading-snug">
+                                            <h3 class="text-xs sm:text-base font-semibold text-[#0d1b13] dark:text-white hover:text-primary transition-colors line-clamp-1 sm:line-clamp-2 leading-tight">
                                                 {{ $cart->product->name }}
                                             </h3>
                                         </a>
-                                        <span class="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-medium">
-                                            <span class="material-symbols-outlined" style="font-size:13px">category</span>
+                                        <span class="inline-flex items-center gap-1 mt-0.5 sm:mt-1 px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 text-gray-500 dark:text-zinc-400 text-[10px] sm:text-xs font-medium">
+                                            <span class="material-symbols-outlined" style="font-size:11px">category</span>
                                             {{ $cart->product->category->name ?? 'Uncategorized' }}
                                         </span>
                                     </div>
 
-                                    <!-- Price, Quantity, Subtotal -->
-                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-2 border-t border-dashed border-[#cfe7d9] dark:border-primary/20">
-                                        
-                                        <!-- Harga Satuan -->
-                                        <div class="text-center">
-                                            <p class="text-[11px] font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">Harga Satuan</p>
-                                            <p class="text-base font-bold text-primary mt-0.5">
+                                    <!-- Price & Quantity -->
+                                    <div class="flex items-center justify-between mt-1 sm:mt-2 sm:pt-2 sm:border-t sm:border-dashed sm:border-[#cfe7d9] dark:sm:border-primary/20">
+                                        <!-- Price -->
+                                        <div>
+                                            <span class="hidden sm:block text-[11px] font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">Harga Satuan</span>
+                                            <p class="text-xs sm:text-base font-bold text-primary">
                                                 Rp {{ number_format($cart->product->price, 0, ',', '.') }}
                                             </p>
                                         </div>
 
                                         <!-- Quantity Controls -->
-                                        <div class="flex flex-col items-center gap-1.5">
-                                            <div class="flex items-center gap-1 bg-gray-50 dark:bg-zinc-800 border border-[#cfe7d9] dark:border-primary/20 rounded-xl p-1">
-                                                <button onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, -1, {{ $cart->product->stock }})" 
-                                                        class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                                                    <span class="material-symbols-outlined text-sm">remove</span>
-                                                </button>
-                                                <input type="number" 
-                                                       value="{{ $cart->quantity }}" 
-                                                       min="1"
-                                                       max="{{ $cart->product->stock }}"
-                                                       class="w-14 text-center bg-transparent border-0 text-sm font-bold text-[#0d1b13] dark:text-white focus:ring-0"
-                                                       onchange="updateQuantityDirect({{ $cart->id }}, {{ $cart->product_id }}, this.value, {{ $cart->product->stock }})"
-                                                       id="quantity-{{ $cart->id }}">
-                                                <button onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, 1, {{ $cart->product->stock }})" 
-                                                        class="w-7 h-7 flex items-center justify-center text-gray-500 hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
-                                                    <span class="material-symbols-outlined text-sm">add</span>
-                                                </button>
-                                            </div>
-                                            <span class="text-[11px] text-gray-400 dark:text-zinc-500" id="stock-{{ $cart->product_id }}">
-                                                Tersedia: <span class="font-semibold text-gray-500 dark:text-zinc-400">{{ $cart->product->stock }}</span>
-                                            </span>
+                                        <div class="flex items-center gap-1 bg-gray-50 dark:bg-zinc-800 border border-[#cfe7d9] dark:border-primary/20 rounded-lg p-0.5">
+                                            <button onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, -1, {{ $cart->product->stock }})" 
+                                                    class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+                                                <span class="material-symbols-outlined text-xs">remove</span>
+                                            </button>
+                                            <input type="number" 
+                                                   value="{{ $cart->quantity }}" 
+                                                   min="1"
+                                                   max="{{ $cart->product->stock }}"
+                                                   class="w-8 sm:w-10 text-center bg-transparent border-0 text-xs font-bold text-[#0d1b13] dark:text-white focus:ring-0 p-0"
+                                                   onchange="updateQuantityDirect({{ $cart->id }}, {{ $cart->product_id }}, this.value, {{ $cart->product->stock }})"
+                                                   id="quantity-{{ $cart->id }}">
+                                            <button onclick="updateQuantity({{ $cart->id }}, {{ $cart->product_id }}, 1, {{ $cart->product->stock }})" 
+                                                    class="w-6 h-6 flex items-center justify-center text-gray-500 hover:text-primary hover:bg-primary/10 rounded transition-colors">
+                                                <span class="material-symbols-outlined text-xs">add</span>
+                                            </button>
                                         </div>
 
-                                        <!-- Subtotal -->
-                                        <div class="text-center">
+                                        <!-- Subtotal (Desktop Only) -->
+                                        <div class="hidden sm:block text-right">
                                             <p class="text-[11px] font-medium text-gray-400 dark:text-zinc-500 uppercase tracking-wide">Subtotal</p>
                                             <p class="text-base font-bold text-[#0d1b13] dark:text-white mt-0.5" id="subtotal-{{ $cart->id }}">
                                                 Rp {{ number_format($cart->subtotal, 0, ',', '.') }}
@@ -151,13 +145,13 @@
             </div>
 
             <!-- Order Summary -->
-            <div class="lg:col-span-1">
+            <div class="hidden lg:block lg:col-span-1">
                 <div class="bg-white dark:bg-background-dark rounded-xl border border-[#cfe7d9] dark:border-primary/20 shadow-sm sticky top-20">
-                    <div class="p-6 border-b border-[#cfe7d9] dark:border-primary/20">
+                    <div class="p-4 sm:p-6 border-b border-[#cfe7d9] dark:border-primary/20">
                         <h2 class="text-lg font-semibold text-[#0d1b13] dark:text-white">Ringkasan Belanja</h2>
                     </div>
                     
-                    <div class="p-6 space-y-4">
+                    <div class="p-4 sm:p-6 space-y-4">
                         <div class="flex justify-between text-sm">
                             <span class="text-gray-600 dark:text-zinc-400">Total Item Dipilih</span>
                             <span class="font-semibold text-[#0d1b13] dark:text-white" id="total-items-selected">0 item</span>
@@ -183,7 +177,7 @@
                         </div>
                     </div>
 
-                    <div class="p-6 border-t border-[#cfe7d9] dark:border-primary/20 space-y-3">
+                    <div class="p-4 sm:p-6 border-t border-[#cfe7d9] dark:border-primary/20 space-y-3">
                         <button onclick="checkoutSelected()" 
                                 id="checkoutBtn"
                                 disabled
@@ -226,6 +220,31 @@
         </div>
     @endif
 
+    <!-- Sticky Mobile Bottom Bar (Shopee Style) -->
+    <div id="mobileStickyBar" class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-background-dark border-t border-[#cfe7d9] dark:border-primary/20 shadow-2xl px-4 py-3 flex items-center justify-between pb-safe transform transition-transform duration-300 translate-y-full">
+        <div class="flex items-center gap-2">
+            <label class="flex items-center gap-1.5 cursor-pointer">
+                <input type="checkbox" 
+                       id="selectAllMobile" 
+                       onchange="toggleSelectAllMobile()"
+                       class="w-4 h-4 text-primary bg-gray-100 border-gray-300 rounded focus:ring-primary dark:bg-zinc-800 dark:border-zinc-700 cursor-pointer">
+                <span class="text-xs font-semibold text-[#0d1b13] dark:text-white">Semua</span>
+            </label>
+        </div>
+        <div class="flex items-center gap-3">
+            <div class="text-right">
+                <p class="text-[10px] text-gray-500 dark:text-zinc-400">Total Bayar</p>
+                <p class="text-sm font-bold text-primary" id="mobile-grand-total">Rp 0</p>
+            </div>
+            <button onclick="checkoutSelected()" 
+                    id="checkoutBtnMobile"
+                    disabled
+                    class="px-5 py-2 bg-primary text-white text-xs font-bold rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+                Checkout (<span id="mobile-selected-count">0</span>)
+            </button>
+        </div>
+    </div>
+
 </div>
 
 @push('scripts')
@@ -239,19 +258,36 @@
         updateSelectAll();
     }
 
+    function toggleSelectAllMobile() {
+        const selectAllMobile = document.getElementById('selectAllMobile');
+        const checkboxes = document.querySelectorAll('.item-checkbox');
+        checkboxes.forEach(cb => cb.checked = selectAllMobile.checked);
+        updateSelectAll();
+    }
+
     // Update Select All state & Calculate Summary
     function updateSelectAll() {
         const checkboxes = document.querySelectorAll('.item-checkbox');
         const checked = document.querySelectorAll('.item-checkbox:checked');
+        
         const selectAll = document.getElementById('selectAll');
+        const selectAllMobile = document.getElementById('selectAllMobile');
+        
         const selectedCount = document.getElementById('selected-count');
+        const mobileSelectedCount = document.getElementById('mobile-selected-count');
+        
         const deleteBtn = document.getElementById('deleteSelectedBtn');
         const checkoutBtn = document.getElementById('checkoutBtn');
+        const checkoutBtnMobile = document.getElementById('checkoutBtnMobile');
         const checkoutBtnText = document.getElementById('checkoutBtnText');
         
-        // Update select all checkbox
-        selectAll.checked = checkboxes.length === checked.length;
-        selectedCount.textContent = checked.length;
+        // Update select all checkboxes
+        const isAllChecked = checkboxes.length === checked.length;
+        if (selectAll) selectAll.checked = isAllChecked;
+        if (selectAllMobile) selectAllMobile.checked = isAllChecked;
+        
+        if (selectedCount) selectedCount.textContent = checked.length;
+        if (mobileSelectedCount) mobileSelectedCount.textContent = checked.length;
         
         // Show/Hide Delete Button
         if (checked.length > 0) {
@@ -281,13 +317,35 @@
         document.getElementById('total-price-selected').textContent = `Rp ${formatNumber(totalPrice)}`;
         document.getElementById('grand-total-selected').textContent = `Rp ${formatNumber(totalPrice)}`;
         
-        // Enable/Disable Checkout Button
+        const mobileGrandTotal = document.getElementById('mobile-grand-total');
+        if (mobileGrandTotal) {
+            mobileGrandTotal.textContent = `Rp ${formatNumber(totalPrice)}`;
+        }
+        
+        // Enable/Disable Checkout Button & Slide Mobile Sticky Bar
+        const mobileStickyBar = document.getElementById('mobileStickyBar');
         if (checked.length > 0) {
-            checkoutBtn.disabled = false;
-            checkoutBtnText.textContent = `Checkout (${checked.length} item)`;
+            if (checkoutBtn) {
+                checkoutBtn.disabled = false;
+                checkoutBtnText.textContent = `Checkout (${checked.length} item)`;
+            }
+            if (checkoutBtnMobile) {
+                checkoutBtnMobile.disabled = false;
+            }
+            if (mobileStickyBar) {
+                mobileStickyBar.classList.remove('translate-y-full');
+            }
         } else {
-            checkoutBtn.disabled = true;
-            checkoutBtnText.textContent = 'Pilih Item Dulu';
+            if (checkoutBtn) {
+                checkoutBtn.disabled = true;
+                checkoutBtnText.textContent = 'Pilih Item Dulu';
+            }
+            if (checkoutBtnMobile) {
+                checkoutBtnMobile.disabled = true;
+            }
+            if (mobileStickyBar) {
+                mobileStickyBar.classList.add('translate-y-full');
+            }
         }
     }
     

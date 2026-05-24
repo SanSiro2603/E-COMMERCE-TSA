@@ -27,6 +27,7 @@
                         "primary": "#13ec6d",
                         "background-light": "#f6f8f7",
                         "background-dark": "#102218",
+                        "soft-green": "#16a34a",
                     },
                     fontFamily: {
                         "display": ["Manrope", "sans-serif"]
@@ -309,6 +310,7 @@
     </main>
 
     <!-- Footer -->
+    @if(!request()->routeIs('pembeli.keranjang.index', 'pembeli.pesanan.checkout', 'pembeli.payment.show'))
     <footer class="bg-white dark:bg-background-dark border-t border-[#e7f3ec] dark:border-primary/20 py-12">
         <div class="max-w-[1280px] mx-auto px-4 md:px-10 grid grid-cols-1 md:grid-cols-4 gap-10">
 
@@ -386,6 +388,7 @@
             </div>
         </div>
     </footer>
+    @endif
 
     <!-- Logout Form -->
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
