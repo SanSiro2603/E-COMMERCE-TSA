@@ -98,110 +98,95 @@
                     @endif
 
                     <!-- Header -->
-                    <div class="p-4 sm:p-6 border-b border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50">
-                        <div class="flex flex-col sm:flex-row justify-between gap-4">
-                            <div class="flex-1">
-                                <div class="flex flex-wrap items-center gap-2 mb-2">
-                                    <span class="material-symbols-outlined text-soft-green">receipt_long</span>
-                                    <h3 class="text-base font-semibold text-gray-900 dark:text-white">
-                                        #{{ $order->order_number }}
-                                    </h3>
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-full
-                                        {{ $order->status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400' : '' }}
-                                        {{ $order->status === 'paid' ? 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400' : '' }}
-                                        {{ $order->status === 'processing' ? 'bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-400' : '' }}
-                                        {{ $order->status === 'shipped' ? 'bg-indigo-100 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400' : '' }}
-                                        {{ $order->status === 'completed' ? 'bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400' : '' }}
-                                        {{ in_array($order->status, ['cancelled', 'failed']) ? 'bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400' : '' }}">
-                                        @if($order->status === 'paid' && $order->paid_at && $order->paid_at->diffInMinutes(now()) < 5)
-                                            <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
-                                        @endif
-                                        {{ $order->status_label }}
-                                    </span>
-                                    @if($order->tracking_number)
-                                        <span class="inline-flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                                            <span class="material-symbols-outlined text-sm">local_shipping</span>
-                                            {{ $order->tracking_number }}
-                                        </span>
-                                    @endif
-                                </div>
-                                <p class="text-sm text-gray-600 dark:text-zinc-400">
-                                    <span class="material-symbols-outlined text-sm align-middle">calendar_today</span>
-                                    {{ $order->created_at->format('d M Y, H:i') }} • {{ $order->items->count() }} produk
-                                </p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-xs text-gray-500 dark:text-zinc-400 mb-1">Total Bayar</p>
-                                <p class="text-xl font-bold text-soft-green">
-                                    Rp {{ number_format($order->grand_total, 0, ',', '.') }}
-                                </p>
-                            </div>
+                    <div class="px-4 py-3 border-b border-gray-100 dark:border-zinc-800/80 flex justify-between items-center bg-gray-50/50 dark:bg-zinc-800/30">
+                        <div class="flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-gray-500 dark:text-zinc-400">storefront</span>
+                            <span class="text-xs font-bold text-gray-900 dark:text-white">Pesanan #{{ substr($order->order_number, -6) }}</span>
                         </div>
+                        <span class="text-[10px] sm:text-xs font-extrabold uppercase tracking-wider
+                            {{ $order->status === 'pending' ? 'text-yellow-600 dark:text-yellow-500' : '' }}
+                            {{ $order->status === 'paid' ? 'text-blue-600 dark:text-blue-500' : '' }}
+                            {{ $order->status === 'processing' ? 'text-purple-600 dark:text-purple-500' : '' }}
+                            {{ $order->status === 'shipped' ? 'text-indigo-600 dark:text-indigo-500' : '' }}
+                            {{ $order->status === 'completed' ? 'text-green-600 dark:text-green-500' : '' }}
+                            {{ in_array($order->status, ['cancelled', 'failed']) ? 'text-red-600 dark:text-red-500' : '' }}">
+                            {{ $order->status_label }}
+                        </span>
                     </div>
 
                     <!-- Items Preview -->
-                    <div class="p-4 sm:p-6">
-                        <div class="space-y-3">
+                    <div class="px-4 py-3">
+                        <div class="space-y-4">
                             @foreach($order->items->take(3) as $item)
-                                <div class="flex gap-3">
-                                    <div class="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-lg overflow-hidden flex-shrink-0">
+                                <div class="flex gap-3 sm:gap-4 items-start">
+                                    <div class="relative shrink-0">
                                         @if($item->product && $item->product->image)
-                                            <img src="{{ asset('storage/' . $item->product->image) }}" class="w-full h-full object-cover">
+                                            <img src="{{ asset('storage/' . $item->product->image) }}" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 shadow-sm">
                                         @else
-                                            <div class="w-full h-full flex items-center justify-center">
-                                                <span class="material-symbols-outlined text-gray-400 text-xl">image</span>
+                                            <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 shadow-sm">
+                                                <span class="material-symbols-outlined text-gray-400 text-2xl">image</span>
                                             </div>
                                         @endif
+                                        <span class="absolute -top-2 -right-2 bg-zinc-900 dark:bg-zinc-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-zinc-800 shadow-sm leading-none flex items-center justify-center min-w-[20px] h-[20px]">
+                                            x{{ $item->quantity }}
+                                        </span>
                                     </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h4 class="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1">
-                                            {{ $item->product->name ?? 'Produk tidak tersedia' }}
-                                        </h4>
-                                        <p class="text-xs text-gray-600 dark:text-zinc-400 mt-1">
-                                            {{ $item->quantity }} x Rp {{ number_format($item->price, 0, ',', '.') }}
-                                        </p>
-                                    </div>
-                                    <div class="text-right">
-                                        <p class="text-sm font-bold text-gray-900 dark:text-white">
-                                            Rp {{ number_format($item->subtotal, 0, ',', '.') }}
-                                        </p>
+                                    <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-between h-full">
+                                        <div>
+                                            <h4 class="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 leading-snug">
+                                                {{ $item->product->name ?? 'Produk tidak tersedia' }}
+                                            </h4>
+                                            @if($item->product)
+                                                <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">
+                                                        {{ $item->product->category->name ?? 'Uncategorized' }}
+                                                    </span>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="flex justify-between items-center mt-2.5">
+                                            <p class="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 font-medium">
+                                                Harga: Rp {{ number_format($item->price, 0, ',', '.') }}
+                                            </p>
+                                            <p class="text-sm font-extrabold text-soft-green">
+                                                Rp {{ number_format($item->subtotal, 0, ',', '.') }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             @endforeach
                             @if($order->items->count() > 3)
-                                <p class="text-xs text-gray-500 dark:text-zinc-400 text-center py-2">
-                                    +{{ $order->items->count() - 3 }} produk lainnya
-                                </p>
+                                <div class="pt-3 mt-1 border-t border-dashed border-gray-200 dark:border-zinc-700/60">
+                                    <a href="{{ route('pembeli.pesanan.show', $order) }}" class="block text-xs text-gray-500 dark:text-zinc-400 text-center font-medium hover:text-soft-green transition-colors">
+                                        Lihat {{ $order->items->count() - 3 }} produk lainnya...
+                                    </a>
+                                </div>
                             @endif
                         </div>
                     </div>
 
-                    <!-- Actions -->
-                    <div class="p-4 sm:p-6 border-t border-gray-200 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-800/50">
-                        <div class="flex flex-wrap gap-2 justify-end">
+                    <!-- Footer & Actions -->
+                    <div class="px-4 py-3 border-t border-gray-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-900">
+                        <div class="flex justify-between items-center mb-3">
+                            <p class="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 font-medium">{{ $order->items->count() }} produk</p>
+                            <div class="text-right">
+                                <p class="text-[10px] sm:text-xs text-gray-500 dark:text-zinc-400 font-medium inline">Total Pesanan:</p>
+                                <p class="text-sm sm:text-base font-extrabold text-soft-green inline ml-1">Rp {{ number_format($order->grand_total, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
 
+                        <div class="flex flex-wrap gap-2 justify-end">
                             <!-- Detail -->
                             <a href="{{ route('pembeli.pesanan.show', $order) }}"
-                               class="inline-flex items-center gap-1 px-4 py-2 bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-600 rounded-lg text-sm font-medium transition-colors">
-                                <span class="material-symbols-outlined text-base">visibility</span>
+                               class="px-3 py-1.5 bg-gray-100 dark:bg-zinc-700 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:hover:bg-zinc-600 rounded text-[11px] sm:text-xs font-bold transition-colors">
                                 Detail
                             </a>
 
-                            <!-- Edit Alamat (hanya jika pending) -->
+                            <!-- Edit Alamat -->
                             @if($order->status === 'pending')
                                 <a href="{{ route('pembeli.pesanan.edit', $order) }}"
-                                   class="inline-flex items-center gap-1 px-4 py-2 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-500/30 rounded-lg text-sm font-medium transition-colors">
-                                    <span class="material-symbols-outlined text-base">edit</span>
-                                    Edit Pesanan
-                                </a>
-                            @endif
-
-                            <!-- Bayar Sekarang -->
-                            @if($order->status === 'pending' && $order->payment?->snap_token)
-                                <a href="{{ route('pembeli.payment.show', $order->id) }}"
-                                   class="inline-flex items-center gap-1 px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-sm font-semibold shadow-md hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200">
-                                    <span class="material-symbols-outlined text-base">payment</span>
-                                    Bayar Sekarang
+                                   class="px-3 py-1.5 bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-500/30 rounded text-[11px] sm:text-xs font-bold transition-colors">
+                                    Edit
                                 </a>
                             @endif
 
@@ -211,11 +196,18 @@
                                     @csrf @method('PATCH')
                                     <button type="button"
                                             onclick="confirmCancel('{{ $order->id }}', '#{{ $order->order_number }}')"
-                                            class="inline-flex items-center gap-1 px-4 py-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-500/30 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg text-sm font-medium transition-all duration-200">
-                                        <span class="material-symbols-outlined text-base">cancel</span>
+                                            class="px-3 py-1.5 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded text-[11px] sm:text-xs font-bold transition-colors">
                                         Batalkan
                                     </button>
                                 </form>
+                            @endif
+
+                            <!-- Bayar Sekarang -->
+                            @if($order->status === 'pending' && $order->payment?->snap_token)
+                                <a href="{{ route('pembeli.payment.show', $order->id) }}"
+                                   class="px-4 py-1.5 bg-soft-green text-white hover:bg-[#15803d] rounded text-[11px] sm:text-xs font-bold shadow-sm transition-colors">
+                                    Bayar Sekarang
+                                </a>
                             @endif
 
                             <!-- Tandai Selesai -->
@@ -224,13 +216,11 @@
                                     @csrf @method('PATCH')
                                     <button type="button"
                                             onclick="confirmComplete('{{ $order->id }}', '#{{ $order->order_number }}')"
-                                            class="inline-flex items-center gap-1 px-4 py-2 bg-[#16a34a] hover:bg-[#15803d] text-white rounded-lg text-sm font-semibold shadow-sm hover:shadow-md hover:shadow-green-500/30 transition-all duration-200">
-                                        <span class="material-symbols-outlined text-base">check_circle</span>
-                                        Selesai
+                                            class="px-4 py-1.5 bg-soft-green text-white hover:bg-[#15803d] rounded text-[11px] sm:text-xs font-bold shadow-sm transition-colors">
+                                        Pesanan Selesai
                                     </button>
                                 </form>
                             @endif
-
                         </div>
                     </div>
                 </div>
@@ -239,8 +229,8 @@
 
         <!-- Pagination -->
         @if($orders->hasPages())
-            <div class="bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 shadow-sm p-4">
-                {{ $orders->appends(request()->query())->links() }}
+            <div class="mt-8 mb-4">
+                {{ $orders->appends(request()->query())->links('vendor.pagination.minimal') }}
             </div>
         @endif
     @else

@@ -310,7 +310,7 @@
     </main>
 
     <!-- Footer -->
-    @if(!request()->routeIs('pembeli.keranjang.index', 'pembeli.pesanan.checkout', 'pembeli.payment.show'))
+    @if(!request()->routeIs('pembeli.keranjang.index', 'pembeli.pesanan.checkout', 'pembeli.payment.show', 'pembeli.pesanan.index', 'pembeli.pesanan.show', 'pembeli.pesanan.edit'))
     <footer class="bg-white dark:bg-background-dark border-t border-[#e7f3ec] dark:border-primary/20 py-12">
         <div class="max-w-[1280px] mx-auto px-4 md:px-10 grid grid-cols-1 md:grid-cols-4 gap-10">
 

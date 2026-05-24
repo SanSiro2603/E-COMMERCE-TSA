@@ -179,28 +179,33 @@
 
                         <div class="space-y-4">
                             @foreach($carts as $cart)
-                                <div
-                                    class="flex gap-3 sm:gap-4 border-b border-gray-150 dark:border-zinc-700/50 pb-3 last:border-0 items-start">
-                                    <img src="{{ asset('storage/' . $cart->product->image) }}" alt="{{ $cart->product->name }}"
-                                        class="w-16 h-16 object-cover rounded-lg border border-gray-200 dark:border-zinc-700 shrink-0">
-                                    <div class="flex-1 min-w-0">
-                                        <p
-                                            class="font-medium text-xs sm:text-base text-gray-900 dark:text-white line-clamp-1 sm:line-clamp-2 leading-tight">
-                                            {{ $cart->product->name }}</p>
-                                        <p class="text-[10px] sm:text-xs text-gray-400 dark:text-zinc-500 mt-0.5 sm:mt-1">
-                                            {{ $cart->product->category->name ?? 'Uncategorized' }}
-                                            @if($cart->product->weight)
-                                                • {{ $cart->product->weight * $cart->quantity }} gr
-                                            @endif
-                                        </p>
-                                        <div class="flex justify-between items-center mt-1 sm:mt-2">
-                                            <p class="text-xs sm:text-base font-bold text-primary">
-                                                Rp {{ number_format($cart->product->price, 0, ',', '.') }}
+                                <div class="flex gap-3 sm:gap-4 border-b border-dashed border-gray-200 dark:border-zinc-700/60 pb-4 last:border-0 last:pb-0 items-start">
+                                    <div class="relative shrink-0">
+                                        <img src="{{ asset('storage/' . $cart->product->image) }}" alt="{{ $cart->product->name }}"
+                                            class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 shadow-sm">
+                                        <span class="absolute -top-2 -right-2 bg-zinc-900 dark:bg-zinc-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-zinc-800 shadow-sm leading-none flex items-center justify-center min-w-[20px] h-[20px]">
+                                            x{{ $cart->quantity }}
+                                        </span>
+                                    </div>
+                                    <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-between h-full">
+                                        <div>
+                                            <p class="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 leading-snug">
+                                                {{ $cart->product->name }}
                                             </p>
-                                            <p class="text-xs sm:text-sm text-gray-500 dark:text-zinc-400">
-                                                x{{ $cart->quantity }}
-                                            </p>
+                                            <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
+                                                <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">
+                                                    {{ $cart->product->category->name ?? 'Uncategorized' }}
+                                                </span>
+                                                @if($cart->product->weight)
+                                                    <span class="text-[10px] text-gray-400 dark:text-zinc-500 font-medium">
+                                                        • {{ $cart->product->weight * $cart->quantity }} gr
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </div>
+                                        <p class="text-sm sm:text-base font-extrabold text-soft-green mt-2.5">
+                                            Rp {{ number_format($cart->product->price, 0, ',', '.') }}
+                                        </p>
                                     </div>
                                 </div>
                             @endforeach
