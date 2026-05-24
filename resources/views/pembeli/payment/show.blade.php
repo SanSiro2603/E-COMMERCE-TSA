@@ -72,7 +72,7 @@
                                 <div class="text-sm">
                                     <p class="font-semibold text-blue-900 dark:text-blue-300">Informasi!</p>
                                     <p class="text-blue-800 dark:text-blue-400">
-                                        Sistem Kami Menggunakan Payment Gateway dari Midtrans
+                                        Sistem Pembayaran Kami Menggunakan Payment Gateway dari Midtrans
                                     </p>
                                 </div>
                             </div>
