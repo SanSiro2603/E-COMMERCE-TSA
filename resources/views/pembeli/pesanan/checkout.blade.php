@@ -62,26 +62,28 @@
                         @else
                             <!-- Compact Address Selector (Shopee Style Dropdown) -->
                             <div class="space-y-3">
-                                <div class="relative">
+                                <div>
                                     <label for="addressSelect"
                                         class="block text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5">
                                         Pilih Alamat Pengiriman
                                     </label>
-                                    <select id="addressSelect"
-                                        class="w-full bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-primary focus:border-primary block p-3 pr-10 cursor-pointer transition appearance-none">
-                                        @foreach($addresses as $addr)
-                                            <option value="{{ $addr->id }}" data-label="{{ $addr->label }}"
-                                                data-recipient="{{ $addr->recipient_name }}"
-                                                data-phone="{{ $addr->recipient_phone }}"
-                                                data-details="{{ $addr->full_address }}, {{ $addr->city_type }} {{ $addr->city_name }}, {{ $addr->province_name }} {{ $addr->postal_code ? '• ' . $addr->postal_code : '' }}"
-                                                {{ $addr->is_default || old('address_id') == $addr->id ? 'selected' : '' }}>
-                                                [{{ $addr->label }}] {{ $addr->recipient_name }} – {{ $addr->city_name }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <div
-                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 pt-6 text-gray-500">
-                                        <span class="material-symbols-outlined text-xl">unfold_more</span>
+                                    <div class="relative">
+                                        <select id="addressSelect"
+                                            class="w-full bg-gray-50 dark:bg-zinc-900 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-white text-sm rounded-xl focus:ring-primary focus:border-primary block p-3 pr-10 cursor-pointer transition appearance-none bg-none">
+                                            @foreach($addresses as $addr)
+                                                <option value="{{ $addr->id }}" data-label="{{ $addr->label }}"
+                                                    data-recipient="{{ $addr->recipient_name }}"
+                                                    data-phone="{{ $addr->recipient_phone }}"
+                                                    data-details="{{ $addr->full_address }}, {{ $addr->city_type }} {{ $addr->city_name }}, {{ $addr->province_name }} {{ $addr->postal_code ? '• ' . $addr->postal_code : '' }}"
+                                                    {{ $addr->is_default || old('address_id') == $addr->id ? 'selected' : '' }}>
+                                                    [{{ $addr->label }}] {{ $addr->recipient_name }} – {{ $addr->city_name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        <div
+                                            class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                            <span class="material-symbols-outlined text-xl">unfold_more</span>
+                                        </div>
                                     </div>
                                 </div>
 
