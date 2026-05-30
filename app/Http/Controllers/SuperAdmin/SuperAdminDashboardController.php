@@ -327,10 +327,14 @@ class SuperAdminDashboardController extends Controller
         // JAM TERSIBUK — Bar Chart (24 jam)
         // Hanya dari transaksi valid
         // =============================================
+        $hourBucketSql = DB::connection()->getDriverName() === 'sqlite'
+            ? "CAST(strftime('%H', orders.created_at) AS INTEGER) as hour, COUNT(*) as total"
+            : 'HOUR(orders.created_at) as hour, COUNT(*) as total';
+
         $hourRaw = Order::query()
             ->tap($applyBase)
             ->whereIn('orders.status', $validStatuses)
-            ->selectRaw('HOUR(orders.created_at) as hour, COUNT(*) as total')
+            ->selectRaw($hourBucketSql)
             ->groupBy('hour')
             ->pluck('total', 'hour');
 

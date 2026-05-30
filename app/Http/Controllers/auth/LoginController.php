@@ -36,11 +36,27 @@ class LoginController extends Controller
 
         // Coba login
         if (Auth::attempt($credentials, $request->filled('remember'))) {
+            $user = Auth::user();
+
+            // Cegah akun nonaktif masuk ke sistem
+            if (!$user->is_active) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                throw ValidationException::withMessages([
+                    'email' => ['Akun Anda sedang nonaktif. Hubungi Super Admin.'],
+                ]);
+            }
 
             // regenerasi session penting untuk keamanan
             $request->session()->regenerate();
 
-            $user = Auth::user();
+            // Paksa verifikasi 2FA ulang setiap login admin/super admin
+            if (in_array($user->role, ['admin', 'super_admin'])) {
+                $request->session()->forget('2fa_passed');
+            }
+
             return $this->authenticated($request, $user);
         }
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\LogHelper;
 use App\Models\Order;
 use Illuminate\Http\Request;
 
@@ -217,8 +218,15 @@ class OrderController extends Controller
                 ->with('error', 'Status hanya bisa diubah ke Diproses jika pesanan berstatus Sudah Dibayar.');
         }
 
+        $previousStatus = $order->status;
+
         // [+] Tambah kolom lain di update([]) jika perlu simpan data tambahan saat status berubah
         $order->update(['status' => 'processing']);
+
+        LogHelper::record(
+            'Update Status Pesanan',
+            "Mengubah status pesanan #{$order->order_number} dari {$previousStatus} menjadi processing."
+        );
 
         return redirect()->route('admin.orders.show', $order)
             ->with('success', 'Status pesanan #' . $order->order_number . ' berhasil diubah ke Diproses.');

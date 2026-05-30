@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Helpers\LogHelper;
 use App\Models\Order;
 use App\Services\BiteshipService;
 use Illuminate\Http\Request;
@@ -38,6 +39,8 @@ class BiteshipController extends Controller
         $result = $this->biteship->createOrder($order);
 
         if ($result['success']) {
+            $previousStatus = $order->status;
+
             // [+] Tambah kolom di update([]) jika perlu simpan data tambahan dari response Biteship
             $order->update([
                 'status'            => 'shipped',
@@ -47,6 +50,12 @@ class BiteshipController extends Controller
                 'courier'           => $result['courier'] ?? $order->courier,
                 'shipped_at'        => now(),
             ]);
+
+            LogHelper::record(
+                'Buat Pengiriman Pesanan',
+                "Membuat pengiriman Biteship untuk pesanan #{$order->order_number}. Status berubah dari {$previousStatus} menjadi shipped." .
+                ($order->tracking_number ? " No. Resi: {$order->tracking_number}." : '')
+            );
 
             return redirect()->route('admin.orders.show', $order)
                 ->with('success',

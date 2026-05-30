@@ -16,6 +16,16 @@ class CheckRole
 
         $user = Auth::user();
 
+        if (!$user->is_active) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda sedang nonaktif. Hubungi Super Admin.',
+            ]);
+        }
+
         if (!in_array($user->role, $roles)) {
             abort(403, 'Akses ditolak. Anda tidak memiliki izin.');
         }

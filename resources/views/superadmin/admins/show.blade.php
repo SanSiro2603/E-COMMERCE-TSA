@@ -54,7 +54,7 @@
                     <span class="material-symbols-outlined text-[18px]">edit</span>
                     Edit
                 </a>
-                <button onclick="confirmDelete({{ $admin->id }})" 
+                <button onclick="confirmDelete({{ $admin->id }}, '{{ addslashes($admin->name) }}')" 
                         class="flex-1 md:flex-none inline-flex items-center justify-center gap-2 px-4 py-2 bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-500/20 rounded-lg text-sm font-medium transition-colors">
                     <span class="material-symbols-outlined text-[18px]">delete</span>
                     Hapus
@@ -71,10 +71,10 @@
             <!-- Tambahan Action Khusus Keamanan Admin -->
             <div class="flex md:flex-col gap-2 border-t md:border-t-0 md:border-l border-gray-100 dark:border-zinc-800 pt-4 md:pt-0 md:pl-6">
                 <!-- Reset 2FA -->
-                <form action="{{ route('superadmin.admins.reset-2fa', $admin) }}" method="POST" class="inline-block flex-1 md:flex-none">
+                <form id="reset-2fa-form-{{ $admin->id }}" action="{{ route('superadmin.admins.reset-2fa', $admin) }}" method="POST" class="inline-block flex-1 md:flex-none">
                     @csrf
                     @method('PATCH')
-                    <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-sm font-medium transition-colors">
+                    <button type="button" onclick="confirmReset2FA({{ $admin->id }}, '{{ addslashes($admin->name) }}')" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-500/20 rounded-lg text-sm font-medium transition-colors">
                         <span class="material-symbols-outlined text-[18px]">key</span>
                         Reset 2FA
                     </button>
@@ -131,10 +131,10 @@
 
 @push('scripts')
 <script>
-function confirmDelete(adminId) {
+function confirmDelete(adminId, adminName) {
     Swal.fire({
-        title: 'Hapus Admin?',
-        text: "Data admin akan dihapus permanen!",
+        title: `Hapus Admin ${adminName}?`,
+        text: 'Data admin akan dihapus permanen!',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#EF4444',
@@ -144,6 +144,23 @@ function confirmDelete(adminId) {
     }).then((result) => {
         if (result.isConfirmed) {
             document.getElementById('delete-form-' + adminId).submit();
+        }
+    });
+}
+
+function confirmReset2FA(adminId, adminName) {
+    Swal.fire({
+        title: `Reset 2FA Admin ${adminName}?`,
+        text: 'Apakah Anda yakin ingin mereset 2FA admin ini?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#2563EB',
+        cancelButtonColor: '#6B7280',
+        confirmButtonText: 'Ya, Reset 2FA!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('reset-2fa-form-' + adminId).submit();
         }
     });
 }

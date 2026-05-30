@@ -94,12 +94,8 @@
 
                     <div class="text-white">
                         <h1 class="max-w-[430px] text-[24px] font-bold leading-tight sm:text-[30px] lg:text-[38px]">
-                            Manage Parrots Efficiently
+                            Tunas Sejahtera Adhi Perkasa
                         </h1>
-                        <p class="mt-2.5 max-w-[430px] text-[11px] leading-relaxed text-white/90 sm:text-xs lg:text-sm">
-                            Easily track parrot health, breeding records, and sanctuary communications in one place.
-                            Say goodbye to manual management.
-                        </p>
                     </div>
                 </div>
             </div>

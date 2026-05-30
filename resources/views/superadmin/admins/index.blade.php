@@ -114,16 +114,19 @@
                                    title="Edit">
                                     <span class="material-symbols-outlined text-[18px]">edit</span>
                                 </a>
-                                <form action="{{ route('superadmin.admins.toggle-active', $admin) }}" method="POST" class="inline-block m-0 p-0">
+                                <form id="toggle-active-form-{{ $admin->id }}" action="{{ route('superadmin.admins.toggle-active', $admin) }}" method="POST" class="inline-block m-0 p-0">
                                     @csrf
                                     @method('PATCH')
-                                    <button type="submit" 
-                                            class="p-2 {{ $admin->is_active ? 'text-red-500 hover:bg-red-50' : 'text-green-500 hover:bg-green-50' }} rounded-lg transition-colors"
-                                            title="{{ $admin->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                        <span class="material-symbols-outlined text-[18px]">{{ $admin->is_active ? 'block' : 'check_circle' }}</span>
+                                    <button
+                                        type="button"
+                                        onclick="confirmToggleActive({{ $admin->id }}, {{ $admin->is_active ? 'true' : 'false' }}, '{{ addslashes($admin->name) }}')"
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors {{ $admin->is_active ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100' }}"
+                                        title="{{ $admin->is_active ? 'Nonaktifkan Admin' : 'Aktifkan Admin' }}">
+                                        <span class="material-symbols-outlined text-[16px]">{{ $admin->is_active ? 'block' : 'check_circle' }}</span>
+                                        {{ $admin->is_active ? 'Nonaktifkan' : 'Aktifkan' }}
                                     </button>
                                 </form>
-                                <button onclick="confirmDelete({{ $admin->id }})" 
+                                <button onclick="confirmDelete({{ $admin->id }}, '{{ addslashes($admin->name) }}')" 
                                         class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
                                         title="Hapus">
                                     <span class="material-symbols-outlined text-[18px]">delete</span>
@@ -212,10 +215,10 @@
 
 @push('scripts')
 <script>
-function confirmDelete(adminId) {
+function confirmDelete(adminId, adminName) {
     Swal.fire({
-        title: 'Hapus Admin?',
-        text: "Data admin akan dihapus permanen!",
+        title: `Hapus Admin ${adminName}?`,
+        text: 'Data admin akan dihapus permanen!',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#EF4444',
@@ -225,6 +228,31 @@ function confirmDelete(adminId) {
     }).then((result) => {
         if (result.isConfirmed) {
             document.getElementById('delete-form-' + adminId).submit();
+        }
+    });
+}
+
+function confirmToggleActive(adminId, isActive, adminName) {
+    const willDeactivate = isActive === true || isActive === 'true';
+    const title = willDeactivate ? 'Nonaktifkan Admin?' : 'Aktifkan Admin?';
+    const text = willDeactivate
+        ? `Akun admin ${adminName} akan dinonaktifkan.`
+        : `Akun admin ${adminName} akan diaktifkan kembali.`;
+    const confirmButtonText = willDeactivate ? 'Ya, Nonaktifkan!' : 'Ya, Aktifkan!';
+    const confirmButtonColor = willDeactivate ? '#EF4444' : '#16A34A';
+
+    Swal.fire({
+        title,
+        text,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor,
+        cancelButtonColor: '#6B7280',
+        confirmButtonText,
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            document.getElementById('toggle-active-form-' + adminId).submit();
         }
     });
 }
