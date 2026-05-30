@@ -46,23 +46,24 @@ use App\Http\Controllers\RajaOngkirController;
 | HALAMAN UMUM
 |--------------------------------------------------------------------------
 */
-Route::get('/', [DashboardController::class, 'index'])->name('landing');
-Route::view('/about', 'landing.about')->name('landing.about');
-Route::view('/catalog', 'landing.page', [
+Route::view('/', 'welcome')->name('welcome');
+Route::get('/home', [DashboardController::class, 'index'])->name('landing');
+Route::view('/home/about', 'landing.about')->name('landing.about');
+Route::view('/home/catalog', 'landing.page', [
     'pageTitle' => 'Catalog',
     'heading' => 'Catalog',
     'description' => 'This page is being prepared and will be delivered next based on your brief.',
 ])->name('landing.catalog');
-Route::view('/information/logistic-delivery', 'landing.information-logistic', [
+Route::view('/home/information/logistic-delivery', 'landing.information-logistic', [
     'pageTitle' => 'Logistic and Delivery',
 ])->name('landing.information.logistic-delivery');
-Route::view('/information/procurement-preparation', 'landing.information-procurement', [
+Route::view('/home/information/procurement-preparation', 'landing.information-procurement', [
     'pageTitle' => 'Procurement and Preparation',
 ])->name('landing.information.procurement-preparation');
-Route::view('/information/live-export-process', 'landing.information-live-export', [
+Route::view('/home/information/live-export-process', 'landing.information-live-export', [
     'pageTitle' => 'Live Export Process',
 ])->name('landing.information.live-export-process');
-Route::view('/support', 'landing.support', [
+Route::view('/home/support', 'landing.support', [
     'pageTitle' => 'Support',
 ])->name('landing.support');
 Route::get('/gallery-hewan', [DashboardController::class, 'hewan'])->name('gallery.hewan');
