@@ -40,6 +40,7 @@ use App\Http\Controllers\Pembeli\ProfileController;
 // LAINNYA
 // =========================
 use App\Http\Controllers\RajaOngkirController;
+use App\Support\LandingCatalogData;
 
 /*
 |--------------------------------------------------------------------------
@@ -49,11 +50,28 @@ use App\Http\Controllers\RajaOngkirController;
 Route::view('/', 'welcome')->name('welcome');
 Route::get('/home', [DashboardController::class, 'index'])->name('landing');
 Route::view('/home/about', 'landing.about')->name('landing.about');
-Route::view('/home/catalog', 'landing.page', [
-    'pageTitle' => 'Catalog',
-    'heading' => 'Catalog',
-    'description' => 'This page is being prepared and will be delivered next based on your brief.',
-])->name('landing.catalog');
+Route::get('/home/catalog', function () {
+    return view('landing.catalog', [
+        'pageTitle' => 'Catalog',
+        'mainCategories' => LandingCatalogData::categories(),
+        'products' => LandingCatalogData::products(),
+    ]);
+})->name('landing.catalog');
+Route::get('/home/catalog/{slug}', function (string $slug) {
+    $products = LandingCatalogData::products();
+    $categories = collect(LandingCatalogData::categories());
+    $product = collect($products)->firstWhere('slug', $slug);
+
+    abort_if(!$product, 404);
+    $category = $categories->firstWhere('key', $product['category']);
+
+    return view('landing.catalog-detail', [
+        'pageTitle' => $product['name'],
+        'product' => $product,
+        'countries' => LandingCatalogData::countries(),
+        'categoryName' => $category['name'] ?? ucfirst($product['category']),
+    ]);
+})->name('landing.catalog.show');
 Route::view('/home/information/logistic-delivery', 'landing.information-logistic', [
     'pageTitle' => 'Logistic and Delivery',
 ])->name('landing.information.logistic-delivery');

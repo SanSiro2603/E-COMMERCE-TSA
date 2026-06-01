@@ -1,18 +1,18 @@
 @extends('landing.layout')
 
 @section('content')
-    <section class="relative isolate h-[380px] overflow-hidden bg-black sm:h-[420px]">
+    <section class="relative isolate h-[430px] overflow-hidden bg-black sm:h-[470px]">
         <div
             class="absolute inset-0 bg-cover bg-center"
             style="background-image: linear-gradient(95deg, rgba(5,16,7,.82) 0%, rgba(5,16,7,.48) 48%, rgba(5,16,7,.22) 100%), url('{{ asset('images/support-banner.jpeg') }}');">
         </div>
 
         <div class="relative mx-auto flex h-full w-[94%] max-w-[1240px] items-center">
-            <div class="max-w-2xl text-white">
-                <p class="text-sm font-semibold text-white/85">Home &nbsp;›&nbsp; Support</p>
-                <h1 class="mt-4 text-5xl font-extrabold leading-tight sm:text-6xl">Our Support & Partners</h1>
+            <div class="reveal-up max-w-2xl text-white" data-reveal>
+                <p class="text-xl font-bold sm:text-2xl">Support</p>
+                <h1 class="line-mask mt-2 font-extrabold leading-[0.98] tracking-tight text-[46px] sm:text-[64px]" data-line-reveal><span class="line-mask-inner">Our Support & Partners</span></h1>
                 <div class="mt-4 h-1 w-20 rounded-full bg-tsa-green"></div>
-                <p class="mt-5 text-lg leading-relaxed text-white/90 sm:text-2xl">
+                <p class="mt-5 max-w-xl text-xl leading-relaxed text-white/90 sm:text-2xl" data-word-stagger>
                     Strong partnerships and reliable support are the foundation of our commitment to responsible wildlife trade and conservation.
                 </p>
             </div>
@@ -78,17 +78,17 @@
 
     <section class="bg-white py-12 sm:py-14">
         <div class="mx-auto w-[94%] max-w-[1240px]">
-            <div class="mx-auto max-w-4xl text-center">
-                <h2 class="text-4xl font-extrabold text-tsa-greenDark sm:text-5xl">Working Together for a Sustainable Future</h2>
+            <div class="reveal-up mx-auto max-w-4xl text-center" data-reveal>
+                <h2 class="line-mask text-4xl font-extrabold text-tsa-greenDark sm:text-5xl" data-line-reveal><span class="line-mask-inner">Working Together for a Sustainable Future</span></h2>
                 <div class="mx-auto mt-3 h-1 w-20 rounded-full bg-tsa-green"></div>
-                <p class="mt-5 text-lg leading-relaxed text-slate-700 sm:text-xl">
+                <p class="mt-5 text-lg leading-relaxed text-slate-700 sm:text-xl" data-word-stagger>
                     We collaborate with government agencies, conservation organizations, breeders, and industry experts to ensure the highest standards of animal welfare, legal compliance, and environmental sustainability.
                 </p>
             </div>
 
             <div class="mt-8 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
                 @foreach ($partners as $partner)
-                    <article class="rounded-xl border border-slate-200 bg-white p-5 text-center shadow-sm">
+                    <article class="reveal-up delay-{{ ($loop->index % 8) + 1 }} zoom-soft rounded-xl border border-slate-200 bg-white p-5 text-center shadow-sm" data-reveal>
                         <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-lime-50">
                             @if ($partner['logo'])
                                 <img src="{{ $partner['logo'] }}" alt="{{ $partner['name'] }} logo" class="max-h-16 w-auto object-contain">
@@ -102,7 +102,7 @@
                 @endforeach
             </div>
 
-            <div class="mt-8 rounded-xl border border-lime-200 bg-lime-50 p-4 sm:p-5">
+            <div class="reveal-up mt-8 rounded-xl border border-lime-200 bg-lime-50 p-4 sm:p-5" data-reveal>
                 <div class="grid gap-4 md:grid-cols-[2fr,3fr] md:items-center">
                     <div>
                         <h3 class="text-2xl font-extrabold text-tsa-greenDark">Our Commitment</h3>
@@ -110,7 +110,7 @@
                     </div>
                     <div class="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
                         @foreach ($highlightItems as $item)
-                            <div class="rounded-lg border border-lime-200 bg-white px-3 py-2 text-center text-sm font-bold text-tsa-greenDark">
+                            <div class="reveal-up delay-{{ $loop->iteration }} rounded-lg border border-lime-200 bg-white px-3 py-2 text-center text-sm font-bold text-tsa-greenDark" data-reveal>
                                 {{ $item }}
                             </div>
                         @endforeach

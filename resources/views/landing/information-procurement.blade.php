@@ -1,16 +1,18 @@
 @extends('landing.layout')
 
 @section('content')
-    <section class="relative isolate h-[380px] overflow-hidden bg-black sm:h-[420px]">
+    <section class="relative isolate h-[430px] overflow-hidden bg-black sm:h-[470px]">
         <div
             class="absolute inset-0 bg-cover bg-center"
             style="background-image: linear-gradient(95deg, rgba(5,16,7,.82) 0%, rgba(5,16,7,.48) 48%, rgba(5,16,7,.22) 100%), url('{{ asset('images/procurement-banner.jpeg') }}');">
         </div>
 
         <div class="relative mx-auto flex h-full w-[94%] max-w-[1240px] items-center">
-            <div class="max-w-2xl text-white">
-                <p class="text-sm font-semibold text-white/85">Home &nbsp;›&nbsp; Information &nbsp;›&nbsp; Procurement & Preparation</p>
-                <h1 class="mt-4 text-5xl font-extrabold leading-tight sm:text-6xl">Procurement & Preparation</h1>
+            <div class="reveal-up max-w-2xl text-white" data-reveal>
+                <p class="text-xl font-bold sm:text-2xl">Information &nbsp;&rsaquo;&nbsp; Procurement & Preparation</p>
+                <h1 class="line-mask mt-2 font-extrabold leading-[0.98] tracking-tight text-[46px] sm:text-[64px]" data-line-reveal>
+                    <span class="line-mask-inner">Procurement & Preparation</span>
+                </h1>
                 <div class="mt-4 h-1 w-20 rounded-full bg-tsa-green"></div>
             </div>
         </div>
@@ -19,8 +21,10 @@
     <section class="bg-white py-12 sm:py-14">
         <div class="mx-auto w-[94%] max-w-[1240px] rounded-2xl bg-[#f7faf5] p-6 sm:p-8">
             <div class="grid gap-6 lg:grid-cols-2">
-                <div>
-                    <p class="text-4xl font-extrabold text-tsa-greenDark sm:text-5xl">Our Commitment</p>
+                <div class="reveal-left" data-reveal>
+                    <h2 class="line-mask text-4xl font-extrabold text-tsa-greenDark sm:text-5xl" data-line-reveal>
+                        <span class="line-mask-inner">Our Commitment</span>
+                    </h2>
                     <p class="mt-4 text-lg leading-relaxed text-slate-700 sm:text-xl">
                         After careful selection of animals, we tailor our approach to preparation, continually reviewing and refining our stringent quality
                         assurance procedures to ensure livestock are prepared not only in accordance with the regulatory and animal welfare requirements
@@ -33,7 +37,7 @@
                     </p>
                 </div>
 
-                <div class="grid gap-3 sm:grid-cols-2">
+                <div class="reveal-right grid gap-3 sm:grid-cols-2" data-reveal>
                     <img src="https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=900&q=80" alt="Parrot inspection close-up" class="h-52 w-full rounded-xl object-cover sm:h-full">
                     <img src="https://images.unsplash.com/photo-1612444530582-fc66183b16f7?auto=format&fit=crop&w=900&q=80" alt="Digital animal identification scanner" class="h-52 w-full rounded-xl object-cover sm:h-full">
                 </div>
@@ -50,7 +54,7 @@
 
             <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 @foreach ($qualityItems as $item)
-                    <article class="rounded-xl border border-slate-200 bg-white p-4 text-center">
+                    <article class="reveal-up delay-{{ $loop->iteration }} zoom-soft rounded-xl border border-slate-200 bg-white p-4 text-center" data-reveal>
                         <div class="mx-auto inline-flex h-10 w-10 items-center justify-center rounded-full bg-lime-100 text-tsa-greenDark">
                             <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M12 2l8 4v6c0 5-3.4 9.7-8 11-4.6-1.3-8-6-8-11V6l8-4z"></path>
@@ -68,17 +72,19 @@
     <section class="bg-white pb-12 sm:pb-14">
         <div class="mx-auto w-[94%] max-w-[1240px] rounded-2xl bg-[#f7faf5] p-6 sm:p-8">
             <div class="grid gap-6 lg:grid-cols-2 lg:items-center">
-                <div>
-                    <p class="text-4xl font-extrabold text-tsa-greenDark sm:text-5xl">Sources of Livestock</p>
+                <div class="reveal-left" data-reveal>
+                    <h2 class="line-mask text-4xl font-extrabold text-tsa-greenDark sm:text-5xl" data-line-reveal>
+                        <span class="line-mask-inner">Sources of Livestock</span>
+                    </h2>
                     <p class="mt-4 text-lg leading-relaxed text-slate-700 sm:text-xl">
                         We work closely with accredited breeding facilities, conservation organizations, and certified breeders to obtain healthy,
                         ethically bred, and high-quality animals.
                     </p>
                 </div>
-                <img src="https://images.unsplash.com/photo-1617957743098-33b1f3f77f6a?auto=format&fit=crop&w=1300&q=80" alt="Breeding center aerial view" class="h-56 w-full rounded-xl object-cover sm:h-64">
+                <img src="https://images.unsplash.com/photo-1617957743098-33b1f3f77f6a?auto=format&fit=crop&w=1300&q=80" alt="Breeding center aerial view" class="reveal-right zoom-soft h-56 w-full rounded-xl object-cover sm:h-64" data-reveal>
             </div>
 
-            <p class="mt-6 text-lg leading-relaxed text-slate-700 sm:text-xl">
+            <p class="reveal-up mt-6 text-lg leading-relaxed text-slate-700 sm:text-xl" data-reveal>
                 All breeding partners are carefully selected based on their reputation, facilities, animal welfare practices, and compliance with national and international regulations.
             </p>
 
@@ -94,14 +100,14 @@
 
             <div class="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
                 @foreach ($sourceCards as $card)
-                    <article class="rounded-xl border border-slate-200 bg-white p-3">
+                    <article class="reveal-up delay-{{ ($loop->index % 8) + 1 }} zoom-soft rounded-xl border border-slate-200 bg-white p-3" data-reveal>
                         <img src="{{ $card['img'] }}" alt="{{ $card['title'] }}" class="h-36 w-full rounded-lg object-cover">
                         <h3 class="mt-3 text-base font-extrabold text-slate-900">{{ $card['title'] }}</h3>
                     </article>
                 @endforeach
             </div>
 
-            <div class="mt-6 rounded-xl border border-lime-200 bg-lime-50 px-5 py-4">
+            <div class="reveal-up mt-6 rounded-xl border border-lime-200 bg-lime-50 px-5 py-4" data-reveal>
                 <p class="text-base leading-relaxed text-slate-700 sm:text-lg">
                     Our procurement and preparation processes are designed to ensure the highest standards of animal health, welfare, and safety before export.
                 </p>
@@ -121,13 +127,13 @@
 
     <section class="bg-white pb-12 sm:pb-14">
         <div class="mx-auto w-[94%] max-w-[1240px] rounded-2xl border border-slate-200 bg-white p-5 sm:p-6">
-            <div class="mx-auto mb-5 inline-flex rounded-lg bg-tsa-greenDark px-8 py-2 text-lg font-extrabold text-white">
+            <div class="reveal-up mx-auto mb-5 inline-flex rounded-lg bg-tsa-greenDark px-8 py-2 text-lg font-extrabold text-white" data-reveal>
                 Our Preparation Standards
             </div>
 
             <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
                 @foreach ($standards as $standard)
-                    <article class="rounded-xl border border-slate-200 p-4 text-center">
+                    <article class="reveal-up delay-{{ ($loop->index % 8) + 1 }} zoom-soft rounded-xl border border-slate-200 p-4 text-center" data-reveal>
                         <div class="mx-auto inline-flex h-11 w-11 items-center justify-center rounded-full bg-lime-100 text-tsa-greenDark">
                             <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
                                 <path d="M9 12l2 2 4-4"></path>
@@ -142,3 +148,4 @@
         </div>
     </section>
 @endsection
+

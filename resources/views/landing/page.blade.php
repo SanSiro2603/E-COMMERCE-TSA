@@ -2,10 +2,12 @@
 
 @section('content')
     <section class="placeholder">
-        <div class="container">
-            <p class="eyebrow">Page In Progress</p>
-            <h2>{{ $heading ?? 'Page' }}</h2>
-            <p>{{ $description ?? 'This page will be available soon.' }}</p>
+        <div class="container reveal-up" data-reveal>
+            <p class="eyebrow reveal-up delay-1" data-reveal>Page In Progress</p>
+            <h2 class="line-mask reveal-up delay-2" data-reveal data-line-reveal>
+                <span class="line-mask-inner">{{ $heading ?? 'Page' }}</span>
+            </h2>
+            <p class="reveal-up delay-3" data-reveal data-word-stagger>{{ $description ?? 'This page will be available soon.' }}</p>
         </div>
     </section>
 @endsection
