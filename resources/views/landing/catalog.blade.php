@@ -226,6 +226,13 @@
                 get canLoadMore() {
                     return this.filteredProducts.length > this.visibleCount;
                 },
+                get activeCategoryLabel() {
+                    if (this.selectedCategory === 'all') {
+                        return 'All';
+                    }
+
+                    return this.categoryLabel(this.selectedCategory);
+                },
                 loadMore() {
                     this.visibleCount += 8;
                 },

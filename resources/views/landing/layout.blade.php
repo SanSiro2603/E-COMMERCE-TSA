@@ -69,6 +69,8 @@
         .line-mask {
             display: block;
             overflow: hidden;
+            padding-bottom: 0.16em;
+            margin-bottom: -0.16em;
         }
 
         .line-mask .line-mask-inner {
@@ -81,8 +83,13 @@
         }
 
         .line-mask.is-visible .line-mask-inner {
-            opacity: 1;
-            transform: translateY(0);
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+        }
+
+        [data-line-reveal].is-visible > .line-mask-inner {
+            opacity: 1 !important;
+            transform: none !important;
         }
 
         .word-stagger .word-token {
@@ -234,29 +241,49 @@
                          x-transition:leave="transition ease-in duration-100"
                          x-transition:leave-start="opacity-100 translate-y-0"
                          x-transition:leave-end="opacity-0 translate-y-1"
-                         class="absolute left-0 top-full mt-2 w-72 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-xl shadow-slate-200/60">
+                         class="absolute left-0 top-full mt-2 w-80 overflow-hidden rounded-xl border border-slate-100 bg-white p-1.5 shadow-xl shadow-slate-200/60">
                         <a href="{{ route('landing.information.logistic-delivery') }}"
-                           class="flex items-center gap-3 px-4 py-3 text-[13px] font-semibold text-slate-700 transition-colors duration-150 hover:bg-tsa-soft hover:text-tsa-greenDark">
-                            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-tsa-green/10 text-tsa-green">
-                                <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path d="M6 3a3 3 0 00-3 3v8a3 3 0 003 3h8a3 3 0 003-3V6a3 3 0 00-3-3H6zm1 7a1 1 0 100-2 1 1 0 000 2zm3 0a1 1 0 100-2 1 1 0 000 2zm3 0a1 1 0 100-2 1 1 0 000 2z"/></svg>
+                           class="group flex items-start gap-3 rounded-lg px-3 py-3 text-slate-700 transition-colors duration-150 hover:bg-tsa-soft hover:text-tsa-greenDark">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-tsa-green/15 bg-tsa-green/10 text-tsa-green transition group-hover:border-tsa-green/30 group-hover:bg-white">
+                                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M10 17h4V5H2v12h3"></path>
+                                    <path d="M14 8h4l4 4v5h-3"></path>
+                                    <circle cx="7.5" cy="17.5" r="2.5"></circle>
+                                    <circle cx="16.5" cy="17.5" r="2.5"></circle>
+                                </svg>
                             </span>
-                            Logistic and Delivery
+                            <span class="block">
+                                <span class="block text-sm font-extrabold leading-tight">Logistic and Delivery</span>
+                                <span class="mt-0.5 block text-[12px] font-semibold leading-snug text-slate-500 group-hover:text-tsa-greenDark/75">Transport handling and delivery flow</span>
+                            </span>
                         </a>
-                        <div class="mx-4 h-px bg-slate-100"></div>
                         <a href="{{ route('landing.information.procurement-preparation') }}"
-                           class="flex items-center gap-3 px-4 py-3 text-[13px] font-semibold text-slate-700 transition-colors duration-150 hover:bg-tsa-soft hover:text-tsa-greenDark">
-                            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-tsa-green/10 text-tsa-green">
-                                <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"/></svg>
+                           class="group flex items-start gap-3 rounded-lg px-3 py-3 text-slate-700 transition-colors duration-150 hover:bg-tsa-soft hover:text-tsa-greenDark">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-tsa-green/15 bg-tsa-green/10 text-tsa-green transition group-hover:border-tsa-green/30 group-hover:bg-white">
+                                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M9 3h6l1 2h3v16H5V5h3l1-2z"></path>
+                                    <path d="M9 13l2 2 4-5"></path>
+                                    <path d="M8 8h8"></path>
+                                </svg>
                             </span>
-                            Procurement and Preparation
+                            <span class="block">
+                                <span class="block text-sm font-extrabold leading-tight">Procurement and Preparation</span>
+                                <span class="mt-0.5 block text-[12px] font-semibold leading-snug text-slate-500 group-hover:text-tsa-greenDark/75">Selection, welfare, and export readiness</span>
+                            </span>
                         </a>
-                        <div class="mx-4 h-px bg-slate-100"></div>
                         <a href="{{ route('landing.information.live-export-process') }}"
-                           class="flex items-center gap-3 px-4 py-3 text-[13px] font-semibold text-slate-700 transition-colors duration-150 hover:bg-tsa-soft hover:text-tsa-greenDark">
-                            <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-tsa-green/10 text-tsa-green">
-                                <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"/><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"/></svg>
+                           class="group flex items-start gap-3 rounded-lg px-3 py-3 text-slate-700 transition-colors duration-150 hover:bg-tsa-soft hover:text-tsa-greenDark">
+                            <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-tsa-green/15 bg-tsa-green/10 text-tsa-green transition group-hover:border-tsa-green/30 group-hover:bg-white">
+                                <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M4 19V5"></path>
+                                    <path d="M4 5h5l2 3h9l-2 4 2 4h-9l-2-3H4"></path>
+                                    <path d="M8 19h8"></path>
+                                </svg>
                             </span>
-                            Live Export Process
+                            <span class="block">
+                                <span class="block text-sm font-extrabold leading-tight">Live Export Process</span>
+                                <span class="mt-0.5 block text-[12px] font-semibold leading-snug text-slate-500 group-hover:text-tsa-greenDark/75">Step-by-step export documentation</span>
+                            </span>
                         </a>
                     </div>
                 </div>
@@ -350,9 +377,31 @@
 
                 <div class="pb-0.5 pt-1">
                     <p class="px-3 pb-1 text-[11px] font-semibold uppercase tracking-widest text-slate-400">Information</p>
-                    <a href="{{ route('landing.information.logistic-delivery') }}"       class="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">↳ Logistic and Delivery</a>
-                    <a href="{{ route('landing.information.procurement-preparation') }}"  class="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">↳ Procurement and Preparation</a>
-                    <a href="{{ route('landing.information.live-export-process') }}"     class="block rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">↳ Live Export Process</a>
+                    <a href="{{ route('landing.information.logistic-delivery') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-tsa-green" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M10 17h4V5H2v12h3"></path>
+                            <path d="M14 8h4l4 4v5h-3"></path>
+                            <circle cx="7.5" cy="17.5" r="2.5"></circle>
+                            <circle cx="16.5" cy="17.5" r="2.5"></circle>
+                        </svg>
+                        Logistic and Delivery
+                    </a>
+                    <a href="{{ route('landing.information.procurement-preparation') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-tsa-green" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 3h6l1 2h3v16H5V5h3l1-2z"></path>
+                            <path d="M9 13l2 2 4-5"></path>
+                            <path d="M8 8h8"></path>
+                        </svg>
+                        Procurement and Preparation
+                    </a>
+                    <a href="{{ route('landing.information.live-export-process') }}" class="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4 shrink-0 text-tsa-green" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M4 19V5"></path>
+                            <path d="M4 5h5l2 3h9l-2 4 2 4h-9l-2-3H4"></path>
+                            <path d="M8 19h8"></path>
+                        </svg>
+                        Live Export Process
+                    </a>
                 </div>
 
                 <a href="{{ route('landing.support') }}" class="block rounded-lg px-3 py-2.5 text-sm font-bold text-slate-800 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">Support</a>
