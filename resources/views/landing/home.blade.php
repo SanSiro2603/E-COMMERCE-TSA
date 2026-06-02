@@ -1,7 +1,7 @@
 @extends('landing.layout')
 
 @section('content')
-    <section x-data="heroSlider()" x-init="init()" class="-mt-16 relative isolate h-[640px] overflow-hidden bg-black sm:h-[680px]">
+    <section x-data="heroSlider()" x-init="init()" class="-mt-16 relative isolate h-[100svh] min-h-[640px] overflow-hidden bg-black">
         <template x-for="(slide, index) in slides" :key="index">
             <article
                 x-show="active === index"
