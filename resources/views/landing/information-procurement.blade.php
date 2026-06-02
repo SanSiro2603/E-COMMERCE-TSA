@@ -4,7 +4,7 @@
     <section class="relative isolate h-[430px] overflow-hidden bg-black sm:h-[470px]">
         <div
             class="absolute inset-0 bg-cover bg-center"
-            style="background-image: linear-gradient(95deg, rgba(5,16,7,.82) 0%, rgba(5,16,7,.48) 48%, rgba(5,16,7,.22) 100%), url('{{ asset('images/procurement-banner.jpeg') }}');">
+            style="background-image: linear-gradient(95deg, rgba(5,16,7,.82) 0%, rgba(5,16,7,.48) 48%, rgba(5,16,7,.22) 100%), url('{{ asset('images/procurement-banner-new.png') }}');">
         </div>
 
         <div class="relative mx-auto flex h-full w-[94%] max-w-[1240px] items-center">
@@ -38,8 +38,8 @@
                 </div>
 
                 <div class="reveal-right grid gap-3 sm:grid-cols-2" data-reveal>
-                    <img src="https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=900&q=80" alt="Parrot inspection close-up" class="h-52 w-full rounded-xl object-cover sm:h-full">
-                    <img src="https://images.unsplash.com/photo-1612444530582-fc66183b16f7?auto=format&fit=crop&w=900&q=80" alt="Digital animal identification scanner" class="h-52 w-full rounded-xl object-cover sm:h-full">
+                    <img src="{{ asset('images/procurement-commitment-1.png') }}" alt="Parrot inspection close-up" class="h-52 w-full rounded-xl object-cover sm:h-full">
+                    <img src="{{ asset('images/procurement-commitment-2.png') }}" alt="Digital animal identification scanner" class="h-52 w-full rounded-xl object-cover sm:h-full">
                 </div>
             </div>
 
@@ -81,7 +81,7 @@
                         ethically bred, and high-quality animals.
                     </p>
                 </div>
-                <img src="https://images.unsplash.com/photo-1617957743098-33b1f3f77f6a?auto=format&fit=crop&w=1300&q=80" alt="Breeding center aerial view" class="reveal-right zoom-soft h-56 w-full rounded-xl object-cover sm:h-64" data-reveal>
+                <img src="{{ asset('images/sources-side.png') }}" alt="Breeding center aerial view" class="reveal-right zoom-soft h-56 w-full rounded-xl object-cover sm:h-64" data-reveal>
             </div>
 
             <p class="reveal-up mt-6 text-lg leading-relaxed text-slate-700 sm:text-xl" data-reveal>
@@ -90,11 +90,11 @@
 
             @php
                 $sourceCards = [
-                    ['title' => 'Accredited Breeding Partners', 'img' => 'https://images.unsplash.com/photo-1452570053594-1b985d6ea890?auto=format&fit=crop&w=900&q=80'],
-                    ['title' => 'Ethical Breeding Practices', 'img' => 'https://images.unsplash.com/photo-1501700493788-fa1a4fc9fe62?auto=format&fit=crop&w=900&q=80'],
-                    ['title' => 'Health & Genetic Screening', 'img' => 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=900&q=80'],
-                    ['title' => 'Hygiene & Biosecurity', 'img' => 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=900&q=80'],
-                    ['title' => 'Continuous Monitoring', 'img' => 'https://images.unsplash.com/photo-1526336024174-e58f5cdd8e13?auto=format&fit=crop&w=900&q=80'],
+                    ['title' => 'Accredited Breeding Partners', 'img' => asset('images/source-card-01.png')],
+                    ['title' => 'Ethical Breeding Practices', 'img' => asset('images/source-card-02.png')],
+                    ['title' => 'Health & Genetic Screening', 'img' => asset('images/source-card-03.png')],
+                    ['title' => 'Hygiene & Biosecurity', 'img' => asset('images/source-card-04.png')],
+                    ['title' => 'Continuous Monitoring', 'img' => asset('images/source-card-05.png')],
                 ];
             @endphp
 

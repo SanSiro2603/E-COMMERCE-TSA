@@ -4,7 +4,7 @@
     <section class="relative isolate h-[430px] overflow-hidden bg-black sm:h-[470px]">
         <div
             class="absolute inset-0 bg-cover bg-center"
-            style="background-image: linear-gradient(95deg, rgba(5,16,7,.82) 0%, rgba(5,16,7,.48) 48%, rgba(5,16,7,.22) 100%), url('{{ asset('images/live-export-banner.jpeg') }}');">
+            style="background-image: linear-gradient(95deg, rgba(5,16,7,.82) 0%, rgba(5,16,7,.48) 48%, rgba(5,16,7,.22) 100%), url('{{ asset('images/live-export-banner-new.png') }}');">
         </div>
 
         <div class="relative mx-auto flex h-full w-[94%] max-w-[1240px] items-center">
@@ -36,52 +36,52 @@
             [
                 'title' => 'Initial Consultation',
                 'desc' => 'We discuss your needs, specifications, quantity, and logistics requirements. A detailed proposal will be sent within 14 days.',
-                'img' => 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-01.png'),
             ],
             [
                 'title' => 'Contract Agreement',
                 'desc' => 'A comprehensive contract is reviewed and signed by both parties before any work begins.',
-                'img' => 'https://images.unsplash.com/photo-1556740749-887f6717d7e4?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-02.png'),
             ],
             [
                 'title' => 'Pro Forma Invoice',
                 'desc' => 'The Pro Forma Invoice will be issued after the contract is signed. An initial payment is required to secure your order.',
-                'img' => 'https://images.unsplash.com/photo-1554224154-26032fced8bd?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-03.png'),
             ],
             [
                 'title' => 'Import Permits',
                 'desc' => 'We handle the import permit process in the destination country. Requirements may vary depending on each country\'s regulations.',
-                'img' => 'https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-04.png'),
             ],
             [
                 'title' => 'Livestock Procurement Begins',
                 'desc' => 'Selection and preparation of animals begin in accordance with the agreed specifications.',
-                'img' => 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-05.png'),
             ],
             [
                 'title' => 'Selection and On Farm Testing',
                 'desc' => 'Genetic, physical, health, and temperament evaluations are conducted for approximately 2 weeks.',
-                'img' => 'https://images.unsplash.com/photo-1552728089-57bdde30beb3?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-06.png'),
             ],
             [
                 'title' => 'Animal Quarantine',
                 'desc' => 'Animals are transferred to a government-licensed quarantine facility.',
-                'img' => 'https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-07.png'),
             ],
             [
                 'title' => 'Vet Checks, Testing and Vaccination',
                 'desc' => 'Veterinary examinations, laboratory testing, and vaccinations are carried out during the quarantine period.',
-                'img' => 'https://images.unsplash.com/photo-1584556812952-905ffd0c611a?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-08.png'),
             ],
             [
                 'title' => 'Final Payment',
                 'desc' => 'Final payment is made to confirm air shipment and government export booking. All shipments are CIP (Carriage and Insurance Paid).',
-                'img' => 'https://images.unsplash.com/photo-1556742208-999815fca738?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-09.png'),
             ],
             [
                 'title' => 'Final Government Vet Inspection and Delivery',
                 'desc' => 'Final inspection by government veterinarian, delivery to destination port/airport, coordination with import agent, and all documents are sent 48 hours before shipment.',
-                'img' => 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1000&q=80',
+                'img' => asset('images/live-step-10.png'),
             ],
         ];
 

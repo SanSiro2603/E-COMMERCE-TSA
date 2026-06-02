@@ -185,7 +185,7 @@
                 <a href="{{ route('landing') }}"
                    class="relative pb-0.5 text-[14px] font-bold transition-colors duration-150
                           {{ request()->routeIs('landing') ? 'text-tsa-greenDark' : 'text-slate-800 hover:text-tsa-greenDark' }}"
-                   x-data @mouseenter="$el.querySelector('span').style.width='100%'" @mouseleave="$el.querySelector('span').style.width=request()->routeIs('landing') ? '100%' : '0%'">
+                   x-data @mouseenter="$el.querySelector('span').style.width='100%'" @mouseleave="$el.querySelector('span').style.width='{{ request()->routeIs('landing') ? '100%' : '0%' }}'">
                     Home
                     <span class="absolute bottom-0 left-0 h-0.5 rounded-full bg-tsa-green transition-all duration-200"
                           style="width: {{ request()->routeIs('landing') ? '100%' : '0%' }}"></span>

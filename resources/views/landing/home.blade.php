@@ -11,8 +11,8 @@
                 x-transition:leave="transition ease-in duration-700"
                 x-transition:leave-start="opacity-100 scale-100"
                 x-transition:leave-end="opacity-0 scale-[1.015]"
-                class="absolute inset-0 bg-cover bg-center"
-                :style="`background-image: linear-gradient(100deg, rgba(8,16,4,.82) 0%, rgba(8,16,4,.5) 45%, rgba(8,16,4,.2) 100%), url('${slide.image}')`">
+                class="absolute inset-0 bg-cover"
+                :style="`background-image: linear-gradient(100deg, rgba(8,16,4,.82) 0%, rgba(8,16,4,.5) 45%, rgba(8,16,4,.2) 100%), url('${slide.image}'); background-position: ${slide.position || 'center center'}`">
             </article>
         </template>
 
@@ -104,25 +104,32 @@
                 slides: [
                     {
                         image: '{{ asset('images/hero-tiger.jpeg') }}',
+                        position: '62% center',
                         titleTop: 'Tunas Sejahtera',
                         titleBottom: 'Adhi Perkasa',
                         copy: 'We are an official import export company that has a private breeding center and is registered with the Indonesian Government'
                     },
                     {
                         image: '{{ asset('images/hero-iguana.jpeg') }}',
+                        position: '68% center',
                         titleTop: 'Tunas Sejahtera',
                         titleBottom: 'Adhi Perkasa',
                         copy: 'We are an official import export company that has a private breeding center and is registered with the Indonesian Government'
                     },
                     {
                         image: '{{ asset('images/hero-macaw.jpeg') }}',
+                        position: '70% center',
                         titleTop: 'Tunas Sejahtera',
                         titleBottom: 'Adhi Perkasa',
                         copy: 'We are an official import export company that has a private breeding center and is registered with the Indonesian Government'
                     }
                 ],
                 init() {
+                    this.syncActiveFromClock();
                     if (!this.reduced) this.resume();
+                },
+                syncActiveFromClock() {
+                    this.active = Math.floor(Date.now() / this.intervalMs) % this.slides.length;
                 },
                 next() {
                     this.active = (this.active + 1) % this.slides.length;
@@ -140,12 +147,18 @@
                 pause() {
                     if (this.timer) {
                         clearInterval(this.timer);
+                        clearTimeout(this.timer);
                         this.timer = null;
                     }
                 },
                 resume() {
                     this.pause();
-                    this.timer = setInterval(() => this.next(), this.intervalMs);
+                    const tick = () => {
+                        this.syncActiveFromClock();
+                        this.timer = setTimeout(tick, this.intervalMs - (Date.now() % this.intervalMs));
+                    };
+
+                    this.timer = setTimeout(tick, this.intervalMs - (Date.now() % this.intervalMs));
                 }
             }
         }

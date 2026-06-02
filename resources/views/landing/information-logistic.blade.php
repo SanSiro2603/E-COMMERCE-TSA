@@ -38,7 +38,7 @@
             </div>
 
             <div class="reveal-right zoom-soft overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" data-reveal>
-                <img src="{{ asset('images/ourcomitmen.png') }}" alt="Our commitment logistics process image" class="h-full w-full object-cover">
+                <img src="{{ asset('images/logistic-commitment.png') }}" alt="Our commitment logistics process image" class="h-full w-full object-cover">
             </div>
         </div>
     </section>
@@ -48,22 +48,22 @@
             [
                 'title' => 'Animal Pickup',
                 'desc' => 'Careful collection of animals from our breeding center with strict handling procedures.',
-                'img' => 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=900&q=80',
+                'img' => asset('images/air-freight-01.png'),
             ],
             [
                 'title' => 'Airport Handling',
                 'desc' => 'Professional handling and transfer of animals to the airport cargo facility.',
-                'img' => 'https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=900&q=80',
+                'img' => asset('images/air-freight-02.png'),
             ],
             [
                 'title' => 'Loading Process',
                 'desc' => 'Animals are loaded into the aircraft under optimal conditions with temperature control.',
-                'img' => 'https://images.unsplash.com/photo-1580833023191-83ec2c7e95d6?auto=format&fit=crop&w=900&q=80',
+                'img' => asset('images/air-freight-03.png'),
             ],
             [
                 'title' => 'Safe Delivery',
                 'desc' => 'We ensure safe and timely delivery to the destination airport with full compliance.',
-                'img' => 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&q=80',
+                'img' => asset('images/air-freight-04.png'),
             ],
         ];
 
@@ -71,22 +71,22 @@
             [
                 'title' => 'Container Preparation',
                 'desc' => 'Specialized containers are prepared with ventilation, temperature control, and appropriate flooring.',
-                'img' => 'https://images.unsplash.com/photo-1586528116493-6f23a2f34c61?auto=format&fit=crop&w=900&q=80',
+                'img' => asset('images/sea-freight-01.png'),
             ],
             [
                 'title' => 'Loading & Securing',
                 'desc' => 'Animals are carefully loaded and secured to ensure safety during the voyage.',
-                'img' => 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=900&q=80',
+                'img' => asset('images/sea-freight-02.png'),
             ],
             [
                 'title' => 'Ocean Transport',
                 'desc' => 'Shipment via reliable shipping lines with regular monitoring and care during transit.',
-                'img' => 'https://images.unsplash.com/photo-1543459176-4426c2fc8be5?auto=format&fit=crop&w=900&q=80',
+                'img' => asset('images/sea-freight-03.png'),
             ],
             [
                 'title' => 'Arrival & Customs Clearance',
                 'desc' => 'Coordination with local agents for smooth customs clearance and final delivery.',
-                'img' => 'https://images.unsplash.com/photo-1567789884554-0b844b597180?auto=format&fit=crop&w=900&q=80',
+                'img' => asset('images/sea-freight-04.png'),
             ],
         ];
     @endphp
