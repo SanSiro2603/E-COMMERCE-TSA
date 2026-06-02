@@ -293,7 +293,7 @@
                             ? 'bg-[#F0F7F4] dark:bg-emerald-950/20'
                             : 'bg-white dark:bg-zinc-900';
                     @endphp
-                    <tr class="{{ $rowBg }}>
+                    <tr class="{{ $rowBg }}">
                         <td class="px-4 py-3 text-center text-xs text-gray-500 dark:text-zinc-400">{{ $orders->firstItem() + $i }}</td>
 
                         <td class="px-4 py-3"><span class="text-xs font-semibold text-gray-900 dark:text-white">#{{ $order->order_number }}</span></td>

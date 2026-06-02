@@ -124,8 +124,8 @@
                     </div>
                     <h2
                         class="hidden md:block text-[#0d1b13] dark:text-white text-base font-extrabold leading-tight tracking-tight">
-                        Tunas Sejahtera<br />
-                        <span class="text-primary text-xs font-semibold">Adi Perkasa</span>
+                        E-COMMERCE TSA<br />
+                        <span class="text-primary text-xs font-semibold">Tunas Sejahtera Adhiperkasa</span>
                     </h2>
                 </a>
             </div>
