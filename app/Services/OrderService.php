@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Cart;
 use App\Models\Product;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Exception;
 
 class OrderService
@@ -37,16 +38,23 @@ class OrderService
         try {
             $totalAmount = $carts->sum('subtotal');
             $grandTotal  = $totalAmount + $shippingCost;
+            $lockedProducts = collect();
 
             // 1. Validasi Ekstra Ketat (Lock baris)
             foreach ($carts as $cart) {
-                $product = Product::lockForUpdate()->find($cart->product_id);
+                $product = Product::with('category')
+                    ->whereKey($cart->product_id)
+                    ->lockForUpdate()
+                    ->first();
+
                 if (!$product) {
                     throw new Exception("Produk tidak ditemukan.");
                 }
                 if ($product->stock < $cart->quantity) {
                     throw new Exception("Stok produk '{$product->name}' tidak mencukupi (Sisa: {$product->stock}). Silakan update keranjang.");
                 }
+
+                $lockedProducts->put($product->id, $product);
             }
 
             // 2. Buat Order
@@ -60,19 +68,23 @@ class OrderService
                 'address_id'      => $address->id,   // Sumber kebenaran alamat
                 'courier'         => $courier,
                 'courier_service' => $courierService,
-            ]);
+            ] + $this->shippingSnapshot($address));
 
             // 3. Kurangi Stok & Buat Order Items
             foreach ($carts as $cart) {
+                $product = $lockedProducts->get($cart->product_id);
+
                 OrderItem::create([
-                    'order_id'   => $order->id,
-                    'product_id' => $cart->product_id,
-                    'quantity'   => $cart->quantity,
-                    'price'      => $cart->product->price,
-                    'subtotal'   => $cart->subtotal,
+                    'order_id'               => $order->id,
+                    'product_id'             => $product->id,
+                    'product_name'           => $product->name,
+                    'product_image'          => $this->copyOrderItemImage($product, $order),
+                    'product_category_name'  => $product->category?->name,
+                    'quantity'               => $cart->quantity,
+                    'price'                  => $product->price,
+                    'subtotal'               => $cart->subtotal,
                 ]);
 
-                $product = Product::find($cart->product_id);
                 $product->decrement('stock', $cart->quantity);
             }
 
@@ -105,7 +117,7 @@ class OrderService
                 'courier_service' => $courierService,
                 'shipping_cost'   => $shippingCost,
                 'grand_total'     => $grandTotal,
-            ]);
+            ] + $this->shippingSnapshot($address));
 
             DB::commit();
             return $order;
@@ -185,5 +197,41 @@ class OrderService
             DB::rollBack();
             throw $e;
         }
+    }
+
+    private function shippingSnapshot($address): array
+    {
+        return [
+            'shipping_label' => $address->label,
+            'shipping_recipient_name' => $address->recipient_name,
+            'shipping_recipient_phone' => $address->recipient_phone,
+            'shipping_province_id' => $address->province_id,
+            'shipping_province_name' => $address->province_name,
+            'shipping_city_id' => $address->city_id,
+            'shipping_city_name' => $address->city_name,
+            'shipping_city_type' => $address->city_type,
+            'shipping_postal_code' => $address->postal_code,
+            'shipping_full_address' => $address->full_address,
+        ];
+    }
+
+    private function copyOrderItemImage(Product $product, Order $order): ?string
+    {
+        if (!$product->image || !Storage::disk('public')->exists($product->image)) {
+            return null;
+        }
+
+        $extension = pathinfo($product->image, PATHINFO_EXTENSION) ?: 'jpg';
+        $destination = sprintf(
+            'order-items/%s/%s-%s.%s',
+            $order->order_number,
+            $product->id,
+            uniqid(),
+            $extension
+        );
+
+        return Storage::disk('public')->copy($product->image, $destination)
+            ? $destination
+            : null;
     }
 }

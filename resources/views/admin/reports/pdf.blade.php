@@ -126,6 +126,12 @@
                             Provinsi | Kota/Kab | Alamat | Produk | Jumlah | Total | Status
          [+] Tambah <th> dan <td> baru jika perlu kolom tambahan
              Sesuaikan juga colspan di <tfoot> --}}
+    @if($statsNote)
+        <div style="margin-bottom:10px; padding:6px 8px; border:1px solid #facc15; background:#fffbeb; color:#92400e; font-size:8px; font-weight:bold;">
+            {{ $statsNote }}
+        </div>
+    @endif
+
     <table>
         <thead>
             <tr>
@@ -152,7 +158,9 @@
             @endphp
             @foreach($orders as $index => $order)
             @php
-                $products = $order->items->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')->implode(', ');
+                $products = $order->items
+                    ->map(fn($item) => $item->display_name . ' (x' . $item->quantity . ')' . ($item->product ? '' : ' - Produk sudah dihapus dari katalog'))
+                    ->implode(', ');
                 $qty      = $order->items->sum('quantity');
 
                 // Grand total tfoot: pending & cancelled tidak dihitung
@@ -177,12 +185,12 @@
                 <td class="text-center">{{ $index + 1 }}</td>
                 <td class="text-bold">{{ $order->order_number ?? '-' }}</td>
                 <td>{{ $order->created_at->format('d/m/Y') }}<br><span class="text-muted">{{ $order->created_at->format('H:i') }}</span></td>
-                <td>{{ $order->address?->recipient_name ?? $order->user?->name ?? '-' }}</td>
+                <td>{{ $order->display_shipping_recipient_name ?? $order->user?->name ?? '-' }}</td>
                 <td>{{ $order->user?->email ?? '-' }}</td>
-                <td>{{ $order->address?->recipient_phone ?? '-' }}</td>
-                <td>{{ $order->address?->province_name ?? '-' }}</td>
-                <td>{{ $order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-' }}</td>
-                <td>{{ $order->address?->full_address ?? '-' }}</td>
+                <td>{{ $order->display_shipping_recipient_phone ?? '-' }}</td>
+                <td>{{ $order->display_shipping_province_name ?? '-' }}</td>
+                <td>{{ trim(($order->display_shipping_city_type ?? '') . ' ' . ($order->display_shipping_city_name ?? '')) ?: '-' }}</td>
+                <td>{{ $order->display_shipping_full_address ?? '-' }}</td>
                 <td>{{ $products }}</td>
                 <td class="text-center">{{ $qty }}</td>
                 <td class="text-right text-bold">Rp {{ number_format($order->grand_total ?? 0, 0, ',', '.') }}</td>

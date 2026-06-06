@@ -3,7 +3,9 @@
 
 namespace App\Exports;
 
+use App\Models\Category;
 use App\Models\Order;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithDrawings;
@@ -59,13 +61,13 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
             ])
             ->orderBy('created_at', 'asc');
 
-        if ($this->province)      $query->whereHas('address', fn($q) => $q->where('province_name', $this->province));
+        if ($this->province)      $this->applyProvinceFilter($query, $this->province);
         if ($this->status)        $query->where('status', $this->status);
         if ($this->paymentMethod) $query->where(function ($q) {
             $q->whereHas('payment', fn($p) => $p->where('payment_type', $this->paymentMethod))
               ->orWhere('payment_method', $this->paymentMethod);
         });
-        if ($this->categoryId)    $query->whereHas('items.product', fn($q) => $q->where('category_id', $this->categoryId));
+        if ($this->categoryId)    $this->applyCategoryFilter($query, $this->categoryId);
 
         $this->orders = $query->get();
 
@@ -154,7 +156,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 $currentRow = 9;
                 $filterParts = [];
                 if ($this->province)      $filterParts[] = 'Provinsi: ' . $this->province;
-                if ($this->categoryId)    $filterParts[] = 'Kategori ID: ' . $this->categoryId;
+                if ($this->categoryId)    $filterParts[] = 'Kategori: ' . (Category::find($this->categoryId)?->name ?? $this->categoryId);
                 if ($this->paymentMethod) $filterParts[] = 'Metode: ' . $this->paymentMethod;
                 if ($this->status)        $filterParts[] = 'Status: ' . $this->status;
 
@@ -168,6 +170,30 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $currentRow = 10;
                 }
 
+                $statusLabelsForNote = [
+                    'pending'    => 'Menunggu Pembayaran',
+                    'paid'       => 'Sudah Dibayar',
+                    'processing' => 'Diproses',
+                    'shipped'    => 'Dikirim',
+                    'completed'  => 'Selesai',
+                    'cancelled'  => 'Dibatalkan',
+                ];
+
+                if ($this->status && !in_array($this->status, $this->validStatuses)) {
+                    $sheet->mergeCells('A' . $currentRow . ':L' . $currentRow);
+                    $sheet->setCellValue(
+                        'A' . $currentRow,
+                        'Catatan: Pesanan dengan status "' . ($statusLabelsForNote[$this->status] ?? $this->status) . '" tetap ditampilkan di tabel untuk analisis, tetapi tidak dihitung pada kartu statistik penjualan karena belum menjadi transaksi valid.'
+                    );
+                    $sheet->getStyle('A' . $currentRow)->applyFromArray([
+                        'font'      => ['bold' => true, 'size' => 9, 'color' => ['rgb' => '92400E']],
+                        'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FFFBEB']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'FACC15']]],
+                    ]);
+                    $currentRow++;
+                }
+
                 // ---- RINGKASAN STATISTIK (2 baris: label + nilai) ----
                 // Selalu hanya hitung $validStatuses — pending & cancelled tidak dihitung
                 $statsStartRow = $currentRow + 1;
@@ -175,7 +201,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 $statsValueRow = $statsStartRow + 1;
 
                 $statsOrders    = $this->orders->filter(fn($o) => in_array($o->status, $this->validStatuses));
-                $totalRevenue   = $statsOrders->sum(fn($o) => ($o->subtotal ?? 0) + ($o->shipping_cost ?? 0));
+                $totalRevenue   = $statsOrders->sum('grand_total');
                 $totalOrders    = $statsOrders->count();
                 $totalItemsSold = $statsOrders->sum(fn($o) => $o->items->sum('quantity'));
                 $avgOrderValue  = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 0) : 0;
@@ -270,15 +296,15 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
 
                 foreach ($this->orders as $order) {
                     $categories = $order->items
-                        ->map(fn($item) => $item->product?->category?->name)
+                        ->map(fn($item) => $item->display_category_name)
                         ->filter()->unique()->implode(', ') ?: '-';
 
                     $products = $order->items
-                        ->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')
+                        ->map(fn($item) => $item->display_name . ' (x' . $item->quantity . ')' . ($item->product ? '' : ' - Produk sudah dihapus dari katalog'))
                         ->implode(', ');
 
                     $qty   = $order->items->sum('quantity');
-                    $total = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
+                    $total = $order->grand_total ?? (($order->subtotal ?? 0) + ($order->shipping_cost ?? 0));
 
                     // Grand total hanya dijumlah dari validStatuses (pending & cancelled dilewati)
                     if (in_array($order->status, $this->validStatuses)) {
@@ -314,7 +340,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('A' . $currentRow, $no++);
                     $sheet->setCellValue('B' . $currentRow, $order->order_number ?? '-');
                     $sheet->setCellValue('C' . $currentRow, $order->created_at->format('d/m/Y H:i'));
-                    $sheet->setCellValue('D' . $currentRow, $order->address?->province_name ?? $order->province ?? '-');
+                    $sheet->setCellValue('D' . $currentRow, $order->display_shipping_province_name ?? '-');
                     $sheet->setCellValue('E' . $currentRow, $categories);
                     $sheet->setCellValue('F' . $currentRow, $products);
                     $sheet->setCellValue('G' . $currentRow, $qty);
@@ -403,5 +429,26 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
                 ]);
             },
         ];
+    }
+
+    private function applyProvinceFilter(Builder $query, string $province): void
+    {
+        $query->where(function (Builder $q) use ($province) {
+            $q->where('shipping_province_name', $province)
+                ->orWhereHas('address', fn($address) => $address->where('province_name', $province));
+        });
+    }
+
+    private function applyCategoryFilter(Builder $query, $categoryId): void
+    {
+        $categoryName = Category::query()->whereKey($categoryId)->value('name');
+
+        $query->whereHas('items', function (Builder $items) use ($categoryId, $categoryName) {
+            $items->whereHas('product', fn($product) => $product->where('category_id', $categoryId));
+
+            if ($categoryName) {
+                $items->orWhere('product_category_name', $categoryName);
+            }
+        });
     }
 }

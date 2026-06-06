@@ -177,7 +177,6 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
         Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
         Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('reports.exportPdf');
         Route::get('/reports/export-excel', [ReportController::class, 'exportExcel'])->name('reports.exportExcel');
-        Route::get('/reports/preview', [ReportController::class, 'preview'])->name('reports.preview');
 
         // Settings
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');

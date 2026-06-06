@@ -16,6 +16,16 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'address_id',
+        'shipping_label',
+        'shipping_recipient_name',
+        'shipping_recipient_phone',
+        'shipping_province_id',
+        'shipping_province_name',
+        'shipping_city_id',
+        'shipping_city_name',
+        'shipping_city_type',
+        'shipping_postal_code',
+        'shipping_full_address',
         'order_number',
         'subtotal',
         'shipping_cost',
@@ -137,6 +147,66 @@ class Order extends Model
     public function calculateGrandTotal()
     {
         return $this->calculateSubtotal() + $this->shipping_cost;
+    }
+
+    public function getDisplayShippingRecipientNameAttribute(): ?string
+    {
+        return $this->address?->recipient_name ?? $this->shipping_recipient_name;
+    }
+
+    public function getDisplayShippingRecipientPhoneAttribute(): ?string
+    {
+        return $this->address?->recipient_phone ?? $this->shipping_recipient_phone;
+    }
+
+    public function getDisplayShippingFullAddressAttribute(): ?string
+    {
+        return $this->address?->full_address ?? $this->shipping_full_address;
+    }
+
+    public function getDisplayShippingProvinceNameAttribute(): ?string
+    {
+        return $this->address?->province_name ?? $this->shipping_province_name;
+    }
+
+    public function getDisplayShippingCityNameAttribute(): ?string
+    {
+        return $this->address?->city_name ?? $this->shipping_city_name;
+    }
+
+    public function getDisplayShippingCityTypeAttribute(): ?string
+    {
+        return $this->address?->city_type ?? $this->shipping_city_type;
+    }
+
+    public function getDisplayShippingPostalCodeAttribute(): ?string
+    {
+        return $this->address?->postal_code ?? $this->shipping_postal_code;
+    }
+
+    public function getDisplayShippingCityLineAttribute(): string
+    {
+        $city = trim(implode(' ', array_filter([
+            $this->display_shipping_city_type,
+            $this->display_shipping_city_name,
+        ])));
+
+        $location = trim(implode(', ', array_filter([
+            $city,
+            $this->display_shipping_province_name,
+        ])));
+
+        return trim($location . ($this->display_shipping_postal_code ? ' ' . $this->display_shipping_postal_code : ''));
+    }
+
+    public function hasCompleteShippingAddress(): bool
+    {
+        return filled($this->display_shipping_recipient_name)
+            && filled($this->display_shipping_recipient_phone)
+            && filled($this->display_shipping_full_address)
+            && filled($this->display_shipping_province_name)
+            && filled($this->display_shipping_city_name)
+            && filled($this->display_shipping_postal_code);
     }
 
     public function canBeCancelled(): bool

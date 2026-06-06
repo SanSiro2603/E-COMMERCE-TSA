@@ -222,6 +222,12 @@
         </div>
     </div>
 
+    @if($statsNote)
+        <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+            {{ $statsNote }}
+        </div>
+    @endif
+
     {{-- TABEL DETAIL PESANAN --}}
     <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-soft border border-gray-100 dark:border-zinc-800">
         <div class="p-6 border-b border-gray-100 dark:border-zinc-800">
@@ -256,10 +262,10 @@
                     @forelse($orders as $i => $order)
                     @php
                         $categories = $order->items
-                            ->map(fn($item) => $item->product?->category?->name)
+                            ->map(fn($item) => $item->display_category_name)
                             ->filter()->unique()->implode(', ');
                         $products = $order->items
-                            ->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')
+                            ->map(fn($item) => $item->display_name . ' (x' . $item->quantity . ')' . ($item->product ? '' : ' - Produk sudah dihapus dari katalog'))
                             ->implode(', ');
                         $qty = $order->items->sum('quantity');
 
@@ -302,7 +308,7 @@
                             <p class="text-xs text-gray-900 dark:text-white">{{ $order->created_at->format('d M Y') }}</p>
                             <p class="text-[10px] text-gray-500 dark:text-zinc-500">{{ $order->created_at->format('H:i') }}</p>
                         </td>
-                        <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $order->address?->province_name ?? '-' }}</span></td>
+                        <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $order->display_shipping_province_name ?? '-' }}</span></td>
                         <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $categories ?: '-' }}</span></td>
                         <td class="px-4 py-3 max-w-[200px]">
                             <span class="text-xs text-gray-900 dark:text-white line-clamp-2" title="{{ $products }}">{{ $products }}</span>

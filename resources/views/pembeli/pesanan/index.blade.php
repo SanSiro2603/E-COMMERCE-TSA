@@ -120,8 +120,8 @@
                             @foreach($order->items->take(3) as $item)
                                 <div class="flex gap-3 sm:gap-4 items-start">
                                     <div class="relative shrink-0">
-                                        @if($item->product && $item->product->image)
-                                            <img src="{{ asset('storage/' . $item->product->image) }}" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 shadow-sm">
+                                        @if($item->display_image)
+                                            <img src="{{ asset('storage/' . $item->display_image) }}" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 shadow-sm">
                                         @else
                                             <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 shadow-sm">
                                                 <span class="material-symbols-outlined text-gray-400 text-2xl">image</span>
@@ -134,7 +134,7 @@
                                     <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-between h-full">
                                         <div>
                                             <h4 class="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 leading-snug">
-                                                {{ $item->product->name ?? 'Produk tidak tersedia' }}
+                                                {{ $item->display_name }}
                                             </h4>
                                             @if($item->product)
                                                 <div class="flex flex-wrap items-center gap-1.5 mt-1.5">

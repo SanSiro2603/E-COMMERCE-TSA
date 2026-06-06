@@ -142,6 +142,12 @@
                             Qty | Subtotal | Ongkir | Total | Metode Bayar | Status
          [+] Tambah <th> dan <td> baru jika perlu kolom tambahan
              Sesuaikan colspan di <tfoot> jika jumlah kolom berubah --}}
+    @if($statsNote)
+        <div style="margin-bottom:10px; padding:6px 8px; border:1px solid #facc15; background:#fffbeb; color:#92400e; font-size:8px; font-weight:bold;">
+            {{ $statsNote }}
+        </div>
+    @endif
+
     <table>
         <thead>
             <tr>
@@ -168,15 +174,15 @@
             @foreach($orders as $index => $order)
             @php
                 $categories = $order->items
-                    ->map(fn($item) => $item->product?->category?->name)
+                    ->map(fn($item) => $item->display_category_name)
                     ->filter()->unique()->implode(', ') ?: '-';
 
                 $products = $order->items
-                    ->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')
+                    ->map(fn($item) => $item->display_name . ' (x' . $item->quantity . ')' . ($item->product ? '' : ' - Produk sudah dihapus dari katalog'))
                     ->implode(', ');
 
                 $qty   = $order->items->sum('quantity');
-                $total = ($order->subtotal ?? 0) + ($order->shipping_cost ?? 0);
+                $total = $order->grand_total ?? (($order->subtotal ?? 0) + ($order->shipping_cost ?? 0));
 
                 // Grand total tfoot: pending & cancelled tidak dihitung
                 if (in_array($order->status, $validStatuses)) {
@@ -217,7 +223,7 @@
                 <td class="text-center">{{ $index + 1 }}</td>
                 <td class="text-bold">{{ $order->order_number ?? '-' }}</td>
                 <td>{{ $order->created_at->format('d/m/Y') }}<br><span class="text-muted">{{ $order->created_at->format('H:i') }}</span></td>
-                <td>{{ $order->address?->province_name ?? '-' }}</td>
+                <td>{{ $order->display_shipping_province_name ?? '-' }}</td>
                 <td>{{ $categories }}</td>
                 <td>{{ $products }}</td>
                 <td class="text-center">{{ $qty }}</td>

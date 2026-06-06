@@ -130,15 +130,16 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
 
                 // Baris keterangan filter status (opsional, muncul jika ada filter)
                 $infoRow = 9;
+                $statusLabels = [
+                    'pending'    => 'Menunggu Pembayaran',
+                    'paid'       => 'Sudah Dibayar',
+                    'processing' => 'Diproses',
+                    'shipped'    => 'Dikirim',
+                    'completed'  => 'Selesai',
+                    'cancelled'  => 'Dibatalkan',
+                ];
+
                 if ($this->status) {
-                    $statusLabels = [
-                        'pending'    => 'Menunggu Pembayaran',
-                        'paid'       => 'Sudah Dibayar',
-                        'processing' => 'Diproses',
-                        'shipped'    => 'Dikirim',
-                        'completed'  => 'Selesai',
-                        'cancelled'  => 'Dibatalkan',
-                    ];
                     $sheet->mergeCells('A9:M9');
                     $sheet->setCellValue('A9', 'Filter Status: ' . ($statusLabels[$this->status] ?? ucfirst($this->status)));
                     $sheet->getStyle('A9')->applyFromArray([
@@ -146,6 +147,21 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                         'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
                     ]);
                     $infoRow = 10;
+                }
+
+                if ($this->status && !in_array($this->status, $this->validStatuses)) {
+                    $sheet->mergeCells('A' . $infoRow . ':M' . $infoRow);
+                    $sheet->setCellValue(
+                        'A' . $infoRow,
+                        'Catatan: Pesanan dengan status "' . ($statusLabels[$this->status] ?? $this->status) . '" tetap ditampilkan di tabel untuk analisis, tetapi tidak dihitung pada kartu statistik penjualan karena belum menjadi transaksi valid.'
+                    );
+                    $sheet->getStyle('A' . $infoRow)->applyFromArray([
+                        'font'      => ['bold' => true, 'size' => 9, 'color' => ['rgb' => '92400E']],
+                        'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FFFBEB']],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER],
+                        'borders'   => ['allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'FACC15']]],
+                    ]);
+                    $infoRow++;
                 }
 
                 // ---- RINGKASAN STATISTIK (2 baris: label + nilai) ----
@@ -259,7 +275,7 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
 
                 foreach ($this->orders as $order) {
                     $products = $order->items
-                        ->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')
+                        ->map(fn($item) => $item->display_name . ' (x' . $item->quantity . ')' . ($item->product ? '' : ' - Produk sudah dihapus dari katalog'))
                         ->implode(', ');
                     $qty = $order->items->sum('quantity');
 
@@ -273,12 +289,12 @@ class SalesReportExport implements FromCollection, WithEvents, WithDrawings
                     $sheet->setCellValue('A' . $currentRow, $no);
                     $sheet->setCellValue('B' . $currentRow, $order->order_number ?? '-');
                     $sheet->setCellValue('C' . $currentRow, $order->created_at->format('d/m/Y H:i'));
-                    $sheet->setCellValue('D' . $currentRow, $order->address?->recipient_name ?? $order->user?->name ?? '-');
+                    $sheet->setCellValue('D' . $currentRow, $order->display_shipping_recipient_name ?? $order->user?->name ?? '-');
                     $sheet->setCellValue('E' . $currentRow, $order->user?->email ?? '-');
-                    $sheet->setCellValue('F' . $currentRow, $order->address?->recipient_phone ?? '-');
-                    $sheet->setCellValue('G' . $currentRow, $order->address?->province_name ?? '-');
-                    $sheet->setCellValue('H' . $currentRow, $order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-');
-                    $sheet->setCellValue('I' . $currentRow, $order->address?->full_address ?? '-');
+                    $sheet->setCellValue('F' . $currentRow, $order->display_shipping_recipient_phone ?? '-');
+                    $sheet->setCellValue('G' . $currentRow, $order->display_shipping_province_name ?? '-');
+                    $sheet->setCellValue('H' . $currentRow, trim(($order->display_shipping_city_type ?? '') . ' ' . ($order->display_shipping_city_name ?? '')) ?: '-');
+                    $sheet->setCellValue('I' . $currentRow, $order->display_shipping_full_address ?? '-');
                     $sheet->setCellValue('J' . $currentRow, $products);
                     $sheet->setCellValue('K' . $currentRow, $qty);
                     $sheet->setCellValue('L' . $currentRow, 'Rp ' . number_format($order->grand_total ?? 0, 0, ',', '.'));
