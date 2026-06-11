@@ -81,9 +81,12 @@ Route::view('/home/information/procurement-preparation', 'landing.information-pr
 Route::view('/home/information/live-export-process', 'landing.information-live-export', [
     'pageTitle' => 'Live Export Process',
 ])->name('landing.information.live-export-process');
-Route::view('/home/support', 'landing.support', [
-    'pageTitle' => 'Support',
-])->name('landing.support');
+Route::view('/home/future-projects', 'landing.future-projects', [
+    'pageTitle' => 'Future Projects',
+])->name('landing.future-projects');
+Route::view('/home/gallery', 'landing.gallery', [
+    'pageTitle' => 'Gallery',
+])->name('landing.gallery');
 Route::get('/gallery-hewan', [DashboardController::class, 'hewan'])->name('gallery.hewan');
 
 /*

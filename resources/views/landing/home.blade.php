@@ -48,9 +48,9 @@
 
             @php
                 $catalogCards = [
-                    ['key' => 'aves', 'title' => 'Aves', 'desc' => 'Explore a wide variety of beautiful and exotic birds from around the world.', 'img' => asset('images/aves.jpeg')],
-                    ['key' => 'mammals', 'title' => 'Mammals', 'desc' => 'High-quality mammals from trusted breeding and conservation programs.', 'img' => asset('images/mammals.jpeg')],
-                    ['key' => 'reptiles', 'title' => 'Reptiles', 'desc' => 'Healthy and unique reptiles with excellent care and certification.', 'img' => asset('images/reptil.jpeg')],
+                    ['key' => 'aves', 'title' => 'Aves', 'desc' => 'Beautiful and healthy birds with excellent care and certification.', 'img' => asset('images/nicobar-pigeon.png')],
+                    ['key' => 'mammals', 'title' => 'Mamalia', 'desc' => 'High-quality mammals from trusted breeding and conservation programs.', 'img' => asset('images/binturong.png')],
+                    ['key' => 'reptiles', 'title' => 'Reptil', 'desc' => 'Healthy and unique reptiles with excellent care and certification.', 'img' => asset('images/reptil.jpeg')],
                     ['key' => 'hybrid', 'title' => 'Hybrid & Mutation', 'desc' => 'Special hybrid and mutation animals with rare and unique characteristics.', 'img' => asset('images/hybrid.jpeg')],
                 ];
             @endphp
@@ -70,25 +70,6 @@
         </div>
     </section>
 
-    <section class="bg-tsa-soft pb-12">
-        <div class="mx-auto w-[94%] max-w-[1240px]">
-            <div class="mx-auto max-w-3xl text-center reveal-up" data-reveal>
-                <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-tsa-greenDark">Our Partnership</p>
-                <h2 class="line-mask mt-2 text-4xl font-extrabold text-slate-900 sm:text-5xl" data-line-reveal>
-                    <span class="line-mask-inner">Trusted Partners Worldwide</span>
-                </h2>
-                <p class="mx-auto mt-4 max-w-2xl text-xl leading-relaxed text-slate-600" data-word-stagger>We collaborate with reputable organizations and institutions to support conservation and sustainable wildlife trade.</p>
-            </div>
-
-            <div class="mt-8 grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
-                @foreach (['Groups-2.png', 'Groups-4.png', 'Groups.png', 'Groups-5.png', 'Groups-1.png', 'Groups-3.png'] as $partnerLogo)
-                    <div class="reveal-up delay-{{ $loop->iteration }} zoom-soft flex min-h-[112px] items-center justify-center rounded-xl border border-slate-200 bg-white p-4 shadow-sm" data-reveal>
-                        <img src="{{ asset('images/' . $partnerLogo) }}" alt="Partner logo {{ $loop->iteration }}" class="max-h-16 w-auto object-contain">
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    </section>
 @endsection
 
 @push('scripts')
@@ -105,23 +86,23 @@
                     {
                         image: '{{ asset('images/hero-tiger.jpeg') }}',
                         position: '62% center',
-                        titleTop: 'Tunas Sejahtera',
-                        titleBottom: 'Adhi Perkasa',
-                        copy: 'We are an official import export company that has a private breeding center and is registered with the Indonesian Government'
+                        titleTop: 'PT. Tunas Sejahtera',
+                        titleBottom: 'Adhiperkasa',
+                        copy: 'We are a Breeding Company that focuses on Birds, Mammals, and Reptiles that supplies Domestic and International needs (Export-Import) with official permits and legality from the Indonesian government'
                     },
                     {
                         image: '{{ asset('images/hero-iguana.jpeg') }}',
                         position: '68% center',
-                        titleTop: 'Tunas Sejahtera',
-                        titleBottom: 'Adhi Perkasa',
-                        copy: 'We are an official import export company that has a private breeding center and is registered with the Indonesian Government'
+                        titleTop: 'PT. Tunas Sejahtera',
+                        titleBottom: 'Adhiperkasa',
+                        copy: 'We are a Breeding Company that focuses on Birds, Mammals, and Reptiles that supplies Domestic and International needs (Export-Import) with official permits and legality from the Indonesian government'
                     },
                     {
                         image: '{{ asset('images/hero-macaw.jpeg') }}',
                         position: '70% center',
-                        titleTop: 'Tunas Sejahtera',
-                        titleBottom: 'Adhi Perkasa',
-                        copy: 'We are an official import export company that has a private breeding center and is registered with the Indonesian Government'
+                        titleTop: 'PT. Tunas Sejahtera',
+                        titleBottom: 'Adhiperkasa',
+                        copy: 'We are a Breeding Company that focuses on Birds, Mammals, and Reptiles that supplies Domestic and International needs (Export-Import) with official permits and legality from the Indonesian government'
                     }
                 ],
                 init() {

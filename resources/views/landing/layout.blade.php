@@ -288,14 +288,24 @@
                     </div>
                 </div>
 
-                {{-- Support --}}
-                <a href="{{ route('landing.support') }}"
+                {{-- Future Projects --}}
+                <a href="{{ route('landing.future-projects') }}"
                    class="relative pb-0.5 text-[14px] font-bold transition-colors duration-150
-                          {{ request()->routeIs('landing.support') ? 'text-tsa-greenDark' : 'text-slate-800 hover:text-tsa-greenDark' }}"
-                   x-data @mouseenter="$el.querySelector('span').style.width='100%'" @mouseleave="$el.querySelector('span').style.width='{{ request()->routeIs('landing.support') ? '100%' : '0%' }}'">
-                    Support
+                          {{ request()->routeIs('landing.future-projects') ? 'text-tsa-greenDark' : 'text-slate-800 hover:text-tsa-greenDark' }}"
+                   x-data @mouseenter="$el.querySelector('span').style.width='100%'" @mouseleave="$el.querySelector('span').style.width='{{ request()->routeIs('landing.future-projects') ? '100%' : '0%' }}'">
+                    Future Projects
                     <span class="absolute bottom-0 left-0 h-0.5 rounded-full bg-tsa-green transition-all duration-200"
-                          style="width: {{ request()->routeIs('landing.support') ? '100%' : '0%' }}"></span>
+                          style="width: {{ request()->routeIs('landing.future-projects') ? '100%' : '0%' }}"></span>
+                </a>
+
+                {{-- Gallery --}}
+                <a href="{{ route('landing.gallery') }}"
+                   class="relative pb-0.5 text-[14px] font-bold transition-colors duration-150
+                          {{ request()->routeIs('landing.gallery') ? 'text-tsa-greenDark' : 'text-slate-800 hover:text-tsa-greenDark' }}"
+                   x-data @mouseenter="$el.querySelector('span').style.width='100%'" @mouseleave="$el.querySelector('span').style.width='{{ request()->routeIs('landing.gallery') ? '100%' : '0%' }}'">
+                    Gallery
+                    <span class="absolute bottom-0 left-0 h-0.5 rounded-full bg-tsa-green transition-all duration-200"
+                          style="width: {{ request()->routeIs('landing.gallery') ? '100%' : '0%' }}"></span>
                 </a>
             </nav>
 
@@ -404,7 +414,8 @@
                     </a>
                 </div>
 
-                <a href="{{ route('landing.support') }}" class="block rounded-lg px-3 py-2.5 text-sm font-bold text-slate-800 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">Support</a>
+                <a href="{{ route('landing.future-projects') }}" class="block rounded-lg px-3 py-2.5 text-sm font-bold text-slate-800 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">Future Projects</a>
+                <a href="{{ route('landing.gallery') }}" class="block rounded-lg px-3 py-2.5 text-sm font-bold text-slate-800 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">Gallery</a>
 
                 {{-- Language switcher (mobile) --}}
                 <div class="relative pt-2" @click.outside="mobileLangOpen = false">
@@ -481,7 +492,7 @@
                          class="h-12 w-12 rounded-full object-cover ring-2 ring-white/20">
                     <div>
                         <p class="text-base font-extrabold leading-tight text-white">Tunas Sejahtera Adhi Perkasa</p>
-                        <p class="mt-0.5 text-xs text-white/55">Live Export Specialist · Bandar Lampung, Indonesia</p>
+                        <p class="mt-0.5 text-xs text-white/55">Livestock Breeding Center & Export-Import Specialist</p>
                     </div>
                 </div>
 
@@ -513,10 +524,6 @@
                         <li class="flex items-center gap-2">
                             <svg class="h-3.5 w-3.5 shrink-0 text-tsa-green" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
                             +6282183948148
-                        </li>
-                        <li class="flex items-center gap-2">
-                            <svg class="h-3.5 w-3.5 shrink-0 text-tsa-green" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
-                            +6289695005000
                         </li>
                         <li class="flex items-center gap-2">
                             <svg class="h-3.5 w-3.5 shrink-0 text-tsa-green" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
@@ -551,7 +558,7 @@
             {{-- Bottom bar --}}
             <div class="mt-8 flex flex-col items-center justify-between gap-2 border-t border-white/15 pt-6 text-xs text-white/50 sm:flex-row">
                 <p>&copy; {{ now()->year }} Tunas Sejahtera Adhi Perkasa. All rights reserved.</p>
-                <p>Live Export Specialist · Bandar Lampung</p>
+                <p>Livestock Breeding Center & Export-Import Specialist</p>
             </div>
         </div>
     </footer>

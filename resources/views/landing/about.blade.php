@@ -4,7 +4,7 @@
     <section class="relative isolate h-[430px] overflow-hidden bg-black sm:h-[470px]">
         <div
             class="absolute inset-0 bg-cover bg-center"
-            style="background-position: 78% top; background-image: linear-gradient(100deg, rgba(8,16,4,.84) 0%, rgba(8,16,4,.54) 45%, rgba(8,16,4,.2) 100%), url('{{ asset('images/banner-about.jpeg') }}');">
+            style="background-position: 78% top; background-image: linear-gradient(100deg, rgba(8,16,4,.84) 0%, rgba(8,16,4,.54) 45%, rgba(8,16,4,.2) 100%), url('{{ asset('images/about-banner-nicobar-pigeon.png') }}');">
         </div>
 
         <div class="relative mx-auto flex h-full w-[94%] max-w-[1240px] items-center">
@@ -69,20 +69,19 @@
                         </p>
                     </article>
                     <div class="reveal-right zoom-soft overflow-hidden rounded-xl border border-slate-200 bg-white" data-reveal>
-                        <img src="{{ asset('images/about-vision.png') }}" alt="Vision image with birds" class="h-full w-full object-cover">
+                        <img src="{{ asset('images/about-vision-sumatran-rabbit.png') }}" alt="Sumatran striped rabbit in rainforest" class="h-full w-full object-cover">
                     </div>
                 </div>
 
                 <div class="grid gap-4 lg:grid-cols-2">
                     <div class="order-2 reveal-left zoom-soft overflow-hidden rounded-xl border border-slate-200 bg-white lg:order-1" data-reveal>
-                        <img src="{{ asset('images/about-mission.png') }}" alt="Mission image with deer" class="h-full w-full object-cover">
+                        <img src="{{ asset('images/about-mission-linsang.png') }}" alt="Banded linsang in rainforest" class="h-full w-full object-cover">
                     </div>
                     <article class="order-1 reveal-right rounded-xl bg-[#eaf2e4] p-7 lg:order-2" data-reveal>
                         <h3 class="text-4xl font-extrabold text-tsa-greenDark">Our Mission</h3>
                         <ol class="mt-4 list-decimal space-y-2 pl-6 text-base leading-relaxed text-slate-700 sm:text-lg">
                             <li>Membangun kemitraan strategis dengan Pemerintah, lembaga konservasi, peternak bersertifikat dan Organisasi resmi di seluruh dunia.</li>
                             <li>Mendukung konservasi keanekaragaman hayati global melalui praktik perdagangan satwa liar yang bertanggung jawab dan berkelanjutan.</li>
-                            <li>Melakukan perdagangan satwa liar internasional sesuai dengan hukum nasional dan internasional serta standar etika.</li>
                             <li>Memberikan layanan profesional, andal, dan berkualitas tinggi serta memberikan jaminan keamanan kepada klien di seluruh dunia.</li>
                         </ol>
                     </article>
@@ -107,26 +106,6 @@
                 PT Tunas Sejahtera Adhiperkasa is a company engaged in the Breeding Center and international wildlife trade (export and import) of various types of animals including Birds, Mammals, and Reptiles on a global scale, as an officially certified business actor in the wildlife trade industry, we carry out all activities in accordance with applicable national and international regulations, including those stipulated by CITES (Convention on International Trade in Endangered Species of Wild Fauna and Flora).
             </p>
 
-            @php
-                $leaders = [
-                    ['name' => 'Rina Fitriani', 'role' => 'President Commissioner'],
-                    ['name' => 'Januar Triasmoro', 'role' => 'Commissioner'],
-                    ['name' => 'Muhammad Irvan Hardika', 'role' => 'President Director'],
-                    ['name' => 'Joko Susilo', 'role' => 'Operations Manager'],
-                ];
-            @endphp
-
-            <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                @foreach ($leaders as $leader)
-                    <article class="reveal-up delay-{{ $loop->iteration }} zoom-soft rounded-xl border border-slate-200 bg-white p-5 text-center shadow-sm" data-reveal>
-                        <div class="mx-auto flex h-28 w-28 items-center justify-center rounded-full bg-lime-50 text-3xl font-extrabold text-tsa-greenDark">
-                            {{ collect(explode(' ', $leader['name']))->map(fn($part) => strtoupper(substr($part, 0, 1)))->take(2)->implode('') }}
-                        </div>
-                        <h3 class="mt-4 text-2xl font-extrabold text-tsa-greenDark">{{ $leader['name'] }}</h3>
-                        <p class="mt-1 text-base text-slate-600">{{ $leader['role'] }}</p>
-                    </article>
-                @endforeach
-            </div>
         </div>
     </section>
 @endsection

@@ -35,7 +35,7 @@
         $steps = [
             [
                 'title' => 'Initial Consultation',
-                'desc' => 'We discuss your needs, specifications, quantity, and logistics requirements. A detailed proposal will be sent within 14 days.',
+                'desc' => 'We discuss your needs, specifications, quantity, and logistics requirements. A detailed proposal will be sent within 21 days.',
                 'img' => asset('images/live-step-01.png'),
             ],
             [

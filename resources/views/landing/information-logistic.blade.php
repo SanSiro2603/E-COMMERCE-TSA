@@ -53,7 +53,7 @@
             [
                 'title' => 'Airport Handling',
                 'desc' => 'Professional handling and transfer of animals to the airport cargo facility.',
-                'img' => asset('images/air-freight-02.png'),
+                'img' => asset('images/airport-handling.png'),
             ],
             [
                 'title' => 'Loading Process',
