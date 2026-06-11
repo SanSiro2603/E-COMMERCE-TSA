@@ -5,6 +5,14 @@
 
 @section('content')
 <div class="max-w-5xl mx-auto space-y-6">
+    @php
+        $buyerName = $order->user?->name ?? 'Pembeli tidak tersedia';
+        $buyerEmail = $order->user?->email ?? '-';
+        $canCreateBiteshipShipment = in_array($order->status, ['paid', 'processing'])
+            && !$order->biteship_order_id
+            && $order->items->isNotEmpty()
+            && $order->hasCompleteShippingAddress();
+    @endphp
 
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -89,30 +97,29 @@
             <div class="space-y-3 text-sm">
                 <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-zinc-400">Nama</span>
-                    <span class="font-medium text-gray-900 dark:text-white">{{ $order->user->name }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ $buyerName }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-zinc-400">Email</span>
-                    <span class="font-medium text-gray-900 dark:text-white">{{ $order->user->email }}</span>
+                    <span class="font-medium text-gray-900 dark:text-white">{{ $buyerEmail }}</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-zinc-400">Penerima</span>
                     <span class="font-medium text-gray-900 dark:text-white">
-                        {{ $order->address->recipient_name ?? '-' }}
+                        {{ $order->display_shipping_recipient_name ?? '-' }}
                     </span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-gray-600 dark:text-zinc-400">No. HP</span>
                     <span class="font-medium text-gray-900 dark:text-white">
-                        {{ $order->address->recipient_phone ?? '-' }}
+                        {{ $order->display_shipping_recipient_phone ?? '-' }}
                     </span>
                 </div>
                 <div class="col-span-2">
                     <span class="text-gray-600 dark:text-zinc-400 block mb-1">Alamat Pengiriman</span>
                     <p class="font-medium text-gray-900 dark:text-white text-sm">
-                        {{ $order->address->full_address ?? '-' }}<br>
-                        {{ $order->address->city_name ?? '' }}{{ $order->address->city_name ? ', ' : '' }}{{ $order->address->province_name ?? '' }}
-                        {{ $order->address->postal_code ? ' - ' . $order->address->postal_code : '' }}
+                        {{ $order->display_shipping_full_address ?? '-' }}<br>
+                        {{ $order->display_shipping_city_line ?: '-' }}
                     </p>
                 </div>
             </div>
@@ -212,8 +219,8 @@
             @foreach($order->items as $item)
                 <div class="flex gap-4 p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
                     <div class="w-16 h-16 bg-gray-100 dark:bg-zinc-700 rounded-lg overflow-hidden flex-shrink-0">
-                        @if($item->product->image)
-                            <img src="{{ asset('storage/' . $item->product->image) }}" class="w-full h-full object-cover">
+                        @if($item->display_image)
+                            <img src="{{ asset('storage/' . $item->display_image) }}" class="w-full h-full object-cover">
                         @else
                             <div class="w-full h-full flex items-center justify-center">
                                 <span class="material-symbols-outlined text-gray-400 text-xl">image</span>
@@ -221,9 +228,12 @@
                         @endif
                     </div>
                     <div class="flex-1">
-                        <h4 class="font-medium text-gray-900 dark:text-white">{{ $item->product->name }}</h4>
+                        <h4 class="font-medium text-gray-900 dark:text-white">{{ $item->display_name }}</h4>
                         <p class="text-xs text-gray-600 dark:text-zinc-400 mt-1">
-                            {{ $item->product->category->name ?? 'Uncategorized' }}
+                            {{ $item->display_category_name }}
+                            @if(!$item->product)
+                                <span class="text-red-500 dark:text-red-400">• Produk sudah dihapus dari katalog</span>
+                            @endif
                         </p>
                     </div>
                     <div class="text-right">
@@ -246,18 +256,27 @@
                 <span class="material-symbols-outlined">local_shipping</span>
                 Kirim via Biteship
             </h3>
-            <p class="text-sm text-emerald-700 dark:text-emerald-400 mb-4">
-                Buat order pengiriman ke Biteship Sandbox. Sistem akan otomatis mengubah status pesanan menjadi <strong>Dikirim</strong> dan menyimpan nomor resi dari kurir.
-            </p>
-            <form id="form-biteship" action="{{ route('admin.orders.biteship.create', $order) }}" method="POST">
-                @csrf
-            </form>
-            <button type="button"
-                    onclick="openModal('modal-biteship')"
-                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium rounded-lg shadow transition-all">
-                <span class="material-symbols-outlined text-lg">send</span>
-                Buat Pengiriman Biteship
-            </button>
+            @if($canCreateBiteshipShipment)
+                <p class="text-sm text-emerald-700 dark:text-emerald-400 mb-4">
+                    Buat order pengiriman ke Biteship Sandbox. Sistem akan otomatis mengubah status pesanan menjadi <strong>Dikirim</strong> dan menyimpan nomor resi dari kurir.
+                </p>
+                <form id="form-biteship" action="{{ route('admin.orders.biteship.create', $order) }}" method="POST">
+                    @csrf
+                </form>
+                <button type="button"
+                        onclick="openModal('modal-biteship')"
+                        class="inline-flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium rounded-lg shadow transition-all">
+                    <span class="material-symbols-outlined text-lg">send</span>
+                    Buat Pengiriman Biteship
+                </button>
+            @else
+                <p class="text-sm text-emerald-700 dark:text-emerald-400 mb-3">
+                    Pengiriman belum bisa dibuat karena data pesanan belum lengkap.
+                </p>
+                <div class="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg p-3">
+                    Pastikan item pesanan tersedia dan alamat memiliki nama penerima, nomor HP, alamat lengkap, provinsi, kota, serta kode pos.
+                </div>
+            @endif
         </div>
     @endif
 
@@ -336,7 +355,7 @@
     @endif
 
     {{-- MODAL: Konfirmasi buat pengiriman Biteship --}}
-    @if(in_array($order->status, ['paid', 'processing']) && !$order->biteship_order_id)
+    @if($canCreateBiteshipShipment)
         <div id="modal-biteship" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
             <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="closeModal('modal-biteship')"></div>
             <div class="relative bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl w-full max-w-md p-6 animate-fade-in">

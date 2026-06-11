@@ -105,8 +105,14 @@
                         @foreach($order->items as $item)
                             <div class="flex gap-3 sm:gap-4 border-b border-dashed border-gray-200 dark:border-zinc-700/60 pb-4 last:border-0 last:pb-0 items-start">
                                 <div class="relative shrink-0">
-                                    <img src="{{ asset('storage/' . $item->product->image) }}" alt="{{ $item->product->name }}"
-                                        class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 shadow-sm">
+                                    @if($item->display_image)
+                                        <img src="{{ asset('storage/' . $item->display_image) }}" alt="{{ $item->display_name }}"
+                                            class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 shadow-sm">
+                                    @else
+                                        <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 shadow-sm">
+                                            <span class="material-symbols-outlined text-gray-400 text-2xl">image</span>
+                                        </div>
+                                    @endif
                                     <span class="absolute -top-2 -right-2 bg-zinc-900 dark:bg-zinc-700 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border-2 border-white dark:border-zinc-800 shadow-sm leading-none flex items-center justify-center min-w-[20px] h-[20px]">
                                         x{{ $item->quantity }}
                                     </span>
@@ -114,13 +120,13 @@
                                 <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-between h-full">
                                     <div>
                                         <p class="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 leading-snug">
-                                            {{ $item->product->name }}
+                                            {{ $item->display_name }}
                                         </p>
                                         <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
                                             <span class="inline-flex items-center px-1.5 py-0.5 rounded bg-gray-100 dark:bg-zinc-800 text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">
-                                                {{ $item->product->category->name ?? 'Uncategorized' }}
+                                                {{ $item->display_category_name }}
                                             </span>
-                                            @if($item->product->weight)
+                                            @if($item->product?->weight)
                                                 <span class="text-[10px] text-gray-400 dark:text-zinc-500 font-medium">
                                                     • {{ $item->product->weight * $item->quantity }} gr
                                                 </span>
@@ -128,7 +134,7 @@
                                         </div>
                                     </div>
                                     <p class="text-sm sm:text-base font-extrabold text-soft-green mt-2.5">
-                                        Rp {{ number_format($item->product->price, 0, ',', '.') }}
+                                        Rp {{ number_format($item->price, 0, ',', '.') }}
                                     </p>
                                 </div>
                             </div>

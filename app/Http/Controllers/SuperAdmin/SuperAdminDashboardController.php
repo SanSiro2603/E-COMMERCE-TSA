@@ -7,6 +7,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class SuperAdminDashboardController extends Controller
@@ -22,6 +23,7 @@ class SuperAdminDashboardController extends Controller
         $categoryId    = $request->input('category_id');
         $paymentMethod = $request->input('payment_method');
         $paymentStatus = $request->input('payment_status');
+        $categoryName  = $categoryId ? Category::query()->whereKey($categoryId)->value('name') : null;
 
         // =============================================
         // STATUS YANG DIHITUNG SEBAGAI TRANSAKSI VALID
@@ -33,7 +35,7 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         // CLOSURE FILTER — dipakai di semua query Eloquent
         // =============================================
-        $applyBase = function ($q) use ($dateFrom, $dateTo, $province, $categoryId, $paymentMethod, $paymentStatus) {
+        $applyBase = function ($q) use ($dateFrom, $dateTo, $province, $categoryId, $categoryName, $paymentMethod, $paymentStatus) {
 
             $q->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id'); // LEFT JOIN agar order tanpa alamat tidak hilang
 
@@ -42,7 +44,12 @@ class SuperAdminDashboardController extends Controller
                 $dateTo   . ' 23:59:59',
             ]);
 
-            if ($province)      $q->where('addresses.province_name', $province);
+            if ($province) {
+                $q->where(function ($sub) use ($province) {
+                    $sub->where('orders.shipping_province_name', $province)
+                        ->orWhere('addresses.province_name', $province);
+                });
+            }
             if ($paymentStatus) $q->where('orders.status', $paymentStatus);
 
             if ($paymentMethod) {
@@ -54,7 +61,13 @@ class SuperAdminDashboardController extends Controller
             }
 
             if ($categoryId) {
-                $q->whereHas('items.product', fn($p) => $p->where('category_id', $categoryId));
+                $q->whereHas('items', function (Builder $items) use ($categoryId, $categoryName) {
+                    $items->whereHas('product', fn($p) => $p->where('category_id', $categoryId));
+
+                    if ($categoryName) {
+                        $items->orWhere('product_category_name', $categoryName);
+                    }
+                });
             }
         };
 
@@ -98,7 +111,7 @@ class SuperAdminDashboardController extends Controller
         $revenueByDate = Order::query()
             ->tap($applyBase)
             ->whereIn('orders.status', $validStatuses)
-            ->selectRaw('DATE(orders.created_at) as date, SUM(grand_total) as total')
+            ->selectRaw('DATE(orders.created_at) as date, SUM(orders.grand_total) as total')
             ->groupBy('date')
             ->orderBy('date')
             ->pluck('total', 'date');
@@ -120,28 +133,20 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $topProducts = DB::table('order_items')
             ->join('orders',   'order_items.order_id',   '=', 'orders.id')
-            ->join('products', 'order_items.product_id', '=', 'products.id')
-            ->join('addresses', 'orders.address_id', '=', 'addresses.id') // 🔥 WAJIB
+            ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
+            ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
 
-            ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->whereIn('orders.status', $validStatuses)
-            ->whereNull('orders.deleted_at')
-
-            ->when($province,      fn($q) => $q->where('addresses.province_name', $province))
-            ->when($paymentStatus, fn($q) => $q->where('orders.status', $paymentStatus))
-            ->when($categoryId,    fn($q) => $q->where('products.category_id', $categoryId))
-            ->when($paymentMethod, fn($q) => $q->whereIn('orders.id',
-                DB::table('payments')->select('order_id')->where('payment_type', $paymentMethod)
-            ))
+            ->tap(fn($q) => $this->applyDashboardDbFilters($q, $dateFrom, $dateTo, $province, $categoryId, $categoryName, $paymentMethod, $paymentStatus))
 
             ->select(
-                'products.id',
-                'products.name',
-                'products.image',
+                DB::raw('MIN(products.id) as id'),
+                DB::raw("COALESCE(order_items.product_name, products.name, 'Produk dihapus') as name"),
+                DB::raw('COALESCE(order_items.product_image, products.image) as image'),
                 DB::raw('SUM(order_items.quantity) as total_sold')
             )
 
-            ->groupBy('products.id', 'products.name', 'products.image')
+            ->groupByRaw("COALESCE(order_items.product_name, products.name, 'Produk dihapus'), COALESCE(order_items.product_image, products.image)")
             ->orderByDesc('total_sold')
             ->limit(5)
             ->get();
@@ -152,24 +157,17 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $topCategories = DB::table('order_items')
             ->join('orders',     'order_items.order_id',   '=', 'orders.id')
-            ->join('products',   'order_items.product_id', '=', 'products.id')
-            ->join('categories', 'products.category_id',   '=', 'categories.id')
-            ->join('addresses', 'orders.address_id', '=', 'addresses.id') // 🔥 WAJIB
-            ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+            ->leftJoin('products',   'order_items.product_id', '=', 'products.id')
+            ->leftJoin('categories', 'products.category_id',   '=', 'categories.id')
+            ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
             ->whereIn('orders.status', $validStatuses)
-            ->whereNull('orders.deleted_at')
-            ->when($province,      fn($q) => $q->where('addresses.province_name', $province))
-            ->when($paymentStatus, fn($q) => $q->where('orders.status', $paymentStatus))
-            ->when($categoryId,    fn($q) => $q->where('products.category_id', $categoryId))
-            ->when($paymentMethod, fn($q) => $q->whereIn('orders.id',
-                DB::table('payments')->select('order_id')->where('payment_type', $paymentMethod)
-            ))
+            ->tap(fn($q) => $this->applyDashboardDbFilters($q, $dateFrom, $dateTo, $province, $categoryId, $categoryName, $paymentMethod, $paymentStatus))
             ->select(
-                'categories.id',
-                'categories.name',
+                DB::raw('MIN(categories.id) as id'),
+                DB::raw("COALESCE(order_items.product_category_name, categories.name, 'Uncategorized') as name"),
                 DB::raw('SUM(order_items.quantity) as total_sold')
             )
-            ->groupBy('categories.id', 'categories.name')
+            ->groupByRaw("COALESCE(order_items.product_category_name, categories.name, 'Uncategorized')")
             ->orderByDesc('total_sold')
             ->limit(5)
             ->get();
@@ -180,14 +178,20 @@ class SuperAdminDashboardController extends Controller
         $topProvinces = Order::query()
             ->tap($applyBase)
             ->whereIn('orders.status', $validStatuses)
-            ->whereNotNull('addresses.province_name')
-            ->where('addresses.province_name', '!=', '')
+            ->where(function ($q) {
+                $q->whereNotNull('orders.shipping_province_name')
+                    ->where('orders.shipping_province_name', '!=', '')
+                    ->orWhere(function ($sub) {
+                        $sub->whereNotNull('addresses.province_name')
+                            ->where('addresses.province_name', '!=', '');
+                    });
+            })
             ->select(
-                'addresses.province_name as province',
+                DB::raw('COALESCE(orders.shipping_province_name, addresses.province_name) as province'),
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(orders.grand_total) as total_revenue')
             )
-            ->groupBy('addresses.province_name')
+            ->groupBy('province')
             ->orderByDesc('total_orders')
             ->limit(5)
             ->get();
@@ -202,13 +206,23 @@ class SuperAdminDashboardController extends Controller
             ->whereNull('orders.deleted_at')
             ->whereNotNull('payments.payment_type')
             ->whereIn('orders.status', $validStatuses)
-            ->when($province,      fn($q) => $q->where('addresses.province_name', $province))
+            ->when($province,      fn($q) => $q->where(function ($sub) use ($province) {
+                $sub->where('orders.shipping_province_name', $province)
+                    ->orWhere('addresses.province_name', $province);
+            }))
             ->when($paymentStatus, fn($q) => $q->where('orders.status', $paymentStatus))
+            ->when($paymentMethod, fn($q) => $q->where('payments.payment_type', $paymentMethod))
             ->when($categoryId,    fn($q) => $q->whereIn('orders.id',
                 DB::table('order_items')
-                    ->join('products', 'order_items.product_id', '=', 'products.id')
+                    ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
                     ->select('order_id')
-                    ->where('products.category_id', $categoryId)
+                    ->where(function ($sub) use ($categoryId, $categoryName) {
+                        $sub->where('products.category_id', $categoryId);
+
+                        if ($categoryName) {
+                            $sub->orWhere('order_items.product_category_name', $categoryName);
+                        }
+                    })
             ))
             ->select('payments.payment_type', DB::raw('COUNT(*) as total'))
             ->groupBy('payments.payment_type')
@@ -227,9 +241,26 @@ class SuperAdminDashboardController extends Controller
             ->whereNull('orders.deleted_at')
             ->whereNotNull('orders.payment_method')
             ->where('orders.payment_method', '!=', '')
+            ->whereIn('orders.status', $validStatuses)
             ->whereNotIn('orders.id', DB::table('payments')->whereNotNull('payment_type')->select('order_id'))
-            ->when($province,      fn($q) => $q->where('addresses.province_name', $province))
+            ->when($province,      fn($q) => $q->where(function ($sub) use ($province) {
+                $sub->where('orders.shipping_province_name', $province)
+                    ->orWhere('addresses.province_name', $province);
+            }))
             ->when($paymentStatus, fn($q) => $q->where('orders.status', $paymentStatus))
+            ->when($paymentMethod, fn($q) => $q->where('orders.payment_method', $paymentMethod))
+            ->when($categoryId,    fn($q) => $q->whereIn('orders.id',
+                DB::table('order_items')
+                    ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
+                    ->select('order_id')
+                    ->where(function ($sub) use ($categoryId, $categoryName) {
+                        $sub->where('products.category_id', $categoryId);
+
+                        if ($categoryName) {
+                            $sub->orWhere('order_items.product_category_name', $categoryName);
+                        }
+                    })
+            ))
             ->select('orders.payment_method as payment_type', DB::raw('COUNT(*) as total'))
             ->groupBy('orders.payment_method')
             ->get()
@@ -275,23 +306,18 @@ class SuperAdminDashboardController extends Controller
         if ($top5ProvinceNames->isNotEmpty()) {
             $cpRaw = DB::table('order_items')
                 ->join('orders',     'order_items.order_id',   '=', 'orders.id')
-                ->join('products',   'order_items.product_id', '=', 'products.id')
-                ->join('categories', 'products.category_id',   '=', 'categories.id')
-                ->join('addresses', 'orders.address_id', '=', 'addresses.id') // 🔥 WAJIB
-                ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
+                ->leftJoin('products',   'order_items.product_id', '=', 'products.id')
+                ->leftJoin('categories', 'products.category_id',   '=', 'categories.id')
+                ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
                 ->whereIn('orders.status', $validStatuses)
-                ->whereNull('orders.deleted_at')
-                ->whereIn('addresses.province_name', $top5ProvinceNames)
-                ->when($paymentMethod, fn($q) => $q->whereIn('orders.id',
-                    DB::table('payments')->select('order_id')->where('payment_type', $paymentMethod)
-                ))
-                ->when($categoryId, fn($q) => $q->where('products.category_id', $categoryId))
+                ->tap(fn($q) => $this->applyDashboardDbFilters($q, $dateFrom, $dateTo, null, $categoryId, $categoryName, $paymentMethod, $paymentStatus))
+                ->whereIn(DB::raw('COALESCE(orders.shipping_province_name, addresses.province_name)'), $top5ProvinceNames)
                 ->select(
-                    'addresses.province_name',
-                    'categories.name as category_name',
+                    DB::raw('COALESCE(orders.shipping_province_name, addresses.province_name) as province_name'),
+                    DB::raw("COALESCE(order_items.product_category_name, categories.name, 'Uncategorized') as category_name"),
                     DB::raw('SUM(order_items.quantity) as total_sold')
                 )
-                ->groupBy('addresses.province_name', 'categories.name')
+                ->groupByRaw("COALESCE(orders.shipping_province_name, addresses.province_name), COALESCE(order_items.product_category_name, categories.name, 'Uncategorized')")
                 ->orderByDesc('total_sold')
                 ->get();
         }
@@ -381,7 +407,7 @@ class SuperAdminDashboardController extends Controller
             ->tap($applyBase)
             ->addSelect([
                 'orders.*',
-                'addresses.province_name as province',
+                DB::raw('COALESCE(orders.shipping_province_name, addresses.province_name) as province'),
             ])
             ->latest('orders.created_at')
             ->paginate(5)
@@ -390,14 +416,22 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         // DROPDOWN OPTIONS
         // =============================================
-        $provinceOptions = DB::table('orders')
-            ->join('addresses', 'orders.address_id', '=', 'addresses.id')
-            ->whereNotNull('addresses.province_name')
-            ->where('addresses.province_name', '!=', '')
-            ->whereNull('orders.deleted_at')
-            ->distinct()
-            ->orderBy('addresses.province_name')
-            ->pluck('addresses.province_name');
+        $provinceOptions = collect()
+            ->merge(DB::table('orders')
+                ->whereNotNull('shipping_province_name')
+                ->where('shipping_province_name', '!=', '')
+                ->whereNull('deleted_at')
+                ->pluck('shipping_province_name'))
+            ->merge(DB::table('orders')
+                ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
+                ->whereNotNull('addresses.province_name')
+                ->where('addresses.province_name', '!=', '')
+                ->whereNull('orders.deleted_at')
+                ->pluck('addresses.province_name'))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
 
         $categoryOptions = Category::where('is_active', true)
             ->orderBy('name')
@@ -437,6 +471,45 @@ class SuperAdminDashboardController extends Controller
             'provinceOptions', 'categoryOptions',
             'paymentMethodOptions', 'paymentStatusOptions'
         ));
+    }
+
+    private function applyDashboardDbFilters($query, string $dateFrom, string $dateTo, ?string $province, $categoryId, ?string $categoryName, ?string $paymentMethod, ?string $paymentStatus): void
+    {
+        $query->whereBetween('orders.created_at', [
+                $dateFrom . ' 00:00:00',
+                $dateTo . ' 23:59:59',
+            ])
+            ->whereNull('orders.deleted_at');
+
+        if ($province) {
+            $query->where(function ($sub) use ($province) {
+                $sub->where('orders.shipping_province_name', $province)
+                    ->orWhere('addresses.province_name', $province);
+            });
+        }
+
+        if ($paymentStatus) {
+            $query->where('orders.status', $paymentStatus);
+        }
+
+        if ($categoryId) {
+            $query->where(function ($sub) use ($categoryId, $categoryName) {
+                $sub->where('products.category_id', $categoryId);
+
+                if ($categoryName) {
+                    $sub->orWhere('order_items.product_category_name', $categoryName);
+                }
+            });
+        }
+
+        if ($paymentMethod) {
+            $query->where(function ($sub) use ($paymentMethod) {
+                $sub->where('orders.payment_method', $paymentMethod)
+                    ->orWhereIn('orders.id', DB::table('payments')
+                        ->select('order_id')
+                        ->where('payment_type', $paymentMethod));
+            });
+        }
     }
 
     private function labelPaymentMethod(?string $method): string

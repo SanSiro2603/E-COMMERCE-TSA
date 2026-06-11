@@ -64,10 +64,12 @@ class ReportController extends Controller
             'cancelled'  => 'Dibatalkan',
         ];
 
+        $statsNote = $this->statsNote($status, $statusOptions);
+
         return view('admin.reports.index', compact(
             'orders', 'stats',
             'startDate', 'endDate', 'status',
-            'statusOptions'
+            'statusOptions', 'statsNote'
         ));
     }
 
@@ -115,12 +117,7 @@ class ReportController extends Controller
             'cancelled'  => 'Dibatalkan',
         ];
 
-        $statsNote = null;
-        if ($status && !in_array($status, $this->validStatuses)) {
-            $statsNote = 'Statistik tidak tersedia untuk status "'
-                . ($statusOptions[$status] ?? $status)
-                . '" karena status ini tidak dihitung sebagai transaksi valid.';
-        }
+        $statsNote = $this->statsNote($status, $statusOptions);
 
         // [+] Ganti 'landscape' ke 'portrait' jika perlu orientasi berbeda
         $pdf = Pdf::loadView('admin.reports.pdf', compact(
@@ -144,5 +141,16 @@ class ReportController extends Controller
             new SalesReportExport($startDate, $endDate, $status),
             $fileName
         );
+    }
+
+    private function statsNote(?string $status, array $statusOptions): ?string
+    {
+        if (!$status || in_array($status, $this->validStatuses)) {
+            return null;
+        }
+
+        return 'Pesanan dengan status "'
+            . ($statusOptions[$status] ?? $status)
+            . '" tetap ditampilkan di tabel untuk analisis, tetapi tidak dihitung pada kartu statistik penjualan karena belum menjadi transaksi valid.';
     }
 }

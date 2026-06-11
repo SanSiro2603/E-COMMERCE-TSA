@@ -71,10 +71,10 @@ class MidtransService
 
         foreach ($order->items as $item) {
             $items[] = [
-                'id' => $item->product_id,
+                'id' => $item->product_id ?? 'ITEM-' . $item->id,
                 'price' => (int) $item->price,
                 'quantity' => $item->quantity,
-                'name' => substr($item->product->name, 0, 50),
+                'name' => substr($item->display_name, 0, 50),
             ];
         }
 

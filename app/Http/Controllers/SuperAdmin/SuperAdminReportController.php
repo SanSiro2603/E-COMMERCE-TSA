@@ -10,6 +10,8 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\SuperAdminReportExport;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 // Controller laporan penjualan SuperAdmin — tampil, export PDF, export Excel
 // Perbedaan dengan Admin: ada filter tambahan (provinsi, kategori, metode pembayaran)
@@ -41,14 +43,14 @@ class SuperAdminReportController extends Controller
 
         // Filter opsional — masing-masing hanya aktif jika parameter dikirim
         // [+] Tambah blok if baru di sini jika perlu filter tambahan
-        if ($province)      $baseQuery->whereHas('address', fn($q) => $q->where('province_name', $province));
+        if ($province)      $this->applyProvinceFilter($baseQuery, $province);
         if ($status)        $baseQuery->where('status', $status);
         if ($paymentMethod) $baseQuery->where(function ($q) use ($paymentMethod) {
             // Cek di tabel payments (payment_type) ATAU di kolom orders (payment_method)
             $q->whereHas('payment', fn($p) => $p->where('payment_type', $paymentMethod))
               ->orWhere('payment_method', $paymentMethod);
         });
-        if ($categoryId)    $baseQuery->whereHas('items.product', fn($q) => $q->where('category_id', $categoryId));
+        if ($categoryId)    $this->applyCategoryFilter($baseQuery, $categoryId);
 
         // STATISTIK — selalu hanya dari $validStatuses, tidak peduli filter status user
         $statsQuery = clone $baseQuery;
@@ -70,15 +72,22 @@ class SuperAdminReportController extends Controller
         $orders = (clone $baseQuery)->latest()->paginate(5)->withQueryString();
 
         // Dropdown opsi provinsi — diambil dari tabel addresses yang terhubung ke orders aktif
-        $provinceOptions = \Illuminate\Support\Facades\DB::table('addresses')
-            ->join('orders', 'orders.address_id', '=', 'addresses.id')
-            ->whereNotNull('addresses.province_name')
-            ->where('addresses.province_name', '!=', '')
-            ->whereNull('orders.deleted_at')
-            ->select('addresses.province_name as province')
-            ->distinct()
-            ->orderBy('addresses.province_name')
-            ->pluck('province');
+        $provinceOptions = collect()
+            ->merge(DB::table('orders')
+                ->whereNotNull('shipping_province_name')
+                ->where('shipping_province_name', '!=', '')
+                ->whereNull('deleted_at')
+                ->pluck('shipping_province_name'))
+            ->merge(DB::table('addresses')
+                ->join('orders', 'orders.address_id', '=', 'addresses.id')
+                ->whereNotNull('addresses.province_name')
+                ->where('addresses.province_name', '!=', '')
+                ->whereNull('orders.deleted_at')
+                ->pluck('addresses.province_name'))
+            ->filter()
+            ->unique()
+            ->sort()
+            ->values();
 
         // Dropdown opsi kategori — hanya kategori aktif
         $categoryOptions = Category::where('is_active', true)
@@ -106,11 +115,13 @@ class SuperAdminReportController extends Controller
             'cancelled'  => 'Dibatalkan',
         ];
 
+        $statsNote = $this->statsNote($status, $statusOptions);
+
         return view('superadmin.reports.index', compact(
             'orders', 'stats',
             'startDate', 'endDate',
             'province', 'categoryId', 'paymentMethod', 'status',
-            'provinceOptions', 'categoryOptions',
+            'provinceOptions', 'categoryOptions', 'statsNote',
             'paymentMethodOptions', 'statusOptions'
         ));
     }
@@ -134,13 +145,13 @@ class SuperAdminReportController extends Controller
             ])
             ->orderBy('created_at', 'asc');
 
-        if ($province)      $query->whereHas('address', fn($q) => $q->where('province_name', $province));
+        if ($province)      $this->applyProvinceFilter($query, $province);
         if ($status)        $query->where('status', $status);
         if ($paymentMethod) $query->where(function ($q) use ($paymentMethod) {
             $q->whereHas('payment', fn($p) => $p->where('payment_type', $paymentMethod))
               ->orWhere('payment_method', $paymentMethod);
         });
-        if ($categoryId)    $query->whereHas('items.product', fn($q) => $q->where('category_id', $categoryId));
+        if ($categoryId)    $this->applyCategoryFilter($query, $categoryId);
 
         $orders = $query->get();
 
@@ -177,12 +188,7 @@ class SuperAdminReportController extends Controller
             'cancelled'  => 'Dibatalkan',
         ];
 
-        $statsNote = null;
-        if ($status && !in_array($status, $this->validStatuses)) {
-            $statsNote = 'Statistik tidak tersedia untuk status "'
-                . ($statusOptions[$status] ?? $status)
-                . '" karena status ini tidak dihitung sebagai transaksi valid.';
-        }
+        $statsNote = $this->statsNote($status, $statusOptions);
 
         // [+] Ganti 'landscape' ke 'portrait' jika perlu orientasi berbeda
         $pdf = Pdf::loadView('superadmin.reports.pdf', compact(
@@ -209,5 +215,37 @@ class SuperAdminReportController extends Controller
             new SuperAdminReportExport($startDate, $endDate, $province, $categoryId, $paymentMethod, $status),
             $fileName
         );
+    }
+
+    private function applyProvinceFilter(Builder $query, string $province): void
+    {
+        $query->where(function (Builder $q) use ($province) {
+            $q->where('shipping_province_name', $province)
+                ->orWhereHas('address', fn($address) => $address->where('province_name', $province));
+        });
+    }
+
+    private function applyCategoryFilter(Builder $query, $categoryId): void
+    {
+        $categoryName = Category::query()->whereKey($categoryId)->value('name');
+
+        $query->whereHas('items', function (Builder $items) use ($categoryId, $categoryName) {
+            $items->whereHas('product', fn($product) => $product->where('category_id', $categoryId));
+
+            if ($categoryName) {
+                $items->orWhere('product_category_name', $categoryName);
+            }
+        });
+    }
+
+    private function statsNote(?string $status, array $statusOptions): ?string
+    {
+        if (!$status || in_array($status, $this->validStatuses)) {
+            return null;
+        }
+
+        return 'Pesanan dengan status "'
+            . ($statusOptions[$status] ?? $status)
+            . '" tetap ditampilkan di tabel untuk analisis, tetapi tidak dihitung pada kartu statistik penjualan karena belum menjadi transaksi valid.';
     }
 }

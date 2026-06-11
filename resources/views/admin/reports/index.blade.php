@@ -216,6 +216,12 @@
         </div>
     </div>
 
+    @if($statsNote)
+        <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+            {{ $statsNote }}
+        </div>
+    @endif
+
     {{-- TABEL DETAIL PESANAN --}}
     <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-soft border border-gray-100 dark:border-zinc-800">
         <div class="p-6 border-b border-gray-100 dark:border-zinc-800">
@@ -251,7 +257,7 @@
                     @forelse($orders as $i => $order)
                     @php
                         $products = $order->items
-                            ->map(fn($item) => ($item->product?->name ?? '-') . ' (x' . $item->quantity . ')')
+                            ->map(fn($item) => $item->display_name . ' (x' . $item->quantity . ')' . ($item->product ? '' : ' - Produk sudah dihapus dari katalog'))
                             ->implode(', ');
                         $qty = $order->items->sum('quantity');
 
@@ -285,7 +291,7 @@
 
                         <td class="px-4 py-3">
                             <span class="text-xs text-gray-900 dark:text-white">
-                                {{ $order->address?->recipient_name ?? $order->user?->name ?? '-' }}
+                                {{ $order->display_shipping_recipient_name ?? $order->user?->name ?? '-' }}
                             </span>
                         </td>
 
@@ -294,22 +300,22 @@
                         </td>
 
                         <td class="px-4 py-3">
-                            <span class="text-xs text-gray-900 dark:text-white">{{ $order->address?->recipient_phone ?? '-' }}</span>
+                            <span class="text-xs text-gray-900 dark:text-white">{{ $order->display_shipping_recipient_phone ?? '-' }}</span>
                         </td>
 
                         <td class="px-4 py-3">
-                            <span class="text-xs text-gray-900 dark:text-white">{{ $order->address?->province_name ?? '-' }}</span>
+                            <span class="text-xs text-gray-900 dark:text-white">{{ $order->display_shipping_province_name ?? '-' }}</span>
                         </td>
 
                         <td class="px-4 py-3">
                             <span class="text-xs text-gray-900 dark:text-white">
-                                {{ $order->address ? $order->address->city_type . ' ' . $order->address->city_name : '-' }}
+                                {{ trim(($order->display_shipping_city_type ?? '') . ' ' . ($order->display_shipping_city_name ?? '')) ?: '-' }}
                             </span>
                         </td>
 
                         <td class="px-4 py-3 max-w-[160px]">
-                            <span class="text-xs text-gray-900 dark:text-white line-clamp-2" title="{{ $order->address?->full_address ?? '-' }}">
-                                {{ $order->address?->full_address ?? '-' }}
+                            <span class="text-xs text-gray-900 dark:text-white line-clamp-2" title="{{ $order->display_shipping_full_address ?? '-' }}">
+                                {{ $order->display_shipping_full_address ?? '-' }}
                             </span>
                         </td>
 

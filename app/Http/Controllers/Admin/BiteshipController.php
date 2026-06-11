@@ -24,6 +24,8 @@ class BiteshipController extends Controller
     // Route: POST /admin/orders/{order}/biteship/create
     public function createShipment(Order $order)
     {
+        $order->loadMissing(['address', 'items.product.category']);
+
         // [+] Ubah array ini jika ingin izinkan status lain untuk buat pengiriman
         if (!in_array($order->status, ['paid', 'processing'])) {
             return redirect()->back()
@@ -36,6 +38,16 @@ class BiteshipController extends Controller
         }
 
         // Kirim data order ke Biteship API — detail ada di BiteshipService::createOrder()
+        if ($order->items->isEmpty()) {
+            return redirect()->back()
+                ->with('error', 'Pengiriman tidak bisa dibuat karena item pesanan tidak tersedia.');
+        }
+
+        if (!$order->hasCompleteShippingAddress()) {
+            return redirect()->back()
+                ->with('error', 'Pengiriman Biteship belum bisa dibuat. Data alamat historis pesanan belum lengkap.');
+        }
+
         $result = $this->biteship->createOrder($order);
 
         if ($result['success']) {

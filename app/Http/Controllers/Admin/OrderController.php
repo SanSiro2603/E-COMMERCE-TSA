@@ -25,7 +25,7 @@ class OrderController extends Controller
         ];
 
         // [+] Tambah relasi ke with([]) jika perlu tampilkan data dari tabel lain
-        $query = Order::with(['user', 'items.product'])->latest();
+        $query = Order::with(['user', 'items.product.category'])->latest();
 
         // Filter: cari berdasarkan nomor pesanan atau nama/email pembeli
         // [+] Tambah kolom pencarian lain di dalam closure $q
@@ -140,7 +140,9 @@ class OrderController extends Controller
         $statusClass = $statusClasses[$order->status] ?? 'bg-gray-100 dark:bg-gray-500/20 text-gray-700 dark:text-gray-400';
         $dotClass    = $dotClasses[$order->status] ?? 'bg-gray-500';
         $statusLabel = $statusLabels[$order->status] ?? ucfirst($order->status);
-        $initial     = strtoupper(substr($order->user->name, 0, 1));
+        $buyerName   = $order->user?->name ?? 'Pembeli tidak tersedia';
+        $buyerEmail  = $order->user?->email ?? '-';
+        $initial     = strtoupper(substr($buyerName, 0, 1));
         $itemsCount  = $order->items->count();
 
         // Badge "BARU!" muncul jika pesanan baru dibayar dalam 2 menit terakhir
@@ -165,8 +167,8 @@ class OrderController extends Controller
                             ' . $initial . '
                         </div>
                         <div>
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">' . e($order->user->name) . '</p>
-                            <p class="text-xs text-gray-500 dark:text-zinc-400">' . e($order->user->email) . '</p>
+                            <p class="text-sm font-medium text-gray-900 dark:text-white">' . e($buyerName) . '</p>
+                            <p class="text-xs text-gray-500 dark:text-zinc-400">' . e($buyerEmail) . '</p>
                         </div>
                     </div>
                 </td>
@@ -194,7 +196,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         // [+] Tambah nama relasi di load([]) jika perlu tampilkan data tambahan
-        $order->load(['user', 'items.product', 'payment', 'address']);
+        $order->load(['user', 'items.product.category', 'payment', 'address']);
         return view('admin.orders.show', compact('order'));
     }
 

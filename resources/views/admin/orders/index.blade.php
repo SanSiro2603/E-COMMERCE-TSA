@@ -267,6 +267,8 @@
 
                             // Status yang TIDAK pakai animasi ping (sudah final)
                             $noPing = in_array($order->status, ['completed', 'cancelled']);
+                            $buyerName = $order->user?->name ?? 'Pembeli tidak tersedia';
+                            $buyerEmail = $order->user?->email ?? '-';
                         @endphp
 
                         <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-all {{ $isNewPaid ? 'ring-2 ring-green-400 ring-opacity-50 animate-pulse' : '' }}">
@@ -291,18 +293,18 @@
                             {{-- KOLOM 3: Pembeli — foto profil dari storage jika ada, fallback ke inisial --}}
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    @if($order->user->profile_photo)
+                                    @if($order->user?->profile_photo)
                                         <img src="{{ Storage::url($order->user->profile_photo) }}"
-                                             alt="{{ $order->user->name }}"
+                                             alt="{{ $buyerName }}"
                                              class="w-10 h-10 rounded-full object-cover border-2 border-soft-green/30 flex-shrink-0">
                                     @else
                                         <div class="w-10 h-10 bg-gradient-to-br from-soft-green to-primary rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                                            {{ strtoupper(substr($order->user->name, 0, 1)) }}
+                                            {{ strtoupper(substr($buyerName, 0, 1)) }}
                                         </div>
                                     @endif
                                     <div>
-                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $order->user->name }}</p>
-                                        <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $order->user->email }}</p>
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $buyerName }}</p>
+                                        <p class="text-xs text-gray-500 dark:text-zinc-400">{{ $buyerEmail }}</p>
                                     </div>
                                 </div>
                             </td>

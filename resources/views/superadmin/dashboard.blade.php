@@ -536,8 +536,13 @@
                     @forelse($salesTable as $i => $order)
                         @php
                             $itemCount     = $order->items->sum('quantity');
-                            $productNames  = $order->items->map(fn($it) => optional($it->product)->name ?? 'Dihapus')->implode(', ');
-                            $categoryNames = $order->items->map(fn($it) => optional(optional($it->product)->category)->name ?? '-')->unique()->implode(', ');
+                            $productNames  = $order->items
+                                ->map(fn($it) => $it->display_name . ($it->product ? '' : ' - Produk sudah dihapus dari katalog'))
+                                ->implode(', ');
+                            $categoryNames = $order->items
+                                ->map(fn($it) => $it->display_category_name)
+                                ->unique()
+                                ->implode(', ');
                             $pmLabel = match(optional($order->payment)->payment_type) {
                                 'bank_transfer' => 'Transfer Bank',
                                 'echannel'      => 'Mandiri',

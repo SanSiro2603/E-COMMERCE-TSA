@@ -102,11 +102,15 @@
         <h2 class="font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2 text-sm sm:text-base">
             <span class="material-symbols-outlined text-soft-green text-lg">location_on</span> Alamat Pengiriman
         </h2>
-        @php $addr = $order->address; @endphp
-        @if($addr)
+        @if($order->display_shipping_full_address)
             <div class="ml-7 text-[13px] sm:text-sm text-gray-700 dark:text-zinc-300">
-                <p class="font-bold text-gray-900 dark:text-white">{{ $addr->recipient_name }} <span class="font-normal text-gray-500 ml-1">| {{ $addr->recipient_phone }}</span></p>
-                <p class="mt-1 leading-relaxed text-gray-600 dark:text-zinc-400">{{ $addr->full_address }}<br>{{ $addr->city_type }} {{ $addr->city_name }}, {{ $addr->province_name }} {{ $addr->postal_code }}</p>
+                <p class="font-bold text-gray-900 dark:text-white">
+                    {{ $order->display_shipping_recipient_name ?? '-' }}
+                    <span class="font-normal text-gray-500 ml-1">| {{ $order->display_shipping_recipient_phone ?? '-' }}</span>
+                </p>
+                <p class="mt-1 leading-relaxed text-gray-600 dark:text-zinc-400">
+                    {{ $order->display_shipping_full_address }}<br>{{ $order->display_shipping_city_line }}
+                </p>
             </div>
         @else
             <div class="ml-7 text-sm italic text-gray-500">Alamat tidak tersedia.</div>
@@ -125,8 +129,8 @@
                 @foreach($order->items as $item)
                     <div class="flex gap-3 sm:gap-4 border-b border-dashed border-gray-200 dark:border-zinc-700/60 pb-4 last:border-0 last:pb-0 items-start">
                         <div class="relative shrink-0">
-                            @if($item->product && $item->product->image)
-                                <img src="{{ asset('storage/' . $item->product->image) }}" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 shadow-sm">
+                            @if($item->display_image)
+                                <img src="{{ asset('storage/' . $item->display_image) }}" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800/50 shadow-sm">
                             @else
                                 <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center rounded-xl border border-gray-200 dark:border-zinc-700 bg-gray-100 dark:bg-zinc-800/50 shadow-sm">
                                     <span class="material-symbols-outlined text-gray-400 text-2xl">image</span>
@@ -139,7 +143,7 @@
                         <div class="flex-1 min-w-0 py-0.5 flex flex-col justify-between h-full">
                             <div>
                                 <h4 class="font-bold text-sm text-gray-900 dark:text-white line-clamp-2 leading-snug">
-                                    {{ $item->product->name ?? 'Produk dihapus' }}
+                                    {{ $item->display_name }}
                                 </h4>
                                 @if($item->product)
                                     <div class="flex flex-wrap items-center gap-1.5 mt-1.5">
