@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/tsax3638/public_html
-    - /bin/cp -R public/* $DEPLOYPATH
+    - export DEPLOYPATH=/home/tsax3638/E-COMMERCE-TSA
+    - /bin/cp -a . $DEPLOYPATH
