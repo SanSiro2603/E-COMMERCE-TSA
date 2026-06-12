@@ -26,7 +26,7 @@ class LoginController extends Controller
         $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required', 'string'],
-            'g-recaptcha-response' => ['required', 'captcha'], 
+            'g-recaptcha-response' => ['required', 'captcha'],
         ], [
             'g-recaptcha-response.required' => 'Silakan verifikasi captcha terlebih dahulu.',
             'g-recaptcha-response.captcha' => 'Captcha tidak valid, coba lagi.',
@@ -39,7 +39,7 @@ class LoginController extends Controller
             $user = Auth::user();
 
             // Cegah akun nonaktif masuk ke sistem
-            if (!$user->is_active) {
+            if (! $user->is_active) {
                 Auth::logout();
                 $request->session()->invalidate();
                 $request->session()->regenerateToken();
@@ -54,7 +54,12 @@ class LoginController extends Controller
 
             // Paksa verifikasi 2FA ulang setiap login admin/super admin
             if (in_array($user->role, ['admin', 'super_admin'])) {
-                $request->session()->forget('2fa_passed');
+                $request->session()->forget([
+                    '2fa_passed',
+                    TwoFactorController::SETUP_SECRET_SESSION_KEY,
+                    TwoFactorController::SETUP_USER_ID_SESSION_KEY,
+                    TwoFactorController::SETUP_PENDING_SESSION_KEY,
+                ]);
             }
 
             return $this->authenticated($request, $user);
@@ -70,22 +75,21 @@ class LoginController extends Controller
      * Redirect setelah berhasil login berdasarkan role.
      */
     protected function authenticated($request, $user)
-{
-    return match ($user->role) {
-        'super_admin' => redirect()->route('superadmin.dashboard')
-                            ->with('success', 'Berhasil login! Selamat datang kembali.'),
-        
-        'admin'       => redirect()->route('admin.dashboard')
-                            ->with('success', 'Berhasil login! Selamat datang kembali.'),
-        
-        'pembeli'     => redirect()->route('pembeli.dashboard')
-                            ->with('success', 'Login berhasil! Selamat berbelanja.'),
-        
-        default       => redirect()->route('landing')
-                            ->with('success', 'Login berhasil!'),
-    };
-}
+    {
+        return match ($user->role) {
+            'super_admin' => redirect()->route('superadmin.dashboard')
+                ->with('success', 'Berhasil login! Selamat datang kembali.'),
 
+            'admin' => redirect()->route('admin.dashboard')
+                ->with('success', 'Berhasil login! Selamat datang kembali.'),
+
+            'pembeli' => redirect()->route('pembeli.dashboard')
+                ->with('success', 'Login berhasil! Selamat berbelanja.'),
+
+            default => redirect()->route('landing')
+                ->with('success', 'Login berhasil!'),
+        };
+    }
 
     /**
      * Proses logout.

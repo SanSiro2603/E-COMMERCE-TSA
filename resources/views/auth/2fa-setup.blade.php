@@ -63,7 +63,8 @@
 
         <p class="text-xs text-gray-500 mb-4">Atau masukkan kode rahasia ini secara manual:<br><strong>{{ $secret }}</strong></p>
 
-        <form action="{{ route('2fa.index') }}" method="GET">
+        <form action="{{ route('2fa.setup.continue') }}" method="POST">
+            @csrf
             <button type="submit" class="btn-primary hover:scale-[1.02] transition-all">Lanjutkan ke Verifikasi</button>
         </form>
     </div>

@@ -106,6 +106,7 @@ use App\Http\Controllers\Auth\TwoFactorController;
 
 Route::middleware(['auth', 'role:admin,super_admin'])->group(function () {
     Route::get('/2fa', [TwoFactorController::class, 'index'])->name('2fa.index');
+    Route::post('/2fa/setup/continue', [TwoFactorController::class, 'continueSetup'])->name('2fa.setup.continue');
     Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify');
 });
 

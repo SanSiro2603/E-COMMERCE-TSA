@@ -21,8 +21,14 @@
 <body class="min-h-screen bg-gradient-to-br from-slate-50 via-zinc-50 to-zinc-100 font-inter antialiased">
     <main class="flex min-h-screen items-center justify-center px-2 py-3 sm:px-4 sm:py-5">
         <div class="w-full max-w-lg rounded-3xl border border-white/80 bg-white/80 p-10 text-center shadow-[0_10px_30px_-15px_rgba(15,23,42,0.25)] backdrop-blur-sm sm:p-12">
-            <h2 class="text-2xl font-semibold tracking-tight text-slate-900">Verifikasi 2FA</h2>
-            <p class="mt-2 text-sm leading-relaxed text-slate-500">Masukkan 6 digit kode dari aplikasi Google Authenticator Anda.</p>
+            <h2 class="text-2xl font-semibold tracking-tight text-slate-900">
+                {{ $isSetup ? 'Konfirmasi Setup 2FA' : 'Verifikasi 2FA' }}
+            </h2>
+            <p class="mt-2 text-sm leading-relaxed text-slate-500">
+                {{ $isSetup
+                    ? 'Masukkan 6 digit kode pertama dari aplikasi Google Authenticator untuk mengaktifkan 2FA.'
+                    : 'Masukkan 6 digit kode dari aplikasi Google Authenticator Anda.' }}
+            </p>
 
             <form method="POST" action="{{ route('2fa.verify') }}" class="mt-8">
                 @csrf
