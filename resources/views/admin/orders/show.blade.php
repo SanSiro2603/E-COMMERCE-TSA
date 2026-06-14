@@ -388,7 +388,14 @@
 
 </div>
 
+<div id="order-tracking-config"
+     data-enabled="{{ $order->biteship_order_id ? '1' : '0' }}"
+     data-url="{{ route('admin.orders.biteship.track', $order) }}"
+     hidden></div>
+
 <script>
+const trackingConfig = document.getElementById('order-tracking-config');
+
 // ===== MODAL HELPERS =====
 function openModal(id) {
     const modal = document.getElementById(id);
@@ -442,17 +449,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 4000);
     });
 
-    @if($order->biteship_order_id)
+    if (trackingConfig.dataset.enabled === '1') {
         loadTracking();
-    @endif
+    }
 });
 
 // ===== TRACKING BITESHIP =====
 
 // Muat data tracking dari server (AJAX ke BiteshipController::trackShipment)
 function loadTracking() {
-    const url = '{{ route("admin.orders.biteship.track", $order) }}';
-    fetch(url)
+    fetch(trackingConfig.dataset.url)
         .then(r => r.json())
         .then(data => renderTracking(data))
         .catch(() => {

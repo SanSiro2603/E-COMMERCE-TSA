@@ -46,7 +46,7 @@ class OrderController extends Controller
         }
 
         // [+] Ganti angka 10 untuk ubah jumlah item per halaman
-        $orders = $query->paginate(10)->withQueryString();
+        $orders = $query->paginate(10)->appends($request->except('page'));
 
         // Query terpisah untuk menghitung stats card (tidak terpengaruh filter status)
         $statsQuery = Order::query();
@@ -75,7 +75,7 @@ class OrderController extends Controller
         // Response AJAX — untuk refresh tabel tanpa reload halaman
         if ($request->ajax() || $request->has('ajax')) {
             $html = '';
-            if ($orders->count() > 0) {
+            if ($orders->isNotEmpty()) {
                 foreach ($orders as $order) {
                     $html .= $this->generateOrderRow($order);
                 }
@@ -107,7 +107,7 @@ class OrderController extends Controller
     // Kolom: No. Pesanan | Tanggal | Pembeli | Total | Status | Aksi
     // [+] Tambah <td> baru di sini jika perlu kolom tambahan di tabel
     //     Jangan lupa tambahkan <th> pasangannya di index.blade.php
-    private function generateOrderRow($order)
+    private function generateOrderRow(Order $order): string
     {
         // [+] Tambah entri baru di ketiga array ini jika ada status baru
         $statusClasses = [
@@ -208,7 +208,6 @@ class OrderController extends Controller
             'status' => ['required', 'in:processing'],
         ]);
 
-        // ✅ DIPERBAIKI: proteksi double-submit
         // Jika sudah processing, anggap sukses agar admin tidak panik
         if ($order->status === 'processing') {
             return redirect()->route('admin.orders.show', $order)

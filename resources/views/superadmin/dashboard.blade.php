@@ -606,9 +606,40 @@
 
 </div>
 
+@php
+    $dashboardChartData = [
+        'chartDates' => $chartDates,
+        'chartRevenues' => $chartRevenues,
+        'productLabels' => $topProducts->pluck('name'),
+        'productData' => $topProducts->pluck('total_sold')->map(fn($value) => (int) $value),
+        'categoryLabels' => $topCategories->pluck('name'),
+        'categoryData' => $topCategories->pluck('total_sold')->map(fn($value) => (int) $value),
+        'provinceLabels' => $topProvinces->pluck('province')->map(
+            fn($name) => strlen($name) > 16 ? substr($name, 0, 14) . '…' : $name
+        ),
+        'provinceData' => $topProvinces->pluck('total_orders')->map(fn($value) => (int) $value),
+        'paymentMethods' => $paymentMethods->values(),
+        'paymentStatuses' => $paymentStatuses->values(),
+        'categoryProvinceDatasets' => $cpDatasets->values(),
+        'categoryProvinceLabels' => $cpProvince->values(),
+        'hourLabels' => $hourLabels,
+        'hourData' => $hourData,
+        'repeatCustomers' => (int) $repeatCustomers,
+        'newCustomers' => (int) $newCustomers,
+    ];
+@endphp
+
+<div id="dashboard-chart-data"
+     data-config="{{ json_encode($dashboardChartData) }}"
+     hidden></div>
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script>
+const dashboardChartData = JSON.parse(
+    document.getElementById('dashboard-chart-data').dataset.config
+);
+
 const isDark    = document.documentElement.classList.contains('dark');
 const gridColor = isDark ? 'rgba(113,113,122,0.12)' : 'rgba(156,163,175,0.15)';
 const tickColor = isDark ? '#71717a' : '#9ca3af';
@@ -663,9 +694,9 @@ if (revCtx) {
     new Chart(ctx2d, {
         type: 'line',
         data: {
-            labels: {!! json_encode($chartDates) !!},
+            labels: dashboardChartData.chartDates,
             datasets: [{
-                label: 'Pendapatan', data: {!! json_encode($chartRevenues) !!},
+                label: 'Pendapatan', data: dashboardChartData.chartRevenues,
                 borderColor: '#6366f1', backgroundColor: grad,
                 borderWidth: 2.5, fill: true, tension: 0.4,
                 pointRadius: 3, pointHoverRadius: 6,
@@ -712,9 +743,9 @@ if (prodCtx) {
         return lines;
     }
 
-    const prodRawLabels = {!! json_encode($topProducts->pluck('name')) !!};
+    const prodRawLabels = dashboardChartData.productLabels;
     const prodLabels    = prodRawLabels.map(n => wrapLabel(n, 20));
-    const prodData      = {!! json_encode($topProducts->pluck('total_sold')->map(fn($v) => (int)$v)) !!};
+    const prodData      = dashboardChartData.productData;
 
     new Chart(prodCtx, {
         type: 'bar',
@@ -770,8 +801,8 @@ if (prodCtx) {
 // ═══════════════════════════════════════════════
 const catCtx = document.getElementById('categoryChart');
 if (catCtx) {
-    const catLabels = {!! json_encode($topCategories->pluck('name')) !!};
-    const catData   = {!! json_encode($topCategories->pluck('total_sold')->map(fn($v) => (int)$v)) !!};
+    const catLabels = dashboardChartData.categoryLabels;
+    const catData   = dashboardChartData.categoryData;
     const catColors = PALETTE.slice(0, catData.length);
     const catTotal  = catData.reduce((a, b) => a + b, 0);
     new Chart(catCtx, {
@@ -800,8 +831,8 @@ if (catCtx) {
 // ═══════════════════════════════════════════════
 const provCtx = document.getElementById('provinceChart');
 if (provCtx) {
-    const provLabels = {!! json_encode($topProvinces->pluck('province')->map(fn($n) => strlen($n) > 16 ? substr($n,0,14).'…' : $n)) !!};
-    const provData   = {!! json_encode($topProvinces->pluck('total_orders')->map(fn($v) => (int)$v)) !!};
+    const provLabels = dashboardChartData.provinceLabels;
+    const provData   = dashboardChartData.provinceData;
     new Chart(provCtx, {
         type: 'bar',
         data: { labels: provLabels, datasets: [{ label: 'Pesanan', data: provData, backgroundColor: PALETTE.slice(0,5), borderRadius: 6, borderSkipped: false }] },
@@ -821,7 +852,7 @@ if (provCtx) {
 // ═══════════════════════════════════════════════
 const pmCtx = document.getElementById('paymentMethodChart');
 if (pmCtx) {
-    const pmRaw    = {!! json_encode($paymentMethods->values()) !!};
+    const pmRaw    = dashboardChartData.paymentMethods;
     const pmLabels = pmRaw.map(x => x.label);
     const pmData   = pmRaw.map(x => x.value);
     const pmColors = PALETTE.slice(0, pmData.length);
@@ -852,7 +883,7 @@ if (pmCtx) {
 // ═══════════════════════════════════════════════
 const psCtx = document.getElementById('paymentStatusChart');
 if (psCtx) {
-    const psRaw    = {!! json_encode($paymentStatuses->values()) !!};
+    const psRaw    = dashboardChartData.paymentStatuses;
     const psLabels = psRaw.map(x => x.label);
     const psData   = psRaw.map(x => x.value);
     const psColors = psRaw.map(x => STATUS_COLORS[x.key] ?? '#9ca3af');
@@ -883,8 +914,8 @@ if (psCtx) {
 // ═══════════════════════════════════════════════
 const cpCtx = document.getElementById('catProvinceChart');
 if (cpCtx) {
-    const cpDatasets = {!! json_encode($cpDatasets->values()) !!};
-    const cpLabels   = {!! json_encode($cpProvince->values()) !!};
+    const cpDatasets = dashboardChartData.categoryProvinceDatasets;
+    const cpLabels   = dashboardChartData.categoryProvinceLabels;
     new Chart(cpCtx, {
         type: 'bar',
         data: { labels: cpLabels, datasets: cpDatasets },
@@ -908,8 +939,8 @@ if (cpCtx) {
 // ═══════════════════════════════════════════════
 const bhCtx = document.getElementById('busyHourChart');
 if (bhCtx) {
-    const hourLabels = {!! json_encode($hourLabels) !!};
-    const hourData   = {!! json_encode($hourData) !!};
+    const hourLabels = dashboardChartData.hourLabels;
+    const hourData   = dashboardChartData.hourData;
     const maxVal     = Math.max(...hourData);
     const bgColors   = hourData.map(v => v === maxVal && maxVal > 0 ? '#6366f1' : 'rgba(99,102,241,0.35)');
     new Chart(bhCtx, {
@@ -939,7 +970,7 @@ if (ctCtx) {
         data: {
             labels: ['Repeat Customer', 'New Customer'],
             datasets: [{
-                data: [{{ $repeatCustomers }}, {{ $newCustomers }}],
+                data: [dashboardChartData.repeatCustomers, dashboardChartData.newCustomers],
                 backgroundColor: ['#6366f1', '#06b6d4'],
                 borderWidth: 3, borderColor: isDark ? '#18181b' : '#fff', hoverOffset: 6,
             }]

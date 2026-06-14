@@ -385,7 +385,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <div id="flash-message-config"
+         data-success="{{ session('success') }}"
+         data-error="{{ session('error') }}"
+         hidden></div>
+
     <script>
+        const flashMessageConfig = document.getElementById('flash-message-config').dataset;
+
         // Sidebar Toggle for Mobile
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -443,23 +450,23 @@
             }
         });
 
-        @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil!',
-            text: '{{ session('success') }}',
-            timer: 2000,
-            showConfirmButton: false
-        });
-        @endif
+        if (flashMessageConfig.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil!',
+                text: flashMessageConfig.success,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
 
-        @if(session('error'))
-        Swal.fire({
-            icon: 'error',
-            title: 'Gagal!',
-            text: '{{ session('error') }}'
-        });
-        @endif
+        if (flashMessageConfig.error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal!',
+                text: flashMessageConfig.error
+            });
+        }
     </script>
 
     @stack('scripts')

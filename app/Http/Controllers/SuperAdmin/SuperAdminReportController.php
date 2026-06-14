@@ -56,7 +56,7 @@ class SuperAdminReportController extends Controller
         $statsQuery = clone $baseQuery;
         $allOrders  = $statsQuery->whereIn('status', $this->validStatuses)->get();
 
-        // ✅ DIPERBAIKI: gunakan grand_total agar konsisten dengan Admin ReportController
+        
         // dan tidak ada perbedaan angka jika ada diskon/voucher di masa depan
         $stats = [
             'total_revenue'    => $allOrders->sum('grand_total'),
@@ -158,7 +158,7 @@ class SuperAdminReportController extends Controller
         // Statistik PDF: sama dengan aturan di index(), hanya dari validStatuses
         $statsOrders = $orders->filter(fn($o) => in_array($o->status, $this->validStatuses));
 
-        // ✅ DIPERBAIKI: gunakan grand_total agar konsisten
+        // gunakan grand_total agar konsisten
         $stats = [
             'total_revenue'    => $statsOrders->sum('grand_total'),
             'total_orders'     => $statsOrders->count(),
@@ -177,7 +177,7 @@ class SuperAdminReportController extends Controller
             'Status'            => $status,
         ]);
 
-        // ✅ DIPERBAIKI: tambah $statsNote agar PDF tidak membingungkan
+        // tambah $statsNote agar PDF tidak membingungkan
         // ketika superadmin filter status di luar validStatuses (misal: cancelled)
         $statusOptions = [
             'pending'    => 'Menunggu Pembayaran',
@@ -221,11 +221,12 @@ class SuperAdminReportController extends Controller
     {
         $query->where(function (Builder $q) use ($province) {
             $q->where('shipping_province_name', $province)
+            
                 ->orWhereHas('address', fn($address) => $address->where('province_name', $province));
         });
     }
 
-    private function applyCategoryFilter(Builder $query, $categoryId): void
+    private function applyCategoryFilter(Builder $query, int|string $categoryId): void
     {
         $categoryName = Category::query()->whereKey($categoryId)->value('name');
 

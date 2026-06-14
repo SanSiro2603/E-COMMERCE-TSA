@@ -457,7 +457,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <div id="flash-message-config"
+         data-success="{{ session('success') }}"
+         data-error="{{ session('error') }}"
+         hidden></div>
+
     <script>
+        const flashMessageConfig = document.getElementById('flash-message-config').dataset;
+
         // ── Sidebar Toggle (Mobile) ───────────────────────────────
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -500,29 +507,29 @@
         });
 
         // ── SweetAlert toast notifikasi ───────────────────────────
-        @if (session('success'))
+        if (flashMessageConfig.success) {
             Swal.fire({
                 icon: 'success',
-                title: '{{ session("success") }}',
+                title: flashMessageConfig.success,
                 toast: true,
                 position: 'top-end',
                 timer: 3000,
                 timerProgressBar: true,
                 showConfirmButton: false,
             });
-        @endif
+        }
 
-        @if (session('error'))
+        if (flashMessageConfig.error) {
             Swal.fire({
                 icon: 'error',
-                title: '{{ session("error") }}',
+                title: flashMessageConfig.error,
                 toast: true,
                 position: 'top-end',
                 timer: 4000,
                 timerProgressBar: true,
                 showConfirmButton: false,
             });
-        @endif
+        }
     </script>
 
     @stack('scripts')

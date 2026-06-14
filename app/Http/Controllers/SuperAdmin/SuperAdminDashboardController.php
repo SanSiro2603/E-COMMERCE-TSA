@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
 
 class SuperAdminDashboardController extends Controller
@@ -473,7 +474,7 @@ class SuperAdminDashboardController extends Controller
         ));
     }
 
-    private function applyDashboardDbFilters($query, string $dateFrom, string $dateTo, ?string $province, $categoryId, ?string $categoryName, ?string $paymentMethod, ?string $paymentStatus): void
+    private function applyDashboardDbFilters(QueryBuilder $query, string $dateFrom, string $dateTo, ?string $province, int|string|null $categoryId, ?string $categoryName, ?string $paymentMethod, ?string $paymentStatus): void
     {
         $query->whereBetween('orders.created_at', [
                 $dateFrom . ' 00:00:00',
