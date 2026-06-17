@@ -47,8 +47,8 @@ use App\Support\LandingCatalogData;
 | HALAMAN UMUM
 |--------------------------------------------------------------------------
 */
-Route::view('/', 'welcome')->name('welcome');
-Route::get('/home', [DashboardController::class, 'index'])->name('landing');
+Route::get('/', [DashboardController::class, 'index'])->name('landing');
+Route::redirect('/home', '/');
 Route::view('/home/about', 'landing.about')->name('landing.about');
 Route::get('/home/catalog', function () {
     return view('landing.catalog', [
