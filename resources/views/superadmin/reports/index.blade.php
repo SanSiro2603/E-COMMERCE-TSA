@@ -58,6 +58,60 @@
         border-color: #3f3f46 !important;
         background-color: #27272a !important;
     }
+
+    .report-order-table {
+        border-collapse: collapse;
+        table-layout: fixed;
+        color: #111827;
+    }
+
+    .report-order-table tr {
+        display: table-row !important;
+    }
+
+    .report-order-table th,
+    .report-order-table td {
+        display: table-cell !important;
+        vertical-align: middle;
+    }
+
+    .report-order-table thead tr {
+        background-color: #2D6A4F !important;
+    }
+
+    .report-order-table tbody td,
+    .report-order-table tbody td :not(.report-status-badge) {
+        color: #111827 !important;
+    }
+
+    .dark .report-order-table tbody td,
+    .dark .report-order-table tbody td :not(.report-status-badge) {
+        color: #f4f4f5 !important;
+    }
+
+    .report-row-base {
+        background-color: #ffffff;
+    }
+
+    .report-row-alt {
+        background-color: #F0F7F4;
+    }
+
+    .dark .report-row-base {
+        background-color: #18181b;
+    }
+
+    .dark .report-row-alt {
+        background-color: rgba(6, 78, 59, 0.22);
+    }
+
+    .report-order-table .report-muted {
+        color: #6b7280 !important;
+    }
+
+    .dark .report-order-table .report-muted {
+        color: #a1a1aa !important;
+    }
 </style>
 
 <div class="space-y-6">
@@ -241,9 +295,23 @@
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[1100px]">
+            <table class="report-order-table w-full min-w-[1280px]">
+                <colgroup>
+                    <col style="width: 56px;">
+                    <col style="width: 124px;">
+                    <col style="width: 118px;">
+                    <col style="width: 110px;">
+                    <col style="width: 118px;">
+                    <col style="width: 238px;">
+                    <col style="width: 64px;">
+                    <col style="width: 112px;">
+                    <col style="width: 112px;">
+                    <col style="width: 112px;">
+                    <col style="width: 132px;">
+                    <col style="width: 96px;">
+                </colgroup>
                 <thead>
-                    <tr style="background-color: #2D6A4F;" class="dark:bg-zinc-800">
+                    <tr>
                         <th class="px-4 py-3.5 text-center text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider w-10">No.</th>
                         <th class="px-4 py-3.5 text-left   text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider">No. Pesanan</th>
                         <th class="px-4 py-3.5 text-left   text-[10px] font-bold text-white dark:text-zinc-200 uppercase tracking-wider">Tanggal</th>
@@ -294,34 +362,31 @@
                         ];
                         $sc = $statusConfig[$order->status] ?? ['label' => ucfirst($order->status), 'class' => 'bg-gray-400 text-white'];
 
-                        // Baris genap (#F0F7F4) seperti di PDF, baris ganjil putih
-                        $rowBg = (($i + 1) % 2 === 0)
-                            ? 'bg-[#F0F7F4] dark:bg-emerald-950/20'
-                            : 'bg-white dark:bg-zinc-900';
+                        $rowClass = ($i % 2 === 0) ? 'report-row-base' : 'report-row-alt';
                     @endphp
-                    <tr class="{{ $rowBg }}">
-                        <td class="px-4 py-3 text-center text-xs text-gray-500 dark:text-zinc-400">{{ $orders->firstItem() + $i }}</td>
+                    <tr class="{{ $rowClass }}">
+                        <td class="px-4 py-3 text-center text-xs report-muted">{{ $orders->firstItem() + $i }}</td>
 
-                        <td class="px-4 py-3"><span class="text-xs font-semibold text-gray-900 dark:text-white">#{{ $order->order_number }}</span></td>
+                        <td class="px-4 py-3"><span class="text-xs font-semibold break-words">#{{ $order->order_number }}</span></td>
 
                         <td class="px-4 py-3">
-                            <p class="text-xs text-gray-900 dark:text-white">{{ $order->created_at->format('d M Y') }}</p>
-                            <p class="text-[10px] text-gray-500 dark:text-zinc-500">{{ $order->created_at->format('H:i') }}</p>
+                            <p class="text-xs">{{ $order->created_at->format('d M Y') }}</p>
+                            <p class="text-[10px] report-muted">{{ $order->created_at->format('H:i') }}</p>
                         </td>
-                        <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $order->display_shipping_province_name ?? '-' }}</span></td>
-                        <td class="px-4 py-3"><span class="text-xs text-gray-900 dark:text-white">{{ $categories ?: '-' }}</span></td>
+                        <td class="px-4 py-3"><span class="text-xs">{{ $order->display_shipping_province_name ?? '-' }}</span></td>
+                        <td class="px-4 py-3"><span class="text-xs">{{ $categories ?: '-' }}</span></td>
                         <td class="px-4 py-3 max-w-[200px]">
-                            <span class="text-xs text-gray-900 dark:text-white line-clamp-2" title="{{ $products }}">{{ $products }}</span>
+                            <span class="text-xs line-clamp-2" title="{{ $products }}">{{ $products }}</span>
                         </td>
-                        <td class="px-4 py-3 text-center"><span class="text-xs font-medium text-gray-900 dark:text-white">{{ $qty }}</span></td>
-                        <td class="px-4 py-3 text-right"><span class="text-xs text-gray-900 dark:text-white">Rp {{ number_format($order->subtotal ?? 0, 0, ',', '.') }}</span></td>
-                        <td class="px-4 py-3 text-right"><span class="text-xs text-gray-900 dark:text-white">Rp {{ number_format($order->shipping_cost ?? 0, 0, ',', '.') }}</span></td>
+                        <td class="px-4 py-3 text-center"><span class="text-xs font-medium">{{ $qty }}</span></td>
+                        <td class="px-4 py-3 text-right"><span class="text-xs">Rp {{ number_format($order->subtotal ?? 0, 0, ',', '.') }}</span></td>
+                        <td class="px-4 py-3 text-right"><span class="text-xs">Rp {{ number_format($order->shipping_cost ?? 0, 0, ',', '.') }}</span></td>
 
-                        <td class="px-4 py-3 text-right"><span class="text-xs font-bold text-gray-900 dark:text-white">Rp {{ number_format($order->grand_total ?? 0, 0, ',', '.') }}</span></td>
+                        <td class="px-4 py-3 text-right"><span class="text-xs font-bold">Rp {{ number_format($order->grand_total ?? 0, 0, ',', '.') }}</span></td>
 
-                        <td class="px-4 py-3"><span class="text-xs text-gray-700 dark:text-zinc-300">{{ $paymentLabel }}</span></td>
+                        <td class="px-4 py-3"><span class="text-xs">{{ $paymentLabel }}</span></td>
                         <td class="px-4 py-3 text-center">
-                            <span class="inline-flex items-center px-2.5 py-1 text-[10px] font-semibold rounded-sm {{ $sc['class'] }}">
+                            <span class="report-status-badge inline-flex items-center px-2.5 py-1 text-[10px] font-semibold rounded-sm {{ $sc['class'] }}">
                                 {{ $sc['label'] }}
                             </span>
                         </td>

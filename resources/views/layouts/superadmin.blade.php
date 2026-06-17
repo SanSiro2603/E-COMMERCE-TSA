@@ -201,7 +201,7 @@
 
     <!-- Sidebar -->
     <aside id="sidebar"
-        class="sidebar fixed left-0 top-0 z-50 h-screen w-72 bg-[#03150B] border-r border-green-500/10 flex flex-col shadow-2xl overflow-hidden">
+        class="sidebar hidden-mobile fixed left-0 top-0 z-50 h-screen w-72 bg-[#03150B] border-r border-green-500/10 flex flex-col shadow-2xl overflow-hidden">
 
         <!-- Background Glow -->
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(114,226,54,0.15),transparent_40%)] pointer-events-none"></div>
@@ -211,7 +211,7 @@
         {{-- PERBAIKAN: logo transparan (hapus bg-white/10), ukuran lebih besar --}}
         <div class="relative px-5 py-6 border-b border-white/10 flex items-center gap-3 z-10">
             <div class="w-14 h-14 flex items-center justify-center overflow-hidden flex-shrink-0">
-                <img src="{{ asset('images/logo header.png') }}"
+                <img src="{{ asset('images/logo-header.png') }}"
                     alt="Logo TSA"
                     class="h-14 w-14 object-contain">
             </div>
