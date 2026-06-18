@@ -59,6 +59,7 @@ class LoginController extends Controller
                     TwoFactorController::SETUP_SECRET_SESSION_KEY,
                     TwoFactorController::SETUP_USER_ID_SESSION_KEY,
                     TwoFactorController::SETUP_PENDING_SESSION_KEY,
+                    TwoFactorController::SETUP_VERIFICATION_SCREEN_SESSION_KEY,
                 ]);
             }
 

@@ -13,6 +13,8 @@ class TwoFactorController extends Controller
 
     public const SETUP_PENDING_SESSION_KEY = '2fa_setup_verification_pending';
 
+    public const SETUP_VERIFICATION_SCREEN_SESSION_KEY = '2fa_setup_show_verification';
+
     /**
      * Tampilkan form untuk setup/verifikasi 2FA
      */
@@ -27,7 +29,7 @@ class TwoFactorController extends Controller
         }
 
         if ($this->setupBelongsToUser($request)
-            && $request->session()->get(self::SETUP_PENDING_SESSION_KEY) === true) {
+            && $request->session()->get(self::SETUP_VERIFICATION_SCREEN_SESSION_KEY) === true) {
             return view('auth.2fa', ['isSetup' => true]);
         }
 
@@ -50,7 +52,10 @@ class TwoFactorController extends Controller
             ]);
         }
 
-        $request->session()->forget(self::SETUP_PENDING_SESSION_KEY);
+        $request->session()->forget([
+            self::SETUP_PENDING_SESSION_KEY,
+            self::SETUP_VERIFICATION_SCREEN_SESSION_KEY,
+        ]);
         $secret = $request->session()->get(self::SETUP_SECRET_SESSION_KEY);
 
         $qrCodeUrl = $google2fa->getQRCodeInline(
@@ -78,7 +83,7 @@ class TwoFactorController extends Controller
             return redirect()->route('2fa.index');
         }
 
-        $request->session()->put(self::SETUP_PENDING_SESSION_KEY, true);
+        $request->session()->flash(self::SETUP_VERIFICATION_SCREEN_SESSION_KEY, true);
 
         return redirect()->route('2fa.index');
     }
@@ -100,8 +105,7 @@ class TwoFactorController extends Controller
         $isSetup = ! $user->google2fa_secret;
 
         if ($isSetup) {
-            if (! $this->setupBelongsToUser($request)
-                || $request->session()->get(self::SETUP_PENDING_SESSION_KEY) !== true) {
+            if (! $this->setupBelongsToUser($request)) {
                 return redirect()->route('2fa.index')
                     ->withErrors(['one_time_password' => 'Sesi setup 2FA tidak valid. Silakan scan QR code kembali.']);
             }
@@ -144,6 +148,7 @@ class TwoFactorController extends Controller
             self::SETUP_SECRET_SESSION_KEY,
             self::SETUP_USER_ID_SESSION_KEY,
             self::SETUP_PENDING_SESSION_KEY,
+            self::SETUP_VERIFICATION_SCREEN_SESSION_KEY,
         ]);
     }
 }
