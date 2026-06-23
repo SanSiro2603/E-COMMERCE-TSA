@@ -84,7 +84,7 @@
                 reduced,
                 slides: [
                     {
-                        image: '{{ asset('images/hero-tiger.jpeg') }}',
+                        image: '{{ asset('images/about-banner-nicobar-pigeon.png') }}',
                         position: '62% center',
                         titleTop: 'PT. Tunas Sejahtera',
                         titleBottom: 'Adhiperkasa',

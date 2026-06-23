@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $pageTitle ?? 'Tunas Sejahtera Adhi Perkasa' }}</title>
+    <title>{{ $pageTitle ?? 'Tunas Sejahtera Adhiperkasa' }}</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -181,7 +181,7 @@
                      class="h-12 w-12 object-contain">
                 <span class="hidden text-[13px] font-extrabold leading-tight text-tsa-greenDark sm:block">
                     <span class="block">Tunas Sejahtera</span>
-                    <span class="block">Adhi Perkasa</span>
+                    <span class="block">Adhiperkasa</span>
                 </span>
             </a>
 
