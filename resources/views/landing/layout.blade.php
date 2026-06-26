@@ -563,6 +563,18 @@
         </div>
     </footer>
 
+    {{-- ─── WhatsApp floating button ──────────────────────────── --}}
+    <a href="https://wa.me/6282183948148"
+       target="_blank"
+       rel="noopener noreferrer"
+       aria-label="Chat via WhatsApp"
+       class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform duration-200 hover:scale-110 hover:shadow-xl"
+       style="background-color: #25D366;">
+        <svg viewBox="0 0 24 24" class="h-7 w-7" fill="white" aria-hidden="true">
+            <path d="M12 2a9.9 9.9 0 00-8.4 15.1L2 22l5-1.5A9.9 9.9 0 1012 2zm0 18a8.1 8.1 0 01-4.2-1.2l-.3-.2-3 .9.9-2.9-.2-.3A8.1 8.1 0 1112 20zm4.5-6.1c-.2-.1-1.3-.6-1.5-.7-.2-.1-.3-.1-.4.1-.1.2-.6.7-.7.8-.1.1-.2.1-.4 0-1.1-.5-1.8-1-2.5-2.2-.2-.2 0-.3.1-.5.1-.1.2-.2.3-.3.1-.1.1-.2.2-.3.1-.1 0-.3 0-.4 0-.1-.4-1.1-.6-1.6-.2-.4-.3-.4-.4-.4h-.4c-.1 0-.4.1-.6.3-.2.2-.8.7-.8 1.7s.8 2 1 2.3c.1.2 1.4 2.2 3.4 3.1 2 .9 2 .6 2.4.6.4 0 1.3-.5 1.4-1 .2-.5.2-1 .1-1 0-.1-.2-.2-.4-.3z"/>
+        </svg>
+    </a>
+
     <script>
         document.documentElement.classList.add('js');
 
