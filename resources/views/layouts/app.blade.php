@@ -311,84 +311,107 @@
 
     <!-- Footer -->
     @if(!request()->routeIs('pembeli.keranjang.index', 'pembeli.pesanan.checkout', 'pembeli.payment.show', 'pembeli.pesanan.index', 'pembeli.pesanan.show', 'pembeli.pesanan.edit'))
-    <footer class="bg-white dark:bg-background-dark border-t border-[#e7f3ec] dark:border-primary/20 py-12">
-        <div class="max-w-[1280px] mx-auto px-4 md:px-10 grid grid-cols-1 md:grid-cols-4 gap-10">
+    <footer style="background-color:#102218;" class="text-white">
+        <div class="h-1 w-full" style="background:linear-gradient(to right, rgba(19,236,109,0.6), rgba(255,255,255,0.2), rgba(19,236,109,0.6));"></div>
 
-            <!-- About -->
-            <div>
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="h-12 w-auto flex-shrink-0">
-                        <img src="{{ asset('images/logo header.png') }}" alt="Logo TSA"
-                            class="h-full w-auto object-contain">
+        <div class="mx-auto w-[94%] max-w-[1240px] py-12">
+
+            {{-- Brand + socials --}}
+            <div class="mb-10 flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/logo header.png') }}" alt="TSA logo"
+                         class="h-12 w-12 rounded-full object-cover" style="outline:2px solid rgba(255,255,255,0.2);">
+                    <div>
+                        <p class="text-base font-extrabold leading-tight text-white">Tunas Sejahtera Adhi Perkasa</p>
+                        <p class="mt-0.5 text-xs" style="color:rgba(255,255,255,0.55);">Livestock Breeding Center & Export-Import Specialist</p>
                     </div>
-                    <h2 class="text-[#0d1b13] dark:text-white text-base font-extrabold leading-tight">PT. Tunas
-                        Sejahtera<br><span class="text-primary text-xs font-semibold">Adhiperkasa</span></h2>
                 </div>
-                <p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
-                    Platform e-commerce ternak terdepan di Indonesia. Menghubungkan peternak lokal dengan pembeli
-                    melalui sistem yang aman dan transparan.
-                </p>
-            </div>
-
-            <!-- Navigation -->
-            <div>
-                <h4 class="font-bold mb-6 text-[#0d1b13] dark:text-white">Navigasi</h4>
-                <ul class="space-y-4 text-sm text-gray-500 dark:text-gray-400">
-                    <li><a href="{{ route('pembeli.dashboard') }}"
-                            class="hover:text-primary transition-colors">Beranda</a></li>
-                    <li><a href="{{ route('pembeli.produk.index') }}"
-                            class="hover:text-primary transition-colors">Katalog</a></li>
-                    <li><a href="{{ route('pembeli.pesanan.index') }}"
-                            class="hover:text-primary transition-colors">Pesanan</a></li>
-                    <li><a href="{{ route('pembeli.profile.show') }}"
-                            class="hover:text-primary transition-colors">Profil</a></li>
-                </ul>
-            </div>
-
-            <!-- Help -->
-            <div>
-                <h4 class="font-bold mb-6 text-[#0d1b13] dark:text-white">Bantuan</h4>
-                <ul class="space-y-4 text-sm text-gray-500 dark:text-gray-400">
-                    <li><a href="#" class="hover:text-primary transition-colors">Cara Pembelian</a></li>
-                    <li><a href="#" class="hover:text-primary transition-colors">Pengiriman Ternak</a></li>
-                    <li><a href="#" class="hover:text-primary transition-colors">Syarat & Ketentuan</a></li>
-                    <li><a href="#" class="hover:text-primary transition-colors">Kebijakan Privasi</a></li>
-                </ul>
-            </div>
-
-            <!-- Contact -->
-            <div>
-                <h4 class="font-bold mb-6 text-[#0d1b13] dark:text-white">Hubungi Kami</h4>
-                <div class="space-y-4 text-sm text-gray-500 dark:text-gray-400">
-                    <p class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-sm">mail</span>
-                        support@tsap-ternak.id
-                    </p>
-                    <p class="flex items-center gap-2">
-                        <span class="material-symbols-outlined text-primary text-sm">call</span>
-                        +62 812-3456-7890
-                    </p>
-                    <p class="flex items-start gap-2">
-                        <span class="material-symbols-outlined text-primary text-sm">location_on</span>
-                        Jl. Agribisnis No. 45,<br />Jakarta Selatan, Indonesia
-                    </p>
+                <div class="flex items-center gap-2">
+                    <a href="#" aria-label="Facebook" class="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors" style="background:rgba(255,255,255,0.1);" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3h-3.1V8.2c0-.9.3-1.5 1.6-1.5h1.7V4c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5V10H7v3h2.7v8h3.8z"/></svg>
+                    </a>
+                    <a href="#" aria-label="Instagram" class="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors" style="background:rgba(255,255,255,0.1);" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M12 7a5 5 0 100 10 5 5 0 000-10zm0 8.3A3.3 3.3 0 1112 8.7a3.3 3.3 0 010 6.6zm6.3-8.5a1.2 1.2 0 11-2.4 0 1.2 1.2 0 012.4 0zM12 2.9c2.9 0 3.3 0 4.5.1 1 .1 1.6.2 2 .4.5.2.9.4 1.3.8.4.4.6.8.8 1.3.2.4.3 1 .4 2 .1 1.2.1 1.6.1 4.5s0 3.3-.1 4.5c-.1 1-.2 1.6-.4 2a3.8 3.8 0 01-2.1 2.1c-.4.2-1 .3-2 .4-1.2.1-1.6.1-4.5.1s-3.3 0-4.5-.1c-1-.1-1.6-.2-2-.4a3.8 3.8 0 01-2.1-2.1c-.2-.4-.3-1-.4-2C2.9 15.3 2.9 14.9 2.9 12s0-3.3.1-4.5c.1-1 .2-1.6.4-2 .2-.5.4-.9.8-1.3.4-.4.8-.6 1.3-.8.4-.2 1-.3 2-.4 1.2-.1 1.6-.1 4.5-.1zm0-1.7c-2.9 0-3.3 0-4.6.1-1.3.1-2.2.3-3 .6-.8.3-1.5.7-2.1 1.3A5.5 5.5 0 001.2 5.3c-.3.8-.5 1.7-.6 3C.5 9.6.5 10 .5 12c0 2 .1 2.4.1 3.7.1 1.3.3 2.2.6 3 .3.8.7 1.5 1.3 2.1.6.6 1.3 1 2.1 1.3.8.3 1.7.5 3 .6 1.3.1 1.7.1 3.7.1s2.4-.1 3.7-.1c1.3-.1 2.2-.3 3-.6.8-.3 1.5-.7 2.1-1.3.6-.6 1-1.3 1.3-2.1.3-.8.5-1.7.6-3 .1-1.3.1-1.7.1-3.7s-.1-2.4-.1-3.7c-.1-1.3-.3-2.2-.6-3-.3-.8-.7-1.5-1.3-2.1-.6-.6-1.3-1-2.1-1.3-.8-.3-1.7-.5-3-.6-1.3-.1-1.7-.1-3.7-.1z"/></svg>
+                    </a>
+                    <a href="https://wa.me/6282183948148" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" class="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors" style="background:rgba(255,255,255,0.1);" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'">
+                        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M12 2a9.9 9.9 0 00-8.4 15.1L2 22l5-1.5A9.9 9.9 0 1012 2zm0 18a8.1 8.1 0 01-4.2-1.2l-.3-.2-3 .9.9-2.9-.2-.3A8.1 8.1 0 1112 20zm4.5-6.1c-.2-.1-1.3-.6-1.5-.7-.2-.1-.3-.1-.4.1-.1.2-.6.7-.7.8-.1.1-.2.1-.4 0-1.1-.5-1.8-1-2.5-2.2-.2-.2 0-.3.1-.5.1-.1.2-.2.3-.3.1-.1.1-.2.2-.3.1-.1 0-.3 0-.4 0-.1-.4-1.1-.6-1.6-.2-.4-.3-.4-.4-.4h-.4c-.1 0-.4.1-.6.3-.2.2-.8.7-.8 1.7s.8 2 1 2.3c.1.2 1.4 2.2 3.4 3.1 2 .9 2 .6 2.4.6.4 0 1.3-.5 1.4-1 .2-.5.2-1 .1-1 0-.1-.2-.2-.4-.3z"/></svg>
+                    </a>
                 </div>
             </div>
-        </div>
 
-        <!-- Footer Bottom -->
-        <div
-            class="max-w-[1280px] mx-auto px-4 md:px-10 mt-12 pt-8 border-t border-gray-100 dark:border-primary/10 flex flex-col md:flex-row justify-between items-center gap-4">
-            <p class="text-xs text-gray-400">© 2024 Tunas Sejahtera Adi Perkasa. All rights reserved.</p>
-            <div class="flex gap-6">
-                <span
-                    class="material-symbols-outlined text-gray-400 hover:text-primary cursor-pointer transition-colors">public</span>
-                <span
-                    class="material-symbols-outlined text-gray-400 hover:text-primary cursor-pointer transition-colors">share</span>
+            {{-- 3-column grid --}}
+            <div class="grid gap-8 pt-10 md:grid-cols-3" style="border-top:1px solid rgba(255,255,255,0.15);">
+                <section>
+                    <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest" style="color:#13ec6d;">Get In Touch</h2>
+                    <ul class="space-y-2.5 text-sm leading-relaxed" style="color:rgba(255,255,255,0.8);">
+                        <li class="flex items-center gap-2">
+                            <svg class="h-3.5 w-3.5 shrink-0" style="color:#13ec6d;" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+                            +62721 8050354
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="h-3.5 w-3.5 shrink-0" style="color:#13ec6d;" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
+                            +6282183948148
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <svg class="h-3.5 w-3.5 shrink-0" style="color:#13ec6d;" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
+                            pt.tsalampung@gmail.com
+                        </li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest" style="color:#13ec6d;">Address</h2>
+                    <p class="text-sm leading-relaxed" style="color:rgba(255,255,255,0.8);">
+                        JL. Raden Imba Kusumaratu, NO: 22, RT: 005, Lk.I,<br>
+                        Sukadana Ham, Tanjung Karang Barat,<br>
+                        Bandar Lampung, Lampung, Indonesia.
+                    </p>
+                    <div class="mt-5">
+                        <h2 class="mb-3 text-xs font-semibold uppercase tracking-widest" style="color:#13ec6d;">Navigasi</h2>
+                        <ul class="space-y-1.5 text-sm" style="color:rgba(255,255,255,0.8);">
+                            <li><a href="{{ route('pembeli.dashboard') }}" class="hover:text-white transition-colors">Beranda</a></li>
+                            <li><a href="{{ route('pembeli.produk.index') }}" class="hover:text-white transition-colors">Katalog</a></li>
+                            <li><a href="{{ route('pembeli.pesanan.index') }}" class="hover:text-white transition-colors">Pesanan</a></li>
+                            <li><a href="{{ route('pembeli.profile.show') }}" class="hover:text-white transition-colors">Profil</a></li>
+                        </ul>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest" style="color:#13ec6d;">Find Us</h2>
+                    <div class="overflow-hidden rounded-xl" style="border:1px solid rgba(255,255,255,0.15);">
+                        <iframe
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            src="https://maps.google.com/maps?q=JL.%20Raden%20Imba%20Kusumaratu%20NO%2022%20Bandar%20Lampung&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                            title="Tunas Sejahtera Adhi Perkasa map"
+                            class="block h-44 w-full border-0">
+                        </iframe>
+                    </div>
+                </section>
+            </div>
+
+            {{-- Bottom bar --}}
+            <div class="mt-8 flex flex-col items-center justify-between gap-2 pt-6 text-xs sm:flex-row" style="border-top:1px solid rgba(255,255,255,0.15); color:rgba(255,255,255,0.5);">
+                <p>&copy; {{ now()->year }} Tunas Sejahtera Adhi Perkasa. All rights reserved.</p>
+                <p>Livestock Breeding Center & Export-Import Specialist</p>
             </div>
         </div>
     </footer>
+
     @endif
+
+    {{-- WA Floating Button --}}
+    <a href="https://wa.me/6282183948148"
+       target="_blank"
+       rel="noopener noreferrer"
+       aria-label="Chat via WhatsApp"
+       class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform duration-200 hover:scale-110 hover:shadow-xl"
+       style="background-color:#25D366;">
+        <svg viewBox="0 0 24 24" class="h-7 w-7" fill="white" aria-hidden="true">
+            <path d="M12 2a9.9 9.9 0 00-8.4 15.1L2 22l5-1.5A9.9 9.9 0 1012 2zm0 18a8.1 8.1 0 01-4.2-1.2l-.3-.2-3 .9.9-2.9-.2-.3A8.1 8.1 0 1112 20zm4.5-6.1c-.2-.1-1.3-.6-1.5-.7-.2-.1-.3-.1-.4.1-.1.2-.6.7-.7.8-.1.1-.2.1-.4 0-1.1-.5-1.8-1-2.5-2.2-.2-.2 0-.3.1-.5.1-.1.2-.2.3-.3.1-.1.1-.2.2-.3.1-.1 0-.3 0-.4 0-.1-.4-1.1-.6-1.6-.2-.4-.3-.4-.4-.4h-.4c-.1 0-.4.1-.6.3-.2.2-.8.7-.8 1.7s.8 2 1 2.3c.1.2 1.4 2.2 3.4 3.1 2 .9 2 .6 2.4.6.4 0 1.3-.5 1.4-1 .2-.5.2-1 .1-1 0-.1-.2-.2-.4-.3z"/>
+        </svg>
+    </a>
 
     <!-- Logout Form -->
     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">@csrf</form>
@@ -658,6 +681,15 @@
                 if (this.value.trim().length >= 2) fetchSuggestions(this.value.trim());
             });
         })();
+    </script>
+
+    {{-- Cegah halaman muncul dari cache browser setelah logout --}}
+    <script>
+        window.addEventListener('pageshow', function (e) {
+            if (e.persisted) {
+                window.location.reload();
+            }
+        });
     </script>
 
 </body>
