@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Helpers\LogHelper;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 // Controller pesanan admin — index, show, updateStatus
 // View: resources/views/admin/orders/index.blade.php & show.blade.php
@@ -61,16 +62,21 @@ class OrderController extends Controller
             });
         }
 
-        // [+] Tambah entri baru di $stats jika ada status baru
+        // 1 query GROUP BY menggantikan 7 query COUNT terpisah
+        $statsRaw = (clone $statsQuery)
+            ->select('status', DB::raw('COUNT(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
         $stats = [
-            'all'        => $statsQuery->count(),
-            'pending'    => (clone $statsQuery)->where('status', 'pending')->count(),
-            'paid'       => (clone $statsQuery)->where('status', 'paid')->count(),
-            'processing' => (clone $statsQuery)->where('status', 'processing')->count(),
-            'shipped'    => (clone $statsQuery)->where('status', 'shipped')->count(),
-            'completed'  => (clone $statsQuery)->where('status', 'completed')->count(),
-            'cancelled'  => (clone $statsQuery)->where('status', 'cancelled')->count(),
+            'pending'    => (int) $statsRaw->get('pending', 0),
+            'paid'       => (int) $statsRaw->get('paid', 0),
+            'processing' => (int) $statsRaw->get('processing', 0),
+            'shipped'    => (int) $statsRaw->get('shipped', 0),
+            'completed'  => (int) $statsRaw->get('completed', 0),
+            'cancelled'  => (int) $statsRaw->get('cancelled', 0),
         ];
+        $stats['all'] = array_sum($stats);
 
         // Response AJAX — untuk refresh tabel tanpa reload halaman
         if ($request->ajax() || $request->has('ajax')) {

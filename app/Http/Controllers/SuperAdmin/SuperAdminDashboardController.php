@@ -9,6 +9,7 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class SuperAdminDashboardController extends Controller
@@ -73,6 +74,18 @@ class SuperAdminDashboardController extends Controller
             }
         };
 
+        // =============================================
+        // CACHE — TTL 10 menit per kombinasi filter
+        // Sales table TIDAK dicache karena bergantung pada halaman aktif
+        // =============================================
+        $cacheKey = 'superadmin_dashboard_' . md5(json_encode([
+            $dateFrom, $dateTo, $province, $categoryId, $paymentMethod, $paymentStatus
+        ]));
+
+        $cached = Cache::remember($cacheKey, now()->addMinutes(10), function () use (
+            $applyBase, $validStatuses, $dateFrom, $dateTo,
+            $province, $categoryId, $categoryName, $paymentMethod, $paymentStatus
+        ) {
         // =============================================
         // SCORE CARDS
         // ✅ DIPERBAIKI: tambah prefix orders. di semua kolom score cards
@@ -407,20 +420,6 @@ class SuperAdminDashboardController extends Controller
         }
 
         // =============================================
-        // TABEL PENJUALAN — Paginasi 5
-        // Menampilkan SEMUA status agar admin bisa monitor pending & cancelled
-        // =============================================
-        $salesTable = Order::with(['items.product.category', 'payment', 'address', 'shippingSnapshot'])
-            ->tap($applyBase)
-            ->addSelect([
-                'orders.*',
-                DB::raw('COALESCE(order_shipping_snapshots.province_name, addresses.province_name) as province'),
-            ])
-            ->latest('orders.created_at')
-            ->paginate(5)
-            ->withQueryString();
-
-        // =============================================
         // DROPDOWN OPTIONS
         // =============================================
         $provinceOptions = collect()
@@ -444,6 +443,33 @@ class SuperAdminDashboardController extends Controller
         $categoryOptions = Category::where('is_active', true)
             ->orderBy('name')
             ->get(['id', 'name']);
+
+        return compact(
+            'totalRevenue', 'totalTransactions', 'totalProductsSold',
+            'avgTransactionValue', 'totalBuyers',
+            'chartDates', 'chartRevenues',
+            'topProducts', 'topCategories', 'topProvinces',
+            'paymentMethods', 'paymentStatuses',
+            'cpProvince', 'cpDatasets',
+            'hourLabels', 'hourData',
+            'repeatCustomers', 'newCustomers',
+            'provinceOptions', 'categoryOptions'
+        );
+        }); // end Cache::remember
+
+        // Ekstrak semua variabel dari cache
+        extract($cached);
+
+        // Sales table tidak dicache — bergantung pada halaman aktif (pagination)
+        $salesTable = Order::with(['items.product.category', 'payment', 'address', 'shippingSnapshot'])
+            ->tap($applyBase)
+            ->addSelect([
+                'orders.*',
+                DB::raw('COALESCE(order_shipping_snapshots.province_name, addresses.province_name) as province'),
+            ])
+            ->latest('orders.created_at')
+            ->paginate(5)
+            ->withQueryString();
 
         $paymentMethodOptions = [
             'bank_transfer' => 'Transfer Bank (VA)',
