@@ -96,18 +96,114 @@ class SuperAdminReportManagementTest extends TestCase
         $response->assertSee('1 data ditemukan');
     }
 
+    // =========================================================================
+    // ACCESS CONTROL
+    // =========================================================================
+
+    public function test_guest_cannot_access_superadmin_reports(): void
+    {
+        $response = $this->get(route('superadmin.reports.index'));
+        $response->assertRedirect();
+    }
+
+    public function test_admin_cannot_access_superadmin_reports(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('superadmin.reports.index'));
+        $response->assertForbidden();
+    }
+
+    public function test_pembeli_cannot_access_superadmin_reports(): void
+    {
+        $pembeli = User::factory()->create(['role' => 'pembeli']);
+        $response = $this->actingAs($pembeli)->get(route('superadmin.reports.index'));
+        $response->assertForbidden();
+    }
+
+    // =========================================================================
+    // EMPTY STATE & DATE FILTER
+    // =========================================================================
+
+    public function test_superadmin_report_shows_empty_state_when_no_orders_in_range(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin']);
+        $this->createOrderWithProduct(['status' => 'completed']);
+
+        $response = $this->actingAs($superAdmin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('superadmin.reports.index', [
+                'start_date' => '2000-01-01',
+                'end_date'   => '2000-01-31',
+            ]));
+
+        $response->assertOk();
+        $response->assertSee('0 data ditemukan');
+    }
+
+    public function test_superadmin_report_filters_by_date_range(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin']);
+        [$order] = $this->createOrderWithProduct(['status' => 'completed']);
+
+        $response = $this->actingAs($superAdmin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('superadmin.reports.index', [
+                'start_date' => $order->created_at->format('Y-m-d'),
+                'end_date'   => $order->created_at->format('Y-m-d'),
+            ]));
+
+        $response->assertOk();
+        $response->assertSee('1 data ditemukan');
+    }
+
+    public function test_superadmin_report_stats_exclude_pending_and_cancelled(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin']);
+        $this->createOrderWithProduct(['status' => 'pending']);
+        $this->createOrderWithProduct(['status' => 'cancelled']);
+        $this->createOrderWithProduct(['status' => 'completed']);
+
+        $response = $this->actingAs($superAdmin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('superadmin.reports.index'));
+
+        $response->assertOk();
+        $data = $response->viewData('stats');
+        $this->assertSame(1, $data['total_orders']);
+    }
+
+    // =========================================================================
+    // FILTER PAYMENT METHOD
+    // =========================================================================
+
+    public function test_superadmin_report_filter_by_payment_method(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin']);
+        [$order1] = $this->createOrderWithProduct(['status' => 'completed', 'payment_method' => 'bank_transfer']);
+        [$order2] = $this->createOrderWithProduct(['status' => 'completed', 'payment_method' => 'qris']);
+
+        $response = $this->actingAs($superAdmin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('superadmin.reports.index', ['payment_method' => 'bank_transfer']));
+
+        $response->assertOk();
+        $response->assertSee($order1->order_number);
+        $response->assertDontSee($order2->order_number);
+    }
+
     private function createOrderWithProduct(array $orderOverrides = []): array
     {
         $user = User::factory()->create(['role' => 'pembeli']);
-        $category = Category::create([
-            'name' => 'Aves',
-            'slug' => 'aves',
-            'is_active' => true,
-        ]);
+        $category = Category::firstOrCreate(
+            ['slug' => 'aves'],
+            ['name' => 'Aves', 'is_active' => true]
+        );
         $product = Product::create([
             'category_id' => $category->id,
             'name' => 'Macaw Biru',
-            'slug' => 'macaw-biru',
+            'slug' => 'macaw-biru-' . uniqid(),
             'description' => 'Burung macaw',
             'price' => 1500000,
             'stock' => 5,
@@ -139,17 +235,20 @@ class SuperAdminReportManagementTest extends TestCase
             'status' => 'paid',
             'courier' => 'jne',
             'courier_service' => 'reg',
-            'shipping_label' => $address->label,
-            'shipping_recipient_name' => $address->recipient_name,
-            'shipping_recipient_phone' => $address->recipient_phone,
-            'shipping_province_id' => $address->province_id,
-            'shipping_province_name' => $address->province_name,
-            'shipping_city_id' => $address->city_id,
-            'shipping_city_name' => $address->city_name,
-            'shipping_city_type' => $address->city_type,
-            'shipping_postal_code' => $address->postal_code,
-            'shipping_full_address' => $address->full_address,
         ], $orderOverrides));
+
+        $order->shippingSnapshot()->create([
+            'label' => $address->label,
+            'recipient_name' => $address->recipient_name,
+            'recipient_phone' => $address->recipient_phone,
+            'province_id' => $address->province_id,
+            'province_name' => $address->province_name,
+            'city_id' => $address->city_id,
+            'city_name' => $address->city_name,
+            'city_type' => $address->city_type,
+            'postal_code' => $address->postal_code,
+            'full_address' => $address->full_address,
+        ]);
 
         $item = OrderItem::create([
             'order_id' => $order->id,

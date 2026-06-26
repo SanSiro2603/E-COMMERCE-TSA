@@ -24,7 +24,7 @@ class BiteshipController extends Controller
     // Route: POST /admin/orders/{order}/biteship/create
     public function createShipment(Order $order)
     {
-        $order->loadMissing(['address', 'items.product.category']);
+        $order->loadMissing(['address', 'shippingSnapshot', 'items.product.category']);
 
         // [+] Ubah array ini jika ingin izinkan status lain untuk buat pengiriman
         if (!in_array($order->status, ['paid', 'processing'])) {

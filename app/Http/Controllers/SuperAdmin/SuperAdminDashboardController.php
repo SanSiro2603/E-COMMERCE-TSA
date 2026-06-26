@@ -38,7 +38,8 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $applyBase = function ($q) use ($dateFrom, $dateTo, $province, $categoryId, $categoryName, $paymentMethod, $paymentStatus) {
 
-            $q->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id'); // LEFT JOIN agar order tanpa alamat tidak hilang
+            $q->leftJoin('order_shipping_snapshots', 'orders.id', '=', 'order_shipping_snapshots.order_id');
+            $q->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id'); // fallback untuk order lama tanpa snapshot
 
             $q->whereBetween('orders.created_at', [
                 $dateFrom . ' 00:00:00',
@@ -47,7 +48,7 @@ class SuperAdminDashboardController extends Controller
 
             if ($province) {
                 $q->where(function ($sub) use ($province) {
-                    $sub->where('orders.shipping_province_name', $province)
+                    $sub->where('order_shipping_snapshots.province_name', $province)
                         ->orWhere('addresses.province_name', $province);
                 });
             }
@@ -135,6 +136,7 @@ class SuperAdminDashboardController extends Controller
         $topProducts = DB::table('order_items')
             ->join('orders',   'order_items.order_id',   '=', 'orders.id')
             ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
+            ->leftJoin('order_shipping_snapshots', 'orders.id', '=', 'order_shipping_snapshots.order_id')
             ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
 
             ->whereIn('orders.status', $validStatuses)
@@ -160,6 +162,7 @@ class SuperAdminDashboardController extends Controller
             ->join('orders',     'order_items.order_id',   '=', 'orders.id')
             ->leftJoin('products',   'order_items.product_id', '=', 'products.id')
             ->leftJoin('categories', 'products.category_id',   '=', 'categories.id')
+            ->leftJoin('order_shipping_snapshots', 'orders.id', '=', 'order_shipping_snapshots.order_id')
             ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
             ->whereIn('orders.status', $validStatuses)
             ->tap(fn($q) => $this->applyDashboardDbFilters($q, $dateFrom, $dateTo, $province, $categoryId, $categoryName, $paymentMethod, $paymentStatus))
@@ -180,15 +183,15 @@ class SuperAdminDashboardController extends Controller
             ->tap($applyBase)
             ->whereIn('orders.status', $validStatuses)
             ->where(function ($q) {
-                $q->whereNotNull('orders.shipping_province_name')
-                    ->where('orders.shipping_province_name', '!=', '')
+                $q->whereNotNull('order_shipping_snapshots.province_name')
+                    ->where('order_shipping_snapshots.province_name', '!=', '')
                     ->orWhere(function ($sub) {
                         $sub->whereNotNull('addresses.province_name')
                             ->where('addresses.province_name', '!=', '');
                     });
             })
             ->select(
-                DB::raw('COALESCE(orders.shipping_province_name, addresses.province_name) as province'),
+                DB::raw('COALESCE(order_shipping_snapshots.province_name, addresses.province_name) as province'),
                 DB::raw('COUNT(*) as total_orders'),
                 DB::raw('SUM(orders.grand_total) as total_revenue')
             )
@@ -202,13 +205,14 @@ class SuperAdminDashboardController extends Controller
         // =============================================
         $paymentMethods = DB::table('payments')
             ->join('orders', 'payments.order_id', '=', 'orders.id')
+            ->leftJoin('order_shipping_snapshots', 'orders.id', '=', 'order_shipping_snapshots.order_id')
             ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id') // LEFT JOIN agar tidak kehilangan data
             ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->whereNull('orders.deleted_at')
             ->whereNotNull('payments.payment_type')
             ->whereIn('orders.status', $validStatuses)
             ->when($province,      fn($q) => $q->where(function ($sub) use ($province) {
-                $sub->where('orders.shipping_province_name', $province)
+                $sub->where('order_shipping_snapshots.province_name', $province)
                     ->orWhere('addresses.province_name', $province);
             }))
             ->when($paymentStatus, fn($q) => $q->where('orders.status', $paymentStatus))
@@ -237,6 +241,7 @@ class SuperAdminDashboardController extends Controller
 
         // Tambahkan data dari orders.payment_method untuk order yang belum punya payments.payment_type
         $paymentMethodsFromOrders = DB::table('orders')
+            ->leftJoin('order_shipping_snapshots', 'orders.id', '=', 'order_shipping_snapshots.order_id')
             ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
             ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->whereNull('orders.deleted_at')
@@ -245,7 +250,7 @@ class SuperAdminDashboardController extends Controller
             ->whereIn('orders.status', $validStatuses)
             ->whereNotIn('orders.id', DB::table('payments')->whereNotNull('payment_type')->select('order_id'))
             ->when($province,      fn($q) => $q->where(function ($sub) use ($province) {
-                $sub->where('orders.shipping_province_name', $province)
+                $sub->where('order_shipping_snapshots.province_name', $province)
                     ->orWhere('addresses.province_name', $province);
             }))
             ->when($paymentStatus, fn($q) => $q->where('orders.status', $paymentStatus))
@@ -309,16 +314,17 @@ class SuperAdminDashboardController extends Controller
                 ->join('orders',     'order_items.order_id',   '=', 'orders.id')
                 ->leftJoin('products',   'order_items.product_id', '=', 'products.id')
                 ->leftJoin('categories', 'products.category_id',   '=', 'categories.id')
+                ->leftJoin('order_shipping_snapshots', 'orders.id', '=', 'order_shipping_snapshots.order_id')
                 ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
                 ->whereIn('orders.status', $validStatuses)
                 ->tap(fn($q) => $this->applyDashboardDbFilters($q, $dateFrom, $dateTo, null, $categoryId, $categoryName, $paymentMethod, $paymentStatus))
-                ->whereIn(DB::raw('COALESCE(orders.shipping_province_name, addresses.province_name)'), $top5ProvinceNames)
+                ->whereIn(DB::raw('COALESCE(order_shipping_snapshots.province_name, addresses.province_name)'), $top5ProvinceNames)
                 ->select(
-                    DB::raw('COALESCE(orders.shipping_province_name, addresses.province_name) as province_name'),
+                    DB::raw('COALESCE(order_shipping_snapshots.province_name, addresses.province_name) as province_name'),
                     DB::raw("COALESCE(order_items.product_category_name, categories.name, 'Uncategorized') as category_name"),
                     DB::raw('SUM(order_items.quantity) as total_sold')
                 )
-                ->groupByRaw("COALESCE(orders.shipping_province_name, addresses.province_name), COALESCE(order_items.product_category_name, categories.name, 'Uncategorized')")
+                ->groupByRaw("COALESCE(order_shipping_snapshots.province_name, addresses.province_name), COALESCE(order_items.product_category_name, categories.name, 'Uncategorized')")
                 ->orderByDesc('total_sold')
                 ->get();
         }
@@ -404,11 +410,11 @@ class SuperAdminDashboardController extends Controller
         // TABEL PENJUALAN — Paginasi 5
         // Menampilkan SEMUA status agar admin bisa monitor pending & cancelled
         // =============================================
-        $salesTable = Order::with(['items.product.category', 'payment', 'address'])
+        $salesTable = Order::with(['items.product.category', 'payment', 'address', 'shippingSnapshot'])
             ->tap($applyBase)
             ->addSelect([
                 'orders.*',
-                DB::raw('COALESCE(orders.shipping_province_name, addresses.province_name) as province'),
+                DB::raw('COALESCE(order_shipping_snapshots.province_name, addresses.province_name) as province'),
             ])
             ->latest('orders.created_at')
             ->paginate(5)
@@ -418,11 +424,12 @@ class SuperAdminDashboardController extends Controller
         // DROPDOWN OPTIONS
         // =============================================
         $provinceOptions = collect()
-            ->merge(DB::table('orders')
-                ->whereNotNull('shipping_province_name')
-                ->where('shipping_province_name', '!=', '')
-                ->whereNull('deleted_at')
-                ->pluck('shipping_province_name'))
+            ->merge(DB::table('order_shipping_snapshots')
+                ->join('orders', 'order_shipping_snapshots.order_id', '=', 'orders.id')
+                ->whereNotNull('order_shipping_snapshots.province_name')
+                ->where('order_shipping_snapshots.province_name', '!=', '')
+                ->whereNull('orders.deleted_at')
+                ->pluck('order_shipping_snapshots.province_name'))
             ->merge(DB::table('orders')
                 ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
                 ->whereNotNull('addresses.province_name')
@@ -484,7 +491,7 @@ class SuperAdminDashboardController extends Controller
 
         if ($province) {
             $query->where(function ($sub) use ($province) {
-                $sub->where('orders.shipping_province_name', $province)
+                $sub->where('order_shipping_snapshots.province_name', $province)
                     ->orWhere('addresses.province_name', $province);
             });
         }

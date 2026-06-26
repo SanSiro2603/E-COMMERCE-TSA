@@ -68,7 +68,9 @@ class OrderService
                 'address_id'      => $address->id,   // Sumber kebenaran alamat
                 'courier'         => $courier,
                 'courier_service' => $courierService,
-            ] + $this->shippingSnapshot($address));
+            ]);
+
+            $order->shippingSnapshot()->create($this->shippingSnapshot($address));
 
             // 3. Kurangi Stok & Buat Order Items
             foreach ($carts as $cart) {
@@ -117,7 +119,12 @@ class OrderService
                 'courier_service' => $courierService,
                 'shipping_cost'   => $shippingCost,
                 'grand_total'     => $grandTotal,
-            ] + $this->shippingSnapshot($address));
+            ]);
+
+            $order->shippingSnapshot()->updateOrCreate(
+                ['order_id' => $order->id],
+                $this->shippingSnapshot($address)
+            );
 
             DB::commit();
             return $order;
@@ -202,16 +209,16 @@ class OrderService
     private function shippingSnapshot($address): array
     {
         return [
-            'shipping_label' => $address->label,
-            'shipping_recipient_name' => $address->recipient_name,
-            'shipping_recipient_phone' => $address->recipient_phone,
-            'shipping_province_id' => $address->province_id,
-            'shipping_province_name' => $address->province_name,
-            'shipping_city_id' => $address->city_id,
-            'shipping_city_name' => $address->city_name,
-            'shipping_city_type' => $address->city_type,
-            'shipping_postal_code' => $address->postal_code,
-            'shipping_full_address' => $address->full_address,
+            'label' => $address->label,
+            'recipient_name' => $address->recipient_name,
+            'recipient_phone' => $address->recipient_phone,
+            'province_id' => $address->province_id,
+            'province_name' => $address->province_name,
+            'city_id' => $address->city_id,
+            'city_name' => $address->city_name,
+            'city_type' => $address->city_type,
+            'postal_code' => $address->postal_code,
+            'full_address' => $address->full_address,
         ];
     }
 

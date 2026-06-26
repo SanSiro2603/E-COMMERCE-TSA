@@ -25,7 +25,7 @@ class OrderController extends Controller
         ];
 
         // [+] Tambah relasi ke with([]) jika perlu tampilkan data dari tabel lain
-        $query = Order::with(['user', 'items.product.category'])->latest();
+        $query = Order::with(['user', 'items.product.category', 'shippingSnapshot'])->latest();
 
         // Filter: cari berdasarkan nomor pesanan atau nama/email pembeli
         // [+] Tambah kolom pencarian lain di dalam closure $q
@@ -196,7 +196,7 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         // [+] Tambah nama relasi di load([]) jika perlu tampilkan data tambahan
-        $order->load(['user', 'items.product.category', 'payment', 'address']);
+        $order->load(['user', 'items.product.category', 'payment', 'address', 'shippingSnapshot']);
         return view('admin.orders.show', compact('order'));
     }
 

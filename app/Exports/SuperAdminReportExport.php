@@ -54,7 +54,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
     // [+] Tambah relasi ke with([]) jika perlu kolom baru di Excel
     public function collection()
     {
-        $query = Order::with(['items.product.category', 'payment', 'address'])
+        $query = Order::with(['items.product.category', 'payment', 'address', 'shippingSnapshot'])
             ->whereBetween('created_at', [
                 $this->startDate . ' 00:00:00',
                 $this->endDate   . ' 23:59:59',
@@ -439,7 +439,7 @@ class SuperAdminReportExport implements FromCollection, WithEvents, WithDrawings
     private function applyProvinceFilter(Builder $query, string $province): void
     {
         $query->where(function (Builder $q) use ($province) {
-            $q->where('shipping_province_name', $province)
+            $q->whereHas('shippingSnapshot', fn($snapshot) => $snapshot->where('province_name', $province))
                 ->orWhereHas('address', fn($address) => $address->where('province_name', $province));
         });
     }

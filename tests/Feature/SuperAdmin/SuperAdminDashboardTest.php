@@ -72,6 +72,83 @@ class SuperAdminDashboardTest extends TestCase
         $this->assertFalse($paymentMethods->contains('key', 'qris'));
     }
 
+    // =========================================================================
+    // ACCESS CONTROL
+    // =========================================================================
+
+    public function test_guest_cannot_access_superadmin_dashboard(): void
+    {
+        $response = $this->get(route('superadmin.dashboard'));
+        $response->assertRedirect();
+    }
+
+    public function test_admin_cannot_access_superadmin_dashboard(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('superadmin.dashboard'));
+        $response->assertForbidden();
+    }
+
+    public function test_pembeli_cannot_access_superadmin_dashboard(): void
+    {
+        $pembeli = User::factory()->create(['role' => 'pembeli']);
+        $response = $this->actingAs($pembeli)->get(route('superadmin.dashboard'));
+        $response->assertForbidden();
+    }
+
+    // =========================================================================
+    // EMPTY STATE
+    // =========================================================================
+
+    public function test_dashboard_loads_successfully_with_no_orders(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin']);
+
+        $response = $this->actingAs($superAdmin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('superadmin.dashboard'));
+
+        $response->assertOk();
+        $this->assertSame(0, $response->viewData('salesTable')->total());
+    }
+
+    // =========================================================================
+    // DATE RANGE FILTER
+    // =========================================================================
+
+    public function test_dashboard_date_range_excludes_orders_outside_range(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin']);
+        $this->createOrderWithProduct(['status' => 'completed']);
+
+        $response = $this->actingAs($superAdmin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('superadmin.dashboard', [
+                'date_from' => '2000-01-01',
+                'date_to'   => '2000-01-31',
+            ]));
+
+        $response->assertOk();
+        $this->assertSame(0, $response->viewData('salesTable')->total());
+    }
+
+    public function test_dashboard_revenue_excludes_pending_and_cancelled_orders(): void
+    {
+        $superAdmin = User::factory()->create(['role' => 'super_admin']);
+        $this->createOrderWithProduct(['status' => 'pending']);
+        $this->createOrderWithProduct(['status' => 'cancelled']);
+        $this->createOrderWithProduct(['status' => 'completed', 'payment_method' => 'bank_transfer']);
+
+        $response = $this->actingAs($superAdmin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('superadmin.dashboard'));
+
+        $response->assertOk();
+        $this->assertSame(1520000.0, (float) $response->viewData('totalRevenue'));
+    }
+
     private function createOrderWithProduct(array $orderOverrides = []): array
     {
         $user = User::factory()->create(['role' => 'pembeli']);
@@ -117,17 +194,20 @@ class SuperAdminDashboardTest extends TestCase
             'status' => 'paid',
             'courier' => 'jne',
             'courier_service' => 'reg',
-            'shipping_label' => $address->label,
-            'shipping_recipient_name' => $address->recipient_name,
-            'shipping_recipient_phone' => $address->recipient_phone,
-            'shipping_province_id' => $address->province_id,
-            'shipping_province_name' => $address->province_name,
-            'shipping_city_id' => $address->city_id,
-            'shipping_city_name' => $address->city_name,
-            'shipping_city_type' => $address->city_type,
-            'shipping_postal_code' => $address->postal_code,
-            'shipping_full_address' => $address->full_address,
         ], $orderOverrides));
+
+        $order->shippingSnapshot()->create([
+            'label' => $address->label,
+            'recipient_name' => $address->recipient_name,
+            'recipient_phone' => $address->recipient_phone,
+            'province_id' => $address->province_id,
+            'province_name' => $address->province_name,
+            'city_id' => $address->city_id,
+            'city_name' => $address->city_name,
+            'city_type' => $address->city_type,
+            'postal_code' => $address->postal_code,
+            'full_address' => $address->full_address,
+        ]);
 
         $item = OrderItem::create([
             'order_id' => $order->id,

@@ -28,7 +28,7 @@ class ReportController extends Controller
 
         // Query dasar: filter rentang tanggal + eager load relasi
         // [+] Tambah relasi ke with([]) jika perlu tampilkan data tambahan di tabel
-        $baseQuery = Order::with(['user', 'items.product', 'address'])
+        $baseQuery = Order::with(['user', 'items.product', 'address', 'shippingSnapshot'])
             ->whereBetween('created_at', [
                 $startDate . ' 00:00:00',
                 $endDate   . ' 23:59:59',
@@ -82,7 +82,7 @@ class ReportController extends Controller
         $status    = $request->input('status');
 
         // [+] Tambah relasi ke with([]) jika perlu kolom baru di PDF
-        $query = Order::with(['user', 'items.product', 'address'])
+        $query = Order::with(['user', 'items.product', 'address', 'shippingSnapshot'])
             ->whereBetween('created_at', [
                 $startDate . ' 00:00:00',
                 $endDate   . ' 23:59:59',
