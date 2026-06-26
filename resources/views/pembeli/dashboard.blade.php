@@ -9,9 +9,8 @@
 <section class="mt-6 @container">
     <div class="relative overflow-hidden rounded-xl bg-primary/10 min-h-[400px] flex items-center">
         <div class="absolute inset-0 z-0">
-            {{-- Ganti dengan image yang sesuai atau gunakan gradient --}}
             <img class="w-full h-full object-cover opacity-80 object-right" 
-                 src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?w=1200" 
+                 src="{{ asset('images/hero-macaw.jpeg') }}" 
                  alt="Hero Banner">
             <div class="absolute inset-0 bg-gradient-to-r from-[#102218]/90 via-[#102218]/40 to-transparent"></div>
         </div>
