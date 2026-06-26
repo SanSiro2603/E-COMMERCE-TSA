@@ -53,13 +53,13 @@ class OrderManagementTest extends TestCase
     {
         $admin = User::factory()->create(['role' => 'admin']);
         [$order] = $this->createOrderWithProduct(['status' => 'paid', 'address_id' => null]);
-        $order->update([
-            'shipping_recipient_name' => null,
-            'shipping_recipient_phone' => null,
-            'shipping_province_name' => null,
-            'shipping_city_name' => null,
-            'shipping_postal_code' => null,
-            'shipping_full_address' => null,
+        $order->shippingSnapshot()->update([
+            'recipient_name' => null,
+            'recipient_phone' => null,
+            'province_name' => null,
+            'city_name' => null,
+            'postal_code' => null,
+            'full_address' => null,
         ]);
 
         $biteship = Mockery::mock(BiteshipService::class);
@@ -166,18 +166,151 @@ class OrderManagementTest extends TestCase
         $this->assertSame($item->product_image, $item->fresh()->display_image);
     }
 
+    // =========================================================================
+    // ACCESS CONTROL
+    // =========================================================================
+
+    public function test_guest_cannot_access_admin_orders_index(): void
+    {
+        $response = $this->get(route('admin.orders.index'));
+        $response->assertRedirect();
+    }
+
+    public function test_pembeli_cannot_access_admin_orders_index(): void
+    {
+        $pembeli = User::factory()->create(['role' => 'pembeli']);
+        $response = $this->actingAs($pembeli)->get(route('admin.orders.index'));
+        $response->assertForbidden();
+    }
+
+    public function test_admin_can_access_orders_index(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->createOrderWithProduct();
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('admin.orders.index'));
+
+        $response->assertOk();
+    }
+
+    // =========================================================================
+    // FILTER & SEARCH
+    // =========================================================================
+
+    public function test_admin_can_filter_orders_by_status(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$pendingOrder] = $this->createOrderWithProduct(['status' => 'pending']);
+        $this->createOrderWithProduct(['status' => 'paid']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('admin.orders.index', ['status' => 'pending']));
+
+        $response->assertOk();
+        $orders = $response->viewData('orders');
+        $this->assertSame(1, $orders->total());
+        $this->assertSame($pendingOrder->id, $orders->first()->id);
+    }
+
+    public function test_admin_can_search_orders_by_order_number(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$order1] = $this->createOrderWithProduct();
+        $this->createOrderWithProduct();
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('admin.orders.index', ['search' => $order1->order_number]));
+
+        $response->assertOk();
+        $orders = $response->viewData('orders');
+        $this->assertSame(1, $orders->total());
+        $this->assertSame($order1->id, $orders->first()->id);
+    }
+
+    // =========================================================================
+    // STATUS UPDATE
+    // =========================================================================
+
+    public function test_admin_can_update_order_status_from_paid_to_processing(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$order] = $this->createOrderWithProduct(['status' => 'paid']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->patch(route('admin.orders.updateStatus', $order), ['status' => 'processing']);
+
+        $response->assertRedirect(route('admin.orders.show', $order));
+        $response->assertSessionHas('success');
+        $this->assertSame('processing', $order->fresh()->status);
+    }
+
+    public function test_admin_cannot_update_status_from_pending_order(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$order] = $this->createOrderWithProduct(['status' => 'pending']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->patch(route('admin.orders.updateStatus', $order), ['status' => 'processing']);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+        $this->assertSame('pending', $order->fresh()->status);
+    }
+
+    public function test_admin_cannot_update_to_invalid_status_value(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$order] = $this->createOrderWithProduct(['status' => 'paid']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->patch(route('admin.orders.updateStatus', $order), ['status' => 'shipped']);
+
+        $response->assertSessionHasErrors('status');
+        $this->assertSame('paid', $order->fresh()->status);
+    }
+
+    public function test_admin_update_status_is_idempotent_when_already_processing(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$order] = $this->createOrderWithProduct(['status' => 'processing']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->patch(route('admin.orders.updateStatus', $order), ['status' => 'processing']);
+
+        $response->assertRedirect(route('admin.orders.show', $order));
+        $response->assertSessionHas('success');
+        $this->assertSame('processing', $order->fresh()->status);
+    }
+
+    public function test_guest_cannot_update_order_status(): void
+    {
+        [$order] = $this->createOrderWithProduct(['status' => 'paid']);
+
+        $response = $this->patch(route('admin.orders.updateStatus', $order), ['status' => 'processing']);
+
+        $response->assertRedirect();
+        $this->assertSame('paid', $order->fresh()->status);
+    }
+
     private function createOrderWithProduct(array $orderOverrides = []): array
     {
         $user = User::factory()->create(['role' => 'pembeli']);
-        $category = Category::create([
-            'name' => 'Aves',
-            'slug' => 'aves',
-            'is_active' => true,
-        ]);
+        $category = Category::firstOrCreate(
+            ['slug' => 'aves'],
+            ['name' => 'Aves', 'is_active' => true]
+        );
         $product = Product::create([
             'category_id' => $category->id,
             'name' => 'Macaw Biru',
-            'slug' => 'macaw-biru',
+            'slug' => 'macaw-biru-' . uniqid(),
             'description' => 'Burung macaw',
             'price' => 1500000,
             'stock' => 5,
@@ -209,17 +342,20 @@ class OrderManagementTest extends TestCase
             'status' => 'pending',
             'courier' => 'jne',
             'courier_service' => 'reg',
-            'shipping_label' => $address->label,
-            'shipping_recipient_name' => $address->recipient_name,
-            'shipping_recipient_phone' => $address->recipient_phone,
-            'shipping_province_id' => $address->province_id,
-            'shipping_province_name' => $address->province_name,
-            'shipping_city_id' => $address->city_id,
-            'shipping_city_name' => $address->city_name,
-            'shipping_city_type' => $address->city_type,
-            'shipping_postal_code' => $address->postal_code,
-            'shipping_full_address' => $address->full_address,
         ], $orderOverrides));
+
+        $order->shippingSnapshot()->create([
+            'label' => $address->label,
+            'recipient_name' => $address->recipient_name,
+            'recipient_phone' => $address->recipient_phone,
+            'province_id' => $address->province_id,
+            'province_name' => $address->province_name,
+            'city_id' => $address->city_id,
+            'city_name' => $address->city_name,
+            'city_type' => $address->city_type,
+            'postal_code' => $address->postal_code,
+            'full_address' => $address->full_address,
+        ]);
 
         $item = OrderItem::create([
             'order_id' => $order->id,

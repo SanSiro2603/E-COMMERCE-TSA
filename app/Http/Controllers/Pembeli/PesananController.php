@@ -80,7 +80,7 @@ class PesananController extends Controller
                 ->first();
         }
 
-        $query = Order::with(['items.product'])
+        $query = Order::with(['items.product', 'shippingSnapshot'])
             ->where('user_id', $userId)
             ->latest();
 
@@ -109,7 +109,7 @@ class PesananController extends Controller
 
     public function show($id)
     {
-        $order = Order::with(['items.product.category', 'payment', 'address'])
+        $order = Order::with(['items.product.category', 'payment', 'address', 'shippingSnapshot'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
 
@@ -185,7 +185,9 @@ class PesananController extends Controller
                 ->with('error', 'Maaf, toko sedang tutup. Fitur checkout sementara dinonaktifkan.');
         }
 
-        $addresses = Auth::user()->addresses()->get();
+        /** @var \App\Models\User $authUser */
+        $authUser  = Auth::user();
+        $addresses = $authUser->addresses()->get();
         if ($addresses->isEmpty()) {
             return redirect()->route('pembeli.alamat.create')
                 ->with('error', 'Silakan tambah alamat terlebih dahulu');
@@ -264,7 +266,9 @@ class PesananController extends Controller
             'weight'     => 'required|numeric|min:1',
         ]);
 
-        $address = Auth::user()->addresses()->findOrFail($request->address_id);
+        /** @var \App\Models\User $authUser */
+        $authUser = Auth::user();
+        $address  = $authUser->addresses()->findOrFail($request->address_id);
 
         if (!$address->postal_code) {
             return response()->json([
@@ -341,7 +345,9 @@ class PesananController extends Controller
         ]);
 
         try {
-            $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
+            /** @var \App\Models\User $authUser */
+            $authUser = Auth::user();
+            $address  = $authUser->addresses()->findOrFail($validated['address_id']);
 
             // ── MODE BUY NOW ──────────────────────────────────────────────────
             $buyNow = session('buy_now');
@@ -422,7 +428,7 @@ class PesananController extends Controller
 
     public function edit($id)
     {
-        $order = Order::with(['items.product', 'address'])
+        $order = Order::with(['items.product', 'address', 'shippingSnapshot'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
 
@@ -431,7 +437,9 @@ class PesananController extends Controller
                 ->with('error', 'Pesanan hanya bisa diedit jika status menunggu pembayaran.');
         }
 
-        $addresses = Auth::user()->addresses()->get();
+        /** @var \App\Models\User $authUser */
+        $authUser  = Auth::user();
+        $addresses = $authUser->addresses()->get();
 
         return view('pembeli.pesanan.edit', compact('order', 'addresses'));
     }
@@ -453,7 +461,9 @@ class PesananController extends Controller
         ]);
 
         try {
-            $address = Auth::user()->addresses()->findOrFail($validated['address_id']);
+            /** @var \App\Models\User $authUser */
+            $authUser = Auth::user();
+            $address  = $authUser->addresses()->findOrFail($validated['address_id']);
 
             $this->orderService->updateShippingDetails(
                 $order,

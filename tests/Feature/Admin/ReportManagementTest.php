@@ -94,18 +94,119 @@ class ReportManagementTest extends TestCase
         $response->assertSee('1 data ditemukan');
     }
 
+    // =========================================================================
+    // ACCESS CONTROL
+    // =========================================================================
+
+    public function test_guest_cannot_access_admin_reports(): void
+    {
+        $response = $this->get(route('admin.reports.index'));
+        $response->assertRedirect();
+    }
+
+    public function test_pembeli_cannot_access_admin_reports(): void
+    {
+        $pembeli = User::factory()->create(['role' => 'pembeli']);
+        $response = $this->actingAs($pembeli)->get(route('admin.reports.index'));
+        $response->assertForbidden();
+    }
+
+    public function test_admin_can_access_reports_index(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('admin.reports.index'));
+
+        $response->assertOk();
+    }
+
+    // =========================================================================
+    // FILTER DATE RANGE
+    // =========================================================================
+
+    public function test_admin_report_shows_empty_state_when_no_orders_in_range(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->createOrderWithProduct(['status' => 'completed']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('admin.reports.index', [
+                'start_date' => '2000-01-01',
+                'end_date'   => '2000-01-31',
+            ]));
+
+        $response->assertOk();
+        $response->assertSee('0 data ditemukan');
+    }
+
+    public function test_admin_report_filters_orders_within_date_range(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$order] = $this->createOrderWithProduct(['status' => 'completed']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('admin.reports.index', [
+                'start_date' => $order->created_at->format('Y-m-d'),
+                'end_date'   => $order->created_at->format('Y-m-d'),
+            ]));
+
+        $response->assertOk();
+        $response->assertSee('1 data ditemukan');
+        $response->assertSee($order->order_number);
+    }
+
+    // =========================================================================
+    // FILTER STATUS & STATISTIK
+    // =========================================================================
+
+    public function test_admin_report_stats_exclude_pending_and_cancelled_orders(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->createOrderWithProduct(['status' => 'pending']);
+        $this->createOrderWithProduct(['status' => 'cancelled']);
+        [$completedOrder] = $this->createOrderWithProduct(['status' => 'completed']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('admin.reports.index'));
+
+        $response->assertOk();
+        $data = $response->viewData('stats');
+        $this->assertSame(1, $data['total_orders']);
+        $this->assertSame((float) $completedOrder->grand_total, (float) $data['total_revenue']);
+    }
+
+    public function test_admin_report_filter_by_paid_status_shows_only_paid_orders(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        [$paidOrder] = $this->createOrderWithProduct(['status' => 'paid']);
+        $this->createOrderWithProduct(['status' => 'completed']);
+
+        $response = $this->actingAs($admin)
+            ->withSession(['2fa_passed' => true])
+            ->get(route('admin.reports.index', ['status' => 'paid']));
+
+        $response->assertOk();
+        $orders = $response->viewData('orders');
+        $this->assertSame(1, $orders->total());
+        $this->assertSame($paidOrder->id, $orders->first()->id);
+    }
+
     private function createOrderWithProduct(array $orderOverrides = []): array
     {
         $user = User::factory()->create(['role' => 'pembeli']);
-        $category = Category::create([
-            'name' => 'Aves',
-            'slug' => 'aves',
-            'is_active' => true,
-        ]);
+        $category = Category::firstOrCreate(
+            ['slug' => 'aves'],
+            ['name' => 'Aves', 'is_active' => true]
+        );
         $product = Product::create([
             'category_id' => $category->id,
             'name' => 'Macaw Biru',
-            'slug' => 'macaw-biru',
+            'slug' => 'macaw-biru-' . uniqid(),
             'description' => 'Burung macaw',
             'price' => 1500000,
             'stock' => 5,
@@ -137,17 +238,20 @@ class ReportManagementTest extends TestCase
             'status' => 'paid',
             'courier' => 'jne',
             'courier_service' => 'reg',
-            'shipping_label' => $address->label,
-            'shipping_recipient_name' => $address->recipient_name,
-            'shipping_recipient_phone' => $address->recipient_phone,
-            'shipping_province_id' => $address->province_id,
-            'shipping_province_name' => $address->province_name,
-            'shipping_city_id' => $address->city_id,
-            'shipping_city_name' => $address->city_name,
-            'shipping_city_type' => $address->city_type,
-            'shipping_postal_code' => $address->postal_code,
-            'shipping_full_address' => $address->full_address,
         ], $orderOverrides));
+
+        $order->shippingSnapshot()->create([
+            'label' => $address->label,
+            'recipient_name' => $address->recipient_name,
+            'recipient_phone' => $address->recipient_phone,
+            'province_id' => $address->province_id,
+            'province_name' => $address->province_name,
+            'city_id' => $address->city_id,
+            'city_name' => $address->city_name,
+            'city_type' => $address->city_type,
+            'postal_code' => $address->postal_code,
+            'full_address' => $address->full_address,
+        ]);
 
         $item = OrderItem::create([
             'order_id' => $order->id,

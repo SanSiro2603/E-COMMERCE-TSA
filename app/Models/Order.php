@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 // Model utama pesanan — tabel: orders
-// Relasi: users, order_items, payments, shipments, addresses
+// Relasi: users, order_items, payments, shipments, addresses, order_shipping_snapshots
 class Order extends Model
 {
     use HasFactory, SoftDeletes;
@@ -16,16 +16,6 @@ class Order extends Model
     protected $fillable = [
         'user_id',
         'address_id',
-        'shipping_label',
-        'shipping_recipient_name',
-        'shipping_recipient_phone',
-        'shipping_province_id',
-        'shipping_province_name',
-        'shipping_city_id',
-        'shipping_city_name',
-        'shipping_city_type',
-        'shipping_postal_code',
-        'shipping_full_address',
         'order_number',
         'subtotal',
         'shipping_cost',
@@ -73,6 +63,11 @@ class Order extends Model
     public function shipment()
     {
         return $this->hasOne(Shipment::class, 'order_id');
+    }
+
+    public function shippingSnapshot()
+    {
+        return $this->hasOne(OrderShippingSnapshot::class);
     }
 
     public function address()
@@ -151,37 +146,37 @@ class Order extends Model
 
     public function getDisplayShippingRecipientNameAttribute(): ?string
     {
-        return $this->address?->recipient_name ?? $this->shipping_recipient_name;
+        return $this->shippingSnapshot?->recipient_name ?? $this->address?->recipient_name;
     }
 
     public function getDisplayShippingRecipientPhoneAttribute(): ?string
     {
-        return $this->address?->recipient_phone ?? $this->shipping_recipient_phone;
+        return $this->shippingSnapshot?->recipient_phone ?? $this->address?->recipient_phone;
     }
 
     public function getDisplayShippingFullAddressAttribute(): ?string
     {
-        return $this->address?->full_address ?? $this->shipping_full_address;
+        return $this->shippingSnapshot?->full_address ?? $this->address?->full_address;
     }
 
     public function getDisplayShippingProvinceNameAttribute(): ?string
     {
-        return $this->address?->province_name ?? $this->shipping_province_name;
+        return $this->shippingSnapshot?->province_name ?? $this->address?->province_name;
     }
 
     public function getDisplayShippingCityNameAttribute(): ?string
     {
-        return $this->address?->city_name ?? $this->shipping_city_name;
+        return $this->shippingSnapshot?->city_name ?? $this->address?->city_name;
     }
 
     public function getDisplayShippingCityTypeAttribute(): ?string
     {
-        return $this->address?->city_type ?? $this->shipping_city_type;
+        return $this->shippingSnapshot?->city_type ?? $this->address?->city_type;
     }
 
     public function getDisplayShippingPostalCodeAttribute(): ?string
     {
-        return $this->address?->postal_code ?? $this->shipping_postal_code;
+        return $this->shippingSnapshot?->postal_code ?? $this->address?->postal_code;
     }
 
     public function getDisplayShippingCityLineAttribute(): string

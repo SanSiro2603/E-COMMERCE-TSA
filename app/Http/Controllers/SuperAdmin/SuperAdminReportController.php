@@ -35,7 +35,7 @@ class SuperAdminReportController extends Controller
 
         // Query dasar: filter rentang tanggal + eager load relasi
         // [+] Tambah relasi ke with([]) jika perlu tampilkan data tambahan di tabel
-        $baseQuery = Order::with(['items.product.category', 'payment', 'address'])
+        $baseQuery = Order::with(['items.product.category', 'payment', 'address', 'shippingSnapshot'])
             ->whereBetween('created_at', [
                 $startDate . ' 00:00:00',
                 $endDate   . ' 23:59:59',
@@ -73,11 +73,12 @@ class SuperAdminReportController extends Controller
 
         // Dropdown opsi provinsi — diambil dari tabel addresses yang terhubung ke orders aktif
         $provinceOptions = collect()
-            ->merge(DB::table('orders')
-                ->whereNotNull('shipping_province_name')
-                ->where('shipping_province_name', '!=', '')
-                ->whereNull('deleted_at')
-                ->pluck('shipping_province_name'))
+            ->merge(DB::table('order_shipping_snapshots')
+                ->join('orders', 'order_shipping_snapshots.order_id', '=', 'orders.id')
+                ->whereNotNull('order_shipping_snapshots.province_name')
+                ->where('order_shipping_snapshots.province_name', '!=', '')
+                ->whereNull('orders.deleted_at')
+                ->pluck('order_shipping_snapshots.province_name'))
             ->merge(DB::table('addresses')
                 ->join('orders', 'orders.address_id', '=', 'addresses.id')
                 ->whereNotNull('addresses.province_name')
@@ -138,7 +139,7 @@ class SuperAdminReportController extends Controller
         $status        = $request->input('status');
 
         // [+] Tambah relasi ke with([]) jika perlu kolom baru di PDF
-        $query = Order::with(['items.product.category', 'payment', 'address'])
+        $query = Order::with(['items.product.category', 'payment', 'address', 'shippingSnapshot'])
             ->whereBetween('created_at', [
                 $startDate . ' 00:00:00',
                 $endDate   . ' 23:59:59',
@@ -220,8 +221,7 @@ class SuperAdminReportController extends Controller
     private function applyProvinceFilter(Builder $query, string $province): void
     {
         $query->where(function (Builder $q) use ($province) {
-            $q->where('shipping_province_name', $province)
-            
+            $q->whereHas('shippingSnapshot', fn($snapshot) => $snapshot->where('province_name', $province))
                 ->orWhereHas('address', fn($address) => $address->where('province_name', $province));
         });
     }
