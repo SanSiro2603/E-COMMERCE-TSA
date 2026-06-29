@@ -9,7 +9,6 @@ use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class SuperAdminDashboardController extends Controller
@@ -75,14 +74,9 @@ class SuperAdminDashboardController extends Controller
         };
 
         // =============================================
-        // CACHE — TTL 10 menit per kombinasi filter
-        // Sales table TIDAK dicache karena bergantung pada halaman aktif
+        // CACHE dinonaktifkan sementara — real-time untuk demo seminar
         // =============================================
-        $cacheKey = 'superadmin_dashboard_' . md5(json_encode([
-            $dateFrom, $dateTo, $province, $categoryId, $paymentMethod, $paymentStatus
-        ]));
-
-        $cached = Cache::remember($cacheKey, now()->addMinutes(10), function () use (
+        $cached = (function () use (
             $applyBase, $validStatuses, $dateFrom, $dateTo,
             $province, $categoryId, $categoryName, $paymentMethod, $paymentStatus
         ) {
