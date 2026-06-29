@@ -449,7 +449,7 @@ class SuperAdminDashboardController extends Controller
             'repeatCustomers', 'newCustomers',
             'provinceOptions', 'categoryOptions'
         );
-        }); // end Cache::remember
+        })(); // immediately invoked
 
         // Ekstrak semua variabel dari cache
         extract($cached);
