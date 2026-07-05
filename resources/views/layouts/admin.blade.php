@@ -318,7 +318,7 @@
         @endphp
 
         <!-- Navigation -->
-        <nav class="relative px-3 pt-4 pb-2 space-y-2 z-10">
+        <nav class="relative flex-shrink-0 px-3 pt-4 pb-2 space-y-2 z-10">
             @foreach ($menu as $item)
                 @php
                     // Dashboard dicek exact, yang lain pakai prefix grup
@@ -349,20 +349,20 @@
         </nav>
 
         <!-- Dynamic Illustration -->
-        <div class="relative flex items-end justify-center px-4 pb-4 z-10" style="height: 180px; flex-shrink: 0;">
+        <div class="relative flex-1 min-h-0 flex items-end justify-center px-4 pb-4 z-10 overflow-hidden">
             @if($activeMenu['image'])
                 <img
                     id="sidebar-feature-image"
                     src="{{ asset($activeMenu['image']) }}"
                     alt="{{ $activeMenu['label'] }}"
-                    class="w-full max-h-[160px] object-contain drop-shadow-2xl">
+                    class="w-full max-h-full object-contain drop-shadow-2xl">
             @else
                 <div id="sidebar-feature-image" class="w-full"></div>
             @endif
         </div>
 
         <!-- Footer User -->
-        <div class="relative px-4 py-4 border-t border-white/10 z-10">
+        <div class="relative flex-shrink-0 px-4 py-4 border-t border-white/10 z-10">
             <div class="flex items-center gap-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl p-3">
 
                 <div class="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-lime-300 text-black font-bold flex items-center justify-center shadow-lg shadow-green-500/30 flex-shrink-0">

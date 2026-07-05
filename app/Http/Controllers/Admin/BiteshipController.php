@@ -9,8 +9,6 @@ use App\Services\BiteshipService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
-// Controller integrasi Biteship — buat & lacak pengiriman
-// Service: app/Services/BiteshipService.php
 class BiteshipController extends Controller
 {
     protected BiteshipService $biteship;
@@ -20,13 +18,10 @@ class BiteshipController extends Controller
         $this->biteship = $biteship;
     }
 
-    // Buat order pengiriman di Biteship, lalu update status order → 'shipped'
-    // Route: POST /admin/orders/{order}/biteship/create
     public function createShipment(Order $order)
     {
         $order->loadMissing(['address', 'shippingSnapshot', 'items.product.category']);
 
-        // [+] Ubah array ini jika ingin izinkan status lain untuk buat pengiriman
         if (!in_array($order->status, ['paid', 'processing'])) {
             return redirect()->back()
                 ->with('error', 'Pengiriman Biteship hanya bisa dibuat untuk pesanan berstatus Dibayar atau Diproses.');
@@ -37,7 +32,6 @@ class BiteshipController extends Controller
                 ->with('error', 'Order pengiriman Biteship sudah dibuat sebelumnya. No. Resi: ' . $order->tracking_number);
         }
 
-        // Kirim data order ke Biteship API — detail ada di BiteshipService::createOrder()
         if ($order->items->isEmpty()) {
             return redirect()->back()
                 ->with('error', 'Pengiriman tidak bisa dibuat karena item pesanan tidak tersedia.');
@@ -53,7 +47,6 @@ class BiteshipController extends Controller
         if ($result['success']) {
             $previousStatus = $order->status;
 
-            // [+] Tambah kolom di update([]) jika perlu simpan data tambahan dari response Biteship
             $order->update([
                 'status'            => 'shipped',
                 'biteship_order_id' => $result['biteship_order_id'],
@@ -77,7 +70,6 @@ class BiteshipController extends Controller
                 );
         }
 
-        // Catat error ke storage/logs/laravel.log
         Log::error('[BiteshipController] createShipment failed', [
             'order_id' => $order->id,
             'result'   => $result,
@@ -87,9 +79,6 @@ class BiteshipController extends Controller
             ->with('error', 'Gagal membuat order Biteship: ' . ($result['message'] ?? 'Unknown error'));
     }
 
-    // Lacak status pengiriman — AJAX endpoint, mengembalikan JSON
-    // Route: GET /admin/orders/{order}/biteship/track
-    // Dipanggil oleh fungsi loadTracking() di show.blade.php
     public function trackShipment(Order $order)
     {
         if (!$order->biteship_order_id) {
