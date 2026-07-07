@@ -15,9 +15,6 @@ class SuperAdminDashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // =============================================
-        // FILTER PARAMETERS
-        // =============================================
         $dateFrom      = $request->input('date_from', now()->startOfMonth()->format('Y-m-d'));
         $dateTo        = $request->input('date_to', now()->format('Y-m-d'));
         $province      = $request->input('province');
@@ -26,20 +23,12 @@ class SuperAdminDashboardController extends Controller
         $paymentStatus = $request->input('payment_status');
         $categoryName  = $categoryId ? Category::query()->whereKey($categoryId)->value('name') : null;
 
-        // =============================================
-        // STATUS YANG DIHITUNG SEBAGAI TRANSAKSI VALID
-        // pending  = belum bayar → TIDAK dihitung
-        // cancelled = dibatalkan → TIDAK dihitung
-        // =============================================
         $validStatuses = ['paid', 'processing', 'shipped', 'completed'];
 
-        // =============================================
-        // CLOSURE FILTER — dipakai di semua query Eloquent
-        // =============================================
         $applyBase = function ($q) use ($dateFrom, $dateTo, $province, $categoryId, $categoryName, $paymentMethod, $paymentStatus) {
 
             $q->leftJoin('order_shipping_snapshots', 'orders.id', '=', 'order_shipping_snapshots.order_id');
-            $q->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id'); // fallback untuk order lama tanpa snapshot
+            $q->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id');
 
             $q->whereBetween('orders.created_at', [
                 $dateFrom . ' 00:00:00',
@@ -55,7 +44,6 @@ class SuperAdminDashboardController extends Controller
             if ($paymentStatus) $q->where('orders.status', $paymentStatus);
 
             if ($paymentMethod) {
-                // Cek di payments.payment_type DAN orders.payment_method
                 $q->where(function ($sub) use ($paymentMethod) {
                     $sub->whereHas('payment', fn($p) => $p->where('payment_type', $paymentMethod))
                         ->orWhere('orders.payment_method', $paymentMethod);
@@ -73,50 +61,34 @@ class SuperAdminDashboardController extends Controller
             }
         };
 
-        // =============================================
-        // CACHE dinonaktifkan sementara — real-time untuk demo seminar
-        // =============================================
         $cached = (function () use (
             $applyBase, $validStatuses, $dateFrom, $dateTo,
             $province, $categoryId, $categoryName, $paymentMethod, $paymentStatus
         ) {
-        // =============================================
-        // SCORE CARDS
-        // ✅ DIPERBAIKI: tambah prefix orders. di semua kolom score cards
-        // agar tidak ambigu setelah leftJoin addresses
-        // =============================================
         $baseQ = Order::query()->tap($applyBase);
 
-        // Total Pendapatan: hanya status valid (paid, processing, shipped, completed)
         $totalRevenue = (clone $baseQ)
             ->whereIn('orders.status', $validStatuses)
             ->sum('orders.grand_total');
 
-        // Total Transaksi: hanya status valid — TIDAK termasuk pending & cancelled
         $totalTransactions = (clone $baseQ)
             ->whereIn('orders.status', $validStatuses)
             ->count('orders.id');
 
-        // Produk Terjual: hanya dari order berstatus valid
         $totalProductsSold = (clone $baseQ)
             ->whereIn('orders.status', $validStatuses)
             ->join('order_items', 'orders.id', '=', 'order_items.order_id')
             ->sum('order_items.quantity');
 
-        // Rata-rata nilai transaksi: dihitung dari transaksi valid saja
         $avgTransactionValue = $totalTransactions > 0
             ? round($totalRevenue / $totalTransactions, 0)
             : 0;
 
-        // Pelanggan Aktif: distinct user yang punya transaksi valid
         $totalBuyers = (clone $baseQ)
             ->whereIn('orders.status', $validStatuses)
             ->distinct('orders.user_id')
             ->count('orders.user_id');
 
-        // =============================================
-        // GRAFIK PENDAPATAN HARIAN
-        // =============================================
         $revenueByDate = Order::query()
             ->tap($applyBase)
             ->whereIn('orders.status', $validStatuses)
@@ -137,9 +109,6 @@ class SuperAdminDashboardController extends Controller
             $chartRevenues->push((float) $revenueByDate->get($d->format('Y-m-d'), 0));
         }
 
-        // =============================================
-        // TOP 5 PRODUK TERLARIS — Bar Chart
-        // =============================================
         $topProducts = DB::table('order_items')
             ->join('orders',   'order_items.order_id',   '=', 'orders.id')
             ->leftJoin('products', 'order_items.product_id', '=', 'products.id')
@@ -162,9 +131,6 @@ class SuperAdminDashboardController extends Controller
             ->get();
 
 
-        // =============================================
-        // TOP 5 KATEGORI — Pie Chart
-        // =============================================
         $topCategories = DB::table('order_items')
             ->join('orders',     'order_items.order_id',   '=', 'orders.id')
             ->leftJoin('products',   'order_items.product_id', '=', 'products.id')
@@ -183,9 +149,6 @@ class SuperAdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // =============================================
-        // TOP 5 PROVINSI — Bar Chart
-        // =============================================
         $topProvinces = Order::query()
             ->tap($applyBase)
             ->whereIn('orders.status', $validStatuses)
@@ -207,13 +170,10 @@ class SuperAdminDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // =============================================
-        // METODE PEMBAYARAN — Pie Chart
-        // =============================================
         $paymentMethods = DB::table('payments')
             ->join('orders', 'payments.order_id', '=', 'orders.id')
             ->leftJoin('order_shipping_snapshots', 'orders.id', '=', 'order_shipping_snapshots.order_id')
-            ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id') // LEFT JOIN agar tidak kehilangan data
+            ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
             ->whereBetween('orders.created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59'])
             ->whereNull('orders.deleted_at')
             ->whereNotNull('payments.payment_type')
@@ -246,7 +206,6 @@ class SuperAdminDashboardController extends Controller
                 'key'   => $item->payment_type,
             ]);
 
-        // Tambahkan data dari orders.payment_method untuk order yang belum punya payments.payment_type
         $paymentMethodsFromOrders = DB::table('orders')
             ->leftJoin('order_shipping_snapshots', 'orders.id', '=', 'order_shipping_snapshots.order_id')
             ->leftJoin('addresses', 'orders.address_id', '=', 'addresses.id')
@@ -283,7 +242,6 @@ class SuperAdminDashboardController extends Controller
                 'key'   => $item->payment_type,
             ]);
 
-        // Merge kedua sumber dan gabungkan yang sama
         $paymentMethods = $paymentMethods->concat($paymentMethodsFromOrders)
             ->groupBy('key')
             ->map(fn($group) => [
@@ -293,11 +251,6 @@ class SuperAdminDashboardController extends Controller
             ])
             ->values();
 
-        // =============================================
-        // STATUS PESANAN — Donut Chart
-        // Sengaja TIDAK difilter $validStatuses agar semua status tampil di chart
-        // supaya admin bisa melihat distribusi lengkap termasuk pending & cancelled
-        // =============================================
         $paymentStatuses = Order::query()
             ->tap($applyBase)
             ->select('orders.status', DB::raw('COUNT(*) as total'))
@@ -309,10 +262,6 @@ class SuperAdminDashboardController extends Controller
                 'key'   => $item->status,
             ]);
 
-        // =============================================
-        // KATEGORI PER PROVINSI — Grouped Bar Horizontal
-        // Top 5 provinsi × top 5 kategori
-        // =============================================
         $top5ProvinceNames = $topProvinces->pluck('province');
 
         $cpRaw = collect();
@@ -336,17 +285,14 @@ class SuperAdminDashboardController extends Controller
                 ->get();
         }
 
-        // Top 5 kategori dari data cross-province
         $top5CatNames = $cpRaw->groupBy('category_name')
             ->map(fn($rows) => $rows->sum('total_sold'))
             ->sortDesc()
             ->take(5)
             ->keys();
 
-        // $cpProvince: list provinsi untuk sumbu Y chart
         $cpProvince = $top5ProvinceNames;
 
-        // $cpDatasets: array dataset per kategori untuk Chart.js
         $palette = ['#6366f1', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'];
         $cpDatasets = $top5CatNames->values()->map(function ($catName, $i) use ($cpRaw, $top5ProvinceNames, $palette) {
             $data = $top5ProvinceNames->map(function ($prov) use ($cpRaw, $catName) {
@@ -363,10 +309,6 @@ class SuperAdminDashboardController extends Controller
             ];
         });
 
-        // =============================================
-        // JAM TERSIBUK — Bar Chart (24 jam)
-        // Hanya dari transaksi valid
-        // =============================================
         $hourBucketSql = DB::connection()->getDriverName() === 'sqlite'
             ? "CAST(strftime('%H', orders.created_at) AS INTEGER) as hour, COUNT(*) as total"
             : 'HOUR(orders.created_at) as hour, COUNT(*) as total';
@@ -378,7 +320,6 @@ class SuperAdminDashboardController extends Controller
             ->groupBy('hour')
             ->pluck('total', 'hour');
 
-        // Buat array lengkap 0–23 jam
         $hourLabels = collect();
         $hourData   = collect();
         for ($h = 0; $h < 24; $h++) {
@@ -386,10 +327,6 @@ class SuperAdminDashboardController extends Controller
             $hourData->push((int) $hourRaw->get($h, 0));
         }
 
-        // =============================================
-        // REPEAT vs NEW CUSTOMER
-        // Hanya dari transaksi valid
-        // =============================================
         $allBuyerIds = Order::query()
             ->tap($applyBase)
             ->whereIn('orders.status', $validStatuses)
@@ -401,7 +338,6 @@ class SuperAdminDashboardController extends Controller
         $newCustomers    = 0;
 
         if ($allBuyerIds->isNotEmpty()) {
-            // Cek apakah user pernah order (valid) sebelum dateFrom
             $repeatIds = Order::whereIn('user_id', $allBuyerIds)
                 ->whereIn('status', $validStatuses)
                 ->where('created_at', '<', $dateFrom . ' 00:00:00')
@@ -413,9 +349,6 @@ class SuperAdminDashboardController extends Controller
             $newCustomers    = $allBuyerIds->count() - $repeatCustomers;
         }
 
-        // =============================================
-        // DROPDOWN OPTIONS
-        // =============================================
         $provinceOptions = collect()
             ->merge(DB::table('order_shipping_snapshots')
                 ->join('orders', 'order_shipping_snapshots.order_id', '=', 'orders.id')
@@ -449,12 +382,10 @@ class SuperAdminDashboardController extends Controller
             'repeatCustomers', 'newCustomers',
             'provinceOptions', 'categoryOptions'
         );
-        })(); // immediately invoked
+        })();
 
-        // Ekstrak semua variabel dari cache
         extract($cached);
 
-        // Sales table tidak dicache — bergantung pada halaman aktif (pagination)
         $salesTable = Order::with(['items.product.category', 'payment', 'address', 'shippingSnapshot'])
             ->tap($applyBase)
             ->addSelect([

@@ -8,13 +8,10 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-// Controller pesanan admin — index, show, updateStatus
-// View: resources/views/admin/orders/index.blade.php & show.blade.php
 class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        // [+] Tambah status baru di sini jika ada perubahan enum
         $statuses = [
             'all'        => 'Semua Status',
             'pending'    => 'Menunggu Pembayaran',
@@ -25,14 +22,11 @@ class OrderController extends Controller
             'cancelled'  => 'Dibatalkan',
         ];
 
-        // [+] Tambah relasi ke with([]) jika perlu tampilkan data dari tabel lain
         $query = Order::with(['user', 'items.product.category', 'shippingSnapshot'])->latest();
 
-        // Filter: cari berdasarkan nomor pesanan atau nama/email pembeli
-        // [+] Tambah kolom pencarian lain di dalam closure $q
         if ($request->filled('search')) {
             $search = ltrim($request->search, '#');
-            $query->where(function ($q) use ($search) {        
+            $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', '%' . $search . '%')
                   ->orWhereHas('user', function ($q) use ($search) {
                       $q->where('name', 'like', '%' . $search . '%')
@@ -41,15 +35,12 @@ class OrderController extends Controller
             });
         }
 
-        // Filter: berdasarkan status
         if ($request->filled('status') && $request->status !== 'all') {
             $query->where('status', $request->status);
         }
 
-        // [+] Ganti angka 10 untuk ubah jumlah item per halaman
         $orders = $query->paginate(10)->appends($request->except('page'));
 
-        // Query terpisah untuk menghitung stats card (tidak terpengaruh filter status)
         $statsQuery = Order::query();
         if ($request->filled('search')) {
             $search = ltrim($request->search, '#');
@@ -62,7 +53,6 @@ class OrderController extends Controller
             });
         }
 
-        // 1 query GROUP BY menggantikan 7 query COUNT terpisah
         $statsRaw = (clone $statsQuery)
             ->select('status', DB::raw('COUNT(*) as total'))
             ->groupBy('status')
@@ -78,7 +68,6 @@ class OrderController extends Controller
         ];
         $stats['all'] = array_sum($stats);
 
-        // Response AJAX — untuk refresh tabel tanpa reload halaman
         if ($request->ajax() || $request->has('ajax')) {
             $html = '';
             if ($orders->isNotEmpty()) {
@@ -109,13 +98,8 @@ class OrderController extends Controller
         return view('admin.orders.index', compact('orders', 'statuses', 'stats'));
     }
 
-    // Menghasilkan satu baris <tr> tabel pesanan untuk response AJAX
-    // Kolom: No. Pesanan | Tanggal | Pembeli | Total | Status | Aksi
-    // [+] Tambah <td> baru di sini jika perlu kolom tambahan di tabel
-    //     Jangan lupa tambahkan <th> pasangannya di index.blade.php
     private function generateOrderRow(Order $order): string
     {
-        // [+] Tambah entri baru di ketiga array ini jika ada status baru
         $statusClasses = [
             'pending'    => 'bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400',
             'paid'       => 'bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400',
@@ -151,7 +135,6 @@ class OrderController extends Controller
         $initial     = strtoupper(substr($buyerName, 0, 1));
         $itemsCount  = $order->items->count();
 
-        // Badge "BARU!" muncul jika pesanan baru dibayar dalam 2 menit terakhir
         $isNewPaid = $order->status === 'paid' && $order->paid_at && $order->paid_at->diffInMinutes(now()) < 2;
 
         return '
@@ -201,20 +184,16 @@ class OrderController extends Controller
 
     public function show(Order $order)
     {
-        // [+] Tambah nama relasi di load([]) jika perlu tampilkan data tambahan
         $order->load(['user', 'items.product.category', 'payment', 'address', 'shippingSnapshot']);
         return view('admin.orders.show', compact('order'));
     }
 
     public function updateStatus(Request $request, Order $order)
     {
-        // Hanya menerima status 'processing' — transisi: paid → processing
-        // [+] Tambah nilai di 'in:...' jika perlu izinkan transisi status lain
         $request->validate([
             'status' => ['required', 'in:processing'],
         ]);
 
-        // Jika sudah processing, anggap sukses agar admin tidak panik
         if ($order->status === 'processing') {
             return redirect()->route('admin.orders.show', $order)
                 ->with('success', 'Pesanan #' . $order->order_number . ' sudah berstatus Diproses.');
@@ -227,7 +206,6 @@ class OrderController extends Controller
 
         $previousStatus = $order->status;
 
-        // [+] Tambah kolom lain di update([]) jika perlu simpan data tambahan saat status berubah
         $order->update(['status' => 'processing']);
 
         LogHelper::record(

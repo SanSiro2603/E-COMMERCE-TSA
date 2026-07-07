@@ -16,6 +16,7 @@
     <title>@yield('title', 'Admin - E-Commerce TSA')</title>
 
     <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
         rel="stylesheet">
@@ -347,7 +348,7 @@
         <div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
 
         <!-- Navigation -->
-        <nav class="relative px-3 pt-4 pb-2 space-y-1 z-10">
+        <nav class="relative px-3 pt-4 pb-2 space-y-2 z-10">
             @foreach ($menu as $item)
                 @php $type = $item['type'] ?? 'item'; @endphp
 
@@ -427,20 +428,22 @@
         </nav>
 
         <!-- Dynamic Illustration -->
-        <div class="mt-auto relative flex items-end justify-center px-4 pb-3 z-10" style="min-height: 120px;">
+        <div class="relative flex items-end justify-center px-4 pb-4 z-10" style="height: 180px; flex-shrink: 0;">
             @if($activeMenu['image'])
                 <img
                     id="sidebar-feature-image"
                     src="{{ asset($activeMenu['image']) }}"
                     alt="{{ $activeMenu['label'] }}"
-                    class="w-full max-h-[120px] object-contain drop-shadow-2xl">
+                    class="w-full max-h-[160px] object-contain drop-shadow-2xl">
+            @else
+                <div id="sidebar-feature-image" class="w-full"></div>
             @endif
         </div>
 
         </div>{{-- end scrollable area --}}
 
         <!-- Footer User -->
-        <div class="relative px-4 py-4 border-t border-white/10 z-10">
+        <div class="relative flex-shrink-0 px-4 py-4 border-t border-white/10 z-10">
             <div class="flex items-center gap-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl p-3">
 
                 <div class="w-11 h-11 rounded-full bg-gradient-to-br from-green-400 to-lime-300 text-black font-bold flex items-center justify-center shadow-lg shadow-green-500/30 flex-shrink-0">
