@@ -21,11 +21,11 @@ class ProfileController extends Controller
         $user->orders_count = Order::where('user_id', $user->id)->count();
 
         $user->completed_orders = Order::where('user_id', $user->id)
-            ->where('status', 'completed')
+            ->whereIn('status', ['paid', 'processing', 'shipped', 'completed'])
             ->count();
 
         $user->total_spent = Order::where('user_id', $user->id)
-            ->where('status', 'completed')
+            ->whereIn('status', ['paid', 'processing', 'shipped', 'completed'])
             ->sum('grand_total');
 
         return view('pembeli.profile.show', compact('user'));

@@ -19,7 +19,7 @@ class PembeliDashboardController extends Controller
         $totalOrders = $user->orders()->count();
         $pendingOrders = $user->orders()->where('status', 'pending')->count();
         $shippedOrders = $user->orders()->where('status', 'shipped')->count();
-        $completedOrders = $user->orders()->where('status', 'completed')->count();
+        $completedOrders = $user->orders()->whereIn('status', ['paid', 'processing', 'shipped', 'completed'])->count();
 
         // Pesanan terbaru
         $recentOrders = $user->orders()
