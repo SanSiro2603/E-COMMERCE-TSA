@@ -276,36 +276,56 @@
         @php
             $menu = [
                 [
+                    'type'  => 'item',
                     'route' => 'admin.dashboard',
                     'icon'  => 'dashboard',
                     'label' => 'Dashboard',
                     'image' => 'images/sidebar/dashboard.png',
                 ],
                 [
+                    'type'  => 'item',
                     'route' => 'admin.categories.index',
                     'icon'  => 'category',
                     'label' => 'Kategori',
                     'image' => 'images/sidebar/kategori.png',
                 ],
                 [
+                    'type'  => 'item',
                     'route' => 'admin.products.index',
                     'icon'  => 'inventory_2',
                     'label' => 'Produk',
                     'image' => 'images/sidebar/produk.png',
                 ],
                 [
+                    'type'  => 'item',
                     'route' => 'admin.orders.index',
                     'icon'  => 'shopping_cart',
                     'label' => 'Pesanan',
                     'image' => 'images/sidebar/manajemen-pesanan.png',
                 ],
                 [
+                    'type'  => 'item',
                     'route' => 'admin.reports.index',
                     'icon'  => 'analytics',
                     'label' => 'Laporan',
                     'image' => 'images/sidebar/laporan.png',
                 ],
                 [
+                    'type'     => 'group',
+                    'icon'     => 'web',
+                    'label'    => 'CMS Landing',
+                    'image'    => null,
+                    'match'    => 'admin.landing.*',
+                    'children' => [
+                        ['route' => 'admin.landing.home.index', 'label' => 'Home',           'icon' => 'home'],
+                        ['route' => null,                       'label' => 'About',          'icon' => 'info',          'soon' => true],
+                        ['route' => null,                       'label' => 'Gallery',        'icon' => 'photo_library', 'soon' => true],
+                        ['route' => null,                       'label' => 'Informasi',      'icon' => 'description',   'soon' => true],
+                        ['route' => null,                       'label' => 'Future Projects','icon' => 'rocket_launch', 'soon' => true],
+                    ],
+                ],
+                [
+                    'type'  => 'item',
                     'route' => 'admin.settings.index',
                     'icon'  => 'settings',
                     'label' => 'Pengaturan',
@@ -313,53 +333,111 @@
                 ],
             ];
 
-            $activeMenu = collect($menu)->first(fn($item) => request()->routeIs($item['route'].'*'))
-                ?? $menu[0];
+            $isCmsActive = request()->routeIs('admin.landing.*');
+
+            $activeMenu = collect($menu)->first(function ($item) {
+                if (($item['type'] ?? 'item') === 'group') {
+                    return request()->routeIs($item['match'] ?? '__none__');
+                }
+                return request()->routeIs($item['route'] . '*');
+            }) ?? $menu[0];
         @endphp
 
+        <!-- Scrollable area: nav + illustration -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+
         <!-- Navigation -->
-        <nav class="relative px-3 pt-4 pb-2 space-y-2 z-10">
+        <nav class="relative px-3 pt-4 pb-2 space-y-1 z-10">
             @foreach ($menu as $item)
-                @php
-                    // Dashboard dicek exact, yang lain pakai prefix grup
-                    if ($item['route'] === 'admin.dashboard') {
-                        $active = request()->routeIs('admin.dashboard');
-                    } else {
-                        $routePrefix = implode('.', array_slice(explode('.', $item['route']), 0, 2));
-                        $active = request()->routeIs($routePrefix . '.*');
-                    }
-                @endphp
+                @php $type = $item['type'] ?? 'item'; @endphp
 
-                <a href="{{ route($item['route']) }}"
-                    class="group relative flex items-center gap-3 px-4 py-3 rounded-none transition-all duration-300 overflow-hidden
-                        {{ $active
-                            ? 'bg-gradient-to-r from-green-500 to-green-400 text-white shadow-[0_10px_30px_rgba(114,226,54,0.35)]'
-                            : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
+                @if ($type === 'item')
+                    @php
+                        if ($item['route'] === 'admin.dashboard') {
+                            $active = request()->routeIs('admin.dashboard');
+                        } else {
+                            $routePrefix = implode('.', array_slice(explode('.', $item['route']), 0, 2));
+                            $active = request()->routeIs($routePrefix . '.*');
+                        }
+                    @endphp
 
-                    @if ($active)
-                        <div class="absolute inset-0 bg-white/10 backdrop-blur-xl pointer-events-none"></div>
-                    @endif
+                    <a href="{{ route($item['route']) }}"
+                        class="group relative flex items-center gap-3 px-4 py-3 rounded-none transition-all duration-300 overflow-hidden
+                            {{ $active
+                                ? 'bg-gradient-to-r from-green-500 to-green-400 text-white shadow-[0_10px_30px_rgba(114,226,54,0.35)]'
+                                : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
+                        @if ($active)
+                            <div class="absolute inset-0 bg-white/10 backdrop-blur-xl pointer-events-none"></div>
+                        @endif
+                        <div class="relative z-10 flex items-center gap-3">
+                            <span class="material-symbols-outlined text-[21px]">{{ $item['icon'] }}</span>
+                            <span class="text-[14px] font-semibold tracking-wide">{{ $item['label'] }}</span>
+                        </div>
+                    </a>
 
-                    <div class="relative z-10 flex items-center gap-3">
-                        <span class="material-symbols-outlined text-[21px]">{{ $item['icon'] }}</span>
-                        <span class="text-[14px] font-semibold tracking-wide">{{ $item['label'] }}</span>
+                @elseif ($type === 'group')
+                    <div x-data="{ open: {{ $isCmsActive ? 'true' : 'false' }} }">
+                        {{-- Group toggle button --}}
+                        <button @click="open = !open"
+                                class="w-full group relative flex items-center justify-between gap-3 px-4 py-3 rounded-none transition-all duration-300
+                                       {{ $isCmsActive ? 'text-white' : 'text-white/75 hover:bg-white/10 hover:text-white' }}">
+                            @if ($isCmsActive)
+                                <div class="absolute inset-0 bg-white/5 pointer-events-none"></div>
+                            @endif
+                            <div class="relative z-10 flex items-center gap-3">
+                                <span class="material-symbols-outlined text-[21px]">{{ $item['icon'] }}</span>
+                                <span class="text-[14px] font-semibold tracking-wide">{{ $item['label'] }}</span>
+                            </div>
+                            <span class="relative z-10 material-symbols-outlined text-[16px] transition-transform duration-200"
+                                  :class="open ? 'rotate-180' : ''">expand_more</span>
+                        </button>
+
+                        {{-- Sub-items --}}
+                        <div x-show="open"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 -translate-y-1"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 -translate-y-1"
+                             class="ml-4 pl-3 border-l border-white/10 space-y-0.5 mt-0.5 mb-1">
+                            @foreach ($item['children'] as $child)
+                                @php
+                                    $childActive = $child['route'] && request()->routeIs($child['route'] . '*');
+                                @endphp
+                                @if ($child['route'])
+                                    <a href="{{ route($child['route']) }}"
+                                       class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium transition-all duration-200
+                                              {{ $childActive ? 'bg-green-500/20 text-green-300' : 'text-white/60 hover:bg-white/8 hover:text-white' }}">
+                                        <span class="material-symbols-outlined text-[16px]">{{ $child['icon'] }}</span>
+                                        {{ $child['label'] }}
+                                    </a>
+                                @else
+                                    <span class="flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-white/30 cursor-not-allowed select-none">
+                                        <span class="material-symbols-outlined text-[16px]">{{ $child['icon'] }}</span>
+                                        {{ $child['label'] }}
+                                        <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-white/40">Soon</span>
+                                    </span>
+                                @endif
+                            @endforeach
+                        </div>
                     </div>
-                </a>
+                @endif
             @endforeach
         </nav>
 
         <!-- Dynamic Illustration -->
-        <div class="relative flex items-end justify-center px-4 pb-4 z-10" style="height: 180px; flex-shrink: 0;">
+        <div class="mt-auto relative flex items-end justify-center px-4 pb-3 z-10" style="min-height: 120px;">
             @if($activeMenu['image'])
                 <img
                     id="sidebar-feature-image"
                     src="{{ asset($activeMenu['image']) }}"
                     alt="{{ $activeMenu['label'] }}"
-                    class="w-full max-h-[160px] object-contain drop-shadow-2xl">
-            @else
-                <div id="sidebar-feature-image" class="w-full"></div>
+                    class="w-full max-h-[120px] object-contain drop-shadow-2xl">
             @endif
         </div>
+
+        </div>{{-- end scrollable area --}}
 
         <!-- Footer User -->
         <div class="relative px-4 py-4 border-t border-white/10 z-10">
