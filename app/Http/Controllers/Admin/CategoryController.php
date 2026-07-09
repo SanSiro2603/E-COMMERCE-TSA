@@ -144,6 +144,11 @@ class CategoryController extends Controller
             $message .= ' ' . count($skipped) . ' dilewati karena nama sudah ada: ' . implode(', ', $skipped) . '.';
         }
 
+        if ($saved > 0) {
+            $parentName = Category::find($request->parent_id)?->name ?? '-';
+            LogHelper::record('Tambah Sub Kategori', "Menambahkan {$saved} sub kategori baru di bawah kategori: {$parentName}");
+        }
+
         return redirect()->route('admin.categories.index')
             ->with('success', $message);
     }
@@ -251,11 +256,13 @@ class CategoryController extends Controller
             case 'activate':
                 Category::whereIn('id', $ids)->update(['is_active' => true]);
                 $message = count($ids) . ' kategori berhasil diaktifkan.';
+                LogHelper::record('Aktifkan Kategori', "Mengaktifkan " . count($ids) . " kategori/sub kategori sekaligus (ID: " . implode(', ', $ids) . ')');
                 break;
 
             case 'deactivate':
                 Category::whereIn('id', $ids)->update(['is_active' => false]);
                 $message = count($ids) . ' kategori berhasil dinonaktifkan.';
+                LogHelper::record('Nonaktifkan Kategori', "Menonaktifkan " . count($ids) . " kategori/sub kategori sekaligus (ID: " . implode(', ', $ids) . ')');
                 break;
 
             case 'delete':
@@ -284,6 +291,10 @@ class CategoryController extends Controller
                     $message = "{$deleted} kategori dihapus. {$skipped} dilewati (masih punya sub-kategori).";
                 } else {
                     $message = "{$deleted} kategori berhasil dihapus.";
+                }
+
+                if ($deleted > 0) {
+                    LogHelper::record('Hapus Kategori (Bulk)', "Menghapus {$deleted} kategori/sub kategori sekaligus.");
                 }
                 break;
 

@@ -163,7 +163,7 @@
 
     <!-- Log Aktivitas Admin Section -->
     <div class="mt-8">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Log Aktivitas Terbaru (50 Terakhir)</h3>
+        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Log Aktivitas Admin</h3>
         <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-soft border border-gray-100 dark:border-zinc-800 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full">
@@ -207,9 +207,16 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- Pagination -->
+            @if($logs->hasPages())
+            <div class="px-6 py-4 border-t border-gray-100 dark:border-zinc-800">
+                {{ $logs->links() }}
+            </div>
+            @endif
         </div>
     </div>
-    
+
 </div>
 @endsection
 

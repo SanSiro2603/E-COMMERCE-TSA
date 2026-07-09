@@ -30,7 +30,7 @@ class AdminManagementController extends Controller
         $admins = $query->latest()
             ->paginate(10);
 
-        $logs = AdminLog::with('user')->latest()->limit(50)->get();
+        $logs = AdminLog::with('user')->latest()->paginate(15, ['*'], 'logs_page');
 
         return view('superadmin.admins.index', compact('admins', 'logs'));
     }
