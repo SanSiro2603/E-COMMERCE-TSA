@@ -11,6 +11,7 @@ use App\Models\Order;
 
 class ProfileController extends Controller
 {
+
     public function show()
     {
         /** @var User $user */
@@ -24,11 +25,12 @@ class ProfileController extends Controller
             ->count();
 
         $user->total_spent = Order::where('user_id', $user->id)
-            ->whereIn('status', ['paid', 'processing', 'shipped', 'completed'])
+            ->where('status', 'completed')
             ->sum('grand_total');
 
         return view('pembeli.profile.show', compact('user'));
     }
+
 
     public function edit()
     {
@@ -45,14 +47,13 @@ class ProfileController extends Controller
             'birth_date' => 'nullable|date',
             'profile_photo' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ]);
-
         /** @var User $user */
         $user = Auth::user();
 
-        // Upload foto
+        // upload foto
         if ($request->hasFile('profile_photo')) {
 
-            // Hapus foto lama
+            // hapus foto lama (optional)
             if ($user->profile_photo) {
                 Storage::delete('public/' . $user->profile_photo);
             }
@@ -73,4 +74,5 @@ class ProfileController extends Controller
         return redirect()->route('pembeli.profile.show')
             ->with('success', 'Profil berhasil diupdate');
     }
+
 }
