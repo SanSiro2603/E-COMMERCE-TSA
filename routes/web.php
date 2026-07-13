@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\BiteshipController;
+use App\Http\Controllers\Admin\LandingHomeController;
 
 // =========================
 // PEMBELI
@@ -185,6 +186,27 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
         // Settings
         Route::get('/settings', [SettingsController::class, 'index'])->name('settings.index');
         Route::post('/settings', [SettingsController::class, 'update'])->name('settings.update');
+
+        // CMS Landing Page
+        Route::prefix('landing')->name('landing.')->group(function () {
+
+            // Home
+            Route::get('/home', [LandingHomeController::class, 'index'])->name('home.index');
+            Route::post('/home/settings', [LandingHomeController::class, 'updateSettings'])->name('home.settings.update');
+
+            // Hero Slides
+            Route::post('/home/slides', [LandingHomeController::class, 'storeSlide'])->name('home.slides.store');
+            Route::put('/home/slides/{slide}', [LandingHomeController::class, 'updateSlide'])->name('home.slides.update');
+            Route::delete('/home/slides/{slide}', [LandingHomeController::class, 'destroySlide'])->name('home.slides.destroy');
+            Route::patch('/home/slides/{slide}/toggle', [LandingHomeController::class, 'toggleSlide'])->name('home.slides.toggle');
+
+            // Catalog Cards
+            Route::post('/home/catalog-cards', [LandingHomeController::class, 'storeCatalogCard'])->name('home.catalog-cards.store');
+            Route::put('/home/catalog-cards/{card}', [LandingHomeController::class, 'updateCatalogCard'])->name('home.catalog-cards.update');
+            Route::delete('/home/catalog-cards/{card}', [LandingHomeController::class, 'destroyCatalogCard'])->name('home.catalog-cards.destroy');
+            Route::patch('/home/catalog-cards/{card}/toggle', [LandingHomeController::class, 'toggleCatalogCard'])->name('home.catalog-cards.toggle');
+
+        });
 
     });
 

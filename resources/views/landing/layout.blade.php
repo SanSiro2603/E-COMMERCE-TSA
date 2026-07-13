@@ -167,6 +167,20 @@
     @php
         $isInformationRoute = request()->routeIs('landing.information.*');
         $locale = app()->getLocale() === 'id' ? 'id' : 'en';
+
+        $siteSettings = \App\Models\SystemSetting::whereIn('key', [
+            'site_phone_1', 'site_phone_2', 'site_email', 'site_address',
+            'social_facebook', 'social_instagram', 'social_youtube', 'social_whatsapp',
+        ])->pluck('value', 'key');
+
+        $phone1    = $siteSettings['site_phone_1']    ?? '+62721 8050354';
+        $phone2    = $siteSettings['site_phone_2']    ?? '+6282183948148';
+        $email     = $siteSettings['site_email']      ?? 'pt.tsalampung@gmail.com';
+        $address   = $siteSettings['site_address']    ?? 'JL. Raden Imba Kusumaratu, NO: 22, RT: 005, Lk.I, Sukadana Ham, Tanjung Karang Barat, Bandar Lampung, Lampung, Indonesia.';
+        $fbUrl     = $siteSettings['social_facebook']  ?? '#';
+        $igUrl     = $siteSettings['social_instagram'] ?? '#';
+        $ytUrl     = $siteSettings['social_youtube']   ?? '#';
+        $waNumber  = $siteSettings['social_whatsapp']  ?? '6282183948148';
     @endphp
 
     {{-- ─── Main header ─────────────────────────────────────────── --}}
@@ -355,12 +369,57 @@
                     </div>
                 </div>
 
-                {{-- Login button (desktop) --}}
-                <a href="{{ route('login') }}"
-                   class="hidden items-center gap-2 rounded-lg bg-tsa-green px-4 py-2 text-[13px] font-bold text-white shadow-sm transition-colors duration-150 hover:bg-tsa-greenDark lg:inline-flex">
-                    <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                    Login
-                </a>
+                {{-- Auth area (desktop) --}}
+                @auth
+                    <div class="relative hidden lg:block" x-data="{ userOpen: false }" @click.outside="userOpen = false">
+                        <button type="button" @click="userOpen = !userOpen"
+                                class="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-[13px] font-bold text-slate-700 shadow-sm transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">
+                            <span class="flex h-6 w-6 items-center justify-center rounded-full bg-tsa-green text-[11px] font-extrabold text-white">
+                                {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                            </span>
+                            <span class="max-w-[100px] truncate">{{ Auth::user()->name }}</span>
+                            <svg class="h-3.5 w-3.5 transition-transform duration-150" :class="userOpen ? 'rotate-180' : ''" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/></svg>
+                        </button>
+
+                        <div x-show="userOpen"
+                             x-transition:enter="transition ease-out duration-150"
+                             x-transition:enter-start="opacity-0 translate-y-1"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             x-transition:leave="transition ease-in duration-100"
+                             x-transition:leave-start="opacity-100 translate-y-0"
+                             x-transition:leave-end="opacity-0 translate-y-1"
+                             class="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-xl border border-slate-100 bg-white shadow-xl shadow-slate-200/60">
+                            @if(Auth::user()->role === 'admin' || Auth::user()->role === 'super_admin')
+                            <a href="{{ route('admin.dashboard') }}"
+                               class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">
+                                <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-tsa-green"><path d="M2 10a8 8 0 1116 0 8 8 0 01-16 0zm8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 10a3.001 3.001 0 01-2 2.83V15a1 1 0 11-2 0v-2.17A3.001 3.001 0 017 10a1 1 0 112 0 1 1 0 001 1 1 1 0 001-1 1 1 0 00-1-1z"/></svg>
+                                Dashboard Admin
+                            </a>
+                            @else
+                            <a href="{{ route('pembeli.dashboard') ?? '#' }}"
+                               class="flex items-center gap-2 px-4 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-tsa-soft hover:text-tsa-greenDark">
+                                <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4 text-tsa-green"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/></svg>
+                                Dashboard
+                            </a>
+                            @endif
+                            <div class="border-t border-slate-100"></div>
+                            <form action="{{ route('logout') }}" method="POST">
+                                @csrf
+                                <button type="submit"
+                                        class="flex w-full items-center gap-2 px-4 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-50">
+                                    <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>
+                                    Logout
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="hidden items-center gap-2 rounded-lg bg-tsa-green px-4 py-2 text-[13px] font-bold text-white shadow-sm transition-colors duration-150 hover:bg-tsa-greenDark lg:inline-flex">
+                        <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                        Login
+                    </a>
+                @endauth
 
                 <button type="button" @click="mobileOpen = !mobileOpen"
                         class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-700 transition-colors duration-150 hover:bg-slate-50 lg:hidden"
@@ -462,11 +521,29 @@
                     </div>
                 </div>
 
-                <div class="pt-2">
-                    <a href="{{ route('login') }}" class="flex w-full items-center justify-center gap-2 rounded-lg bg-tsa-green py-2.5 text-sm font-bold text-white transition-colors hover:bg-tsa-greenDark">
-                        <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-                        Login
-                    </a>
+                <div class="pt-2 space-y-2">
+                    @auth
+                        @if(Auth::user()->role === 'admin' || Auth::user()->role === 'super_admin')
+                        <a href="{{ route('admin.dashboard') }}"
+                           class="flex w-full items-center justify-center gap-2 rounded-lg border border-tsa-green py-2.5 text-sm font-bold text-tsa-greenDark transition-colors hover:bg-tsa-soft">
+                            <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path d="M2 10a8 8 0 1116 0 8 8 0 01-16 0zm8-3a1 1 0 00-.867.5 1 1 0 11-1.731-1A3 3 0 0113 10a3.001 3.001 0 01-2 2.83V15a1 1 0 11-2 0v-2.17A3.001 3.001 0 017 10a1 1 0 112 0 1 1 0 001 1 1 1 0 001-1 1 1 0 00-1-1z"/></svg>
+                            Dashboard Admin
+                        </a>
+                        @endif
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit"
+                                    class="flex w-full items-center justify-center gap-2 rounded-lg bg-red-500 py-2.5 text-sm font-bold text-white transition-colors hover:bg-red-600">
+                                <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd"/></svg>
+                                Logout
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('login') }}" class="flex w-full items-center justify-center gap-2 rounded-lg bg-tsa-green py-2.5 text-sm font-bold text-white transition-colors hover:bg-tsa-greenDark">
+                            <svg viewBox="0 0 20 20" fill="currentColor" class="h-4 w-4"><path fill-rule="evenodd" d="M3 3a1 1 0 011 1v12a1 1 0 11-2 0V4a1 1 0 011-1zm7.707 3.293a1 1 0 010 1.414L9.414 9H17a1 1 0 110 2H9.414l1.293 1.293a1 1 0 01-1.414 1.414l-3-3a1 1 0 010-1.414l3-3a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                            Login
+                        </a>
+                    @endauth
                 </div>
             </nav>
         </div>
@@ -497,16 +574,16 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <a href="#" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20" aria-label="Facebook">
+                    <a href="{{ $fbUrl ?: '#' }}" @if($fbUrl && $fbUrl !== '#') target="_blank" rel="noopener" @endif class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20" aria-label="Facebook">
                         <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M13.5 21v-8h2.7l.4-3h-3.1V8.2c0-.9.3-1.5 1.6-1.5h1.7V4c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5V10H7v3h2.7v8h3.8z"/></svg>
                     </a>
-                    <a href="#" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20" aria-label="Instagram">
+                    <a href="{{ $igUrl ?: '#' }}" @if($igUrl && $igUrl !== '#') target="_blank" rel="noopener" @endif class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20" aria-label="Instagram">
                         <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M12 7a5 5 0 100 10 5 5 0 000-10zm0 8.3A3.3 3.3 0 1112 8.7a3.3 3.3 0 010 6.6zm6.3-8.5a1.2 1.2 0 11-2.4 0 1.2 1.2 0 012.4 0zM12 2.9c2.9 0 3.3 0 4.5.1 1 .1 1.6.2 2 .4.5.2.9.4 1.3.8.4.4.6.8.8 1.3.2.4.3 1 .4 2 .1 1.2.1 1.6.1 4.5s0 3.3-.1 4.5c-.1 1-.2 1.6-.4 2a3.8 3.8 0 01-2.1 2.1c-.4.2-1 .3-2 .4-1.2.1-1.6.1-4.5.1s-3.3 0-4.5-.1c-1-.1-1.6-.2-2-.4a3.8 3.8 0 01-2.1-2.1c-.2-.4-.3-1-.4-2C2.9 15.3 2.9 14.9 2.9 12s0-3.3.1-4.5c.1-1 .2-1.6.4-2 .2-.5.4-.9.8-1.3.4-.4.8-.6 1.3-.8.4-.2 1-.3 2-.4 1.2-.1 1.6-.1 4.5-.1zm0-1.7c-2.9 0-3.3 0-4.6.1-1.3.1-2.2.3-3 .6-.8.3-1.5.7-2.1 1.3A5.5 5.5 0 001.2 5.3c-.3.8-.5 1.7-.6 3C.5 9.6.5 10 .5 12c0 2 .1 2.4.1 3.7.1 1.3.3 2.2.6 3 .3.8.7 1.5 1.3 2.1.6.6 1.3 1 2.1 1.3.8.3 1.7.5 3 .6 1.3.1 1.7.1 3.7.1s2.4-.1 3.7-.1c1.3-.1 2.2-.3 3-.6.8-.3 1.5-.7 2.1-1.3.6-.6 1-1.3 1.3-2.1.3-.8.5-1.7.6-3 .1-1.3.1-1.7.1-3.7s-.1-2.4-.1-3.7c-.1-1.3-.3-2.2-.6-3-.3-.8-.7-1.5-1.3-2.1-.6-.6-1.3-1-2.1-1.3-.8-.3-1.7-.5-3-.6-1.3-.1-1.7-.1-3.7-.1z"/></svg>
                     </a>
-                    <a href="#" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20" aria-label="YouTube">
+                    <a href="{{ $ytUrl ?: '#' }}" @if($ytUrl && $ytUrl !== '#') target="_blank" rel="noopener" @endif class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20" aria-label="YouTube">
                         <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M23 7.5a3 3 0 00-2.1-2.1C19 5 12 5 12 5s-7 0-8.9.4A3 3 0 001 7.5 31.2 31.2 0 001 12a31.2 31.2 0 00.1 4.5 3 3 0 002.1 2.1C5 19 12 19 12 19s7 0 8.9-.4a3 3 0 002.1-2.1c.1-1.5.1-3 .1-4.5s0-3-.1-4.5zM9.8 15.1V8.9l5.4 3.1-5.4 3.1z"/></svg>
                     </a>
-                    <a href="#" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20" aria-label="WhatsApp">
+                    <a href="https://wa.me/{{ $waNumber }}" target="_blank" rel="noopener" class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/10 transition-colors hover:bg-white/20" aria-label="WhatsApp">
                         <svg viewBox="0 0 24 24" class="h-4 w-4" fill="currentColor"><path d="M12 2a9.9 9.9 0 00-8.4 15.1L2 22l5-1.5A9.9 9.9 0 1012 2zm0 18a8.1 8.1 0 01-4.2-1.2l-.3-.2-3 .9.9-2.9-.2-.3A8.1 8.1 0 1112 20zm4.5-6.1c-.2-.1-1.3-.6-1.5-.7-.2-.1-.3-.1-.4.1-.1.2-.6.7-.7.8-.1.1-.2.1-.4 0-1.1-.5-1.8-1-2.5-2.2-.2-.2 0-.3.1-.5.1-.1.2-.2.3-.3.1-.1.1-.2.2-.3.1-.1 0-.3 0-.4 0-.1-.4-1.1-.6-1.6-.2-.4-.3-.4-.4-.4h-.4c-.1 0-.4.1-.6.3-.2.2-.8.7-.8 1.7s.8 2 1 2.3c.1.2 1.4 2.2 3.4 3.1 2 .9 2 .6 2.4.6.4 0 1.3-.5 1.4-1 .2-.5.2-1 .1-1 0-.1-.2-.2-.4-.3z"/></svg>
                     </a>
                 </div>
@@ -517,27 +594,31 @@
                 <section>
                     <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-tsa-green">Get In Touch</h2>
                     <ul class="space-y-2.5 text-sm leading-relaxed text-white/80">
+                        @if($phone1)
                         <li class="flex items-center gap-2">
                             <svg class="h-3.5 w-3.5 shrink-0 text-tsa-green" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
-                            +62721 8050354
+                            {{ $phone1 }}
                         </li>
+                        @endif
+                        @if($phone2)
                         <li class="flex items-center gap-2">
                             <svg class="h-3.5 w-3.5 shrink-0 text-tsa-green" viewBox="0 0 20 20" fill="currentColor"><path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/></svg>
-                            +6282183948148
+                            {{ $phone2 }}
                         </li>
+                        @endif
+                        @if($email)
                         <li class="flex items-center gap-2">
                             <svg class="h-3.5 w-3.5 shrink-0 text-tsa-green" viewBox="0 0 20 20" fill="currentColor"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/></svg>
-                            pt.tsalampung@gmail.com
+                            {{ $email }}
                         </li>
+                        @endif
                     </ul>
                 </section>
 
                 <section>
                     <h2 class="mb-4 text-xs font-semibold uppercase tracking-widest text-tsa-green">Address</h2>
                     <p class="text-sm leading-relaxed text-white/80">
-                        JL. Raden Imba Kusumaratu, NO: 22, RT: 005, Lk.I,<br>
-                        Sukadana Ham, Tanjung Karang Barat,<br>
-                        Bandar Lampung, Lampung, Indonesia.
+                        {!! nl2br(e($address)) !!}
                     </p>
                 </section>
 
@@ -564,7 +645,7 @@
     </footer>
 
     {{-- ─── WhatsApp floating button ──────────────────────────── --}}
-    <a href="https://wa.me/6282183948148"
+    <a href="https://wa.me/{{ $waNumber }}"
        target="_blank"
        rel="noopener noreferrer"
        aria-label="Chat via WhatsApp"

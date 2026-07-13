@@ -30,7 +30,7 @@ class AdminManagementController extends Controller
         $admins = $query->latest()
             ->paginate(10);
 
-        $logs = AdminLog::with('user')->latest()->limit(50)->get();
+        $logs = AdminLog::with('user')->latest()->paginate(15, ['*'], 'logs_page');
 
         return view('superadmin.admins.index', compact('admins', 'logs'));
     }
@@ -97,6 +97,8 @@ class AdminManagementController extends Controller
             'address' => ['nullable', 'string'],
         ]);
 
+        $emailChanged = $admin->email !== $validated['email'];
+
         $admin->update([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -106,6 +108,11 @@ class AdminManagementController extends Controller
 
         if ($request->filled('password')) {
             $admin->update(['password' => Hash::make($validated['password'])]);
+        }
+
+        if ($emailChanged) {
+            $admin->update(['google2fa_secret' => null]);
+            LogHelper::record('Reset 2FA', "2FA otomatis di-reset untuk admin {$admin->email} karena email diubah");
         }
 
         LogHelper::record('Update Admin', "Memperbarui data admin: {$admin->email}");

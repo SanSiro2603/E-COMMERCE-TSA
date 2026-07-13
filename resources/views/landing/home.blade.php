@@ -40,37 +40,46 @@
     <section class="bg-tsa-soft py-16 sm:py-20">
         <div class="mx-auto w-[94%] max-w-[1240px]">
             <div class="mx-auto max-w-3xl text-center reveal-up" data-reveal>
-                <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-tsa-greenDark">Our Catalog</p>
+                <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-tsa-greenDark">
+                    {{ $settings['home_catalog_label'] ?? 'Our Catalog' }}
+                </p>
                 <h2 class="line-mask mt-2 text-4xl font-extrabold text-slate-900 sm:text-5xl" data-line-reveal>
-                    <span class="line-mask-inner">Explore Our Main Categories</span>
+                    <span class="line-mask-inner">{{ $settings['home_catalog_heading'] ?? 'Explore Our Main Categories' }}</span>
                 </h2>
             </div>
 
-            @php
-                $catalogCards = [
-                    ['key' => 'aves', 'title' => 'Aves', 'desc' => 'Beautiful and healthy birds with excellent care and certification.', 'img' => asset('images/nicobar-pigeon.png')],
-                    ['key' => 'mammals', 'title' => 'Mamalia', 'desc' => 'High-quality mammals from trusted breeding and conservation programs.', 'img' => asset('images/binturong.png')],
-                    ['key' => 'reptiles', 'title' => 'Reptil', 'desc' => 'Healthy and unique reptiles with excellent care and certification.', 'img' => asset('images/reptil.jpeg')],
-                    ['key' => 'hybrid', 'title' => 'Hybrid & Mutation', 'desc' => 'Special hybrid and mutation animals with rare and unique characteristics.', 'img' => asset('images/hybrid.jpeg')],
-                ];
-            @endphp
-
             <div class="mt-10 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-                @foreach ($catalogCards as $card)
+                @forelse($catalogCards as $card)
                     <article class="reveal-up delay-{{ $loop->iteration }} zoom-soft flex h-full flex-col overflow-hidden rounded-md border border-slate-200 bg-white text-center shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-md" data-reveal>
-                        <img src="{{ $card['img'] }}" alt="{{ $card['title'] }} category" class="h-80 w-full object-cover">
+                        <img src="{{ $card->image_url }}" alt="{{ $card->title }} category" class="h-80 w-full object-cover">
                         <div class="flex flex-1 flex-col px-6 pb-7 pt-6">
-                            <h3 class="text-3xl font-extrabold uppercase text-tsa-greenDark">{{ $card['title'] }}</h3>
-                            <p class="mt-4 text-xl leading-relaxed text-slate-700">{{ $card['desc'] }}</p>
-                            <a href="{{ route('landing.catalog', ['category' => $card['key']]) }}" class="mt-auto pt-6 inline-flex justify-center text-xl font-extrabold text-tsa-greenDark transition hover:text-tsa-green">View Catalog &rarr;</a>
+                            <h3 class="text-3xl font-extrabold uppercase text-tsa-greenDark">{{ $card->title }}</h3>
+                            <p class="mt-4 text-xl leading-relaxed text-slate-700">{{ $card->description }}</p>
+                            <a href="{{ route('landing.catalog', ['category' => $card->catalog_key]) }}" class="mt-auto pt-6 inline-flex justify-center text-xl font-extrabold text-tsa-greenDark transition hover:text-tsa-green">View Catalog &rarr;</a>
                         </div>
                     </article>
-                @endforeach
+                @empty
+                    <div class="col-span-4 py-16 text-center text-slate-400">
+                        Konten catalog sedang dipersiapkan.
+                    </div>
+                @endforelse
             </div>
         </div>
     </section>
 
 @endsection
+
+@php
+    $slidesJson = $slides->map(function ($s) {
+        return [
+            'image'       => $s->image_url,
+            'position'    => $s->bg_position,
+            'titleTop'    => $s->title_top,
+            'titleBottom' => $s->title_bottom,
+            'copy'        => $s->copy,
+        ];
+    });
+@endphp
 
 @push('scripts')
     <script>
@@ -82,30 +91,9 @@
                 timer: null,
                 intervalMs: 4500,
                 reduced,
-                slides: [
-                    {
-                        image: '{{ asset('images/about-banner-nicobar-pigeon.png') }}',
-                        position: '62% center',
-                        titleTop: 'PT. Tunas Sejahtera',
-                        titleBottom: 'Adhiperkasa',
-                        copy: 'We are a Breeding Company that focuses on Birds, Mammals, and Reptiles that supplies Domestic and International needs (Export-Import) with official permits and legality from the Indonesian government'
-                    },
-                    {
-                        image: '{{ asset('images/hero-iguana.jpeg') }}',
-                        position: '68% center',
-                        titleTop: 'PT. Tunas Sejahtera',
-                        titleBottom: 'Adhiperkasa',
-                        copy: 'We are a Breeding Company that focuses on Birds, Mammals, and Reptiles that supplies Domestic and International needs (Export-Import) with official permits and legality from the Indonesian government'
-                    },
-                    {
-                        image: '{{ asset('images/hero-macaw.jpeg') }}',
-                        position: '70% center',
-                        titleTop: 'PT. Tunas Sejahtera',
-                        titleBottom: 'Adhiperkasa',
-                        copy: 'We are a Breeding Company that focuses on Birds, Mammals, and Reptiles that supplies Domestic and International needs (Export-Import) with official permits and legality from the Indonesian government'
-                    }
-                ],
+                slides: @json($slidesJson),
                 init() {
+                    if (!this.slides.length) return;
                     this.syncActiveFromClock();
                     if (!this.reduced) this.resume();
                 },
@@ -123,7 +111,7 @@
                     if (!this.reduced) this.resume();
                 },
                 get currentSlide() {
-                    return this.slides[this.active] || this.slides[0];
+                    return this.slides[this.active] || { titleTop: '', titleBottom: '', copy: '' };
                 },
                 pause() {
                     if (this.timer) {
@@ -138,11 +126,9 @@
                         this.syncActiveFromClock();
                         this.timer = setTimeout(tick, this.intervalMs - (Date.now() % this.intervalMs));
                     };
-
                     this.timer = setTimeout(tick, this.intervalMs - (Date.now() % this.intervalMs));
                 }
             }
         }
-
     </script>
 @endpush
