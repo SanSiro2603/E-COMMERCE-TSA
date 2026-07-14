@@ -21,7 +21,7 @@ class AdminDashboardController extends Controller
         $processingOrders = Order::where('status', 'processing')->count();
         $completedOrders  = Order::where('status', 'completed')->count();
 
-        $totalRevenue = Order::where('status', 'completed')->sum('grand_total');
+        $totalRevenue = Order::where('status', 'completed')->sum('subtotal');
         $todayRevenue = Order::where('status', 'completed')
             ->whereDate('paid_at', today())
             ->sum('grand_total');
@@ -46,8 +46,8 @@ class AdminDashboardController extends Controller
         );
 
         $revenueTrend = $this->calcTrend(
-            Order::where('status', 'completed')->whereBetween('paid_at', [$lastStart, $lastEnd])->sum('grand_total'),
-            Order::where('status', 'completed')->where('paid_at', '>=', $thisStart)->sum('grand_total')
+            Order::where('status', 'completed')->whereBetween('paid_at', [$lastStart, $lastEnd])->sum('subtotal'),
+            Order::where('status', 'completed')->where('paid_at', '>=', $thisStart)->sum('subtotal')
         );
 
         $customersTrend = $this->calcTrend(
@@ -64,14 +64,14 @@ class AdminDashboardController extends Controller
         $topProducts = Product::withSum([
         'orderItems as total_sold' => function ($query) {
             $query->whereHas('order', function ($q) {
-                $q->whereIn('status', ['paid', 'processing', 'shipped', 'completed']);
+                $q->whereIn('status', 'completed');
             });
         }
     ], 'quantity')
     ->withSum([
         'orderItems as total_revenue' => function ($query) {
             $query->whereHas('order', function ($q) {
-                $q->whereIn('status', ['paid', 'processing', 'shipped', 'completed']);
+                $q->whereIn('status', 'completed');
             });
         }
     ], 'subtotal')
@@ -156,7 +156,7 @@ class AdminDashboardController extends Controller
 
         $revenueMap = Order::where('status', 'completed')
             ->whereBetween('paid_at', [$start, now()->endOfDay()])
-            ->selectRaw('DATE(paid_at) as date, SUM(grand_total) as total')
+            ->selectRaw('DATE(paid_at) as date, SUM(subtotal) as total')
             ->groupBy('date')
             ->pluck('total', 'date');
 
