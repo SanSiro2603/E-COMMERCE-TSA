@@ -24,7 +24,7 @@ class AdminDashboardController extends Controller
         $totalRevenue = Order::where('status', 'completed')->sum('subtotal');
         $todayRevenue = Order::where('status', 'completed')
             ->whereDate('paid_at', today())
-            ->sum('grand_total');
+            ->sum('subtotal');
 
         $totalProducts    = Product::count();
         $lowStockProducts = Product::where('stock', '<=', 5)->where('is_active', true)->count();
@@ -64,14 +64,14 @@ class AdminDashboardController extends Controller
         $topProducts = Product::withSum([
         'orderItems as total_sold' => function ($query) {
             $query->whereHas('order', function ($q) {
-                $q->whereIn('status', 'completed');
+                $q->where('status', 'completed');
             });
         }
     ], 'quantity')
     ->withSum([
         'orderItems as total_revenue' => function ($query) {
             $query->whereHas('order', function ($q) {
-                $q->whereIn('status', 'completed');
+                $q->where('status', 'completed');
             });
         }
     ], 'subtotal')
