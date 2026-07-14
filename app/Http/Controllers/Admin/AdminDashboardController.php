@@ -62,18 +62,25 @@ class AdminDashboardController extends Controller
         $categoryStats = $this->getCategoryStats();
 
         $topProducts = Product::withSum([
-                'orderItems as total_sold' => function ($query) {
-                    $query->whereHas('order', function ($q) {
-                        $q->whereIn('status', ['paid', 'processing', 'shipped', 'completed']);
-                    });
-                }
-            ], 'quantity')
-            ->with('category')
-            ->where('is_active', true)
-            ->having('total_sold', '>', 0)
-            ->orderByDesc('total_sold')
-            ->limit(5)
-            ->get();
+        'orderItems as total_sold' => function ($query) {
+            $query->whereHas('order', function ($q) {
+                $q->whereIn('status', ['paid', 'processing', 'shipped', 'completed']);
+            });
+        }
+    ], 'quantity')
+    ->withSum([
+        'orderItems as total_revenue' => function ($query) {
+            $query->whereHas('order', function ($q) {
+                $q->whereIn('status', ['paid', 'processing', 'shipped', 'completed']);
+            });
+        }
+    ], 'subtotal')
+    ->with('category')
+    ->where('is_active', true)
+    ->having('total_sold', '>', 0)
+    ->orderByDesc('total_sold')
+    ->limit(5)
+    ->get();
 
         // ── 5 Pesanan terbaru ─────────────────────────────────────
         $recentOrders = Order::with('user')
@@ -173,7 +180,7 @@ class AdminDashboardController extends Controller
             ->join('products',   'products.id',   '=', 'order_items.product_id')
             ->join('categories', 'categories.id', '=', 'products.category_id')
             ->where('orders.status', 'completed')
-            ->where('orders.paid_at', '>=', now()->startOfMonth())
+            ->where('orders.paid_at', '>=', now()->subDays(30))
             ->selectRaw('categories.name, SUM(order_items.quantity) as total_sold')
             ->groupBy('categories.id', 'categories.name')
             ->orderByDesc('total_sold')
