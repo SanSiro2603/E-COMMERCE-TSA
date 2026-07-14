@@ -12,37 +12,49 @@ use Illuminate\Support\Facades\Storage;
 class CategoryController extends Controller
 {
     public function index(Request $request)
-    {
-        $search = $request->search;
-        $sort = $request->get('sort', 'latest');
-        $status = $request->get('status', '');
-        $type = $request->get('type', '');
+{
+    $search = $request->search;
+    $sort = $request->get('sort', 'latest');
+    $status = $request->get('status', '');
+    $type = $request->get('type', '');
 
-        $categories = Category::parentOnly()
-            ->with([
-                'children' => function ($q) use ($status) {
-                    $q->withCount('products');
-                    if ($status !== '') {
-                        $q->where('is_active', $status);
-                    }
+    $categories = Category::parentOnly()
+        ->with([
+            'children' => function ($q) use ($status) {
+                $q->withCount('products');
+                if ($status !== '') {
+                    $q->where('is_active', $status);
                 }
-            ])
-            ->withCount(['products', 'children'])
-            ->when($search, fn($q) => $q->where('name', 'like', "%$search%"))
-            ->when($status !== '', fn($q) => $q->where('is_active', $status))
-            ->when($type === 'parent', fn($q) => $q->has('children'))
-            ->when($sort === 'name_asc', fn($q) => $q->orderBy('name', 'asc'))
-            ->when($sort === 'name_desc', fn($q) => $q->orderBy('name', 'desc'))
-            ->when($sort === 'products', fn($q) => $q->orderByDesc('products_count'))
-            ->when($sort === 'latest', fn($q) => $q->latest())
-            ->paginate(10)
-            ->withQueryString();
+            }
+        ])
+        ->withCount(['products', 'children'])
+        ->when($search, function ($q) use ($search) {
+            // FIX: cari di nama parent ATAU nama sub-kategori
+            $q->where(function ($qq) use ($search) {
+                $qq->where('name', 'like', "%$search%")
+                   ->orWhereHas('children', function ($c) use ($search) {
+                       $c->where('name', 'like', "%$search%");
+                   });
+            });
+        })
+        ->when($status !== '', fn($q) => $q->where('is_active', $status))
+        ->when($type === 'parent', fn($q) => $q->has('children'))
+        ->when($sort === 'name_asc', fn($q) => $q->orderBy('name', 'asc'))
+        ->when($sort === 'name_desc', fn($q) => $q->orderBy('name', 'desc'))
+        ->when($sort === 'products', fn($q) => $q->orderByDesc('products_count'))
+        ->when($sort === 'latest', fn($q) => $q->latest())
+        ->paginate(10)
+        ->withQueryString();
 
-        $totalParent = Category::parentOnly()->count();
-        $totalSub = Category::childOnly()->count();
+    $totalParent = Category::parentOnly()->count();
+    $totalSub = Category::childOnly()->count();
 
-        return view('admin.categories.index', compact('categories', 'totalParent', 'totalSub'));
-    }
+    // FIX: kalau request AJAX (live search), kirim balik cuma HTML tabelnya aja
+    if ($request->ajax()) {
+        return view('admin.categories._table', compact('categories'))->render();
+}
+    return view('admin.categories.index', compact('categories', 'totalParent', 'totalSub'));
+}
 
     public function create()
     {
