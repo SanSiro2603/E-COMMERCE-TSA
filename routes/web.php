@@ -82,6 +82,12 @@ Route::middleware(['auth', 'role:admin,super_admin'])->group(function () {
     Route::get('/2fa', [TwoFactorController::class, 'index'])->name('2fa.index');
     Route::post('/2fa/setup/continue', [TwoFactorController::class, 'continueSetup'])->name('2fa.setup.continue');
     Route::post('/2fa/verify', [TwoFactorController::class, 'verify'])->name('2fa.verify');
+    Route::post('/2fa/send-reset-email', [TwoFactorController::class, 'sendResetEmail'])
+        ->name('2fa.send-reset-email')
+        ->middleware('throttle:3,1');
+    Route::get('/2fa/reset-confirm/{user}', [TwoFactorController::class, 'resetConfirm'])
+        ->name('2fa.reset.confirm')
+        ->middleware('signed');
 });
 
 Route::middleware('guest')->group(function () {
@@ -244,6 +250,10 @@ Route::middleware(['auth', 'role:super_admin', '2fa'])
         Route::resource('admins',
             App\Http\Controllers\SuperAdmin\AdminManagementController::class
         );
+
+        Route::get('/logs',
+            [App\Http\Controllers\SuperAdmin\AdminLogController::class, 'index']
+        )->name('logs.index');
 
         Route::prefix('reports')->name('reports.')->group(function () {
             Route::get('/',

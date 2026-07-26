@@ -10,12 +10,17 @@ class AdminLog extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 
+        'user_id',
         'admin_name',
         'admin_email',
-        'action', 
-        'description', 
-        'user_agent'
+        'action',
+        'description',
+        'ip_address',
+        'device_type',
+        'device_name',
+        'operating_system',
+        'browser',
+        'user_agent',
     ];
 
     public function user()

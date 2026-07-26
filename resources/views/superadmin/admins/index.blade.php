@@ -159,64 +159,6 @@
             {{ $admins->links() }}
         </div>
         @endif
-    </div>
-
-    <!-- Log Aktivitas Admin Section -->
-    <div class="mt-8">
-        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Log Aktivitas Admin</h3>
-        <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-soft border border-gray-100 dark:border-zinc-800 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 dark:bg-zinc-800/50 border-b border-gray-100 dark:border-zinc-800">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Waktu</th>
-                            <th class="px-6 py-3 text-left text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Admin</th>
-                            <th class="px-6 py-3 text-left text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-3 text-left text-[10px] font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider">Aktivitas</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 dark:divide-zinc-800">
-                        @forelse($logs as $log)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors">
-                            <td class="px-6 py-4 text-xs text-gray-500 dark:text-zinc-400">
-                                {{ $log->created_at?->format('d M Y H:i') ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm font-semibold text-gray-900 dark:text-white">
-                                {{ $log->admin_name }}
-                                @if(!$log->user_id)
-                                <div class="text-[10px] text-red-500 font-normal mt-0.5">
-                                    (Akun Terhapus)
-                                </div>
-                                @endif
-                            </td>
-                            <td class="px-6 py-4 text-xs text-gray-600 dark:text-zinc-400">
-                                {{ $log->admin_email }}
-                            </td>
-                            <td class="px-6 py-4">
-                                <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 text-xs font-medium rounded-full mb-1">
-                                    {{ $log->action }}
-                                </span>
-                                <p class="text-xs text-gray-600 dark:text-zinc-400">{{ $log->description }}</p>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="4" class="px-6 py-8 text-center text-gray-500 text-sm">Belum ada aktivitas tercatat.</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Pagination -->
-            @if($logs->hasPages())
-            <div class="px-6 py-4 border-t border-gray-100 dark:border-zinc-800">
-                {{ $logs->links() }}
-            </div>
-            @endif
-        </div>
-    </div>
-
 </div>
 @endsection
 

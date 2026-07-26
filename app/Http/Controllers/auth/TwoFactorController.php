@@ -3,7 +3,11 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetTwoFactorMail;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\URL;
 
 class TwoFactorController extends Controller
 {
@@ -121,6 +125,9 @@ class TwoFactorController extends Controller
             if ($isSetup) {
                 $user->forceFill(['google2fa_secret' => $secret])->save();
                 $this->clearSetupSession($request);
+                \App\Helpers\LogHelper::record('Setup 2FA', 'Berhasil mengaktifkan dan mengonfirmasi 2FA', $user);
+            } else {
+                \App\Helpers\LogHelper::record('Verifikasi 2FA', 'Berhasil verifikasi 6-digit kode OTP 2FA', $user);
             }
 
             $request->session()->put('2fa_passed', true);
@@ -133,6 +140,52 @@ class TwoFactorController extends Controller
         }
 
         return back()->withErrors(['one_time_password' => 'Kode OTP tidak valid atau sudah kadaluarsa.']);
+    }
+
+    /**
+     * Kirim email link reset 2FA (khusus Super Admin)
+     */
+    public function sendResetEmail(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->role !== 'super_admin') {
+            abort(403, 'Aksi ini hanya diperbolehkan untuk Super Admin.');
+        }
+
+        $url = URL::temporarySignedRoute(
+            '2fa.reset.confirm',
+            now()->addMinutes(15),
+            ['user' => $user->getKey()]
+        );
+
+        Mail::to($user->email)->send(new ResetTwoFactorMail($url));
+        \App\Helpers\LogHelper::record('Reset 2FA Email', 'Mengirimkan link reset 2FA ke email ' . $user->email, $user);
+
+        return back()->with('status', 'Link reset 2FA telah dikirim ke email Anda (' . $user->email . '). Silakan periksa inbox atau folder spam.');
+    }
+
+    /**
+     * Konfirmasi dan proses reset 2FA via email link
+     */
+    public function resetConfirm(Request $request, User $user)
+    {
+        if ($user->role !== 'super_admin') {
+            abort(403, 'Aksi ini hanya diperbolehkan untuk Super Admin.');
+        }
+
+        if ($request->user() && (string) $request->user()->getKey() !== (string) $user->getKey()) {
+            abort(403, 'Pengguna tidak sesuai dengan token reset.');
+        }
+
+        $user->forceFill(['google2fa_secret' => null])->save();
+        $this->clearSetupSession($request);
+        $request->session()->forget('2fa_passed');
+
+        \App\Helpers\LogHelper::record('Reset 2FA Selesai', 'Berhasil mereset barcode 2FA via email link', $user);
+
+        return redirect()->route('2fa.index')
+            ->with('status', '2FA Authenticator berhasil di-reset. Silakan scan QR code baru untuk mengaktifkan kembali 2FA Anda.');
     }
 
     private function setupBelongsToUser(Request $request): bool

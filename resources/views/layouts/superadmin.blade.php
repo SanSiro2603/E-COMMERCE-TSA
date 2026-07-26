@@ -241,6 +241,12 @@
                     'label' => 'Laporan',
                     'image' => 'images/sidebar/laporan.png',
                 ],
+                [
+                    'route' => 'superadmin.logs.index',
+                    'icon'  => 'history',
+                    'label' => 'Log Aktivitas',
+                    'image' => 'images/sidebar/laporan.png',
+                ],
             ];
 
             $activeMenu = collect($menu)->first(fn($item) => request()->routeIs($item['route'].'*'))

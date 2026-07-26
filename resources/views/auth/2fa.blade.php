@@ -30,6 +30,24 @@
                     : 'Masukkan 6 digit kode dari aplikasi Google Authenticator Anda.' }}
             </p>
 
+            @if (session('status'))
+                <div class="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-left text-xs font-medium text-emerald-800 leading-relaxed shadow-sm">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            @if (session('success'))
+                <div class="mt-4 rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-left text-xs font-medium text-emerald-800 leading-relaxed shadow-sm">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if (session('error'))
+                <div class="mt-4 rounded-2xl bg-red-50 border border-red-200 p-4 text-left text-xs font-medium text-red-800 leading-relaxed shadow-sm">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <form method="POST" action="{{ route('2fa.verify') }}" class="mt-8">
                 @csrf
             
@@ -44,6 +62,20 @@
 
                 <button type="submit" class="mt-6 inline-flex h-12 w-full items-center justify-center rounded-2xl bg-emerald-600 text-sm font-semibold text-white shadow-[0_10px_20px_-12px_rgba(5,150,105,0.8)] transition duration-200 hover:scale-[1.01] hover:bg-emerald-500 focus:outline-none focus:ring-4 focus:ring-emerald-100">Verifikasi</button>
             </form>
+
+            @if (auth()->check() && auth()->user()->role === 'super_admin' && ! $isSetup)
+                <div class="mt-6 border-t border-slate-100 pt-6">
+                    <form method="POST" action="{{ route('2fa.send-reset-email') }}">
+                        @csrf
+                        <button type="submit" class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 transition hover:text-emerald-700 hover:underline focus:outline-none">
+                            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                            Reset Authenticator via Email
+                        </button>
+                    </form>
+                </div>
+            @endif
 
             <form method="POST" action="{{ route('logout') }}" class="mt-6">
                 @csrf
