@@ -19,12 +19,12 @@
     </section>
 
     <section class="bg-white py-10"
-             x-data="{ activeImage: '{{ $product['gallery'][0] ?? $product['image'] }}', previewOpen: false }"
+             x-data="{ activeImage: @js($product['gallery'][0]['url'] ?? $product['image']), previewOpen: false }"
              @keydown.escape.window="previewOpen = false">
         <div class="mx-auto grid w-[94%] max-w-[1240px] gap-6 lg:grid-cols-[1.08fr,0.92fr]">
             <div class="reveal-left" data-reveal>
                 <div class="relative overflow-hidden rounded-xl border border-slate-200 bg-white">
-                    <img :src="activeImage" alt="{{ $product['name'] }}" class="h-[620px] w-full object-cover sm:h-[700px] lg:h-[760px]">
+                    <img :src="activeImage" alt="{{ $product['image_alt'] }}" class="h-[620px] w-full object-cover sm:h-[700px] lg:h-[760px]">
                     <button type="button" @click="previewOpen = true" class="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white/95 text-tsa-greenDark shadow">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="h-5 w-5">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M14 10l7-7" />
@@ -45,10 +45,10 @@
                         <div class="inline-flex gap-2.5 pr-1">
                             @foreach ($product['gallery'] as $image)
                                 <button type="button"
-                                        @click="activeImage = '{{ $image }}'"
+                                        @click="activeImage = @js($image['url'])"
                                         class="overflow-hidden rounded-lg border border-slate-300 bg-white transition hover:border-tsa-green"
-                                        :class="activeImage === '{{ $image }}' ? 'ring-2 ring-tsa-green border-tsa-green' : ''">
-                                    <img src="{{ $image }}" alt="{{ $product['name'] }} image {{ $loop->iteration }}" class="h-24 w-24 object-cover">
+                                        :class="activeImage === @js($image['url']) ? 'ring-2 ring-tsa-green border-tsa-green' : ''">
+                                    <img src="{{ $image['url'] }}" alt="{{ $image['alt'] }}" class="h-24 w-24 object-cover">
                                 </button>
                             @endforeach
                         </div>
@@ -71,14 +71,6 @@
                     </p>
                     <h2 class="mt-2 text-4xl font-extrabold text-slate-900">{{ $product['name'] }}</h2>
                     <p class="mt-1 text-xl italic text-slate-500">{{ $product['latin'] }}</p>
-
-                    <div class="mt-5">
-                        <p class="text-sm font-semibold text-slate-500">Price</p>
-                        <p class="text-5xl font-extrabold text-tsa-greenDark">{{ $product['price'] }}</p>
-                        <p class="mt-2 text-base font-semibold text-tsa-greenDark">
-                            <span class="mr-1 text-tsa-green">&#10003;</span> Availability: In Stock
-                        </p>
-                    </div>
 
                     <div class="mt-5 border-t border-slate-200 pt-5">
                         <h3 class="text-2xl font-extrabold text-slate-900">Interested in this animal?</h3>
@@ -129,8 +121,8 @@
                     'description' => ['title' => 'Description', 'content' => $product['description'] ?? '-'],
                     'details' => ['title' => 'Details', 'content' => $product['details'] ?? '-'],
                     'shipping' => ['title' => 'Shipping Information', 'content' => $product['shipping'] ?? '-'],
-                    'care' => ['title' => 'Care & Maintenance', 'content' => $product['care'] ?? ($product['other'] ?? '-')],
-                    'legal' => ['title' => 'Legal & Documents', 'content' => $product['legal'] ?? ($product['other'] ?? '-')],
+                    'care' => ['title' => 'Care & Maintenance', 'content' => $product['care'] ?? '-'],
+                    'legal' => ['title' => 'Legal & Documents', 'content' => $product['legal'] ?? '-'],
                 ];
             @endphp
 

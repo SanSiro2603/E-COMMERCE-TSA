@@ -25,6 +25,8 @@ use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\BiteshipController;
 use App\Http\Controllers\Admin\LandingHomeController;
+use App\Http\Controllers\Admin\LandingPageController as AdminLandingPageController;
+use App\Http\Controllers\Admin\LandingCatalogController as AdminLandingCatalogController;
 
 // =========================
 // PEMBELI
@@ -41,7 +43,8 @@ use App\Http\Controllers\Pembeli\ProfileController;
 // LAINNYA
 // =========================
 use App\Http\Controllers\RajaOngkirController;
-use App\Support\LandingCatalogData;
+use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\LandingCatalogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,44 +53,14 @@ use App\Support\LandingCatalogData;
 */
 Route::get('/', [DashboardController::class, 'index'])->name('landing');
 Route::redirect('/home', '/');
-Route::view('/home/about', 'landing.about')->name('landing.about');
-Route::get('/home/catalog', function () {
-    return view('landing.catalog', [
-        'pageTitle' => 'Catalog',
-        'mainCategories' => LandingCatalogData::categories(),
-        'products' => LandingCatalogData::products(),
-    ]);
-})->name('landing.catalog');
-Route::get('/home/catalog/{slug}', function (string $slug) {
-    $products = LandingCatalogData::products();
-    $categories = collect(LandingCatalogData::categories());
-    $product = collect($products)->firstWhere('slug', $slug);
-
-    abort_if(!$product, 404);
-    $category = $categories->firstWhere('key', $product['category']);
-
-    return view('landing.catalog-detail', [
-        'pageTitle' => $product['name'],
-        'product' => $product,
-        'countries' => LandingCatalogData::countries(),
-        'categoryName' => $category['name'] ?? ucfirst($product['category']),
-    ]);
-})->name('landing.catalog.show');
-Route::view('/home/information/logistic-delivery', 'landing.information-logistic', [
-    'pageTitle' => 'Logistic and Delivery',
-])->name('landing.information.logistic-delivery');
-Route::view('/home/information/procurement-preparation', 'landing.information-procurement', [
-    'pageTitle' => 'Procurement and Preparation',
-])->name('landing.information.procurement-preparation');
-Route::view('/home/information/live-export-process', 'landing.information-live-export', [
-    'pageTitle' => 'Live Export Process',
-])->name('landing.information.live-export-process');
-Route::view('/home/future-projects', 'landing.future-projects', [
-    'pageTitle' => 'Future Projects',
-])->name('landing.future-projects');
-Route::view('/home/gallery', 'landing.gallery', [
-    'pageTitle' => 'Gallery',
-])->name('landing.gallery');
+Route::get('/home/about', [LandingPageController::class, 'about'])->name('landing.about');
+Route::get('/home/catalog', [LandingCatalogController::class, 'index'])->name('landing.catalog');
+Route::get('/home/catalog/{slug}', [LandingCatalogController::class, 'show'])->name('landing.catalog.show');
+Route::get('/home/information/logistic-delivery', [LandingPageController::class, 'logistic'])->name('landing.information.logistic-delivery');
+Route::get('/home/information/procurement-preparation', [LandingPageController::class, 'procurement'])->name('landing.information.procurement-preparation');
+Route::get('/home/information/live-export-process', [LandingPageController::class, 'liveExport'])->name('landing.information.live-export-process');
+Route::get('/home/future-projects', [LandingPageController::class, 'futureProjects'])->name('landing.future-projects');
+Route::get('/home/gallery', [LandingPageController::class, 'gallery'])->name('landing.gallery');
 Route::get('/gallery-hewan', [DashboardController::class, 'hewan'])->name('gallery.hewan');
 
 /*
@@ -205,6 +178,38 @@ Route::middleware(['auth', 'role:admin,super_admin', '2fa'])
             Route::put('/home/catalog-cards/{card}', [LandingHomeController::class, 'updateCatalogCard'])->name('home.catalog-cards.update');
             Route::delete('/home/catalog-cards/{card}', [LandingHomeController::class, 'destroyCatalogCard'])->name('home.catalog-cards.destroy');
             Route::patch('/home/catalog-cards/{card}/toggle', [LandingHomeController::class, 'toggleCatalogCard'])->name('home.catalog-cards.toggle');
+
+            // Catalog landing (separate from e-commerce products)
+            Route::get('/catalog', [AdminLandingCatalogController::class, 'index'])->name('catalog.index');
+            Route::post('/catalog/categories', [AdminLandingCatalogController::class, 'storeCategory'])->name('catalog.categories.store');
+            Route::put('/catalog/categories/{category}', [AdminLandingCatalogController::class, 'updateCategory'])->name('catalog.categories.update');
+            Route::patch('/catalog/categories/{category}/toggle', [AdminLandingCatalogController::class, 'toggleCategory'])->name('catalog.categories.toggle');
+            Route::delete('/catalog/categories/{category}', [AdminLandingCatalogController::class, 'destroyCategory'])->name('catalog.categories.destroy');
+            Route::post('/catalog/families', [AdminLandingCatalogController::class, 'storeFamily'])->name('catalog.families.store');
+            Route::put('/catalog/families/{family}', [AdminLandingCatalogController::class, 'updateFamily'])->name('catalog.families.update');
+            Route::patch('/catalog/families/{family}/toggle', [AdminLandingCatalogController::class, 'toggleFamily'])->name('catalog.families.toggle');
+            Route::delete('/catalog/families/{family}', [AdminLandingCatalogController::class, 'destroyFamily'])->name('catalog.families.destroy');
+            Route::post('/catalog/animals', [AdminLandingCatalogController::class, 'storeAnimal'])->name('catalog.animals.store');
+            Route::put('/catalog/animals/{animal}', [AdminLandingCatalogController::class, 'updateAnimal'])->name('catalog.animals.update');
+            Route::patch('/catalog/animals/{animal}/toggle', [AdminLandingCatalogController::class, 'toggleAnimal'])->name('catalog.animals.toggle');
+            Route::delete('/catalog/animals/{animal}', [AdminLandingCatalogController::class, 'destroyAnimal'])->name('catalog.animals.destroy');
+            Route::post('/catalog/animals/{animal}/images', [AdminLandingCatalogController::class, 'storeImage'])->name('catalog.images.store');
+            Route::put('/catalog/animals/{animal}/images/{image}', [AdminLandingCatalogController::class, 'updateImage'])->name('catalog.images.update');
+            Route::delete('/catalog/animals/{animal}/images/{image}', [AdminLandingCatalogController::class, 'destroyImage'])->name('catalog.images.destroy');
+
+            // Other landing pages
+            Route::get('/about', [AdminLandingPageController::class, 'index'])->defaults('page', 'about')->name('about.index');
+            Route::get('/information/logistic', [AdminLandingPageController::class, 'index'])->defaults('page', 'information_logistic')->name('information.logistic.index');
+            Route::get('/information/procurement', [AdminLandingPageController::class, 'index'])->defaults('page', 'information_procurement')->name('information.procurement.index');
+            Route::get('/information/live-export', [AdminLandingPageController::class, 'index'])->defaults('page', 'information_live_export')->name('information.live-export.index');
+            Route::get('/future-projects', [AdminLandingPageController::class, 'index'])->defaults('page', 'future_projects')->name('future-projects.index');
+            Route::get('/gallery', [AdminLandingPageController::class, 'index'])->defaults('page', 'gallery')->name('gallery.index');
+
+            Route::post('/{page}/settings', [AdminLandingPageController::class, 'updateSettings'])->name('pages.settings.update');
+            Route::post('/{page}/{section}/items', [AdminLandingPageController::class, 'storeItem'])->name('pages.items.store');
+            Route::put('/{page}/{section}/items/{item}', [AdminLandingPageController::class, 'updateItem'])->name('pages.items.update');
+            Route::delete('/{page}/{section}/items/{item}', [AdminLandingPageController::class, 'destroyItem'])->name('pages.items.destroy');
+            Route::patch('/{page}/{section}/items/{item}/toggle', [AdminLandingPageController::class, 'toggleItem'])->name('pages.items.toggle');
 
         });
 

@@ -1,0 +1,12 @@
+@php $value = fn ($field, $default = '') => old($field, $animal?->{$field} ?? $default); @endphp
+<label><span class="mb-1 block text-xs font-bold">Kategori *</span><select name="category_id" required class="{{ $inputClass }}"><option value="">Pilih kategori</option>@foreach($categories as $category)<option value="{{ $category->id }}" @selected((string)$value('category_id') === (string)$category->id)>{{ $category->name_en }}</option>@endforeach</select></label>
+<label><span class="mb-1 block text-xs font-bold">Family *</span><select name="family_id" required class="{{ $inputClass }}"><option value="">Pilih family</option>@foreach($families as $family)<option value="{{ $family->id }}" @selected((string)$value('family_id') === (string)$family->id)>{{ $family->category->name_en }} — {{ $family->name_en }}</option>@endforeach</select></label>
+<label><span class="mb-1 block text-xs font-bold">Nama *</span><input name="name_en" value="{{ $value('name_en') }}" required class="{{ $inputClass }}"></label>
+<label><span class="mb-1 block text-xs font-bold">Nama Latin</span><input name="latin_name" value="{{ $value('latin_name') }}" class="{{ $inputClass }}"></label>
+<label><span class="mb-1 block text-xs font-bold">{{ $animal ? 'Ganti gambar utama' : 'Gambar utama *' }}</span><input type="file" name="main_image" {{ $animal ? '' : 'required' }} accept="image/jpeg,image/png,image/webp"><small class="block text-gray-400">JPEG/PNG/WebP, maks. 3 MB</small></label>
+<label><span class="mb-1 block text-xs font-bold">Alt gambar utama *</span><input name="main_image_alt_en" value="{{ $value('main_image_alt_en') }}" required class="{{ $inputClass }}"><small class="mt-1 block text-gray-400">Bisa diubah. Tidak tampil sebagai caption; untuk pembaca layar dan gambar gagal dimuat.</small></label>
+@foreach(['description_en' => 'Description', 'details_en' => 'Details', 'shipping_en' => 'Shipping', 'care_en' => 'Care', 'legal_en' => 'Legal'] as $field => $label)
+<label class="md:col-span-2"><span class="mb-1 block text-xs font-bold">{{ $label }}</span><textarea name="{{ $field }}" rows="3" class="{{ $inputClass }}">{{ $value($field) }}</textarea></label>
+@endforeach
+<label><span class="mb-1 block text-xs font-bold">Urutan *</span><input type="number" min="1" name="sort_order" value="{{ $value('sort_order', $animals->count() + 1) }}" required class="{{ $inputClass }}"></label>
+<label class="flex items-center gap-2"><input type="checkbox" name="is_active" value="1" @checked($animal ? $animal->is_active : true)> Aktif</label>

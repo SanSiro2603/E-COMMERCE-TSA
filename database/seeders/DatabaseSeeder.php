@@ -14,6 +14,8 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             LandingHomeSeeder::class,
+            LandingPagesSeeder::class,
+            LandingCatalogSeeder::class,
         ]);
     }
 }

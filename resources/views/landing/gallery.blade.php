@@ -4,51 +4,40 @@
     <section class="relative isolate h-[430px] overflow-hidden bg-black sm:h-[470px]">
         <div
             class="absolute inset-0 bg-cover bg-center"
-            style="background-image: linear-gradient(95deg, rgba(5,16,7,.82) 0%, rgba(5,16,7,.48) 48%, rgba(5,16,7,.22) 100%), url('{{ asset('images/catalog-banner.png') }}');">
+            style="background-position: {{ $settings['hero_position'] }}; background-image: linear-gradient(95deg, rgba(5,16,7,.82) 0%, rgba(5,16,7,.48) 48%, rgba(5,16,7,.22) 100%), url('{{ $assets['hero_image'] }}');">
         </div>
 
         <div class="relative mx-auto flex h-full w-[94%] max-w-[1240px] items-center">
             <div class="reveal-up max-w-2xl text-white" data-reveal>
-                <p class="text-xl font-bold sm:text-2xl">{{ __('Gallery') }}</p>
+                <p class="text-xl font-bold sm:text-2xl">{{ $settings['hero_eyebrow'] }}</p>
                 <h1 class="line-mask mt-2 font-extrabold leading-[0.98] tracking-tight text-[46px] sm:text-[64px]" data-line-reveal>
-                    <span class="line-mask-inner">{{ __('Our Gallery') }}</span>
+                    <span class="line-mask-inner whitespace-pre-line">{{ $settings['hero_title'] }}</span>
                 </h1>
                 <div class="mt-4 h-1 w-20 rounded-full bg-tsa-green"></div>
                 <p class="mt-5 max-w-xl text-xl leading-relaxed text-white/90 sm:text-2xl" data-word-stagger>
-                    {{ __('A preview collection of our wildlife, breeding center, and export handling activities.') }}
+                    {{ $settings['hero_description'] }}
                 </p>
             </div>
         </div>
     </section>
 
-    @php
-        $galleryItems = [
-            ['title' => 'Aves Collection', 'category' => 'Wildlife', 'img' => asset('images/nicobar-pigeon.png')],
-            ['title' => 'Mamalia Collection', 'category' => 'Wildlife', 'img' => asset('images/binturong.png')],
-            ['title' => 'Reptile Collection', 'category' => 'Wildlife', 'img' => asset('images/reptil.jpeg')],
-            ['title' => 'Hybrid & Mutation', 'category' => 'Wildlife', 'img' => asset('images/hybrid.jpeg')],
-            ['title' => 'Breeding Center', 'category' => 'Facility', 'img' => asset('images/whoweare.png')],
-            ['title' => 'Airport Handling', 'category' => 'Logistic', 'img' => asset('images/airport-handling.png')],
-            ['title' => 'Procurement Process', 'category' => 'Preparation', 'img' => asset('images/procurement-commitment-1.png')],
-            ['title' => 'Live Export Process', 'category' => 'Export', 'img' => asset('images/live-step-10.png')],
-            ['title' => 'Sea Freight Handling', 'category' => 'Logistic', 'img' => asset('images/sea-freight-03.png')],
-        ];
-    @endphp
-
-    <section class="bg-white py-14 sm:py-16" x-data="{ lightboxOpen: false, lightboxImg: '' }">
+    <section class="bg-white py-14 sm:py-16" x-data="{ lightboxOpen: false, lightboxImg: '', lightboxAlt: '' }">
         <div class="mx-auto w-[94%] max-w-[1240px]">
             <div class="reveal-up mx-auto max-w-3xl text-center" data-reveal>
-                <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-tsa-greenDark">{{ __('Gallery') }}</p>
+                <p class="text-xs font-extrabold uppercase tracking-[0.14em] text-tsa-greenDark">{{ $settings['section_label'] }}</p>
                 <h2 class="line-mask mt-2 text-4xl font-extrabold text-slate-900 sm:text-5xl" data-line-reveal>
-                    <span class="line-mask-inner">{{ __('Photo Collection') }}</span>
+                    <span class="line-mask-inner">{{ $settings['section_heading'] }}</span>
                 </h2>
             </div>
 
             <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                @foreach ($galleryItems as $item)
-                    <article class="reveal-up delay-{{ ($loop->index % 8) + 1 }} zoom-soft group overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm cursor-pointer" data-reveal @click="lightboxOpen = true; lightboxImg = '{{ $item['img'] }}'">
+                @foreach ($items as $item)
+                    <article class="reveal-up delay-{{ ($loop->index % 8) + 1 }} zoom-soft group overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm cursor-pointer" data-reveal
+                             data-image="{{ $item->image_url }}"
+                             data-alt="{{ data_get($item->metadata, 'alt', $item->titleForLocale()) }}"
+                             @click="lightboxOpen = true; lightboxImg = $el.dataset.image; lightboxAlt = $el.dataset.alt">
                         <div class="relative aspect-[4/3] overflow-hidden">
-                            <img src="{{ $item['img'] }}" alt="Gallery Image" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                            <img src="{{ $item->image_url }}" alt="{{ data_get($item->metadata, 'alt', $item->titleForLocale()) }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
                             
                             {{-- Hover dark overlay --}}
                             <div class="absolute inset-0 bg-slate-900/0 transition-colors duration-300 group-hover:bg-slate-900/20"></div>
@@ -99,7 +88,7 @@
                       x-transition:leave="transition ease-in duration-200"
                       x-transition:leave-start="opacity-100 scale-100"
                       x-transition:leave-end="opacity-0 scale-95">
-                     <img :src="lightboxImg" class="max-h-[95vh] w-auto max-w-[95vw] rounded-xl object-contain shadow-2xl ring-1 ring-white/10" alt="Lightbox Image">
+                     <img :src="lightboxImg" :alt="lightboxAlt" class="max-h-[95vh] w-auto max-w-[95vw] rounded-xl object-contain shadow-2xl ring-1 ring-white/10">
                  </div>
             </div>
         </template>

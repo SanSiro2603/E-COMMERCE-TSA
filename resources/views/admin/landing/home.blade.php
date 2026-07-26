@@ -14,7 +14,7 @@
                 <span class="text-soft-green font-semibold">Halaman Home</span>
             </div>
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">CMS — Halaman Home</h1>
-            <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">Kelola konten yang tampil di halaman utama landing page.</p>
+            <p class="text-sm text-gray-500 dark:text-zinc-400 mt-1">Perubahan langsung tampil. Urutan dimulai dari 1 dan posisi lain bergeser otomatis.</p>
         </div>
         <a href="{{ route('landing') }}" target="_blank"
            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
@@ -33,15 +33,15 @@
             deleteId: null,
             slideId: null,
             imagePreview: null,
-            form: { title_top: '', title_bottom: '', copy: '', bg_position: 'center center', sort_order: 0 },
+            form: { title_top: '', title_bottom: '', copy: '', sort_order: {{ $slides->count() + 1 }} },
             openAdd() {
                 this.editing = false; this.slideId = null; this.imagePreview = null;
-                this.form = { title_top: '', title_bottom: '', copy: '', bg_position: 'center center', sort_order: 0 };
+                this.form = { title_top: '', title_bottom: '', copy: '', sort_order: {{ $slides->count() + 1 }} };
                 this.open = true;
             },
             openEdit(s) {
                 this.editing = true; this.slideId = s.id; this.imagePreview = s.image_url;
-                this.form = { title_top: s.title_top, title_bottom: s.title_bottom, copy: s.copy, bg_position: s.bg_position, sort_order: s.sort_order };
+                this.form = { title_top: s.title_top, title_bottom: s.title_bottom, copy: s.copy, sort_order: s.sort_order };
                 this.open = true;
             },
             previewImage(e) {
@@ -120,7 +120,6 @@
                                             title_top: @js($slide->title_top),
                                             title_bottom: @js($slide->title_bottom),
                                             copy: @js($slide->copy),
-                                            bg_position: @js($slide->bg_position),
                                             sort_order: {{ $slide->sort_order }},
                                             image_url: @js($slide->image_url)
                                         })"
@@ -200,19 +199,10 @@
                                   placeholder="Deskripsi singkat..."></textarea>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 dark:text-zinc-400 mb-1.5">Posisi Gambar</label>
-                            <input type="text" name="bg_position" x-model="form.bg_position" maxlength="50"
-                                   class="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-soft-green/50 focus:border-soft-green"
-                                   placeholder="center center">
-                            <p class="text-[10px] text-gray-400 mt-1">Contoh: 62% center, top center</p>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-gray-600 dark:text-zinc-400 mb-1.5">Urutan</label>
-                            <input type="number" name="sort_order" x-model="form.sort_order" min="0" max="255"
-                                   class="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-soft-green/50 focus:border-soft-green">
-                        </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-600 dark:text-zinc-400 mb-1.5">Urutan</label>
+                        <input type="number" name="sort_order" x-model="form.sort_order" min="1" max="255"
+                               class="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-soft-green/50 focus:border-soft-green">
                     </div>
 
                     <div class="flex gap-3 pt-2">
@@ -267,10 +257,10 @@
             deleteId: null,
             cardId: null,
             imagePreview: null,
-            form: { title: '', description: '', catalog_key: '', sort_order: 0 },
+            form: { title: '', description: '', catalog_key: '', sort_order: {{ $catalogCards->count() + 1 }} },
             openAdd() {
                 this.editing = false; this.cardId = null; this.imagePreview = null;
-                this.form = { title: '', description: '', catalog_key: '', sort_order: 0 };
+                this.form = { title: '', description: '', catalog_key: '', sort_order: {{ $catalogCards->count() + 1 }} };
                 this.open = true;
             },
             openEdit(c) {
@@ -438,7 +428,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 dark:text-zinc-400 mb-1.5">Urutan</label>
-                            <input type="number" name="sort_order" x-model="form.sort_order" min="0" max="255"
+                            <input type="number" name="sort_order" x-model="form.sort_order" min="1" max="255"
                                    class="w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-soft-green/50 focus:border-soft-green">
                         </div>
                     </div>

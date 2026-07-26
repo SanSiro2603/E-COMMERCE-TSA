@@ -54,7 +54,6 @@ class LandingCatalogData
                 'latin' => 'Ara ararauna',
                 'category' => 'aves',
                 'subcategory' => 'Parrot Macaw',
-                'price' => 'USD 2,850 / Pair',
                 'image' => asset('images/detail-macaw.jpeg'),
                 'gallery' => [
                     asset('images/detail-macaw.jpeg'),
@@ -76,7 +75,6 @@ class LandingCatalogData
                 'latin' => 'Cacatua sulphurea',
                 'category' => 'aves',
                 'subcategory' => 'Parrot Cockatoo',
-                'price' => '$2,900',
                 'image' => 'https://images.unsplash.com/photo-1621438578138-3cf41ebf9e09?auto=format&fit=crop&w=900&q=80',
                 'gallery' => [
                     'https://images.unsplash.com/photo-1621438578138-3cf41ebf9e09?auto=format&fit=crop&w=1200&q=80',
@@ -85,7 +83,7 @@ class LandingCatalogData
                 'description' => 'Highly charismatic cockatoo with vibrant crest and strong social behavior.',
                 'details' => 'Age: 10 months. Feed: premium mixed nuts and fruits. Temperament: active.',
                 'shipping' => 'Air freight with quarantine and full veterinary checks before departure.',
-                'other' => 'Availability depends on seasonal breeding and legal permit approval.',
+                'other' => 'Timing depends on seasonal breeding and legal permit approval.',
             ],
             [
                 'slug' => 'rhinoceros-hornbill',
@@ -93,7 +91,6 @@ class LandingCatalogData
                 'latin' => 'Buceros rhinoceros',
                 'category' => 'aves',
                 'subcategory' => 'Hornbill',
-                'price' => '$4,250',
                 'image' => 'https://images.unsplash.com/photo-1516632664305-eda5d93dd409?auto=format&fit=crop&w=900&q=80',
                 'gallery' => [
                     'https://images.unsplash.com/photo-1516632664305-eda5d93dd409?auto=format&fit=crop&w=1200&q=80',
@@ -110,7 +107,6 @@ class LandingCatalogData
                 'latin' => 'Vulpes zerda',
                 'category' => 'mammals',
                 'subcategory' => 'Viverridae',
-                'price' => '$3,100',
                 'image' => 'https://images.unsplash.com/photo-1598755257130-c2aaca1f061c?auto=format&fit=crop&w=900&q=80',
                 'gallery' => [
                     'https://images.unsplash.com/photo-1598755257130-c2aaca1f061c?auto=format&fit=crop&w=1200&q=80',
@@ -127,7 +123,6 @@ class LandingCatalogData
                 'latin' => 'Petaurus breviceps',
                 'category' => 'mammals',
                 'subcategory' => 'Marsupilia',
-                'price' => '$950',
                 'image' => 'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=900&q=80',
                 'gallery' => [
                     'https://images.unsplash.com/photo-1548767797-d8c844163c4c?auto=format&fit=crop&w=1200&q=80',
@@ -144,7 +139,6 @@ class LandingCatalogData
                 'latin' => 'Oryctolagus cuniculus',
                 'category' => 'mammals',
                 'subcategory' => 'Leporidae',
-                'price' => '$480',
                 'image' => 'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=900&q=80',
                 'gallery' => [
                     'https://images.unsplash.com/photo-1585110396000-c9ffd4e4b308?auto=format&fit=crop&w=1200&q=80',
@@ -160,7 +154,6 @@ class LandingCatalogData
                 'latin' => 'Morelia viridis',
                 'category' => 'reptiles',
                 'subcategory' => 'Snake',
-                'price' => '$1,650',
                 'image' => 'https://images.unsplash.com/photo-1531386151447-fd76ad50012f?auto=format&fit=crop&w=900&q=80',
                 'gallery' => [
                     'https://images.unsplash.com/photo-1531386151447-fd76ad50012f?auto=format&fit=crop&w=1200&q=80',
@@ -177,7 +170,6 @@ class LandingCatalogData
                 'latin' => 'Eublepharis macularius',
                 'category' => 'reptiles',
                 'subcategory' => 'Gecko',
-                'price' => '$420',
                 'image' => 'https://images.unsplash.com/photo-1604161988974-647a7f85d5f2?auto=format&fit=crop&w=900&q=80',
                 'gallery' => [
                     'https://images.unsplash.com/photo-1604161988974-647a7f85d5f2?auto=format&fit=crop&w=1200&q=80',
@@ -194,7 +186,6 @@ class LandingCatalogData
                 'latin' => 'Centrochelys sulcata',
                 'category' => 'reptiles',
                 'subcategory' => 'Tortoise',
-                'price' => '$780',
                 'image' => 'https://images.unsplash.com/photo-1627247341456-21853440c8da?auto=format&fit=crop&w=900&q=80',
                 'gallery' => [
                     'https://images.unsplash.com/photo-1627247341456-21853440c8da?auto=format&fit=crop&w=1200&q=80',
@@ -211,7 +202,6 @@ class LandingCatalogData
                 'latin' => 'Ara ararauna x Ara macao',
                 'category' => 'hybrid',
                 'subcategory' => 'Macaw',
-                'price' => '$3,650',
                 'image' => asset('images/hybrid.jpeg'),
                 'gallery' => [
                     asset('images/hybrid.jpeg'),
@@ -228,7 +218,6 @@ class LandingCatalogData
                 'latin' => 'Ara macao hybrid line',
                 'category' => 'hybrid',
                 'subcategory' => 'Macaw',
-                'price' => '$3,450',
                 'image' => asset('images/hybrid.jpeg'),
                 'gallery' => [
                     asset('images/hybrid.jpeg'),

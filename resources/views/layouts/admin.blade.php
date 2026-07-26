@@ -319,10 +319,13 @@
                     'match'    => 'admin.landing.*',
                     'children' => [
                         ['route' => 'admin.landing.home.index', 'label' => 'Home',           'icon' => 'home'],
-                        ['route' => null,                       'label' => 'About',          'icon' => 'info',          'soon' => true],
-                        ['route' => null,                       'label' => 'Gallery',        'icon' => 'photo_library', 'soon' => true],
-                        ['route' => null,                       'label' => 'Informasi',      'icon' => 'description',   'soon' => true],
-                        ['route' => null,                       'label' => 'Future Projects','icon' => 'rocket_launch', 'soon' => true],
+                        ['route' => 'admin.landing.catalog.index',               'label' => 'Catalog',            'icon' => 'pets'],
+                        ['route' => 'admin.landing.about.index',                  'label' => 'About',              'icon' => 'info'],
+                        ['route' => 'admin.landing.information.logistic.index',   'label' => 'Info - Logistic',    'icon' => 'local_shipping'],
+                        ['route' => 'admin.landing.information.procurement.index','label' => 'Info - Procurement', 'icon' => 'inventory'],
+                        ['route' => 'admin.landing.information.live-export.index','label' => 'Info - Live Export', 'icon' => 'flight_takeoff'],
+                        ['route' => 'admin.landing.future-projects.index',        'label' => 'Future Projects',    'icon' => 'rocket_launch'],
+                        ['route' => 'admin.landing.gallery.index',                'label' => 'Gallery',            'icon' => 'photo_library'],
                     ],
                 ],
                 [
