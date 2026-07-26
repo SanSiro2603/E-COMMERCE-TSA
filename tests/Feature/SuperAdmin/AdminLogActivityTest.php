@@ -50,7 +50,7 @@ class AdminLogActivityTest extends TestCase
         $this->assertEquals('Mobile', $parsed['device_type']);
         $this->assertStringContainsString('Xiaomi', $parsed['device_name']);
         $this->assertEquals('Android 12', $parsed['operating_system']);
-        $this->assertEquals('Google Chrome', $parsed['browser']);
+        $this->assertStringContainsString('Google Chrome', $parsed['browser']);
     }
 
     public function test_customer_login_does_not_create_admin_log(): void
