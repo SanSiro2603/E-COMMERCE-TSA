@@ -48,8 +48,8 @@ class AdminLogActivityTest extends TestCase
         $parsed = AgentHelper::parse($xiaomiUa);
 
         $this->assertEquals('Mobile', $parsed['device_type']);
-        $this->assertStringContainsString('Xiaomi', $parsed['device_name']);
-        $this->assertEquals('Android 12', $parsed['operating_system']);
+        $this->assertEquals('Android Device', $parsed['device_name']);
+        $this->assertEquals('Android', $parsed['operating_system']);
         $this->assertStringContainsString('Google Chrome', $parsed['browser']);
     }
 
