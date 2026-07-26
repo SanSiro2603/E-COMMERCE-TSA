@@ -21,10 +21,10 @@ class AdminDashboardController extends Controller
         $processingOrders = Order::where('status', 'processing')->count();
         $completedOrders  = Order::where('status', 'completed')->count();
 
-        $totalRevenue = Order::where('status', 'completed')->sum('grand_total');
+        $totalRevenue = Order::where('status', 'completed')->sum('subtotal');
         $todayRevenue = Order::where('status', 'completed')
             ->whereDate('paid_at', today())
-            ->sum('grand_total');
+            ->sum('subtotal');
 
         $totalProducts    = Product::count();
         $lowStockProducts = Product::where('stock', '<=', 5)->where('is_active', true)->count();
@@ -46,8 +46,8 @@ class AdminDashboardController extends Controller
         );
 
         $revenueTrend = $this->calcTrend(
-            Order::where('status', 'completed')->whereBetween('paid_at', [$lastStart, $lastEnd])->sum('grand_total'),
-            Order::where('status', 'completed')->where('paid_at', '>=', $thisStart)->sum('grand_total')
+            Order::where('status', 'completed')->whereBetween('paid_at', [$lastStart, $lastEnd])->sum('subtotal'),
+            Order::where('status', 'completed')->where('paid_at', '>=', $thisStart)->sum('subtotal')
         );
 
         $customersTrend = $this->calcTrend(
@@ -62,18 +62,25 @@ class AdminDashboardController extends Controller
         $categoryStats = $this->getCategoryStats();
 
         $topProducts = Product::withSum([
-                'orderItems as total_sold' => function ($query) {
-                    $query->whereHas('order', function ($q) {
-                        $q->whereIn('status', ['paid', 'processing', 'shipped', 'completed']);
-                    });
-                }
-            ], 'quantity')
-            ->with('category')
-            ->where('is_active', true)
-            ->having('total_sold', '>', 0)
-            ->orderByDesc('total_sold')
-            ->limit(5)
-            ->get();
+        'orderItems as total_sold' => function ($query) {
+            $query->whereHas('order', function ($q) {
+                $q->where('status', 'completed');
+            });
+        }
+    ], 'quantity')
+    ->withSum([
+        'orderItems as total_revenue' => function ($query) {
+            $query->whereHas('order', function ($q) {
+                $q->where('status', 'completed');
+            });
+        }
+    ], 'subtotal')
+    ->with('category')
+    ->where('is_active', true)
+    ->having('total_sold', '>', 0)
+    ->orderByDesc('total_sold')
+    ->limit(5)
+    ->get();
 
         // ── 5 Pesanan terbaru ─────────────────────────────────────
         $recentOrders = Order::with('user')
@@ -149,7 +156,7 @@ class AdminDashboardController extends Controller
 
         $revenueMap = Order::where('status', 'completed')
             ->whereBetween('paid_at', [$start, now()->endOfDay()])
-            ->selectRaw('DATE(paid_at) as date, SUM(grand_total) as total')
+            ->selectRaw('DATE(paid_at) as date, SUM(subtotal) as total')
             ->groupBy('date')
             ->pluck('total', 'date');
 
@@ -173,7 +180,7 @@ class AdminDashboardController extends Controller
             ->join('products',   'products.id',   '=', 'order_items.product_id')
             ->join('categories', 'categories.id', '=', 'products.category_id')
             ->where('orders.status', 'completed')
-            ->where('orders.paid_at', '>=', now()->startOfMonth())
+            ->where('orders.paid_at', '>=', now()->subDays(30))
             ->selectRaw('categories.name, SUM(order_items.quantity) as total_sold')
             ->groupBy('categories.id', 'categories.name')
             ->orderByDesc('total_sold')

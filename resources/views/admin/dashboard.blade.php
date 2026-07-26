@@ -541,13 +541,27 @@
                             <h3 class="text-base font-semibold text-gray-900 dark:text-white">Produk Terlaris</h3>
                             <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Top 5 bulan ini</p>
                         </div>
-                        <a href="{{ route('admin.products.index') }}"
-                           class="text-xs font-medium text-soft-green hover:underline flex items-center gap-0.5">
-                            Lihat
-                            <span class="material-symbols-outlined text-sm">arrow_forward</span>
-                        </a>
+                        <button type="button" onclick="openTopProductsModal()"
+                            class="text-xs font-medium text-soft-green hover:underline flex items-center gap-0.5">
+                                Lihat
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                            </button>
+
                     </div>
                 </div>
+                            @php
+                $topProductsJson = $topProducts->map(function ($p, $i) {
+                    return [
+                        'rank'       => $i + 1,
+                        'name'       => $p->name,
+                        'category'   => $p->category->name ?? '-',
+                        'price'      => $p->price,
+                        'stock'      => $p->stock,
+                        'total_sold' => $p->total_sold ?? 0,
+                        'revenue'    => $p->total_revenue ?? 0,
+                    ];
+    });
+@endphp
                 <div class="p-4">
                     <div class="space-y-2">
                         @forelse($topProducts as $index => $product)
@@ -666,7 +680,36 @@
     </div>
 
 </div>
-
+{{-- ===================== MODAL: PRODUK TERLARIS ===================== --}}
+<div id="topProductsModal" class="hidden fixed inset-0 bg-black/50 z-50 items-center justify-center p-4" onclick="if(event.target === this) closeModal('topProductsModal')">
+    <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col">
+        <div class="p-5 border-b border-gray-200 dark:border-zinc-800 flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-semibold text-gray-900 dark:text-white">Produk Terlaris</h3>
+                <p class="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">Top 5 bulan ini</p>
+            </div>
+            <button onclick="closeModal('topProductsModal')" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 dark:hover:bg-zinc-800 text-gray-400">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        <div class="p-5 overflow-y-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="text-left text-xs text-gray-400 dark:text-zinc-500 border-b border-gray-100 dark:border-zinc-800">
+                        <th class="pb-2 font-medium">#</th>
+                        <th class="pb-2 font-medium">Produk</th>
+                        <th class="pb-2 font-medium">Kategori</th>
+                        <th class="pb-2 font-medium text-right">Harga</th>
+                        <th class="pb-2 font-medium text-right">Stok</th>
+                        <th class="pb-2 font-medium text-right">Terjual</th>
+                        <th class="pb-2 font-medium text-right">Pendapatan</th>
+                    </tr>
+                </thead>
+                <tbody id="topProductsTableBody" class="divide-y divide-gray-100 dark:divide-zinc-800"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
 @push('styles')
 <style>
     .period-btn {
@@ -855,6 +898,41 @@
 @endpush
 
 @push('scripts')
+<script>
+    const topProductsData = @json($topProductsJson);
+
+function closeModal(id) {
+    const el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.classList.remove('flex');
+}
+
+function openModal(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+}
+
+function formatRupiah(num) {
+    return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
+}
+
+function openTopProductsModal() {
+    const body = document.getElementById('topProductsTableBody');
+    body.innerHTML = topProductsData.map(p => `
+        <tr>
+            <td class="py-2.5 text-xs text-gray-400">${p.rank}</td>
+            <td class="py-2.5 font-medium text-gray-900 dark:text-white">${p.name}</td>
+            <td class="py-2.5 text-xs text-gray-500 dark:text-zinc-400">${p.category}</td>
+            <td class="py-2.5 text-right">${formatRupiah(p.price)}</td>
+            <td class="py-2.5 text-right">${p.stock}</td>
+            <td class="py-2.5 text-right font-semibold text-soft-green">${p.total_sold}</td>
+            <td class="py-2.5 text-right font-semibold">${formatRupiah(p.revenue)}</td>
+        </tr>
+    `).join('');
+    openModal('topProductsModal');
+}
+</script>
     @include('admin.partials.global-search')
 @endpush
 @endsection
