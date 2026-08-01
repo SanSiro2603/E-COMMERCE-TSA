@@ -22,6 +22,7 @@ class AdminLogController extends Controller
                 $q->where('admin_name', 'like', "%{$search}%")
                   ->orWhere('admin_email', 'like', "%{$search}%")
                   ->orWhere('action', 'like', "%{$search}%")
+                  ->orWhere('module', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%")
                   ->orWhere('device_name', 'like', "%{$search}%")
                   ->orWhere('ip_address', 'like', "%{$search}%");
@@ -31,6 +32,16 @@ class AdminLogController extends Controller
         // Action filter
         if ($request->filled('action')) {
             $query->where('action', $request->action);
+        }
+
+        // Module filter
+        if ($request->filled('module')) {
+            $query->where('module', $request->module);
+        }
+
+        // Severity filter
+        if ($request->filled('severity')) {
+            $query->where('severity', $request->severity);
         }
 
         // Date filter
@@ -47,8 +58,9 @@ class AdminLogController extends Controller
             ->distinct('device_name')
             ->count('device_name');
 
-        // Distinct actions for filter dropdown
-        $actions = AdminLog::select('action')->distinct()->pluck('action');
+        // Distinct actions & modules for filter dropdowns
+        $actions = AdminLog::whereNotNull('action')->distinct()->pluck('action');
+        $modules = AdminLog::whereNotNull('module')->distinct()->pluck('module');
 
         $logs = $query->paginate(15)->withQueryString();
 
@@ -57,7 +69,8 @@ class AdminLogController extends Controller
             'totalLogs',
             'todayLogins',
             'uniqueDevices',
-            'actions'
+            'actions',
+            'modules'
         ));
     }
 

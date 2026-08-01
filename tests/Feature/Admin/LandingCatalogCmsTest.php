@@ -41,6 +41,64 @@ class LandingCatalogCmsTest extends TestCase
         $this->get('/home/catalog/blue-and-gold-macaw')->assertOk();
     }
 
+    public function test_public_detail_gallery_starts_with_main_image_and_deduplicates_sorted_images(): void
+    {
+        $animal = LandingCatalogAnimal::where('slug', 'blue-and-gold-macaw')->firstOrFail();
+        $animal->images()->delete();
+
+        $animal->images()->create([
+            'image_path' => 'landing/catalog/gallery/last.jpg',
+            'alt_en' => 'Last gallery image',
+            'sort_order' => 20,
+        ]);
+        $animal->images()->create([
+            'image_path' => $animal->main_image_path,
+            'alt_en' => 'Duplicate main image',
+            'sort_order' => 1,
+        ]);
+        $animal->images()->create([
+            'image_path' => 'landing/catalog/gallery/first.jpg',
+            'alt_en' => 'First gallery image',
+            'sort_order' => 5,
+        ]);
+
+        $response = $this->get(route('landing.catalog.show', $animal->slug))
+            ->assertOk()
+            ->assertSee('aria-label="Show previous image"', false)
+            ->assertSee('aria-label="Show next image"', false)
+            ->assertSee('data-gallery-index="2"', false);
+        $gallery = $response->viewData('product')['gallery'];
+
+        $this->assertSame([
+            $animal->main_image_url,
+            '/storage/landing/catalog/gallery/first.jpg',
+            '/storage/landing/catalog/gallery/last.jpg',
+        ], array_column($gallery, 'url'));
+        $this->assertSame([
+            $animal->main_image_alt,
+            'First gallery image',
+            'Last gallery image',
+        ], array_column($gallery, 'alt'));
+    }
+
+    public function test_public_detail_gallery_uses_only_main_image_when_no_extra_images_exist(): void
+    {
+        $animal = LandingCatalogAnimal::where('slug', 'blue-and-gold-macaw')->firstOrFail();
+        $animal->images()->delete();
+
+        $response = $this->get(route('landing.catalog.show', $animal->slug))
+            ->assertOk()
+            ->assertDontSee('aria-label="Show previous image"', false)
+            ->assertDontSee('aria-label="Show next image"', false)
+            ->assertDontSee('data-gallery-index="0"', false);
+        $gallery = $response->viewData('product')['gallery'];
+
+        $this->assertSame([[
+            'url' => $animal->main_image_url,
+            'alt' => $animal->main_image_alt,
+        ]], $gallery);
+    }
+
     public function test_public_catalog_respects_numeric_animal_order(): void
     {
         LandingCatalogAnimal::where('slug', 'blue-and-gold-macaw')->update(['sort_order' => 20]);

@@ -11,9 +11,10 @@
     </div>
 @endif
 @if(in_array('description', $fields, true))
+    @php $descriptionRequired = !in_array('description', $collection['optional_fields'] ?? [], true); @endphp
     <div class="md:col-span-2">
-        <label class="mb-1.5 block text-xs font-bold text-gray-600 dark:text-zinc-400">Deskripsi</label>
-        <textarea name="description_en" rows="3" required maxlength="5000" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">{{ $item?->description_en }}</textarea>
+        <label class="mb-1.5 block text-xs font-bold text-gray-600 dark:text-zinc-400">Deskripsi{{ $descriptionRequired ? '' : ' (opsional)' }}</label>
+        <textarea name="description_en" rows="3" {{ $descriptionRequired ? 'required' : '' }} maxlength="5000" class="w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm dark:border-zinc-700 dark:bg-zinc-900 dark:text-white">{{ $item?->description_en }}</textarea>
     </div>
 @endif
 @if(in_array('image', $fields, true))

@@ -52,10 +52,17 @@ class LandingCatalogController extends Controller
             ->with(['category', 'family', 'images' => fn ($query) => $query->orderBy('sort_order')->orderBy('id')])
             ->firstOrFail();
 
-        $gallery = $animal->images->map(fn ($image) => ['url' => $image->image_url, 'alt' => $image->alt])->values()->all();
-        if ($gallery === []) {
-            $gallery[] = ['url' => $animal->main_image_url, 'alt' => $animal->main_image_alt];
-        }
+        $gallery = collect([
+            ['url' => $animal->main_image_url, 'alt' => $animal->main_image_alt],
+        ])
+            ->concat($animal->images->map(fn ($image) => [
+                'url' => $image->image_url,
+                'alt' => $image->alt,
+            ]))
+            ->filter(fn ($image) => filled($image['url']))
+            ->unique(fn ($image) => $image['url'])
+            ->values()
+            ->all();
 
         return view('landing.catalog-detail', [
             'pageTitle' => $animal->name,

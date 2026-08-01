@@ -129,7 +129,8 @@ class LandingPageCmsTest extends TestCase
         $session = $this->actingAs($admin)->withSession(['2fa_passed' => true]);
 
         $session->post(route('admin.landing.pages.items.store', ['gallery', 'items']), [
-            'title_en' => 'New Gallery Photo', 'category' => 'Wildlife', 'alt' => 'New photo',
+            'title_en' => 'New Gallery Photo', 'description_en' => 'A new gallery caption.',
+            'alt' => 'New photo',
             'sort_order' => 10, 'image' => UploadedFile::fake()->image('gallery.jpg')->size(300),
         ])->assertSessionHas('success');
 
@@ -138,7 +139,8 @@ class LandingPageCmsTest extends TestCase
         $originalPath = $item->image_path;
 
         $session->put(route('admin.landing.pages.items.update', ['gallery', 'items', $item]), [
-            'title_en' => 'Updated Gallery Photo', 'category' => 'Facility', 'alt' => 'Updated photo',
+            'title_en' => 'Updated Gallery Photo', 'description_en' => 'An updated gallery caption.',
+            'alt' => 'Updated photo',
             'sort_order' => 2, 'image' => UploadedFile::fake()->image('gallery-new.webp')->size(300),
         ])->assertSessionHas('success');
         Storage::disk('public')->assertMissing($originalPath);
@@ -153,6 +155,32 @@ class LandingPageCmsTest extends TestCase
             ->assertSessionHas('success');
         $this->assertDatabaseMissing('landing_page_items', ['id' => $item->id]);
         Storage::disk('public')->assertMissing($uploadedPath);
+    }
+
+    public function test_gallery_caption_is_optional_for_new_items_and_rendered_publicly(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['role' => 'admin']);
+        $session = $this->actingAs($admin)->withSession(['2fa_passed' => true]);
+
+        $session->post(route('admin.landing.pages.items.store', ['gallery', 'items']), [
+            'title_en' => 'Caption Optional', 'alt' => 'Caption validation',
+            'sort_order' => 10, 'image' => UploadedFile::fake()->image('caption.jpg')->size(300),
+        ])->assertSessionHas('success');
+
+        $optionalCaption = LandingPageItem::where('title_en', 'Caption Optional')->firstOrFail();
+        $this->assertNull($optionalCaption->description_en);
+
+        $item = LandingPageItem::forSection('gallery', 'items')->firstOrFail();
+        $item->update([
+            'title_en' => 'Visible Gallery Caption',
+            'description_en' => 'This summary appears below the gallery image.',
+        ]);
+
+        $this->get(route('landing.gallery'))
+            ->assertOk()
+            ->assertSee('Visible Gallery Caption')
+            ->assertSee('This summary appears below the gallery image.');
     }
 
     public function test_deleting_seeded_item_never_deletes_public_asset(): void

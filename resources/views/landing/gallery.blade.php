@@ -32,7 +32,7 @@
 
             <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 @foreach ($items as $item)
-                    <article class="reveal-up delay-{{ ($loop->index % 8) + 1 }} zoom-soft group overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm cursor-pointer" data-reveal
+                    <article class="reveal-up delay-{{ ($loop->index % 8) + 1 }} zoom-soft group cursor-pointer overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm" data-reveal
                              data-image="{{ $item->image_url }}"
                              data-alt="{{ data_get($item->metadata, 'alt', $item->titleForLocale()) }}"
                              @click="lightboxOpen = true; lightboxImg = $el.dataset.image; lightboxAlt = $el.dataset.alt">
@@ -50,6 +50,16 @@
                                     </svg>
                                 </span>
                             </div>
+                        </div>
+                        <div class="flex min-h-[7.5rem] flex-col px-5 py-4">
+                            <h3 class="line-clamp-1 text-lg font-extrabold text-slate-900">
+                                {{ $item->titleForLocale() }}
+                            </h3>
+                            @if(filled($item->descriptionForLocale()))
+                                <p class="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-600">
+                                    {{ $item->descriptionForLocale() }}
+                                </p>
+                            @endif
                         </div>
                     </article>
                 @endforeach

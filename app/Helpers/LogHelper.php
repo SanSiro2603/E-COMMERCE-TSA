@@ -31,6 +31,7 @@ class LogHelper
 
         $userAgent = request()->userAgent();
         $agentInfo = AgentHelper::parse($userAgent);
+        $gps = static::getGpsLocation();
 
         return AdminLog::create([
             'user_id'          => $targetUser->id,
@@ -38,6 +39,8 @@ class LogHelper
             'admin_email'      => $targetUser->email,
             'action'           => $action,
             'description'      => $description,
+            'latitude'         => $gps['latitude'],
+            'longitude'        => $gps['longitude'],
             'ip_address'       => static::getRealIp(),
             'device_type'      => $agentInfo['device_type'],
             'device_name'      => $agentInfo['device_name'],
@@ -45,6 +48,30 @@ class LogHelper
             'browser'          => $agentInfo['browser'],
             'user_agent'       => $userAgent,
         ]);
+    }
+
+    /**
+     * Get GPS latitude and longitude from request headers, cookies, session, or inputs.
+     */
+    public static function getGpsLocation(): array
+    {
+        $request = request();
+        $lat = $request->header('X-GPS-Latitude')
+            ?? ($_COOKIE['admin_lat'] ?? null)
+            ?? $request->cookie('admin_lat')
+            ?? session('admin_lat')
+            ?? $request->input('latitude');
+
+        $lng = $request->header('X-GPS-Longitude')
+            ?? ($_COOKIE['admin_lng'] ?? null)
+            ?? $request->cookie('admin_lng')
+            ?? session('admin_lng')
+            ?? $request->input('longitude');
+
+        return [
+            'latitude'  => (is_numeric($lat) && (float)$lat != 0) ? (float) $lat : null,
+            'longitude' => (is_numeric($lng) && (float)$lng != 0) ? (float) $lng : null,
+        ];
     }
 
     /**

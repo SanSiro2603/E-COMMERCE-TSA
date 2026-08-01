@@ -4,9 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\LogsActivity;
 
 class HomeSlide extends Model
 {
+    use LogsActivity;
     protected $fillable = [
         'title_top', 'title_bottom', 'copy',
         'image_path', 'bg_position', 'sort_order', 'is_active',

@@ -181,7 +181,9 @@ class LandingPageController extends Controller
             $rules['title_en'] = 'required|string|max:255';
         }
         if (in_array('description', $fields, true)) {
-            $rules['description_en'] = 'required|string|max:5000';
+            $rules['description_en'] = in_array('description', $collection['optional_fields'] ?? [], true)
+                ? 'nullable|string|max:5000'
+                : 'required|string|max:5000';
         }
         if (in_array('image', $fields, true)) {
             $rules['image'] = ($creating ? 'required' : 'nullable').'|image|mimes:jpeg,jpg,png,webp|max:3072';

@@ -52,12 +52,119 @@ class AgentHelper
 
     public static function detectDeviceName(string $ua): string
     {
-        // Apple
+        $request = request();
+
+        // Tier 1: Client Hints API / JS Cookie (Exact High-Entropy Device Model)
+        $clientDevice = $request->header('X-Device-Model')
+            ?? ($_COOKIE['admin_device_name'] ?? null)
+            ?? $request->cookie('admin_device_name');
+
+        if (filled($clientDevice) && is_string($clientDevice)) {
+            $cleaned = trim(urldecode($clientDevice));
+            if (strlen($cleaned) > 1 && strlen($cleaned) < 50 && $cleaned !== 'Unknown') {
+                return $cleaned;
+            }
+        }
+
+        // Tier 2: Apple Devices
         if (stripos($ua, 'iPhone') !== false)    return 'iPhone';
         if (stripos($ua, 'iPad') !== false)       return 'iPad';
         if (stripos($ua, 'Macintosh') !== false)  return 'Mac';
 
-        // Android (semua brand → cukup "Android Device")
+        // Tier 2 & 3: Android Model Segment Extractor (Linux; Android X.X; <MODEL> Build/...)
+        $androidModel = null;
+        if (preg_match('/Android[^;]*;\s*([^;)]+)\s*Build/i', $ua, $m)) {
+            $androidModel = trim($m[1]);
+        }
+
+        // Infinix
+        if (preg_match('/(?:Infinix|X6\d{3}|X6\d{2}[A-Z]|X5\d{3})/i', $ua)) {
+            if ($androidModel) {
+                return stripos($androidModel, 'Infinix') !== false ? $androidModel : 'Infinix ' . $androidModel;
+            }
+            return 'Infinix Device';
+        }
+
+        // Tecno
+        if (preg_match('/(?:TECNO|CK\d|LH\d|AD\d|BF\d)/i', $ua)) {
+            if ($androidModel) {
+                return stripos($androidModel, 'TECNO') !== false ? $androidModel : 'TECNO ' . $androidModel;
+            }
+            return 'TECNO Device';
+        }
+
+        // Itel
+        if (preg_match('/(?:itel|A6\d|L6\d)/i', $ua)) {
+            if ($androidModel) {
+                return stripos($androidModel, 'itel') !== false ? $androidModel : 'Itel ' . $androidModel;
+            }
+            return 'Itel Device';
+        }
+
+        // Xiaomi / Redmi / POCO
+        if (preg_match('/(?:Redmi|POCO|Xiaomi|Mi\s|220\d|210\d|230\d|240\d|250\d|M210|2201)/i', $ua)) {
+            if (preg_match('/(Redmi\s*[\w\s]+|POCO\s*[\w\s]+|Xiaomi\s*[\w\s]+|Mi\s*[\w\s]+)/i', $ua, $xm)) {
+                return trim($xm[1]);
+            }
+            if ($androidModel) return 'Xiaomi/Redmi (' . $androidModel . ')';
+            return 'Xiaomi / POCO';
+        }
+
+        // Samsung
+        if (preg_match('/(?:Samsung|SM-[A-Z0-9]+)/i', $ua)) {
+            if (preg_match('/(SM-[A-Z0-9]+)/i', $ua, $sm)) {
+                return 'Samsung (' . $sm[1] . ')';
+            }
+            if ($androidModel) return 'Samsung ' . $androidModel;
+            return 'Samsung Device';
+        }
+
+        // Oppo
+        if (preg_match('/(?:OPPO|CPH\d{4}|PDR\d{3})/i', $ua)) {
+            if ($androidModel) return 'Oppo ' . $androidModel;
+            return 'Oppo Device';
+        }
+
+        // Vivo
+        if (preg_match('/(?:vivo|V2\d{3}|V2\d{2}[A-Z])/i', $ua)) {
+            if ($androidModel) return 'Vivo ' . $androidModel;
+            return 'Vivo Device';
+        }
+
+        // Realme
+        if (preg_match('/(?:realme|RMX\d{4})/i', $ua)) {
+            if ($androidModel) return 'Realme ' . $androidModel;
+            return 'Realme Device';
+        }
+
+        // Google Pixel
+        if (preg_match('/(?:Pixel\s*[\d\w]*)/i', $ua, $m)) {
+            return 'Google ' . trim($m[0]);
+        }
+
+        // Asus / ROG
+        if (preg_match('/Asus|ROG/i', $ua)) {
+            if ($androidModel) return 'Asus ' . $androidModel;
+            return 'Asus Device';
+        }
+
+        // Sony
+        if (preg_match('/Sony|SO-\d|Xperia/i', $ua)) {
+            if ($androidModel) return 'Sony ' . $androidModel;
+            return 'Sony Device';
+        }
+
+        // Huawei / Honor
+        if (preg_match('/HUAWEI|HONOR|VOG-L|ELE-L/i', $ua)) {
+            if ($androidModel) return 'Huawei/Honor ' . $androidModel;
+            return 'Huawei Device';
+        }
+
+        // Generic Android model fallback
+        if ($androidModel && strlen($androidModel) > 2 && strlen($androidModel) < 35) {
+            return $androidModel;
+        }
+
         if (preg_match('/Android/i', $ua))        return 'Android Device';
 
         // Desktop

@@ -14,13 +14,25 @@ class AdminLog extends Model
         'admin_name',
         'admin_email',
         'action',
+        'module',
+        'model_id',
         'description',
+        'old_values',
+        'new_values',
+        'severity',
+        'latitude',
+        'longitude',
         'ip_address',
         'device_type',
         'device_name',
         'operating_system',
         'browser',
         'user_agent',
+    ];
+
+    protected $casts = [
+        'old_values' => 'array',
+        'new_values' => 'array',
     ];
 
     public function user()

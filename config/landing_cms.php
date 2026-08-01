@@ -138,6 +138,10 @@ return [
                 'section_heading' => ['label' => 'Heading', 'type' => 'text', 'rules' => 'required|string|max:200'],
             ]],
         ],
-        'collections' => ['items' => ['label' => 'Foto Gallery', 'fields' => ['title', 'category', 'image', 'alt', 'sort_order']]],
+        'collections' => ['items' => [
+            'label' => 'Foto Gallery',
+            'fields' => ['title', 'description', 'image', 'alt', 'sort_order'],
+            'optional_fields' => ['description'],
+        ]],
     ],
 ];

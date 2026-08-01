@@ -3,12 +3,13 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasLandingAsset;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class LandingPageItem extends Model
 {
-    use HasLandingAsset;
+    use HasLandingAsset, LogsActivity;
 
     protected $fillable = [
         'page', 'section', 'item_key', 'title_en', 'title_id',

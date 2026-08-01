@@ -5,12 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use App\Traits\LogsActivity;
 
 // Model utama pesanan — tabel: orders
 // Relasi: users, order_items, payments, shipments, addresses, order_shipping_snapshots
 class Order extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity;
 
     // [+] Tambah nama kolom baru di sini jika ada kolom baru di migration
     protected $fillable = [

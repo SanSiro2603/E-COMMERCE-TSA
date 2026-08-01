@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasLandingAsset;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LandingCatalogCategory extends Model
 {
-    use HasLandingAsset;
+    use HasLandingAsset, LogsActivity;
 
     protected $fillable = ['slug', 'name_en', 'name_id', 'description_en', 'description_id', 'image_path', 'image_alt_en', 'image_alt_id', 'sort_order', 'is_active'];
 

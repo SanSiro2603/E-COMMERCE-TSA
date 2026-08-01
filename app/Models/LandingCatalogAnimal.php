@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Concerns\HasLandingAsset;
+use App\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class LandingCatalogAnimal extends Model
 {
-    use HasLandingAsset;
+    use HasLandingAsset, LogsActivity;
 
     protected $fillable = ['category_id', 'family_id', 'slug', 'name_en', 'name_id', 'latin_name', 'main_image_path', 'main_image_alt_en', 'main_image_alt_id', 'description_en', 'description_id', 'details_en', 'details_id', 'shipping_en', 'shipping_id', 'care_en', 'care_id', 'legal_en', 'legal_id', 'sort_order', 'is_active'];
 

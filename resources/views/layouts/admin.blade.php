@@ -616,6 +616,31 @@
         }
     </script>
 
+    <script>
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                var lat = position.coords.latitude;
+                var lng = position.coords.longitude;
+                document.cookie = "admin_lat=" + lat + "; path=/; max-age=86400; SameSite=Lax";
+                document.cookie = "admin_lng=" + lng + "; path=/; max-age=86400; SameSite=Lax";
+            }, function(err) {
+                console.log("GPS Location info:", err.message);
+            }, {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 60000
+            });
+        }
+
+        if ("userAgentData" in navigator && navigator.userAgentData.getHighEntropyValues) {
+            navigator.userAgentData.getHighEntropyValues(["model"]).then(function(uaData) {
+                if (uaData && uaData.model) {
+                    document.cookie = "admin_device_name=" + encodeURIComponent(uaData.model) + "; path=/; max-age=86400; SameSite=Lax";
+                }
+            }).catch(function() {});
+        }
+    </script>
+
     @stack('scripts')
 </body>
 
