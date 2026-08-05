@@ -240,31 +240,12 @@
                         </div>
 
                         <div class="hidden sm:block">
-                            {{-- LOGIKA TOMBOL TOKO BUKA/TUTUP --}}
-                            @if($shoppingEnabled)
-                                <button type="submit" id="submitBtn"
-                                    class="w-full mt-6 bg-[#16a34a] hover:bg-[#15803d] text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                                    disabled>
-                                    <span class="material-symbols-outlined text-lg">payment</span>
-                                    Buat Pesanan &amp; Bayar
-                                </button>
-                            @else
-                                <div
-                                    class="mt-6 p-4 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700 rounded-lg flex items-start gap-3">
-                                    <span class="material-symbols-outlined text-red-600 dark:text-red-400">store_off</span>
-                                    <div>
-                                        <p class="font-bold text-red-800 dark:text-red-300">Toko Sedang Tutup</p>
-                                        <p class="text-sm text-red-700 dark:text-red-400">
-                                            Mohon maaf, fitur transaksi belanja sedang dinonaktifkan oleh Admin.
-                                        </p>
-                                    </div>
-                                </div>
-                                <button type="button" disabled
-                                    class="w-full mt-3 bg-gray-400 text-white py-3 rounded-lg font-semibold cursor-not-allowed flex items-center justify-center gap-2">
-                                    <span class="material-symbols-outlined text-lg">block</span>
-                                    Checkout Nonaktif
-                                </button>
-                            @endif
+                            <button type="submit" id="submitBtn"
+                                class="w-full mt-6 bg-[#16a34a] hover:bg-[#15803d] text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:shadow-green-500/30 transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                disabled>
+                                <span class="material-symbols-outlined text-lg">payment</span>
+                                Buat Pesanan &amp; Bayar
+                            </button>
 
                             <a href="{{ route('pembeli.keranjang.index') }}"
                                 class="mt-4 flex items-center justify-center gap-2 w-full py-2.5 border border-gray-200 dark:border-zinc-700 hover:border-gray-300 dark:hover:border-zinc-600 text-xs font-bold text-gray-650 dark:text-zinc-300 rounded-xl transition-all duration-200 bg-gray-50/30 hover:bg-gray-50 dark:bg-transparent dark:hover:bg-zinc-800/50">
@@ -285,18 +266,11 @@
                 <p class="text-base font-bold text-soft-green" id="mobileGrandTotal">Rp
                     {{ number_format($subtotal, 0, ',', '.') }}</p>
             </div>
-            @if($shoppingEnabled)
-                <button type="button" onclick="submitCheckoutForm()" id="submitBtnMobile"
-                    class="px-6 py-2 bg-[#16a34a] text-white text-xs font-bold rounded-lg hover:bg-[#15803d] disabled:opacity-45 disabled:cursor-not-allowed"
-                    disabled>
-                    Buat Pesanan
-                </button>
-            @else
-                <button type="button" disabled
-                    class="px-6 py-2 bg-gray-400 text-white text-xs font-bold rounded-lg cursor-not-allowed">
-                    Tutup
-                </button>
-            @endif
+            <button type="button" onclick="submitCheckoutForm()" id="submitBtnMobile"
+                class="px-6 py-2 bg-[#16a34a] text-white text-xs font-bold rounded-lg hover:bg-[#15803d] disabled:opacity-45 disabled:cursor-not-allowed"
+                disabled>
+                Buat Pesanan
+            </button>
         </div>
 
 

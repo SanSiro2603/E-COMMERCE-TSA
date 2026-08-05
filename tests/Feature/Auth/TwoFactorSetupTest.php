@@ -27,8 +27,9 @@ class TwoFactorSetupTest extends TestCase
             ->get(route('2fa.index'));
 
         $response->assertOk();
-        $response->assertSee('Setup 2-Factor Authentication');
-        $response->assertDontSee('Konfirmasi Setup 2FA');
+        $response->assertSee('Hubungkan aplikasi authenticator');
+        $response->assertSee('Logout');
+        $response->assertDontSee('Konfirmasi pengamanan akun');
     }
 
     public function test_continue_setup_shows_code_once_then_returns_to_qr_while_secret_is_empty(): void
@@ -41,20 +42,21 @@ class TwoFactorSetupTest extends TestCase
         $this->actingAs($admin)
             ->get(route('2fa.index'))
             ->assertOk()
-            ->assertSee('Setup 2-Factor Authentication');
+            ->assertSee('Hubungkan aplikasi authenticator')
+            ->assertSee('Logout');
 
         $this->post(route('2fa.setup.continue'))
             ->assertRedirect(route('2fa.index'));
 
         $this->get(route('2fa.index'))
             ->assertOk()
-            ->assertSee('Konfirmasi Setup 2FA');
+            ->assertSee('Konfirmasi pengamanan akun');
 
         $this->assertNull($admin->fresh()->google2fa_secret);
 
         $this->get(route('2fa.index'))
             ->assertOk()
-            ->assertSee('Setup 2-Factor Authentication')
-            ->assertDontSee('Konfirmasi Setup 2FA');
+            ->assertSee('Hubungkan aplikasi authenticator')
+            ->assertDontSee('Konfirmasi pengamanan akun');
     }
 }

@@ -35,16 +35,12 @@ public function boot()
     Config::$is3ds = true;
 
     date_default_timezone_set('Asia/Jakarta');
-    // === 2. TAMBAHAN BARU (Logika Toko Tutup) ===
+    // Status ini hanya mengatur akses autentikasi customer, bukan checkout.
     try {
-        $setting = SystemSetting::where('key', 'shopping_enabled')->first();
-        // Kalau setting ketemu dan value '1', berarti aktif.
-        // Kalau setting tidak ketemu (null), kita anggap aktif (true) biar aman.
-        $shoppingEnabled = $setting ? $setting->value === '1' : true;
-        View::share('shoppingEnabled', $shoppingEnabled);
+        View::share('customerLoginEnabled', SystemSetting::isEnabled('customer_login_enabled'));
     } catch (\Exception $e) {
         // Fallback jika database belum siap/migrate
-        View::share('shoppingEnabled', true);
+        View::share('customerLoginEnabled', true);
     }
 
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -46,6 +47,16 @@ class LoginController extends Controller
 
                 throw ValidationException::withMessages([
                     'email' => ['Akun Anda sedang nonaktif. Hubungi Super Admin.'],
+                ]);
+            }
+
+            if ($user->role === 'pembeli' && ! SystemSetting::isEnabled('customer_login_enabled')) {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                throw ValidationException::withMessages([
+                    'email' => ['Login customer sedang dinonaktifkan oleh Admin.'],
                 ]);
             }
 

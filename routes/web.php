@@ -68,8 +68,10 @@ Route::get('/gallery-hewan', [DashboardController::class, 'hewan'])->name('galle
 | AUTH GOOGLE
 |--------------------------------------------------------------------------
 */
-Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
-Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+Route::middleware('customer.login')->group(function () {
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
+    Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -95,21 +97,23 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [LoginController::class, 'login'])->middleware('throttle:5,1');
 
-    Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-    Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
+    Route::middleware('customer.login')->group(function () {
+        Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+        Route::post('/register', [RegisterController::class, 'register'])->middleware('throttle:5,1');
 
-    Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
-        ->name('password.request');
+        Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
+            ->name('password.request');
 
-    Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
-        ->name('password.email')
-        ->middleware('throttle:5,1');
+        Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+            ->name('password.email')
+            ->middleware('throttle:5,1');
 
-    Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
-        ->name('password.reset');
+        Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+            ->name('password.reset');
 
-    Route::post('/reset-password', [NewPasswordController::class, 'store'])
-        ->name('password.update');
+        Route::post('/reset-password', [NewPasswordController::class, 'store'])
+            ->name('password.update');
+    });
 });
 
 /*

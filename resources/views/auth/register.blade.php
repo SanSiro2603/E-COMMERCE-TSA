@@ -158,12 +158,14 @@
       </button>
 
       <!-- Google Login -->
-       <div class="mb-6">
-        <a href="{{ route('google.redirect') }}" class="google-login text-gray-700 font-medium">
-          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-4 h-4" />
-          <span>Continue with Google</span>
-        </a>
-      </div>
+       @if($customerLoginEnabled)
+         <div class="mb-6">
+          <a href="{{ route('google.redirect') }}" class="google-login text-gray-700 font-medium">
+            <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" class="w-4 h-4" />
+            <span>Continue with Google</span>
+          </a>
+        </div>
+       @endif
 
       <div class="text-center mt-5 text-[11px]">
         <p class="text-gray-700">

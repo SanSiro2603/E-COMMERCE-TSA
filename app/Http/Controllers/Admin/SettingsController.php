@@ -10,24 +10,20 @@ class SettingsController extends Controller
 {
     public function index()
     {
-        // Ambil setting 'shopping_enabled', default '1' jika belum ada
-        $setting = SystemSetting::where('key', 'shopping_enabled')->first();
-        $shoppingEnabled = $setting ? $setting->value : '1';
+        $customerLoginEnabled = SystemSetting::isEnabled('customer_login_enabled');
 
-        return view('admin.settings.index', compact('shoppingEnabled'));
+        return view('admin.settings.index', compact('customerLoginEnabled'));
     }
 
     public function update(Request $request)
     {
-        // Validasi input (opsional, krn cuma toggle)
-        $status = $request->has('shopping_enabled') ? '1' : '0';
+        $status = $request->boolean('customer_login_enabled') ? '1' : '0';
 
-        // Simpan ke database
         SystemSetting::updateOrCreate(
-            ['key' => 'shopping_enabled'], // Cari key 
-            ['value' => $status]           // Update valuenya
+            ['key' => 'customer_login_enabled'],
+            ['value' => $status]
         );
 
-        return back()->with('success', 'Status toko berhasil diperbarui!');
+        return back()->with('success', 'Akses login customer berhasil diperbarui!');
     }
 }

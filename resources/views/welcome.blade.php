@@ -214,11 +214,13 @@
                             class="size-11 rounded-full glass-strong flex items-center justify-center hover:scale-110 transition-transform duration-300">
                             <span class="material-symbols-outlined text-primary dark:text-secondary">dark_mode</span>
                         </button>
-                        <a href="{{ route('login') }}"
-                            class="px-6 h-11 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2">
-                            <span>{{ __('Shop Now') }}</span>
-                            <span class="material-symbols-outlined">arrow_forward</span>
-                        </a>
+                        @if($customerLoginEnabled)
+                            <a href="{{ route('login') }}"
+                                class="px-6 h-11 rounded-full bg-gradient-to-r from-primary to-green-600 text-white font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 flex items-center gap-2">
+                                <span>{{ __('Shop Now') }}</span>
+                                <span class="material-symbols-outlined">arrow_forward</span>
+                            </a>
+                        @endif
                     </div>
 
                     <!-- Mobile Menu Button -->

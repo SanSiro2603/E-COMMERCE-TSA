@@ -163,11 +163,13 @@
 
                     <!-- Action Buttons -->
                     <div class="flex items-center gap-3">
-                        <a href="{{route('login')}}" 
-                        class="hidden sm:flex items-center gap-2 px-6 h-11 rounded-2xl bg-gradient-to-r from-secondary to-yellow-400 text-primary font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                            <span class="material-symbols-outlined">person</span>
-                            <span>Login</span>
-                        </a>
+                        @if($customerLoginEnabled)
+                            <a href="{{route('login')}}"
+                            class="hidden sm:flex items-center gap-2 px-6 h-11 rounded-2xl bg-gradient-to-r from-secondary to-yellow-400 text-primary font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                                <span class="material-symbols-outlined">person</span>
+                                <span>Login</span>
+                            </a>
+                        @endif
                         
                         <button 
                             onclick="document.documentElement.classList.toggle('dark')" 
@@ -313,12 +315,14 @@
     
                 <!-- Load More Section -->
                 <div class="flex justify-center mt-16">
-                    <a href="{{route('login')}}" 
-                    class="group flex items-center gap-3 px-8 h-14 rounded-2xl glass-strong font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                        <span class="material-symbols-outlined text-primary dark:text-secondary">pets</span>
-                        <span>Muat Lebih Banyak Hewan</span>
-                        <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
-                    </a>
+                    @if($customerLoginEnabled)
+                        <a href="{{route('login')}}"
+                        class="group flex items-center gap-3 px-8 h-14 rounded-2xl glass-strong font-bold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                            <span class="material-symbols-outlined text-primary dark:text-secondary">pets</span>
+                            <span>Muat Lebih Banyak Hewan</span>
+                            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </a>
+                    @endif
                 </div>
             </div>
         </main>

@@ -92,6 +92,7 @@ class LandingHomeSeeder extends Seeder
 
         // ── System Settings ───────────────────────────────────────────
         $defaults = [
+            'customer_login_enabled' => '1',
             'home_catalog_label'   => 'Our Catalog',
             'home_catalog_heading' => 'Explore Our Main Categories',
             'site_phone_1'         => '+62721 8050354',

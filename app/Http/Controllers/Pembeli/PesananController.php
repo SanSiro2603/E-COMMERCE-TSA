@@ -8,7 +8,6 @@ use App\Models\OrderItem;
 use App\Models\Cart;
 use App\Models\Product;
 use App\Models\Payment;
-use App\Models\SystemSetting;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -139,15 +138,6 @@ class PesananController extends Controller
             ], 422);
         }
 
-        // Cek toko buka
-        $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
-        if ($isStoreOpen !== '1') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Maaf, toko sedang tutup.',
-            ], 403);
-        }
-
         // Simpan ke session — TIDAK masuk keranjang
         session([
             'buy_now' => [
@@ -179,12 +169,6 @@ class PesananController extends Controller
     // =========================================================================
     public function checkout()
     {
-        $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
-        if ($isStoreOpen !== '1') {
-            return redirect()->route('pembeli.keranjang.index')
-                ->with('error', 'Maaf, toko sedang tutup. Fitur checkout sementara dinonaktifkan.');
-        }
-
         /** @var \App\Models\User $authUser */
         $authUser  = Auth::user();
         $addresses = $authUser->addresses()->get();
@@ -220,10 +204,8 @@ class PesananController extends Controller
             $subtotal      = $buyNow['subtotal'];
             $totalWeight   = $buyNow['weight'];
             $isBuyNow      = true;
-            $shoppingEnabled = true;
-
             return view('pembeli.pesanan.checkout', compact(
-                'fakeCarts', 'subtotal', 'totalWeight', 'addresses', 'shoppingEnabled', 'isBuyNow'
+                'fakeCarts', 'subtotal', 'totalWeight', 'addresses', 'isBuyNow'
             ))->with('carts', $fakeCarts);
         }
 
@@ -248,10 +230,8 @@ class PesananController extends Controller
         $subtotal        = $carts->sum('subtotal');
         $totalWeight     = $carts->sum(fn($c) => ($c->product->weight ?? 1000) * $c->quantity);
         $isBuyNow        = false;
-        $shoppingEnabled = $isStoreOpen === '1';
-
         return view('pembeli.pesanan.checkout', compact(
-            'carts', 'subtotal', 'totalWeight', 'addresses', 'shoppingEnabled', 'isBuyNow'
+            'carts', 'subtotal', 'totalWeight', 'addresses', 'isBuyNow'
         ));
     }
 
@@ -332,11 +312,6 @@ class PesananController extends Controller
     // =========================================================================
     public function store(Request $request)
     {
-        $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
-        if ($isStoreOpen !== '1') {
-            return redirect()->back()->with('error', 'Transaksi DITOLAK: Toko sedang tutup.');
-        }
-
         $validated = $request->validate([
             'address_id'      => 'required|exists:addresses,id',
             'courier'         => 'required|string',

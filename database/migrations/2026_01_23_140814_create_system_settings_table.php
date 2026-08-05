@@ -13,8 +13,8 @@ return new class extends Migration
 {
     Schema::create('system_settings', function (Blueprint $table) {
         $table->id();
-        $table->string('key')->unique(); //  untuk nama setting, misal: 'shopping_enabled'
-        $table->text('value')->nullable(); // isinya: '1' (Buka) atau '0' (Tutup)
+        $table->string('key')->unique();
+        $table->text('value')->nullable();
         $table->timestamps();
     });
 }

@@ -109,6 +109,11 @@
                         </div>
                         <h2 class="text-[28px] font-bold leading-tight text-slate-800">Welcome Back</h2>
                         <p class="mt-1 text-xs text-slate-500">Sign in your account</p>
+                        @if(!$customerLoginEnabled)
+                            <p class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-800" role="status">
+                                Login customer sedang ditutup oleh Admin. Form ini tetap tersedia untuk login admin.
+                            </p>
+                        @endif
                     </div>
 
                     <form method="POST" action="{{ route('login') }}" class="space-y-4">
@@ -151,10 +156,12 @@
                                     class="h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500" />
                                 <span>Remember Me</span>
                             </label>
-                            <a href="{{ route('password.request') }}"
-                                class="font-medium text-teal-700 transition hover:text-teal-600 hover:underline">
-                                Forgot Password?
-                            </a>
+                            @if($customerLoginEnabled)
+                                <a href="{{ route('password.request') }}"
+                                    class="font-medium text-teal-700 transition hover:text-teal-600 hover:underline">
+                                    Forgot Password?
+                                </a>
+                            @endif
                         </div>
 
                         <div class="captcha-wrapper pt-0.5">
@@ -169,25 +176,27 @@
                             Login
                         </button>
 
-                        <div class="flex items-center pt-2">
-                            <div class="h-px flex-1 bg-slate-300"></div>
-                            <span class="mx-3 text-xs text-slate-500">Instant Login</span>
-                            <div class="h-px flex-1 bg-slate-300"></div>
-                        </div>
+                        @if($customerLoginEnabled)
+                            <div class="flex items-center pt-2">
+                                <div class="h-px flex-1 bg-slate-300"></div>
+                                <span class="mx-3 text-xs text-slate-500">Instant Login</span>
+                                <div class="h-px flex-1 bg-slate-300"></div>
+                            </div>
 
-                        <div class="grid gap-3">
-                            <a href="{{ route('google.redirect') }}"
-                                class="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
-                                <img src="https://www.svgrepo.com/show/475656/google-color.svg"
-                                    alt="Google logo in blue, red, yellow, and green colors" class="h-5 w-5" />
-                                <span>Sign in with Google</span>
-                            </a>
-                        </div>
+                            <div class="grid gap-3">
+                                <a href="{{ route('google.redirect') }}"
+                                    class="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50">
+                                    <img src="https://www.svgrepo.com/show/475656/google-color.svg"
+                                        alt="Google logo in blue, red, yellow, and green colors" class="h-5 w-5" />
+                                    <span>Sign in with Google</span>
+                                </a>
+                            </div>
 
-                        <p class="pt-2 text-center text-sm text-slate-500">
-                            Don't have any account?
-                            <a href="{{ route('register') }}" class="font-semibold text-teal-700 hover:underline">Register</a>
-                        </p>
+                            <p class="pt-2 text-center text-sm text-slate-500">
+                                Don't have any account?
+                                <a href="{{ route('register') }}" class="font-semibold text-teal-700 hover:underline">Register</a>
+                            </p>
+                        @endif
                     </form>
                 </div>
             </div>

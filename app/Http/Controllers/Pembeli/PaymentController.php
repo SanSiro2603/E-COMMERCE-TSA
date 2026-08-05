@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Pembeli;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Payment;
-use App\Models\SystemSetting;
 use App\Services\MidtransService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,12 +25,6 @@ class PaymentController extends Controller
      */
     public function show($orderId)
     {
-        $isStoreOpen = SystemSetting::where('key', 'shopping_enabled')->value('value');
-        if ($isStoreOpen !== '1') {
-            return redirect()->route('pembeli.pesanan.index')
-                ->with('error', 'Pembayaran ditutup sementara oleh Admin.');
-        }
-
         $order = Order::with(['items.product', 'payment'])
             ->where('user_id', Auth::id())
             ->findOrFail($orderId);
